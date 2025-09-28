@@ -1,51 +1,31 @@
 // Scene.tsx
 import { Canvas } from "@react-three/fiber";
-import { useGameStore } from "./Stores/GameState";
-import { useKeyboardControls } from "./Hooks/useKeyboardControls";
+import { MainModel } from "./3d/MainModel";
+import { useCameraSwitcher } from "./Hooks/useCameraSwitcher";
+import { CameraController } from "./3d/CameraController";
 
-import { PerspectiveCamera } from "@react-three/drei";
 
-function CameraController() {
-    const cameraPos = useGameStore((s) => s.cameraPos);
-    return (
-        <PerspectiveCamera
-            makeDefault
-            position={cameraPos}
-            fov={75}
-            near={0.1}
-            far={1000}
-        />
-    );
-}
-
-function Box() {
-    return (
-        <mesh position={[0, 0.5, 0]}>
-            <boxGeometry />
-            <meshStandardMaterial color="hotpink" />
-        </mesh>
-    );
-}
-
-function Ground() {
-    return (
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[50, 50]} />
-            <meshStandardMaterial color="lightblue" />
-        </mesh>
-    );
-}
 
 export function Scene() {
-    useKeyboardControls();
+    useCameraSwitcher(); // listen for spacebar
 
     return (
-        <Canvas>
-            <ambientLight />
-            <pointLight position={[10, 10, 10]} />
+        <Canvas shadows dpr={[1, 2]} >
+            <ambientLight intensity={5} color={"#e2d8be"} />
+
+            <directionalLight
+                castShadow
+                position={[5, 10, 5]}
+                intensity={1}
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
+                shadow-camera-near={0.5}
+                shadow-camera-far={50}
+            />
+            <pointLight position={[-1.34, 0.734, -0.393]} intensity={.3} />
+            <pointLight position={[-0.769, 0.734, -0.393]} intensity={.3} />
             <CameraController />
-            <Box />
-            <Ground />
+            <MainModel />
         </Canvas>
     );
 }

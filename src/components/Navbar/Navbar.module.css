@@ -1,0 +1,18 @@
+.navbar {
+    height: var(--navbar-height);
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    font-size: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-image-source: url("/assets/hudbg.png");
+    border-image-slice: 24 fill;
+    border-image-width: 24px;
+    border-image-repeat: stretch;
+    z-index: 2;
+    image-rendering: pixelated;
+}
