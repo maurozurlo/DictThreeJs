@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useGameStore } from "../Stores/GameState";
 
 export function useCameraSwitcher() {
-    const cycleCamera = useGameStore((s) => s.cycleCamera);
+    const cycleCamera = useGameStore((s) => s.scene.camera.cycleCamera);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
