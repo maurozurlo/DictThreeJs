@@ -27,7 +27,7 @@ body,
   font-family: 'PressStart2P', sans-serif;
 
   --navbar-height: 84px;
-  --action-panel-height: 120px;
+  --action-panel-height: 200px;
 
 
   --text-color: #ffffff;
@@ -36,10 +36,7 @@ body,
 
   /* HUD / Action panel colors */
   --hud-border-dark: #401d09;
-  --hud-panel-bg: #000000;
-
-  /* layout */
-  --action-panel-height: 120px;
+  --hud-panel-bg: #2b1807;
 }
 
 button {

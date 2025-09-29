@@ -23,7 +23,7 @@ const Meet = () => {
                     <Icon type='takeover' /> Expropiate (+$100)
                 </Button>
                 <Button>
-                    <Icon type='charisma' /> Dialogue (+$100)
+                    <Icon type='charisma' /> Dialogue
                 </Button>
             </div>
 

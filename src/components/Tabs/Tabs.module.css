@@ -45,12 +45,12 @@
 
 
 .pageContainer {
-    background-color: #000;
+    background-color: var(--hud-panel-bg);
     padding: 16px;
     min-width: 100%;
     overflow-y: auto;
 
     h2 {
-        color: yellow;
+        color: var(--accent-color);
     }
 }

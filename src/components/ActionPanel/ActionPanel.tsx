@@ -1,11 +1,15 @@
 import styles from './ActionPanel.module.css'
 import { Icon } from '../Icon/Icon'
-import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import Meet from '../Tabs/Meet'
+import Laws from '../Tabs/Laws'
+import { useGameStore } from '../../Stores/GameState'
+import { Tabs } from '../../types/Tabs'
 
 
 const ActionPanel = () => {
+    const activeTab = useGameStore((s) => s.tabs.activeTab);
+
     return (
         <div className={styles.actionPanel}>
             <div className={styles.genStats}>
@@ -56,7 +60,8 @@ const ActionPanel = () => {
             </div>
 
             <div className={styles.actions}>
-                <Meet />
+                {activeTab === Tabs.Meet ? <Meet /> : null}
+                {activeTab === Tabs.Laws ? <Laws /> : null}
             </div>
 
 

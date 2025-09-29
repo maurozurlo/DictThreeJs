@@ -114,10 +114,6 @@
             height: 18px;
         }
     }
-
-
-
-
 }
 
 .actions {
@@ -125,8 +121,6 @@
     margin-top: 19px;
     margin-bottom: 19px;
     padding: 1rem;
-
-
     display: flex;
     flex-direction: column;
     align-items: center;
