@@ -2,6 +2,7 @@ import styles from './ActionPanel.module.css'
 import { Icon } from '../Icon/Icon'
 import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
+import Meet from '../Tabs/Meet'
 
 
 const ActionPanel = () => {
@@ -55,30 +56,7 @@ const ActionPanel = () => {
             </div>
 
             <div className={styles.actions}>
-
-                <Typography variant='caption' className={styles.title}>Selected Faction: Military</Typography>
-                <div className={styles.actionsContainer}>
-                    <Button>
-                        <Icon type='plus' /> Bribe
-                    </Button>
-
-
-                    <Button>
-                        <Icon type='meet' /> Eliminate
-                    </Button>
-
-
-
-                    <Button>
-                        <Icon type='news' /> Expropiate (+$100)
-                    </Button>
-                    <Button>
-                        <Icon type='charisma' /> Dialogue (+$100)
-                    </Button>
-                </div>
-
-
-
+                <Meet />
             </div>
 
 

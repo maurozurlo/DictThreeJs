@@ -23,6 +23,9 @@ export type IconType =
   | "company"
   | "people"
   | "military"
+  | "gun"
+  | "bribe"
+  | "takeover"
   ;
 
 export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
