@@ -1,5 +1,5 @@
 import React from 'react'
-import './Typography.module.css'
+import './Typography.css'
 
 type TypographyProps = {
     variant: 'h1' | 'h2' | 'body' | 'caption';
