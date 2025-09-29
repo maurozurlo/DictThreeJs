@@ -94,8 +94,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
 
     tabs: {
-        activeTab: Tabs.Menu,
-        shouldDisplayTabs: false,
+        activeTab: Tabs.Meet,
+        shouldDisplayTabs: true,
         setShouldDisplayTabs(display) {
             set((state) => ({
                 tabs: {

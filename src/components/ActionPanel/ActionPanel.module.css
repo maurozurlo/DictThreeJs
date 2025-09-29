@@ -4,15 +4,141 @@
     position: fixed;
     bottom: 0;
     left: 0;
-    font-size: 20px;
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     border-image-source: url("/assets/hudbg.png");
     border-image-slice: 24 fill;
     border-image-width: 24px;
     border-image-repeat: stretch;
     z-index: 2;
     image-rendering: pixelated;
+
+
+    display: grid;
+
+    grid-template-columns: 240px 200px 1fr;
+
+}
+
+.genStats {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    justify-content: center;
+    padding: 1rem;
+    margin: 19px 0 19px 19px;
+    border-right: 4px solid #401d09;
+
+    .clock {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 1rem;
+    }
+
+    .time {
+        margin-top: 24px;
+    }
+
+    .minutes, .hours {
+        background-color: black;
+        z-index: 3;
+        width: 6px;
+        height: 2px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: rotate(-90deg);
+        transform-origin: left center;
+    }
+
+    .minutes {
+        height: 1px;
+        width: 10px;
+        transform: rotate(0deg);
+    }
+
+    .bigClock {
+        transform: scale(2) translateY(0px);
+        position: relative;
+
+    }
+}
+
+.respect {
+    border-right: 4px solid #401d09;
+    margin: 19px 0;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    --respect-item-width: 50px;
+
+    .respectPowers {
+        padding-top: .75rem;
+        padding-bottom: .75rem;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+
+        .respectItem {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: var(--respect-item-width);
+            gap: .5rem;
+            text-align: center;
+        }
+
+        .respectNumber {
+            width: 100%;
+            border: 3px solid #401d09;
+            min-height: var(--respect-item-width);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    .charisma {
+        span {
+            margin-bottom: .25rem;
+            display: block;
+        }
+
+        .charismaSlider {
+            position: relative;
+            background-image: url('/assets/respect.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 18px;
+        }
+    }
+
+
+
+
+}
+
+.actions {
+    margin-right: 19px;
+    margin-top: 19px;
+    margin-bottom: 19px;
+    padding: 1rem;
+
+    .title {
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .actionsContainer {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+        gap: .5rem;
+
+        button {
+            height: auto;
+        }
+    }
 }

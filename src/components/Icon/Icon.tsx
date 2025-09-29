@@ -28,13 +28,14 @@ export type IconType =
 export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   type: IconType;
   className?: string;
+  children?: React.ReactNode;
 }
 
-export const Icon: React.FC<IconProps> = ({ type, className, ...props }) => {
+export const Icon: React.FC<IconProps> = ({ type, className, children, ...props }) => {
   return (
     <span
       className={clsx(styles.icon, styles[`icon-${type}`], className)}
       {...props}
-    />
+    >{children}</span>
   );
 };

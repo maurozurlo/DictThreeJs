@@ -54,7 +54,7 @@ const Navbar = () => {
                     ><Icon type='secret' />???</Button>
                 </div> : null}
             <div className={styles.gameInfo}>
-                {displayTabs ? <div>Day: 1</div> : null}
+                {displayTabs ? <div>Round: 1/10</div> : null}
             </div>
         </header>
     )

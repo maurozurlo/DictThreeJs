@@ -3,3 +3,14 @@ h1 {
     color: var(--text-color);
     font-size: 2rem;
 }
+
+p {
+    margin: .5rem 0;
+    color: #fbee32;
+    font-size: 1.25rem;
+}
+
+span {
+    font-size: 1rem;
+    color: #d1d37f;
+}
