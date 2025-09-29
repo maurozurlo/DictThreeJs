@@ -4,12 +4,17 @@
 
 @font-face {
   font-family: 'PressStart2P';
-  src: url('./assets/fonts/PressStart2P.ttf') format('truetype');
+  src: url('/assets/fonts/PressStart2P.ttf') format('truetype');
 }
 
 @font-face {
   font-family: '8-BIT WONDER';
-  src: url('./assets/fonts/8-BIT WONDER.ttf') format('truetype');
+  src: url('/assets/fonts/8-BIT WONDER.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Bitmgothic';
+  src: url('/assets/fonts/Bitmgothic.ttf') format('truetype');
 }
 
 html,
@@ -17,6 +22,8 @@ body,
 #root {
   height: 100%;
   margin: unset;
+  max-height: 100vh;
+  overflow: hidden;
   font-family: 'PressStart2P', sans-serif;
 
   --navbar-height: 84px;
@@ -24,6 +31,8 @@ body,
 
 
   --text-color: #ffffff;
+
+  --tab-bg: rgb(48 22 4);
 }
 
 button {

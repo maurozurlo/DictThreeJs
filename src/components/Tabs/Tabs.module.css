@@ -1,0 +1,56 @@
+.Tab {
+    background: var(--tab-bg);
+    min-width: 100%;
+    position: fixed;
+    bottom: var(--action-panel-height);
+    top: var(--navbar-height);
+    height: calc(100vh - var(--navbar-height) - var(--action-panel-height));
+    z-index: 4;
+    display: none;
+    justify-content: center;
+
+    &.isActive {
+        display: flex;
+
+    }
+
+    &.TabMenu {
+        height: calc(100vh - var(--navbar-height));
+        bottom: 0;
+    }
+}
+
+.centeredContainer {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.menuButtons {
+    padding-top: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: .5rem;
+
+    button {
+        min-width: 100%;
+    }
+}
+
+
+.pageContainer {
+    background-color: #000;
+    padding: 16px;
+    min-width: 100%;
+    overflow-y: auto;
+
+    h2 {
+        color: yellow;
+    }
+}

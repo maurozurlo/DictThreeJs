@@ -4,11 +4,12 @@ import { useEffect } from "react";
 import { useGameStore } from "../Stores/GameState";
 import type { Vector3 } from "three";
 import { NearestFilter } from "three";
+import * as THREE from "three";
 
 export function MainModel() {
-    const fbx = useLoader(FBXLoader, "/assets/3d/main.FBX");
-    const moveCameraTo = useGameStore((s) => s.moveCameraTo);
-    const setCameraPositions = useGameStore((s) => s.setCameraPositions);
+    const fbx = useLoader(FBXLoader, "/assets/3d/main.FBX") as THREE.Group;
+    const moveCameraTo = useGameStore((s) => s.scene.camera.moveCameraTo);
+    const setCameraPositions = useGameStore((s) => s.scene.camera.setCameraPositions);
 
     useEffect(() => {
         // find all camera dummies by name

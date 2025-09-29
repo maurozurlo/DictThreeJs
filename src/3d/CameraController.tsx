@@ -6,7 +6,7 @@ import { useGameStore } from "../Stores/GameState";
 
 export function CameraController() {
     const ref = useRef<any>(null);
-    const { cameraPos } = useGameStore();
+    const { scene: { camera: { cameraPos } } } = useGameStore();
 
     const currentPos = useRef(new Vector3(...cameraPos));
 

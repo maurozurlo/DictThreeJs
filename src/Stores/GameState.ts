@@ -1,39 +1,163 @@
 // store.ts
 import { create } from "zustand";
 import { Vector3 } from "three";
+import { Tabs } from "../types/Tabs";
 
-type GameState = {
+type CameraState = {
     cameraPos: [number, number, number];
     cameraTarget?: Vector3;
     cameraPositions: Vector3[];
-    cameraTargets: Vector3[];  // optional look-at points
+    cameraTargets: Vector3[];
     currentCameraIndex: number;
     moveCameraTo: (pos: [number, number, number], target?: Vector3) => void;
     cycleCamera: () => void;
     setCameraPositions: (positions: Vector3[], targets?: Vector3[]) => void;
 };
 
-export const useGameStore = create<GameState>((set, get) => ({
-    cameraPos: [-1.336, .63, .302],
-    cameraTarget: undefined,
-    cameraPositions: [],
-    cameraTargets: [],
-    currentCameraIndex: 0,
-    moveCameraTo: (pos, target) => set({ cameraPos: pos, cameraTarget: target }),
-    setCameraPositions: (positions, targets) => set({ cameraPositions: positions, cameraTargets: targets || positions }),
-    cycleCamera: () => {
-        const { cameraPositions, cameraTargets, currentCameraIndex } = get();
-        if (cameraPositions.length === 0) return;
+type GameState = {
+    scene: {
+        camera: CameraState;
+    };
+    tabs: {
+        shouldDisplayTabs: boolean;
+        setShouldDisplayTabs: (display: boolean) => void;
+        activeTab: Tabs;
+        setActiveTab: (tab: Tabs) => void;
+    };
+    gameManagement: {
+        phase: 'idle' | 'start' | 'event' | 'gameover';
+        setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
+    }
+};
 
-        const nextIndex = (currentCameraIndex + 1) % cameraPositions.length;
-        set({ currentCameraIndex: nextIndex });
-        set({
-            cameraPos: [
-                cameraPositions[nextIndex].x,
-                cameraPositions[nextIndex].y,
-                cameraPositions[nextIndex].z,
-            ],
-            cameraTarget: cameraTargets[nextIndex].clone(),
-        });
+export const useGameStore = create<GameState>((set, get) => ({
+    scene: {
+        camera: {
+            cameraPos: [-1.336, 0.63, 0.302],
+            cameraTarget: undefined,
+            cameraPositions: [],
+            cameraTargets: [],
+            currentCameraIndex: 0,
+
+            moveCameraTo: (pos, target) =>
+                set((state) => ({
+                    scene: {
+                        ...state.scene,
+                        camera: {
+                            ...state.scene.camera,
+                            cameraPos: pos,
+                            cameraTarget: target,
+                        },
+                    },
+                })),
+
+            setCameraPositions: (positions, targets) =>
+                set((state) => ({
+                    scene: {
+                        ...state.scene,
+                        camera: {
+                            ...state.scene.camera,
+                            cameraPositions: positions,
+                            cameraTargets: targets || positions,
+                        },
+                    },
+                })),
+
+            cycleCamera: () => {
+                const {
+                    scene: {
+                        camera: { cameraPositions, cameraTargets, currentCameraIndex },
+                    },
+                } = get();
+
+                if (cameraPositions.length === 0) return;
+
+                const nextIndex = (currentCameraIndex + 1) % cameraPositions.length;
+
+                set((state) => ({
+                    scene: {
+                        ...state.scene,
+                        camera: {
+                            ...state.scene.camera,
+                            currentCameraIndex: nextIndex,
+                            cameraPos: [
+                                cameraPositions[nextIndex].x,
+                                cameraPositions[nextIndex].y,
+                                cameraPositions[nextIndex].z,
+                            ],
+                            cameraTarget: cameraTargets[nextIndex]?.clone(),
+                        },
+                    },
+                }));
+            },
+        },
     },
+
+    tabs: {
+        activeTab: Tabs.Menu,
+        shouldDisplayTabs: false,
+        setShouldDisplayTabs(display) {
+            set((state) => ({
+                tabs: {
+                    ...state.tabs,
+                    shouldDisplayTabs: display,
+                },
+            }));
+        },
+
+        setActiveTab: (tab: Tabs) => {
+            const cameraPositions = get().scene.camera.cameraPositions;
+            let newCameraPos: Vector3 | undefined;
+
+            if (tab === Tabs.Meet) {
+                newCameraPos = cameraPositions[0];
+            } else if (tab === Tabs.Laws) {
+                newCameraPos = cameraPositions[1];
+            } else if (tab === Tabs.Street) {
+                newCameraPos = cameraPositions[2];
+            }
+
+            set((state) => ({
+                tabs: {
+                    ...state.tabs,
+                    activeTab: tab,
+                },
+                scene: {
+                    ...state.scene,
+                    camera: {
+                        ...state.scene.camera,
+                        ...(newCameraPos && {
+                            cameraPos: [newCameraPos.x, newCameraPos.y, newCameraPos.z],
+                        }),
+                    },
+                },
+            }));
+        },
+    },
+
+    gameManagement: {
+        phase: 'idle',
+        setPhase: (phase) => {
+            if (phase === 'start') {
+                return set((state) => ({
+                    tabs: {
+                        ...state.tabs,
+                        shouldDisplayTabs: true,
+                        activeTab: Tabs.Log,
+                    },
+                    gameManagement: {
+                        ...state.gameManagement,
+                        phase,
+                    }
+                }))
+            }
+
+            return set((state) => ({
+                gameManagement: {
+                    ...state.gameManagement,
+                    phase,
+                }
+            }))
+        },
+    }
 }));
