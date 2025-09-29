@@ -19,7 +19,11 @@ export type IconType =
   | "shop"
   | "charisma"
   | "checked"
-  | "unchecked";
+  | "unchecked"
+  | "company"
+  | "people"
+  | "military"
+  ;
 
 export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   type: IconType;

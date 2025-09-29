@@ -1,4 +1,3 @@
-import React from 'react'
 import styles from './Tabs.module.css'
 import type { TabProps } from '../../types/Tabs'
 import clsx from 'clsx'

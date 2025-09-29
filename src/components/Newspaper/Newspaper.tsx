@@ -1,9 +1,10 @@
-import React from 'react'
 import './Newspaper.css'
 
-type Props = {}
+type NewspaperProps = {
+    mainTitle?: string;
+}
 
-const Newspaper = (props: Props) => {
+const Newspaper = ({ mainTitle }: NewspaperProps) => {
     return (
         <div className="newspaper-container">
             {/* Header Section */}
@@ -51,12 +52,7 @@ const Newspaper = (props: Props) => {
                         </div>
                     </div>
 
-                    {/* Grestin Story */}
                     <div className="grestin-story">
-                        {/*<h2 className="story-headline">
-
-
-                        </h2>*/}
                         <div className="story-content">
                             {[...Array(32)].map((_, i) => (
                                 <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
@@ -69,7 +65,7 @@ const Newspaper = (props: Props) => {
                 <div className="center-column">
                     {/* Main Headline */}
                     <div className="main-headline">
-                        <h1>Analysts Upbeat</h1>
+                        <h1>{mainTitle}</h1>
                         <p>Increased Trade And Cooperation Predicted</p>
                     </div>
 
