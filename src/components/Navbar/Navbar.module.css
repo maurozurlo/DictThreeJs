@@ -5,14 +5,34 @@
     top: 0;
     left: 0;
     font-size: 20px;
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 0 2rem;
     border-image-source: url("/assets/hudbg.png");
     border-image-slice: 24 fill;
     border-image-width: 24px;
     border-image-repeat: stretch;
     z-index: 2;
     image-rendering: pixelated;
+
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+}
+
+.buttonContainer {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    justify-content: center;
+}
+
+.gameInfo {
+    color: var(--text-color);
+    font-size: 1rem;
+    text-align: right;
+}
+
+.gameTitle {
+    color: var(--text-color);
+    font-size: 1rem;
 }

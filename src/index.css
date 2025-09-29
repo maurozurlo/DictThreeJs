@@ -21,4 +21,11 @@ body,
 
   --navbar-height: 84px;
   --action-panel-height: 256px;
+
+
+  --text-color: #ffffff;
+}
+
+button {
+  font-family: 'PressStart2P', sans-serif;
 }
