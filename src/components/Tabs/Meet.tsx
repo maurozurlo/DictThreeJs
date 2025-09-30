@@ -2,11 +2,16 @@ import Typography from '../Typography/Typography'
 import Button from '../Button/Button'
 import { Icon } from '../Icon/Icon'
 import styles from './Meet.module.css'
+import { useGameStore } from '../../Stores/GameState'
 
 const Meet = () => {
+    const selectedPower = useGameStore((s) => s.gameManagement.selectedPower);
+
     return (
         <>
-            <Typography variant='caption' className={styles.title}>Selected Faction: Military</Typography>
+            <Typography variant='caption' className={styles.title}>Selected Faction: {selectedPower === 'military' ? 'Military' : selectedPower === 'people' ? 'People' : selectedPower === 'company' ? 'Elite' : 'None'}
+
+            </Typography>
             <div className={styles.actionsContainer}>
                 <Button>
                     <Icon type='bribe' /> Bribe

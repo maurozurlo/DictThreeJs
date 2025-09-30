@@ -27,6 +27,8 @@ type GameState = {
     gameManagement: {
         phase: 'idle' | 'start' | 'event' | 'gameover';
         setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
+        selectedPower: 'none' | 'people' | 'company' | 'military';
+        setSelectedPower: (power: 'none' | 'people' | 'company' | 'military') => void;
     }
 };
 
@@ -131,6 +133,10 @@ export const useGameStore = create<GameState>((set, get) => ({
                         }),
                     },
                 },
+                gameManagement: {
+                    ...state.gameManagement,
+                    selectedPower: 'none',
+                }
             }));
         },
     },
@@ -159,5 +165,12 @@ export const useGameStore = create<GameState>((set, get) => ({
                 }
             }))
         },
+        selectedPower: 'none',
+        setSelectedPower: (power) => set((state) => ({
+            gameManagement: {
+                ...state.gameManagement,
+                selectedPower: power,
+            }
+        }))
     }
 }));
