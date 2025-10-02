@@ -42,3 +42,27 @@ body,
 button {
   font-family: 'PressStart2P', sans-serif;
 }
+
+.debug-toggle {
+  position: fixed;
+  z-index: 99;
+  bottom: 16px;
+  right: 16px;
+}
+
+.debug-banner {
+  background-color: red;
+  color: white;
+  font-family: 'PressStart2P', sans-serif;
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.hidden {
+  display: none;
+}

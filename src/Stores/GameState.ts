@@ -15,6 +15,10 @@ type CameraState = {
 };
 
 type GameState = {
+    debug: {
+        enabled: boolean;
+        setDebugMode: (enabled: boolean) => void;
+    },
     scene: {
         camera: CameraState;
     };
@@ -33,6 +37,15 @@ type GameState = {
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
+    debug: {
+        enabled: false,
+        setDebugMode: (enabled: boolean) => set((state) => ({
+            debug: {
+                ...state.debug,
+                enabled,
+            }
+        }))
+    },
     scene: {
         camera: {
             cameraPos: [-1.336, 0.63, 0.302],
