@@ -1,0 +1,16 @@
+{
+    "tabs": {
+        "menu": "Menu",
+        "log": "Diario",
+        "meet": "Reunir",
+        "laws": "Leyes",
+        "deals": "Tratos",
+        "budget": "Presupuesto",
+        "shop": "Compras",
+        "street": "Calle",
+        "unknown": "Unknown"
+    },
+    "actionPanel": {
+        "someKey": "Some text"
+    }
+}

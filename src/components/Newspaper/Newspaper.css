@@ -57,6 +57,10 @@
     color: #616054;
 }
 
+.date-info>span {
+    color: #a3a3a3;
+}
+
 /* Content grid */
 .content-grid {
     display: grid;

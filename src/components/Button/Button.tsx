@@ -6,11 +6,12 @@ type ButtonProps = {
     clickHandler?: () => void
     children?: React.ReactNode;
     variant?: 'primary' | 'secondary' | 'square';
+    disabled?: boolean;
 }
 
-const Button = ({ clickHandler, children, variant }: ButtonProps) => {
+const Button = ({ clickHandler, children, variant, disabled = false }: ButtonProps) => {
     return (
-        <button onClick={clickHandler} className={clsx(styles.button, {
+        <button onClick={clickHandler} disabled={disabled} className={clsx(styles.button, {
             [styles.primary]: variant === 'primary',
             [styles.secondary]: variant === 'secondary',
             [styles.square]: variant === 'square',

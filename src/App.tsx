@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar/Navbar";
 import TabManager from "./components/Tabs/TabManager";
 import { Scene } from "./Scene";
 import { useGameStore } from "./Stores/GameState";
+import { Suspense } from "react";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -12,12 +13,17 @@ export default function App() {
 
   return (
     <>
-      <div className={clsx("debug-banner", { 'hidden': !debugEnabled })}>DEBUG MODE</div>
-      <Navbar />
-      <TabManager />
+      <Suspense fallback="Loading...">
+        <div className={clsx("debug-banner", { 'hidden': !debugEnabled })}>DEBUG MODE</div>
+        <Navbar />
+        <TabManager />
+
+        <ActionPanel />
+        <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
+      </Suspense>
       <Scene />
-      <ActionPanel />
-      <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
     </>
+
+
   );
 }

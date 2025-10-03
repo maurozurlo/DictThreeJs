@@ -1,0 +1,16 @@
+{
+  "tabs": {
+    "menu": "Menu",
+    "log": "Log",
+    "meet": "Meet",
+    "laws": "Laws",
+    "deals": "Deals",
+    "budget": "Budget",
+    "shop": "Shop",
+    "street": "Street",
+    "unknown": "Unknown"
+  },
+  "actionPanel": {
+    "someKey": "Some text"
+  }
+}
