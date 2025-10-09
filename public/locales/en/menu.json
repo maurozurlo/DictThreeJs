@@ -12,5 +12,11 @@
   },
   "actionPanel": {
     "someKey": "Some text"
+  },
+  "log": {
+    "today": "Today's paper:",
+    "sports": "Sports",
+    "weather": "The Weather",
+    "no_charge": "No charge"
   }
 }

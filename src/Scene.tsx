@@ -22,18 +22,9 @@ export function Scene() {
 
     return (
         <Canvas shadows dpr={[1, 2]} >
-            <ambientLight intensity={5} color={"#e2d8be"} />
+            <ambientLight intensity={3.4} color={"#e2d8be"} />
 
-            <directionalLight
-                castShadow
-                position={[5, 10, 5]}
-                intensity={1}
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
-                shadow-camera-near={0.5}
-                shadow-camera-far={50}
-            />
-            <pointLight position={[-1.34, 0.734, -0.393]} intensity={.3} />
+            <pointLight position={[-1.335, 0.642, -0.09]} intensity={.2} />
             <pointLight position={[-0.769, 0.734, -0.393]} intensity={.3} />
             {debug ? <CameraControllerFree /> : <CameraController />}
             <MainModel />

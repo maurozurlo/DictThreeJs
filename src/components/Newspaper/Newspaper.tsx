@@ -1,10 +1,12 @@
 import './Newspaper.css'
+import { useTranslation } from 'react-i18next';
 
 type NewspaperProps = {
     mainTitle?: string;
 }
 
 const Newspaper = ({ mainTitle }: NewspaperProps) => {
+    const { t } = useTranslation()
     return (
         <div className="newspaper-container">
             {/* Header Section */}
@@ -32,7 +34,7 @@ const Newspaper = ({ mainTitle }: NewspaperProps) => {
                 {/* Date and Info */}
                 <div className="date-info">
                     <span>November 24th, 1982</span>
-                    <span>No Charge</span>
+                    <span>{t('log.no_charge')}</span>
                 </div>
             </header>
 
@@ -43,7 +45,7 @@ const Newspaper = ({ mainTitle }: NewspaperProps) => {
                     {/* Weather Section */}
                     <div className="weather-box">
                         <div className="box-header">
-                            <h3>The Weather</h3>
+                            <h3>{t('log.weather')}</h3>
                         </div>
                         <div className="box-content">
                             {[...Array(8)].map((_, i) => (
@@ -99,7 +101,7 @@ const Newspaper = ({ mainTitle }: NewspaperProps) => {
                     {/* Sports Section */}
                     <div className="sports-box">
                         <div className="box-header">
-                            <h3>Sports</h3>
+                            <h3>{t('log.sports')}</h3>
                         </div>
                         <div className="box-content">
                             {[...Array(12)].map((_, i) => (

@@ -12,5 +12,11 @@
     },
     "actionPanel": {
         "someKey": "Some text"
+    },
+    "log": {
+        "today": "El periodico de hoy:",
+        "sports": "Deportes",
+        "weather": "El clima",
+        "no_charge": "Sin cargo"
     }
 }
