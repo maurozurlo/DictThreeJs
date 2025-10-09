@@ -5,7 +5,7 @@ import styles from './Meet.module.css'
 import { useGameStore } from '../../Stores/GameState'
 
 const Meet = () => {
-    const selectedPower = useGameStore((s) => s.gameManagement.selectedPower);
+    const selectedPower = useGameStore((s) => s.meet.selectedPower);
 
     return (
         <>

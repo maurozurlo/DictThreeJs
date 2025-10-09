@@ -4,6 +4,8 @@ import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { BOUNDS_EXPENDITURE, BOUNDS_TAX } from "../Constants/Budget";
+import type { Power } from "../types/Power";
+import type { Law } from "../types/Law";
 
 type CameraState = {
     cameraPos: [number, number, number];
@@ -33,9 +35,11 @@ type GameState = {
     gameManagement: {
         phase: 'idle' | 'start' | 'event' | 'gameover';
         setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
-        selectedPower: 'none' | 'people' | 'company' | 'military';
-        setSelectedPower: (power: 'none' | 'people' | 'company' | 'military') => void;
     };
+    meet: {
+        selectedPower: Power;
+        setSelectedPower: (power: Power) => void;
+    },
     budget: {
         expenditures: Record<Expenditures, number>;
         taxes: Record<Taxes, number>;
@@ -43,6 +47,9 @@ type GameState = {
         adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => void;
         // read helpers
         getBudgetItem: (id: Expenditures | Taxes) => number;
+    },
+    law: {
+        current: Law | null
     }
 };
 
@@ -163,7 +170,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             }));
         },
     },
-
+    law: {
+        current: null
+    },
     gameManagement: {
         phase: 'idle',
         setPhase: (phase) => {
@@ -188,6 +197,8 @@ export const useGameStore = create<GameState>((set, get) => ({
                 }
             }))
         },
+    },
+    meet: {
         selectedPower: 'none',
         setSelectedPower: (power) => set((state) => ({
             gameManagement: {
@@ -204,8 +215,8 @@ export const useGameStore = create<GameState>((set, get) => ({
             education: 1,
         },
         taxes: {
-            peopleTax: 1,
-            businessTax: 1,
+            people: 20,
+            business: 30
         },
         adjustBudgetItem: (id: string, amount: number) => {
             set((state: GameState) => {

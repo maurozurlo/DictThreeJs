@@ -1,0 +1,1 @@
+export type Power = 'none' | 'people' | 'company' | 'military'

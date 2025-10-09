@@ -7,8 +7,8 @@ import { useGameStore } from "../Stores/GameState";
 const TYPE = 'company';
 function Elite() {
     const fbx = useLoader(FBXLoader, "/assets/3d/chars/elite.FBX") as Group;
-    const selectedPower = useGameStore((s) => s.gameManagement.selectedPower);
-    const setSelectedPower = useGameStore((s) => s.gameManagement.setSelectedPower);
+    const selectedPower = useGameStore((s) => s.meet.selectedPower);
+    const setSelectedPower = useGameStore((s) => s.meet.setSelectedPower);
     const handlers = useHoverGlow(fbx, { onClick: () => setSelectedPower(TYPE), isSelected: selectedPower === TYPE });
 
     return (
