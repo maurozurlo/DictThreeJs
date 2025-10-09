@@ -22,7 +22,7 @@ export function CameraController() {
         <PerspectiveCamera
             makeDefault
             position={cameraPos}
-            fov={38}
+            fov={34}
             near={0.1}
             far={1000}
             ref={ref}

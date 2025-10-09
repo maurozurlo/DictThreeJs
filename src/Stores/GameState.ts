@@ -126,7 +126,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
 
     tabs: {
-        activeTab: Tabs.Budget,
+        activeTab: Tabs.Laws,
         shouldDisplayTabs: true,
         setShouldDisplayTabs(display) {
             set((state) => ({
@@ -201,8 +201,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     meet: {
         selectedPower: 'none',
         setSelectedPower: (power) => set((state) => ({
-            gameManagement: {
-                ...state.gameManagement,
+            meet: {
+                ...state.meet,
                 selectedPower: power,
             }
         }))

@@ -1,7 +1,7 @@
 import Typography from '../Typography/Typography'
 import Button from '../Button/Button'
 import { Icon } from '../Icon/Icon'
-import styles from './Meet.module.css'
+import styles from './Tabs.module.css'
 import { useGameStore } from '../../Stores/GameState'
 
 const Meet = () => {

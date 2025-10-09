@@ -1,0 +1,79 @@
+:root {
+    --hand-width: 350px;
+    --hold-width: 47px;
+    --hand-bottom: 45px;
+    /* slide animation defaults */
+    --start-displacement: 320px;
+    /* start offset (down) — adjust to taste */
+    --slide-duration: 1500ms;
+    --slide-easing: cubic-bezier(.22, .9, .35, 1);
+}
+
+@keyframes slideUpLaw {
+    from {
+        transform: translateY(var(--start-displacement));
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUpHand {
+    from {
+        transform: translateY(var(--start-displacement));
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUpHandFlip {
+    from {
+        transform: scaleX(-1) translateY(var(--start-displacement));
+    }
+
+    to {
+        transform: scaleX(-1) translateY(0);
+    }
+}
+
+.hand {
+    position: absolute;
+    bottom: calc(var(--action-panel-height) - var(--hand-bottom));
+    z-index: 1;
+    width: var(--hand-width);
+    image-rendering: pixelated;
+    left: 20%;
+
+    /* start displaced and animate up to target */
+    transform: translateY(var(--start-displacement));
+    will-change: transform, opacity;
+    animation: slideUpHand var(--slide-duration) var(--slide-easing) both;
+
+    &.right {
+        right: 20%;
+        left: auto;
+        transform: scaleX(-1) translateY(var(--start-displacement));
+        animation: slideUpHandFlip var(--slide-duration) var(--slide-easing) both;
+    }
+}
+
+.law {
+    position: absolute;
+    bottom: calc(var(--action-panel-height));
+    left: calc(20% + var(--hand-width) - var(--hold-width));
+    right: calc(20% + var(--hand-width) - var(--hold-width));
+    height: 500px;
+    min-width: 500px;
+    z-index: 1;
+    background: url('/assets/sheet.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 2rem;
+
+    transform: translateY(var(--start-displacement));
+    will-change: transform, opacity;
+    animation: slideUpLaw var(--slide-duration) var(--slide-easing) both;
+}

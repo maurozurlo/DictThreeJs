@@ -35,6 +35,9 @@ body,
   --accent-color: #fbee32;
   --accent-muted: #d1d37f;
 
+  --text-color-dark: #000;
+  --text-body-dark: #3f3f3f;
+
   /* HUD / Action panel colors */
   --hud-border-dark: #401d09;
   --hud-panel-bg: #2b1807;

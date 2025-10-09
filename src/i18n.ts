@@ -10,7 +10,7 @@ i18n
     .init({
         fallbackLng: 'en',
         debug: false,
-        ns: ['menu'],
+        ns: ['menu', 'laws'],
         defaultNS: 'menu',
         backend: {
             // served from public folder

@@ -88,3 +88,21 @@
         }
     }
 }
+
+.title {
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.actionsContainer {
+    max-width: 800px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+
+    button {
+        height: auto;
+        justify-content: start;
+        padding: .5rem 1rem;
+    }
+}
