@@ -34,6 +34,7 @@
         "security": "Security",
         "education": "Education",
         "totalExpenses": "Total Expenses",
+        "totalTax": "Expected Income",
         "peopleTax": "People Tax",
         "businessTax": "Business Tax"
     }

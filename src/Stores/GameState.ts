@@ -2,6 +2,8 @@
 import { create } from "zustand";
 import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
+import type { Expenditures, Taxes } from "../types/Budget";
+import { BOUNDS_EXPENDITURE, BOUNDS_TAX } from "../Constants/Budget";
 
 type CameraState = {
     cameraPos: [number, number, number];
@@ -33,6 +35,14 @@ type GameState = {
         setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
         selectedPower: 'none' | 'people' | 'company' | 'military';
         setSelectedPower: (power: 'none' | 'people' | 'company' | 'military') => void;
+    };
+    budget: {
+        expenditures: Record<Expenditures, number>;
+        taxes: Record<Taxes, number>;
+        // adjust by amount (positive or negative)
+        adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => void;
+        // read helpers
+        getBudgetItem: (id: Expenditures | Taxes) => number;
     }
 };
 
@@ -185,5 +195,57 @@ export const useGameStore = create<GameState>((set, get) => ({
                 selectedPower: power,
             }
         }))
-    }
+    },
+    budget: {
+        expenditures: {
+            health: 1,
+            infrastructure: 1,
+            security: 1,
+            education: 1,
+        },
+        taxes: {
+            peopleTax: 1,
+            businessTax: 1,
+        },
+        adjustBudgetItem: (id: string, amount: number) => {
+            set((state: GameState) => {
+                const { budget } = state;
+                if (Object.keys(budget.expenditures).includes(id)) {
+                    const key = id as Expenditures;
+                    const current = budget.expenditures[key] || 0;
+                    const min = BOUNDS_EXPENDITURE[0];
+                    const max = BOUNDS_EXPENDITURE[1];
+                    const newValue = Math.min(Math.max(current + amount, min), max);
+                    const newEx = { ...budget.expenditures, [key]: newValue };
+                    return { budget: { ...budget, expenditures: newEx } };
+                }
+                if (Object.keys(budget.taxes).includes(id)) {
+                    const key = id as Taxes;
+                    const current = budget.taxes[key] || 0;
+                    const min = BOUNDS_TAX[0];
+                    const max = BOUNDS_TAX[1];
+                    const newValue = Math.min(Math.max(current + amount, min), max);
+                    const newTaxes = { ...budget.taxes, [key]: newValue };
+                    return { budget: { ...budget, taxes: newTaxes } };
+                }
+                console.error('Unknown id for budget', id)
+                return state;
+            });
+        },
+        getBudgetItem: (id: string) => {
+            const { budget }: GameState = get();
+            if (Object.keys(budget.taxes).includes(id)) {
+                const key = id as Taxes;
+                return budget.taxes[key]
+            }
+            if (Object.keys(budget.expenditures).includes(id)) {
+                {
+                    const key = id as Expenditures;
+                    return budget.expenditures[key]
+                }
+            }
+            console.error('Unknown id for budget', id)
+            return 0;
+        },
+    },
 }));

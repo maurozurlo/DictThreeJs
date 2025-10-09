@@ -1,0 +1,18 @@
+/* Budget */
+.budgetRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    .amountControl {
+        display: flex;
+        justify-content: space-between;
+        gap: .5rem;
+        align-items: center;
+    }
+
+    p {
+        min-width: 120px;
+        text-align: center;
+    }
+}

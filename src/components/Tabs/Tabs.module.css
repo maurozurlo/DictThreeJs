@@ -71,36 +71,20 @@
         display: flex;
         justify-content: space-between;
 
-        .buttonContainer {
+        .values {
             display: flex;
             gap: 1rem;
-
-            button {
-                padding: .5rem 1.5rem;
-            }
+            align-items: center;
+            color: var(--accent-color);
         }
     }
 
     .columns {
         display: flex;
-        gap: 2rem;
+        gap: 4rem;
 
         .column {
             width: 50%;
         }
-    }
-}
-
-/* Budget */
-.budgetRow {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-
-    div {
-        display: flex;
-        justify-content: space-between;
-        gap: .5rem;
-        align-items: center;
     }
 }
