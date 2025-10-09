@@ -11,8 +11,10 @@
     appearance: none;
     height: 44px;
 
-    &.primary {
-        min-width: 120px;
+    min-width: 120px;
+
+    &.square {
+        min-width: 44px;
     }
 
     display: flex;

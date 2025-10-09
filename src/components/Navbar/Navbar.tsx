@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 const Navbar = () => {
     const setCurrentTab = useGameStore((s) => s.tabs.setActiveTab);
-    const displayTabs = useGameStore((s) => s.tabs.shouldDisplayTabs);
+    const displayTabs = useGameStore((s) => s.tabs.activeTab) !== Tabs.Menu;
     const { t } = useTranslation();
 
     const tabConfig: { tab: Tabs, icon: IconType, label: string, disabled?: boolean }[] = [

@@ -14,7 +14,7 @@ const Menu = ({ isActive }: TabProps) => {
     return (
         <div className={clsx(styles.Tab, styles.TabMenu, { [styles.isActive]: isActive })}>
 
-            <div className="centeredContainer">
+            <div className={styles.centeredContainer}>
                 <Typography variant={'h1'}>
                     Dictator Simulator
                 </Typography>

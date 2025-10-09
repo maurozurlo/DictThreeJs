@@ -17,6 +17,7 @@
     &.TabMenu {
         height: calc(100vh - var(--navbar-height));
         bottom: 0;
+        background-color: var(--hud-panel-bg);
     }
 }
 
@@ -28,9 +29,14 @@
 
     align-items: center;
     justify-content: center;
+
+    & hr {
+        width: 100%;
+    }
 }
 
 .menuButtons {
+    width: 100%;
     padding-top: 2rem;
     display: flex;
     align-items: center;

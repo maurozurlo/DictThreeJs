@@ -27,8 +27,6 @@ type GameState = {
         camera: CameraState;
     };
     tabs: {
-        shouldDisplayTabs: boolean;
-        setShouldDisplayTabs: (display: boolean) => void;
         activeTab: Tabs;
         setActiveTab: (tab: Tabs) => void;
     };
@@ -126,17 +124,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
 
     tabs: {
-        activeTab: Tabs.Laws,
-        shouldDisplayTabs: true,
-        setShouldDisplayTabs(display) {
-            set((state) => ({
-                tabs: {
-                    ...state.tabs,
-                    shouldDisplayTabs: display,
-                },
-            }));
-        },
-
+        activeTab: Tabs.Menu,
         setActiveTab: (tab: Tabs) => {
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
