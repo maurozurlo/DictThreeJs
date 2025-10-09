@@ -18,5 +18,23 @@
     "sports": "Sports",
     "weather": "The Weather",
     "no_charge": "No charge"
+  },
+  "mainMenu": {
+    "newGame": "New Game",
+    "loadGame": "Load Game",
+    "settings": "Settings",
+    "help": "Help",
+    "credits": "Credits"
+  },
+  "budget": {
+    "taxes": "Taxes",
+    "expenditures": "Expenditures",
+    "health": "Health",
+    "infrastructure": "Infrastructure",
+    "security": "Security",
+    "education": "Education",
+    "totalExpenses": "Total Expenses",
+    "peopleTax": "People Tax",
+    "businessTax": "Business Tax"
   }
 }

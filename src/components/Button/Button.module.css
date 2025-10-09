@@ -10,7 +10,11 @@
     cursor: pointer;
     appearance: none;
     height: 44px;
-    min-width: 120px;
+
+    &.primary {
+        min-width: 120px;
+    }
+
     display: flex;
     align-items: center;
     justify-content: center;

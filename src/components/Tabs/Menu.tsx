@@ -4,10 +4,13 @@ import clsx from 'clsx'
 import Typography from '../Typography/Typography'
 import Button from '../Button/Button'
 import { useGameStore } from '../../Stores/GameState'
+import { useTranslation } from 'react-i18next'
 
 
 const Menu = ({ isActive }: TabProps) => {
     const setGamePhase = useGameStore((s) => s.gameManagement.setPhase);
+    const { t } = useTranslation();
+
     return (
         <div className={clsx(styles.Tab, styles.TabMenu, { [styles.isActive]: isActive })}>
 
@@ -18,11 +21,11 @@ const Menu = ({ isActive }: TabProps) => {
                 <hr />
 
                 <div className={styles.menuButtons}>
-                    <Button variant='primary' clickHandler={() => setGamePhase('start')}>New Game</Button>
-                    {/*<Button variant='primary'>Load Game</Button>*/}
-                    <Button variant='primary'>Settings</Button>
-                    <Button variant='primary'>Help</Button>
-                    <Button variant='primary'>Credits</Button>
+                    <Button variant='primary' onClick={() => setGamePhase('start')}>{t('mainMenu.newGame')}</Button>
+                    <Button variant='primary'>{t('mainMenu.loadGame')}</Button>
+                    <Button variant='primary'>{t('mainMenu.help')}</Button>
+                    <Button variant='primary'>{t('mainMenu.settings')}</Button>
+                    <Button variant='primary'>{t('mainMenu.credits')}</Button>
                 </div>
             </div>
         </div>

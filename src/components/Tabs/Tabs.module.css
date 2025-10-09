@@ -46,11 +46,61 @@
 
 .pageContainer {
     background-color: var(--hud-panel-bg);
-    padding: 16px;
+    padding: 0 2rem;
+
+
+
+    padding: 2rem;
     min-width: 100%;
     overflow-y: auto;
 
+    &.card {
+        border-image-source: url("/assets/hudbg.png");
+        border-image-slice: 24 fill;
+        border-image-width: 24px;
+        border-image-repeat: stretch;
+        image-rendering: pixelated;
+        padding: 2rem 3rem;
+    }
+
     h2 {
         color: var(--accent-color);
+    }
+
+    .tabsHeader {
+        display: flex;
+        justify-content: space-between;
+
+        .buttonContainer {
+            display: flex;
+            gap: 1rem;
+
+            button {
+                padding: .5rem 1.5rem;
+            }
+        }
+    }
+
+    .columns {
+        display: flex;
+        gap: 2rem;
+
+        .column {
+            width: 50%;
+        }
+    }
+}
+
+/* Budget */
+.budgetRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+
+    div {
+        display: flex;
+        justify-content: space-between;
+        gap: .5rem;
+        align-items: center;
     }
 }

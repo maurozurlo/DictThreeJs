@@ -18,5 +18,23 @@
         "sports": "Deportes",
         "weather": "El clima",
         "no_charge": "Sin cargo"
+    },
+    "mainMenu": {
+        "newGame": "Nueva partida",
+        "loadGame": "Cargar partida",
+        "settings": "Opciones",
+        "help": "Ayuda",
+        "credits": "Creditos"
+    },
+    "budget": {
+        "taxes": "Taxes",
+        "expenditures": "Expenditures",
+        "health": "Health",
+        "infrastructure": "Infrastructure",
+        "security": "Security",
+        "education": "Education",
+        "totalExpenses": "Total Expenses",
+        "peopleTax": "People Tax",
+        "businessTax": "Business Tax"
     }
 }

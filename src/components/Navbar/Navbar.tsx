@@ -35,7 +35,7 @@ const Navbar = () => {
                             key={tab}
                             variant="primary"
                             disabled={disabled}
-                            clickHandler={() => setCurrentTab(tab)}
+                            onClick={() => setCurrentTab(tab)}
                         >
                             <Icon type={icon} />
                             {label}
