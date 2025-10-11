@@ -11,7 +11,9 @@
         "unknown": "Unknown"
     },
     "actionPanel": {
-        "someKey": "Some text"
+        "someKey": "Some text",
+        "treasury": "Treasury",
+        "charisma": "Charisma"
     },
     "log": {
         "today": "El periodico de hoy:",
@@ -49,7 +51,7 @@
     "power": {
         "military": "Military",
         "people": "People",
-        "company": "Elite",
+        "business": "Elite",
         "none": "None"
     }
 }

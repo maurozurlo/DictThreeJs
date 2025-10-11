@@ -4,7 +4,7 @@ import { Group } from "three";
 import { useHoverGlow } from "../Hooks/useHoverGlow";
 import { useGameStore } from "../Stores/GameState";
 
-const TYPE = 'company';
+const TYPE = 'business';
 function Elite() {
     const fbx = useLoader(FBXLoader, "/assets/3d/chars/elite.FBX") as Group;
     const selectedPower = useGameStore((s) => s.meet.selectedPower);

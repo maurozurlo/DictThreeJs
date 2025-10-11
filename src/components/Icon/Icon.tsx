@@ -20,7 +20,7 @@ export type IconType =
   | "charisma"
   | "checked"
   | "unchecked"
-  | "company"
+  | "business"
   | "people"
   | "military"
   | "gun"

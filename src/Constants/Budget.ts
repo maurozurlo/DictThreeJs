@@ -1,7 +1,4 @@
 import type { Expenditures, Taxes } from "../types/Budget"
-
-export const BOUNDS_EXPENDITURE = [1, 10]
-export const BOUNDS_TAX = [0, 50]
 export const EXPENDITURE_MULTIPLIER = 25
 
 export const EXPENDITURES: { id: Expenditures, label: string }[] = [

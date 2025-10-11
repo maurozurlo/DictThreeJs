@@ -5,10 +5,12 @@ import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
 import LanguageSwitcher from '../LanguageSwitcher'
 import { useTranslation } from 'react-i18next';
+import { GAMESTATE } from '../../Constants/GameState'
 
 const Navbar = () => {
     const setCurrentTab = useGameStore((s) => s.tabs.setActiveTab);
     const displayTabs = useGameStore((s) => s.tabs.activeTab) !== Tabs.Menu;
+    const round = useGameStore(s => s.gameManagement.round)
     const { t } = useTranslation();
 
     const tabConfig: { tab: Tabs, icon: IconType, label: string, disabled?: boolean }[] = [
@@ -46,7 +48,7 @@ const Navbar = () => {
 
             <div className={styles.gameInfo}>
                 <LanguageSwitcher />
-                {displayTabs && <div>Round: 1/10</div>}
+                {displayTabs && <div>{t('nav.rounds')}: {round}/{GAMESTATE.ROUNDS.MAX}</div>}
             </div>
         </header>
     );

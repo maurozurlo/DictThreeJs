@@ -5,10 +5,17 @@ import Meet from '../Tabs/Meet'
 import Laws from '../Tabs/Laws'
 import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
+import { MoneyNumberFormatter } from '../../Constants/Budget'
+import { getCharismaLeft } from '../../Utils/UI'
+import { useTranslation } from 'react-i18next'
 
 
 const ActionPanel = () => {
+    const { t } = useTranslation()
     const activeTab = useGameStore((s) => s.tabs.activeTab);
+    const relations = useGameStore((s) => s.relations.current);
+    const money = useGameStore((s) => s.budget.treasury);
+    const charisma = useGameStore(s => s.gameManagement.charisma.current)
 
     return (
         <div className={styles.actionPanel}>
@@ -21,8 +28,8 @@ const ActionPanel = () => {
                 </div>
 
                 <div className={styles.budget}>
-                    <Typography variant={'body'}>Treasury</Typography>
-                    <Typography variant={'caption'}>$550m</Typography>
+                    <Typography variant={'body'}>{t('actionPanel.treasury')}</Typography>
+                    <Typography variant={'caption'}>{MoneyNumberFormatter(money)}</Typography>
                 </div>
             </div>
 
@@ -31,28 +38,28 @@ const ActionPanel = () => {
 
                     <div className={styles.respectItem}>
                         <Icon type='people' />
-                        <span className={styles.respectNumber}>7</span>
+                        <span className={styles.respectNumber}>{relations.people}</span>
 
                     </div>
                     <div className={styles.respectItem}>
-                        <Icon type='company' />
-                        <span className={styles.respectNumber}>2</span>
+                        <Icon type='business' />
+                        <span className={styles.respectNumber}>{relations.business}</span>
                     </div>
                     <div className={styles.respectItem}>
                         <Icon type='military' />
-                        <span className={styles.respectNumber}>3</span>
+                        <span className={styles.respectNumber}>{relations.military}</span>
                     </div>
                 </div>
 
                 <div className={styles.charisma}>
-                    <Typography variant='caption'>Charisma</Typography>
+                    <Typography variant='caption'>{t('actionPanel.charisma')}</Typography>
 
 
                     <div className={styles.charismaSlider}>
                         <Icon type='needle' style={{
                             position: 'absolute',
                             top: '10%',
-                            left: '40%' // always -10%
+                            left: `${getCharismaLeft(charisma)}%`
                         }} />
                     </div>
                 </div>

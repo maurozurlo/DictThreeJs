@@ -19,7 +19,7 @@ const Meet = () => {
     "power": {
         "military": "Military",
         "people": "People",
-        "company": "Elite"
+        "business": "Elite"
     }*/
 
     return selectedPower === 'none' ? (

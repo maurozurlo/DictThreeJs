@@ -3,9 +3,10 @@ import { create } from "zustand";
 import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
-import { BOUNDS_EXPENDITURE, BOUNDS_TAX } from "../Constants/Budget";
 import type { Power } from "../types/Power";
 import type { Law } from "../types/Law";
+import { GAMESTATE } from "../Constants/GameState";
+import { Clamp } from "../Utils/Math";
 
 type CameraState = {
     cameraPos: [number, number, number];
@@ -33,22 +34,34 @@ type GameState = {
     gameManagement: {
         phase: 'idle' | 'start' | 'event' | 'gameover';
         setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
+        round: number,
+        charisma: {
+            current: number,
+            adjustCharisma: (amount: number) => void;
+        }
     };
     meet: {
-        selectedPower: Power;
+        selectedPower: Power | 'none';
+        actionTaken: boolean;
         setSelectedPower: (power: Power) => void;
     },
     budget: {
+        treasury: number,
         expenditures: Record<Expenditures, number>;
         taxes: Record<Taxes, number>;
         // adjust by amount (positive or negative)
         adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => void;
-        // read helpers
-        getBudgetItem: (id: Expenditures | Taxes) => number;
     },
     law: {
-        current: Law | null
-    }
+        current: Law | null,
+        passedLaws: Set<Law>,
+        lawDecided: boolean;
+    },
+    log: string[],
+    relations: {
+        current: Record<Power, number>
+        adjustRelations: (p: Power, a: number) => void;
+    };
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -122,9 +135,8 @@ export const useGameStore = create<GameState>((set, get) => ({
             },
         },
     },
-
     tabs: {
-        activeTab: Tabs.Menu,
+        activeTab: GAMESTATE.TABS.START_TAB,
         setActiveTab: (tab: Tabs) => {
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
@@ -159,9 +171,12 @@ export const useGameStore = create<GameState>((set, get) => ({
         },
     },
     law: {
-        current: null
+        current: null,
+        passedLaws: new Set(),
+        lawDecided: false,
     },
     gameManagement: {
+        round: GAMESTATE.ROUNDS.START,
         phase: 'idle',
         setPhase: (phase) => {
             if (phase === 'start') {
@@ -185,6 +200,25 @@ export const useGameStore = create<GameState>((set, get) => ({
                 }
             }))
         },
+        charisma: {
+            current: GAMESTATE.CHARISMA.INITIAL,
+            adjustCharisma: (amount) => {
+                set((s) => {
+                    const prevValue = s.gameManagement.charisma.current
+                    const newValue = Clamp(prevValue + amount, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
+                    return {
+                        ...s,
+                        gameManagement: {
+                            ...s.gameManagement,
+                            charisma: {
+                                ...s.gameManagement.charisma,
+                                current: newValue
+                            }
+                        }
+                    }
+                })
+            }
+        }
     },
     meet: {
         selectedPower: 'none',
@@ -193,41 +227,42 @@ export const useGameStore = create<GameState>((set, get) => ({
                 ...state.meet,
                 selectedPower: power,
             }
-        }))
+        })),
+        actionTaken: false
     },
     budget: {
-        expenditures: {
-            health: 1,
-            infrastructure: 1,
-            security: 1,
-            education: 1,
-        },
-        taxes: {
-            people: 20,
-            business: 30
-        },
+        treasury: GAMESTATE.BUDGET.TREASURY,
+        expenditures: GAMESTATE.BUDGET.EXPENDITURES,
+        taxes: GAMESTATE.BUDGET.TAXES,
         adjustBudgetItem: (id: string, amount: number) => {
             set((state: GameState) => {
                 const { budget } = state;
+
                 if (Object.keys(budget.expenditures).includes(id)) {
                     const key = id as Expenditures;
                     const current = budget.expenditures[key] || 0;
-                    const min = BOUNDS_EXPENDITURE[0];
-                    const max = BOUNDS_EXPENDITURE[1];
-                    const newValue = Math.min(Math.max(current + amount, min), max);
-                    const newEx = { ...budget.expenditures, [key]: newValue };
-                    return { budget: { ...budget, expenditures: newEx } };
+                    const newValue = Clamp(current + amount, GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN, GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MAX);
+                    return {
+                        budget: {
+                            ...budget,
+                            expenditures: { ...budget.expenditures, [key]: newValue },
+                        },
+                    };
                 }
+
                 if (Object.keys(budget.taxes).includes(id)) {
                     const key = id as Taxes;
                     const current = budget.taxes[key] || 0;
-                    const min = BOUNDS_TAX[0];
-                    const max = BOUNDS_TAX[1];
-                    const newValue = Math.min(Math.max(current + amount, min), max);
-                    const newTaxes = { ...budget.taxes, [key]: newValue };
-                    return { budget: { ...budget, taxes: newTaxes } };
+                    const newValue = Clamp(current + amount, GAMESTATE.BUDGET.BOUNDS.TAX.MIN, GAMESTATE.BUDGET.BOUNDS.TAX.MAX);
+                    return {
+                        budget: {
+                            ...budget,
+                            taxes: { ...budget.taxes, [key]: newValue },
+                        },
+                    };
                 }
-                console.error('Unknown id for budget', id)
+
+                console.error('Unknown id for budget', id);
                 return state;
             });
         },
@@ -247,4 +282,36 @@ export const useGameStore = create<GameState>((set, get) => ({
             return 0;
         },
     },
+    log: [],
+    relations: {
+        current: GAMESTATE.RELATIONS.INITIAL,
+        adjustRelations: (power, amount) => {
+            set((state: GameState) => {
+                const {
+                    relations: { current },
+                } = state;
+
+                const prevValue = current[power];
+                const newValue = Clamp(prevValue + amount, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                // Check for special side effects
+                if (newValue <= GAMESTATE.RELATIONS.MIN) {
+                    console.warn(`Relation with ${power} reached minimum (${GAMESTATE.RELATIONS.MIN}).`);
+                    // You could add side effects here:
+                    // e.g., trigger game over, change phase, log event, etc.
+                    // setTimeout(() => get().gameManagement.setPhase("gameover"), 0);
+                }
+
+                return {
+                    ...state,
+                    relations: {
+                        ...state.relations,
+                        current: {
+                            ...current,
+                            [power]: newValue,
+                        },
+                    },
+                };
+            });
+        },
+    }
 }));

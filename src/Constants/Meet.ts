@@ -1,11 +1,11 @@
 import type { Power } from "../types/Power";
 
-export const MEET_VALUES: Record<Exclude<Power, 'none'>, {
+export const MEET_VALUES: Record<Power, {
     bribe: number;
     expropiate: number;
     base_dialogue_success_rate: number
 }> = {
-    "company": {
+    "business": {
         bribe: 80,
         expropiate: 120,
         base_dialogue_success_rate: .2 // 0 - 1
