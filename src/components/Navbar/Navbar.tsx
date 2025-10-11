@@ -17,9 +17,9 @@ const Navbar = () => {
         { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws') },
         { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals') },
         { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget') },
-        { tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
-        { tab: Tabs.Street, icon: 'street', label: t('tabs.street') },
-        { tab: Tabs.Secret, icon: 'secret', label: '???', disabled: true },
+        //{ tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
+        //{ tab: Tabs.Street, icon: 'street', label: t('tabs.street') },
+        //{ tab: Tabs.Secret, icon: 'secret', label: '???', disabled: true },
     ];
 
     return (

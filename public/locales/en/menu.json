@@ -37,5 +37,19 @@
     "totalTax": "Expected Income",
     "peopleTax": "People Tax",
     "businessTax": "Business Tax"
+  },
+  "meet": {
+    "none_selected": "Select a faction to begin the meeting",
+    "selected": "Selected",
+    "bribe": "Bribe",
+    "eliminate": "Eliminate",
+    "expropiate": "Expropiate",
+    "dialogue": "Dialogue"
+  },
+  "power": {
+    "military": "Military",
+    "people": "People",
+    "company": "Elite",
+    "none": "None"
   }
 }

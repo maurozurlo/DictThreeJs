@@ -3,32 +3,53 @@ import Button from '../Button/Button'
 import { Icon } from '../Icon/Icon'
 import styles from './Tabs.module.css'
 import { useGameStore } from '../../Stores/GameState'
+import { useTranslation } from 'react-i18next'
+import { MEET_VALUES } from '../../Constants/Meet'
+import { MoneyNumberFormatter } from '../../Constants/Budget'
 
 const Meet = () => {
+    const { t } = useTranslation();
     const selectedPower = useGameStore((s) => s.meet.selectedPower);
+    /*    "meet": {
+        "bribe": "Bribe",
+        "eliminate": "Eliminate",
+        "expropiate": "Expropiate",
+        "dialogue": "Dialogue"
+    },
+    "power": {
+        "military": "Military",
+        "people": "People",
+        "company": "Elite"
+    }*/
 
-    return (
+    return selectedPower === 'none' ? (
+        <Typography variant='caption' className={styles.title}>
+            {t('meet.none_selected')}
+
+        </Typography>
+    ) : (
         <>
-            <Typography variant='caption' className={styles.title}>Selected Faction: {selectedPower === 'military' ? 'Military' : selectedPower === 'people' ? 'People' : selectedPower === 'company' ? 'Elite' : 'None'}
+            <Typography variant='caption' className={styles.title}>
+                {t('meet.selected')}: {t(`power.${selectedPower}`)}
 
             </Typography>
             <div className={styles.actionsContainer}>
                 <Button>
-                    <Icon type='bribe' /> Bribe
+                    <Icon type='bribe' /> {t('meet.bribe')} (-{MoneyNumberFormatter(MEET_VALUES[selectedPower].bribe)})
                 </Button>
 
 
                 <Button>
-                    <Icon type='gun' /> Eliminate
+                    <Icon type='gun' /> {t('meet.eliminate')}
                 </Button>
 
 
 
                 <Button>
-                    <Icon type='takeover' /> Expropiate (+$100)
+                    <Icon type='takeover' /> {t('meet.expropiate')} (+{MoneyNumberFormatter(MEET_VALUES[selectedPower].expropiate)})
                 </Button>
                 <Button>
-                    <Icon type='charisma' /> Dialogue
+                    <Icon type='charisma' /> {t('meet.dialogue')}
                 </Button>
             </div>
 
