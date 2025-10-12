@@ -1,0 +1,31 @@
+{
+    "deals": {
+        "1": {
+            "text": "A foreign spy offers you classified intelligence in exchange for $50M. Accept the deal?",
+            "acceptText": "You accepted the spy's offer. Gained valuable intelligence but risked exposure.",
+            "rejectText": "You rejected the spy's offer. Played it safe but missed potential advantage.",
+            "riskText": "The intelligence was a trap! Foreign relations suffer."
+        },
+        "2": {
+            "text": "A wealthy businessman offers you a $80M 'donation' for favorable policies. Accept?",
+            "acceptText": "You accepted the businessman's donation. Treasury boosted but ethics questioned.",
+            "rejectText": "You rejected the bribe. Maintained integrity but missed financial opportunity."
+        },
+        "3": {
+            "text": "Intelligence reports suggest a rival is planning against you. Spend $40M on counter-intelligence?",
+            "acceptText": "You invested in counter-intelligence. Potential threats neutralized.",
+            "rejectText": "You chose not to investigate. Saved money but remained vulnerable.",
+            "riskText": "Your rival successfully undermined your position with the military!"
+        },
+        "4": {
+            "text": "A popular celebrity wants to endorse your regime for $30M. Worth the investment?",
+            "acceptText": "You hired the celebrity endorsement. Public image improved significantly.",
+            "rejectText": "You declined the celebrity deal. Saved money but missed PR opportunity."
+        },
+        "5": {
+            "text": "Black market arms dealers offer you military equipment for $60M. Make the deal?",
+            "acceptText": "You purchased black market weapons. Military strength increased but reputation damaged.",
+            "rejectText": "You refused the illegal arms deal. Maintained legitimacy but missed military advantage."
+        }
+    }
+}

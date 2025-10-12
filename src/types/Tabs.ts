@@ -14,4 +14,7 @@ export type Tabs = typeof Tabs[keyof typeof Tabs];
 
 export type TabProps = {
     isActive: boolean;
+    children?: React.ReactNode;
+    sideMenu?: React.ReactNode;
+    headerTitle?: string | React.ReactNode;
 }

@@ -7,6 +7,7 @@ import type { Power } from "../types/Power";
 import type { Law } from "../types/Law";
 import { GAMESTATE } from "../Constants/GameState";
 import { Clamp } from "../Utils/Math";
+import type { Deal } from "../types/Deal";
 
 type CameraState = {
     cameraPos: [number, number, number];
@@ -56,12 +57,19 @@ type GameState = {
         current: Law | null,
         passedLaws: Set<Law>,
         lawDecided: boolean;
+        actUponLaw: (hasAccepted: boolean) => void;
     },
     log: string[],
     relations: {
         current: Record<Power, number>
         adjustRelations: (p: Power, a: number) => void;
-    };
+    },
+    deals: {
+        current: Deal | null,
+        dealDecided: boolean,
+        interactedWithDeals: Set<Deal>,
+        actUponDeal: (hasAccepted: boolean) => void;
+    }
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -174,6 +182,18 @@ export const useGameStore = create<GameState>((set, get) => ({
         current: null,
         passedLaws: new Set(),
         lawDecided: false,
+        actUponLaw: (hasAccepted: boolean) => {
+            alert(hasAccepted)
+
+        }
+    },
+    deals: {
+        current: null,
+        dealDecided: false,
+        interactedWithDeals: new Set(),
+        actUponDeal: (hasAccepted: boolean) => {
+            alert(hasAccepted)
+        }
     },
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
