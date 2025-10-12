@@ -1,0 +1,9 @@
+.cardActions {
+    display: flex;
+    gap: 1rem;
+    justify-content: end;
+}
+
+.isInactive {
+    opacity: .5;
+}

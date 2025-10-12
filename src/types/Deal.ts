@@ -1,6 +1,6 @@
 import type { Power } from "./Power";
 
-export type DealEffect = Record<keyof Power | 'treasury' | 'risk', number>
+export type DealEffect = Partial<Record<Power | 'treasury' | 'risk', number>>
 
 export interface Deal {
     id: number;

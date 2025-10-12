@@ -6,8 +6,9 @@ import type { Expenditures, Taxes } from "../types/Budget";
 import type { Power } from "../types/Power";
 import type { Law } from "../types/Law";
 import { GAMESTATE } from "../Constants/GameState";
-import { Clamp } from "../Utils/Math";
+import { Clamp, getRandomUniqueItem } from "../Utils/Math";
 import type { Deal } from "../types/Deal";
+import { DEALS } from "../assets/deals";
 
 type CameraState = {
     cameraPos: [number, number, number];
@@ -69,6 +70,7 @@ type GameState = {
         dealDecided: boolean,
         interactedWithDeals: Set<Deal>,
         actUponDeal: (hasAccepted: boolean) => void;
+        lastDealOutcome: string | null;
     }
 };
 
@@ -191,26 +193,90 @@ export const useGameStore = create<GameState>((set, get) => ({
         current: null,
         dealDecided: false,
         interactedWithDeals: new Set(),
+        lastDealOutcome: null,
+
         actUponDeal: (hasAccepted: boolean) => {
-            alert(hasAccepted)
-        }
+            const state = get();
+            const { current } = state.deals;
+            if (!current) return;
+
+            const resultText = hasAccepted ? current.acceptText : current.rejectText;
+            const effect = hasAccepted ? current.acceptEffect : current.rejectEffect;
+
+            // Clone the current game state (so we can safely modify)
+            const newTreasury = (state.budget.treasury ?? 0) + (effect.treasury ?? 0);
+            const newRelations = { ...state.relations.current };
+
+            // Apply power effects (clamped to [-10, 10])
+            for (const key of ['military', 'business', 'people'] as const) {
+                if (effect[key] !== undefined) {
+                    newRelations[key] = Math.max(-10, Math.min(10, newRelations[key] + effect[key]));
+                }
+            }
+
+            let finalText = resultText;
+
+            // Handle risk
+            if (effect.risk && Math.random() < effect.risk) {
+                finalText += " " + (current.riskText ?? '');
+                if (hasAccepted && current.acceptEffect.military) {
+                    newRelations.military = Math.max(-10, newRelations.military - 2);
+                } else if (!hasAccepted) {
+                    const powers = ['military', 'business', 'people'] as const;
+                    const angryPower = powers[Math.floor(Math.random() * powers.length)];
+                    newRelations[angryPower] = Math.max(-10, newRelations[angryPower] - 1);
+                }
+            }
+
+            // Update Zustand store properly
+            set({
+                budget: {
+                    ...state.budget,
+                    treasury: newTreasury,
+                },
+                relations: {
+                    ...state.relations,
+                    current: newRelations
+                },
+                deals: {
+                    ...state.deals,
+                    dealDecided: true,
+                    lastDealOutcome: finalText,
+                    interactedWithDeals: new Set(state.deals.interactedWithDeals).add(current),
+                },
+            });
+        },
     },
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
         phase: 'idle',
         setPhase: (phase) => {
             if (phase === 'start') {
-                return set((state) => ({
-                    tabs: {
-                        ...state.tabs,
-                        shouldDisplayTabs: true,
-                        activeTab: Tabs.Log,
-                    },
-                    gameManagement: {
-                        ...state.gameManagement,
-                        phase,
+
+                return set((state) => {
+                    const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals)
+                    const updatedDeals = new Set(state.deals.interactedWithDeals);
+                    if (randomDeal) updatedDeals.add(randomDeal);
+
+                    return {
+                        tabs: {
+                            ...state.tabs,
+                            shouldDisplayTabs: true,
+                            activeTab: Tabs.Log,
+                        },
+                        gameManagement: {
+                            ...state.gameManagement,
+                            phase,
+                            round: GAMESTATE.ROUNDS.START
+                        },
+                        deals: {
+                            ...state.deals,
+                            current: randomDeal,
+                            interactedWithDeals: updatedDeals,
+                        }
                     }
-                }))
+                }
+                )
             }
 
             return set((state) => ({

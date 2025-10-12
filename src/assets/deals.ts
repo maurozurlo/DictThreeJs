@@ -1,4 +1,6 @@
-export const DEALS = [
+import type { Deal } from "../types/Deal";
+
+export const DEALS: Deal[] = [
     {
         id: 1,
         text: 'deals.1.text',

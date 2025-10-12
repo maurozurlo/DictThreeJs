@@ -1,5 +1,9 @@
 {
     "deals": {
+        "accept": "Accept",
+        "reject": "Reject",
+        "outcome": "Outcome",
+        "no_current_deals": "No current deals",
         "1": {
             "text": "A foreign spy offers you classified intelligence in exchange for $50M. Accept the deal?",
             "acceptText": "You accepted the spy's offer. Gained valuable intelligence but risked exposure.",

@@ -7,7 +7,7 @@ export const GAMESTATE = {
         TIME_LENGHT_MS: 5 * 60 * 1000
     },
     TABS: {
-        START_TAB: Tabs.Meet
+        START_TAB: Tabs.Menu
     },
     BUDGET: {
         TREASURY: 500,

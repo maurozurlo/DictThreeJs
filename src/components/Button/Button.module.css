@@ -10,7 +10,6 @@
     cursor: pointer;
     appearance: none;
     height: 44px;
-
     min-width: 120px;
 
     &.square {
@@ -27,9 +26,19 @@
     z-index: 2;
     image-rendering: pixelated;
     padding: .25rem .5rem;
-    transition: all .25 ease-in;
+    transition: all .25s ease-in;
 
     &:hover {
         filter: brightness(1.2);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        filter: brightness(0.8) saturate(0.5);
+        opacity: 0.8;
+    }
+
+    &:disabled:hover {
+        filter: brightness(0.8) saturate(0.5);
     }
 }
