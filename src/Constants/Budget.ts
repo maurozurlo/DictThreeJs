@@ -22,11 +22,11 @@ export const EXPENDITURES: { id: Expenditures, label: string }[] = [
 
 export const TAXES: { id: Taxes, label: string }[] = [
     {
-        id: 'people',
+        id: 'peopleTaxes',
         label: 'budget.peopleTax'
     },
     {
-        id: 'business',
+        id: 'businessTaxes',
         label: 'budget.businessTax'
     }
 ]

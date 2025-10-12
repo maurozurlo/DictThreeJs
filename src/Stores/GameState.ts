@@ -3,76 +3,11 @@ import { create } from "zustand";
 import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
-import type { Power } from "../types/Power";
-import type { Law } from "../types/Law";
 import { GAMESTATE } from "../Constants/GameState";
 import { Clamp, getRandomUniqueItem } from "../Utils/Math";
-import type { Deal } from "../types/Deal";
 import { DEALS } from "../assets/deals";
-
-type CameraState = {
-    cameraPos: [number, number, number];
-    cameraTarget?: Vector3;
-    cameraPositions: Vector3[];
-    cameraTargets: Vector3[];
-    currentCameraIndex: number;
-    moveCameraTo: (pos: [number, number, number], target?: Vector3) => void;
-    cycleCamera: () => void;
-    setCameraPositions: (positions: Vector3[], targets?: Vector3[]) => void;
-};
-
-type GameState = {
-    debug: {
-        enabled: boolean;
-        setDebugMode: (enabled: boolean) => void;
-    },
-    scene: {
-        camera: CameraState;
-    };
-    tabs: {
-        activeTab: Tabs;
-        setActiveTab: (tab: Tabs) => void;
-    };
-    gameManagement: {
-        phase: 'idle' | 'start' | 'event' | 'gameover';
-        setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
-        round: number,
-        charisma: {
-            current: number,
-            adjustCharisma: (amount: number) => void;
-        }
-    };
-    meet: {
-        selectedPower: Power | 'none';
-        actionTaken: boolean;
-        setSelectedPower: (power: Power) => void;
-    },
-    budget: {
-        treasury: number,
-        expenditures: Record<Expenditures, number>;
-        taxes: Record<Taxes, number>;
-        // adjust by amount (positive or negative)
-        adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => void;
-    },
-    law: {
-        current: Law | null,
-        passedLaws: Set<Law>,
-        lawDecided: boolean;
-        actUponLaw: (hasAccepted: boolean) => void;
-    },
-    log: string[],
-    relations: {
-        current: Record<Power, number>
-        adjustRelations: (p: Power, a: number) => void;
-    },
-    deals: {
-        current: Deal | null,
-        dealDecided: boolean,
-        interactedWithDeals: Set<Deal>,
-        actUponDeal: (hasAccepted: boolean) => void;
-        lastDealOutcome: string | null;
-    }
-};
+import type { GameState } from "../types/GameState";
+import { LAWS } from "../assets/laws";
 
 export const useGameStore = create<GameState>((set, get) => ({
     debug: {
@@ -254,9 +189,14 @@ export const useGameStore = create<GameState>((set, get) => ({
             if (phase === 'start') {
 
                 return set((state) => {
+                    // DEAL
                     const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals)
                     const updatedDeals = new Set(state.deals.interactedWithDeals);
                     if (randomDeal) updatedDeals.add(randomDeal);
+                    // LAW
+                    const randomLaw = getRandomUniqueItem(LAWS, state.law.passedLaws)
+                    const updatedLaws = new Set(state.law.passedLaws)
+                    if (randomLaw) updatedLaws.add(randomLaw)
 
                     return {
                         tabs: {
@@ -273,6 +213,11 @@ export const useGameStore = create<GameState>((set, get) => ({
                             ...state.deals,
                             current: randomDeal,
                             interactedWithDeals: updatedDeals,
+                        },
+                        law: {
+                            ...state.law,
+                            current: randomLaw,
+                            passedLaws: updatedLaws
                         }
                     }
                 }

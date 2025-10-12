@@ -28,8 +28,8 @@ export const GAMESTATE = {
             education: 1,
         },
         TAXES: {
-            people: 20,
-            business: 30
+            peopleTaxes: 20,
+            businessTaxes: 30
 
         }
     },

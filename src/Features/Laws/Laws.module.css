@@ -77,3 +77,20 @@
     will-change: transform, opacity;
     animation: slideUpLaw var(--slide-duration) var(--slide-easing) both;
 }
+
+.contentLine {
+    height: 12px;
+    background-color: var(--text-body-dark);
+    opacity: .5;
+}
+
+.lawContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    p {
+        line-height: 1.5;
+        margin: 0;
+    }
+}
