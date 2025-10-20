@@ -94,3 +94,21 @@
         margin: 0;
     }
 }
+
+.approvedStamp, .rejectedStamp {
+    position: absolute;
+    padding: 8px;
+    top: 45px;
+    right: 16px;
+    transform: rotate(35deg);
+}
+
+.approvedStamp {
+    color: green;
+    border: 6px solid green;
+}
+
+.rejectedStamp {
+    color: red;
+    border: 6px solid red;
+}

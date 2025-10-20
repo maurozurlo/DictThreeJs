@@ -8,6 +8,7 @@ import { Clamp, getRandomUniqueItem } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
+import { handleDecision } from "./EffectHandler";
 
 export const useGameStore = create<GameState>((set, get) => ({
     debug: {
@@ -117,12 +118,15 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
     law: {
         current: null,
-        passedLaws: new Set(),
+        interactedWithLaws: new Set(),
         lawDecided: false,
+        lastLawOutcome: null,
         actUponLaw: (hasAccepted: boolean) => {
-            alert(hasAccepted)
-
-        }
+            const state = get();
+            const current = state.law.current;
+            if (!current) return;
+            handleDecision({ type: "law", item: current, hasAccepted, get, set });
+        },
     },
     deals: {
         current: null,
@@ -132,54 +136,9 @@ export const useGameStore = create<GameState>((set, get) => ({
 
         actUponDeal: (hasAccepted: boolean) => {
             const state = get();
-            const { current } = state.deals;
+            const current = state.deals.current;
             if (!current) return;
-
-            const resultText = hasAccepted ? current.acceptText : current.rejectText;
-            const effect = hasAccepted ? current.acceptEffect : current.rejectEffect;
-
-            // Clone the current game state (so we can safely modify)
-            const newTreasury = (state.budget.treasury ?? 0) + (effect.treasury ?? 0);
-            const newRelations = { ...state.relations.current };
-
-            // Apply power effects (clamped to [-10, 10])
-            for (const key of ['military', 'business', 'people'] as const) {
-                if (effect[key] !== undefined) {
-                    newRelations[key] = Math.max(-10, Math.min(10, newRelations[key] + effect[key]));
-                }
-            }
-
-            let finalText = resultText;
-
-            // Handle risk
-            if (effect.risk && Math.random() < effect.risk) {
-                finalText += " " + (current.riskText ?? '');
-                if (hasAccepted && current.acceptEffect.military) {
-                    newRelations.military = Math.max(-10, newRelations.military - 2);
-                } else if (!hasAccepted) {
-                    const powers = ['military', 'business', 'people'] as const;
-                    const angryPower = powers[Math.floor(Math.random() * powers.length)];
-                    newRelations[angryPower] = Math.max(-10, newRelations[angryPower] - 1);
-                }
-            }
-
-            // Update Zustand store properly
-            set({
-                budget: {
-                    ...state.budget,
-                    treasury: newTreasury,
-                },
-                relations: {
-                    ...state.relations,
-                    current: newRelations
-                },
-                deals: {
-                    ...state.deals,
-                    dealDecided: true,
-                    lastDealOutcome: finalText,
-                    interactedWithDeals: new Set(state.deals.interactedWithDeals).add(current),
-                },
-            });
+            handleDecision({ type: "deal", item: current, hasAccepted, get, set });
         },
     },
     gameManagement: {
@@ -194,8 +153,8 @@ export const useGameStore = create<GameState>((set, get) => ({
                     const updatedDeals = new Set(state.deals.interactedWithDeals);
                     if (randomDeal) updatedDeals.add(randomDeal);
                     // LAW
-                    const randomLaw = getRandomUniqueItem(LAWS, state.law.passedLaws)
-                    const updatedLaws = new Set(state.law.passedLaws)
+                    const randomLaw = getRandomUniqueItem(LAWS, state.law.interactedWithLaws)
+                    const updatedLaws = new Set(state.law.interactedWithLaws)
                     if (randomLaw) updatedLaws.add(randomLaw)
 
                     return {

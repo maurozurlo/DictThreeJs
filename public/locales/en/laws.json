@@ -3,6 +3,8 @@
         "proposal": "Law Proposal",
         "0": "Prueba ley",
         "approve": "Aprove Law",
-        "reject": "Reject Law"
+        "reject": "Reject Law",
+        "approved": "Approved",
+        "rejected": "Rejected"
     }
 }

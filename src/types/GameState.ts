@@ -51,8 +51,9 @@ export type GameState = {
     },
     law: {
         current: Law | null,
-        passedLaws: Set<Law>,
+        interactedWithLaws: Set<Law>,
         lawDecided: boolean;
+        lastLawOutcome: boolean | null;
         actUponLaw: (hasAccepted: boolean) => void;
     },
     log: string[][],

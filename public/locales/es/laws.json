@@ -1,6 +1,10 @@
 {
     "laws": {
         "proposal": "Law Proposal",
-        "0": "Prueba ley"
+        "0": "Prueba ley",
+        "approve": "Aprove Law",
+        "reject": "Reject Law",
+        "approved": "Approved",
+        "rejected": "Rejected"
     }
 }
