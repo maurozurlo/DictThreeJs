@@ -22,3 +22,11 @@ export function getRandomUniqueItem<T>(list: T[], used: Set<T>): T | null {
     const randomIndex = Math.floor(Math.random() * available.length);
     return available[randomIndex];
 }
+
+export function getRandomFromList<T>(list: T[]): T {
+    if (list.length === 0) {
+        throw new Error("getRandomFromList: list is empty.");
+    }
+    const randomIndex = Math.floor(Math.random() * list.length);
+    return list[randomIndex];
+}

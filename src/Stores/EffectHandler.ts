@@ -1,6 +1,8 @@
 import type { GameState } from "../types/GameState";
 import type { Deal } from "../types/Deal";
 import type { Law } from "../types/Law";
+import { Clamp, getRandomFromList } from "../Utils/Math";
+import { Power } from "../Constants/Power";
 
 export function handleDecision({
     type,
@@ -23,10 +25,10 @@ export function handleDecision({
 
     // --- Relations update (clamped) ---
     const newRelations = { ...state.relations.current };
-    (["military", "business", "people"] as const).forEach((key) => {
+    Power.forEach((key) => {
         const delta = effect[key];
         if (typeof delta === "number") {
-            newRelations[key] = Math.max(-10, Math.min(10, newRelations[key] + delta));
+            newRelations[key] = Clamp(newRelations[key], -10, 10);
         }
     });
 
@@ -45,9 +47,8 @@ export function handleDecision({
             if (hasAccepted && deal.acceptEffect.military) {
                 newRelations.military = Math.max(-10, newRelations.military - 2);
             } else if (!hasAccepted) {
-                const powers = ["military", "business", "people"] as const;
-                const angryPower = powers[Math.floor(Math.random() * powers.length)];
-                newRelations[angryPower] = Math.max(-10, newRelations[angryPower] - 1);
+                const angryPower = getRandomFromList(Power);
+                newRelations[angryPower] = Clamp(newRelations[angryPower], -10, 10);
             }
             finalText += " " + (deal.riskText ?? "");
         }

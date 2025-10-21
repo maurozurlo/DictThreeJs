@@ -1,1 +1,2 @@
-export type Power = 'people' | 'business' | 'military'
+import { Power } from "../Constants/Power";
+export type Power = typeof Power[number];
