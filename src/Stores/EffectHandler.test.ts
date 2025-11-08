@@ -24,7 +24,7 @@ describe('handleRelations', () => {
         const result = handleRelations({
             power: 'military',
             amount: 3,
-            current
+            current: current.military
         });
 
         expect(result).toBe(8);
@@ -36,7 +36,7 @@ describe('handleRelations', () => {
         const result = handleRelations({
             power: 'military',
             amount: 5,
-            current
+            current: current.military
         });
 
         expect(result).toBe(10);
@@ -48,7 +48,7 @@ describe('handleRelations', () => {
         const result = handleRelations({
             power: 'military',
             amount: -5,
-            current
+            current: current.military
         });
 
         expect(result).toBe(-10);
@@ -61,7 +61,7 @@ describe('handleRelations', () => {
         handleRelations({
             power: 'military',
             amount: -5,
-            current
+            current: current.military
         });
 
         expect(consoleSpy).toHaveBeenCalledWith(

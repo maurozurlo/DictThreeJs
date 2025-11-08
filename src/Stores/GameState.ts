@@ -9,6 +9,7 @@ import { DEALS } from "../assets/deals";
 import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations } from "./EffectHandler";
+import { handleActionOutcome } from "./ActionHandler";
 
 export const INITIAL_STATE = ({ set, get }: {
     set: {
@@ -224,7 +225,27 @@ export const INITIAL_STATE = ({ set, get }: {
                 selectedPower: power,
             }
         })),
-        actionTaken: false
+        actionOutcomeText: '',
+        actionTaken: false,
+        takeAction: (power, action) => set((state) => {
+            const { actionTaken, newRelations, resultText, treasuryUpdate } = handleActionOutcome(power, action, state);
+            return {
+                ...state,
+                meet: {
+                    ...state.meet,
+                    actionTaken,
+                    actionOutcomeText: resultText,
+                },
+                budget: {
+                    ...state.budget,
+                    treasury: state.budget.treasury + treasuryUpdate,
+                },
+                relations: {
+                    ...state.relations,
+                    current: newRelations,
+                }
+            };
+        })
     },
     budget: {
         treasury: GAMESTATE.BUDGET.TREASURY,
@@ -271,7 +292,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 const newValue = handleRelations({
                     power,
                     amount,
-                    current: state.relations.current,
+                    current: state.relations.current[power],
                 });
                 return {
                     relations: {

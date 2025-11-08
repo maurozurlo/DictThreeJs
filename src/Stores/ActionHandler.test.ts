@@ -1,0 +1,257 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { handleActionOutcome } from './ActionHandler';
+import type { GameState } from '../types/GameState';
+
+// Mock the effect handler
+vi.mock('./EffectHandler', () => ({
+    handleRelations: ({ power, amount, current }: any) => {
+        const newValue = current[power] + amount;
+        return Math.max(-10, Math.min(10, newValue));
+    }
+}));
+
+// Mock constants
+vi.mock('../Constants/GameState', () => ({
+    GAMESTATE: {
+        RELATIONS: {
+            INITIAL: {
+                military: 0,
+                business: 0,
+                people: 0
+            },
+            MIN: -10,
+            MAX: 10
+        },
+        MEET: {
+            ACTIONS: {
+                BRIBE: {
+                    COSTS: {
+                        military: 60,
+                        business: 80,
+                        people: 60
+                    }
+                },
+                EXPROPIATE: {
+                    GAINS: {
+                        military: 50,
+                        business: 120,
+                        people: 40
+                    }
+                }
+            }
+        }
+    }
+}));
+
+describe('handleActionOutcome', () => {
+    let mockState: GameState;
+
+    beforeEach(() => {
+        mockState = {
+            budget: { treasury: 200 },
+            relations: {
+                current: {
+                    military: 0,
+                    business: 0,
+                    people: 0
+                }
+            }
+        } as unknown as GameState;
+    });
+
+    describe('bribe action', () => {
+        it('should successfully bribe when funds are sufficient', () => {
+            const result = handleActionOutcome('military', 'bribe', mockState);
+            expect(result.actionTaken).toBe(true);
+            expect(result.treasuryUpdate).toBe(-60);
+            expect(result.newRelations.military).toBe(3);
+            expect(result.resultText).toBe('You bribed the military. Relation +3, Treasury -$60M');
+        });
+
+        it('should fail bribe when funds are insufficient', () => {
+            mockState.budget!.treasury = 50;
+
+            const result = handleActionOutcome('military', 'bribe', mockState);
+
+            expect(result.actionTaken).toBe(false);
+            expect(result.treasuryUpdate).toBe(0);
+            expect(result.newRelations.military).toBe(0);
+            expect(result.resultText).toBe('Insufficient funds for bribery. Action failed.');
+        });
+
+        it('should use correct costs for different powers', () => {
+            const militaryResult = handleActionOutcome('military', 'bribe', mockState);
+            expect(militaryResult.treasuryUpdate).toBe(-60);
+
+            const businessResult = handleActionOutcome('business', 'bribe', mockState);
+            expect(businessResult.treasuryUpdate).toBe(-80);
+
+            const peopleResult = handleActionOutcome('people', 'bribe', mockState);
+            expect(peopleResult.treasuryUpdate).toBe(-60);
+        });
+    });
+
+    describe('eliminate action', () => {
+        it('should reset target power to neutral without backlash', () => {
+            vi.spyOn(Math, 'random').mockReturnValue(0.5); // No backlash (>0.3)
+            mockState.relations.current.military = 5;
+
+            const result = handleActionOutcome('military', 'eliminate', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.treasuryUpdate).toBe(0);
+            expect(result.newRelations.military).toBe(0);
+            expect(result.newRelations.business).toBe(0);
+            expect(result.newRelations.people).toBe(0);
+            expect(result.resultText).toBe('You eliminated military leadership. military relation reset to neutral.');
+
+            vi.restoreAllMocks();
+        });
+
+        it('should trigger backlash and anger another power', () => {
+            vi.spyOn(Math, 'random')
+                .mockReturnValueOnce(0.1) // Backlash triggers (0.1 < 0.3)
+                .mockReturnValueOnce(0); // Select first other power
+
+            mockState.relations.current.military = -5;
+            mockState.relations.current.business = 2;
+
+            const result = handleActionOutcome('military', 'eliminate', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.newRelations.military).toBe(0);
+            expect(result.newRelations.business).toBe(0); // 2 - 2 = 0
+            expect(result.resultText).toContain('backlash');
+            expect(result.resultText).toContain('business relation -2');
+
+            vi.restoreAllMocks();
+        });
+
+        it('should not anger the eliminated power during backlash', () => {
+            vi.spyOn(Math, 'random')
+                .mockReturnValueOnce(0.1) // Backlash triggers
+                .mockReturnValueOnce(0.5); // Random selection
+
+            const result = handleActionOutcome('military', 'eliminate', mockState);
+
+            expect(result.newRelations.military).toBe(0);
+            // Either business or people should be -2, but not military
+            const angryPowers = Object.entries(result.newRelations)
+                .filter(([power, value]) => power !== 'military' && value === -2);
+            expect(angryPowers.length).toBe(1);
+
+            vi.restoreAllMocks();
+        });
+    });
+
+    describe('expropriate action', () => {
+        it('should expropriate assets and reduce relations', () => {
+            const result = handleActionOutcome('business', 'expropriate', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.treasuryUpdate).toBe(120);
+            expect(result.newRelations.business).toBe(-3);
+            expect(result.resultText).toBe('You expropriated assets from business. Treasury +$120M, relation -3');
+        });
+
+        it('should use correct gains for different powers', () => {
+            const militaryResult = handleActionOutcome('military', 'expropriate', mockState);
+            expect(militaryResult.treasuryUpdate).toBe(50);
+
+            const businessResult = handleActionOutcome('business', 'expropriate', mockState);
+            expect(businessResult.treasuryUpdate).toBe(120);
+
+            const peopleResult = handleActionOutcome('people', 'expropriate', mockState);
+            expect(peopleResult.treasuryUpdate).toBe(40);
+        });
+
+        it('should clamp relations at minimum', () => {
+            mockState.relations.current.people = -8;
+
+            const result = handleActionOutcome('people', 'expropriate', mockState);
+
+            expect(result.newRelations.people).toBe(-10); // Clamped at minimum
+        });
+    });
+
+    describe('dialogue action', () => {
+        it('should handle terrible dialogue outcome (10% chance)', () => {
+            vi.spyOn(Math, 'random').mockReturnValue(0.05); // < 0.1
+
+            const result = handleActionOutcome('people', 'dialogue', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.treasuryUpdate).toBe(0);
+            expect(result.newRelations.people).toBe(-1);
+            expect(result.resultText).toBe('Dialogue with people went terribly wrong! Relation -1');
+
+            vi.restoreAllMocks();
+        });
+
+        it('should handle successful dialogue outcome (60% chance)', () => {
+            vi.spyOn(Math, 'random').mockReturnValue(0.3); // >= 0.1 and < 0.7
+
+            const result = handleActionOutcome('military', 'dialogue', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.treasuryUpdate).toBe(0);
+            expect(result.newRelations.military).toBe(1);
+            expect(result.resultText).toBe('Successful dialogue with military. Relation +1');
+
+            vi.restoreAllMocks();
+        });
+
+        it('should handle inconclusive dialogue outcome (30% chance)', () => {
+            vi.spyOn(Math, 'random').mockReturnValue(0.8); // >= 0.7
+
+            const result = handleActionOutcome('business', 'dialogue', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.treasuryUpdate).toBe(0);
+            expect(result.newRelations.business).toBe(0);
+            expect(result.resultText).toBe('Dialogue with business was inconclusive. No change.');
+
+            vi.restoreAllMocks();
+        });
+
+        it('should clamp relations at maximum', () => {
+            vi.spyOn(Math, 'random').mockReturnValue(0.5); // Success
+            mockState.relations.current.people = 10;
+
+            const result = handleActionOutcome('people', 'dialogue', mockState);
+
+            expect(result.newRelations.people).toBe(10); // Already at max, stays there
+
+            vi.restoreAllMocks();
+        });
+    });
+
+    describe('relation preservation', () => {
+        it('should not modify unaffected powers', () => {
+            mockState.relations.current = {
+                military: 3,
+                business: -2,
+                people: 5
+            };
+
+            const result = handleActionOutcome('military', 'bribe', mockState);
+
+            expect(result.newRelations.business).toBe(-2);
+            expect(result.newRelations.people).toBe(5);
+        });
+
+        it('should handle multiple actions preserving state', () => {
+            // First action
+            const result1 = handleActionOutcome('military', 'dialogue', mockState);
+
+            // Update state with new relations
+            mockState.relations.current = result1.newRelations;
+
+            // Second action
+            const result2 = handleActionOutcome('business', 'expropriate', mockState);
+
+            // Military relation from first action should be preserved
+            expect(result2.newRelations.military).toBe(result1.newRelations.military);
+        });
+    });
+});

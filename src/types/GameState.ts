@@ -1,7 +1,7 @@
 import type { Vector3 } from "three";
 import type { Tabs } from "./Tabs";
 import type { Deal } from "./Deal";
-import type { Power } from "./Power";
+import type { MeetActionType, Power } from "./Power";
 import type { Expenditures, Taxes } from "./Budget";
 import type { Law } from "./Law";
 
@@ -41,12 +41,13 @@ export type GameState = {
         selectedPower: Power | 'none';
         actionTaken: boolean;
         setSelectedPower: (power: Power) => void;
+        takeAction: (power: Power, action: MeetActionType) => void;
+        actionOutcomeText: string;
     },
     budget: {
         treasury: number,
         expenditures: Record<Expenditures, number>;
         taxes: Record<Taxes, number>;
-        // adjust by amount (positive or negative)
         adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => void;
     },
     law: {

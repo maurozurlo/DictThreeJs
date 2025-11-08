@@ -32,7 +32,7 @@ export function handleDecision({
             newRelations[key] = handleRelations({
                 power: key,
                 amount: delta,
-                current: newRelations,
+                current: newRelations[key],
             });
         }
     });
@@ -44,7 +44,7 @@ export function handleDecision({
         newRelations[angryPower] = handleRelations({
             power: angryPower,
             amount: -2,
-            current: newRelations,
+            current: newRelations[angryPower],
         });
     }
 
@@ -92,10 +92,10 @@ export function handleRelations({
 }: {
     power: keyof GameState["relations"]["current"];
     amount: number;
-    current: GameState["relations"]["current"];
+    current: number
 }) {
     const newValue = Clamp(
-        current[power] + amount,
+        current + amount,
         GAMESTATE.RELATIONS.MIN,
         GAMESTATE.RELATIONS.MAX
     );
