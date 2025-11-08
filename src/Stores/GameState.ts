@@ -4,11 +4,11 @@ import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
-import { Clamp, getRandomUniqueItem } from "../Utils/Math";
+import { Clamp, getRandomFromList, getRandomUniqueItem } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
-import { handleDecision } from "./EffectHandler";
+import { handleDecision, handleRelations } from "./EffectHandler";
 
 export const INITIAL_STATE = ({ set, get }: {
     set: {
@@ -123,7 +123,7 @@ export const INITIAL_STATE = ({ set, get }: {
         },
     },
     law: {
-        current: null,
+        current: getRandomFromList(LAWS),
         interactedWithLaws: new Set(),
         lawDecided: false,
         lastLawOutcome: null,
@@ -135,7 +135,7 @@ export const INITIAL_STATE = ({ set, get }: {
         },
     },
     deals: {
-        current: null,
+        current: getRandomFromList(DEALS),
         dealDecided: false,
         interactedWithDeals: new Set(),
         lastDealOutcome: null,
@@ -267,8 +267,20 @@ export const INITIAL_STATE = ({ set, get }: {
     relations: {
         current: GAMESTATE.RELATIONS.INITIAL,
         adjustRelations: (power, amount) => {
-
-        },
+            set((state) => {
+                const newValue = handleRelations({
+                    power,
+                    amount,
+                    current: state.relations.current,
+                });
+                return {
+                    relations: {
+                        ...state.relations,
+                        current: { ...state.relations.current, [power]: newValue },
+                    },
+                }
+            })
+        }
     }
 })
 
