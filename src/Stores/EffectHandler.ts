@@ -3,6 +3,7 @@ import type { Deal } from "../types/Deal";
 import type { Law } from "../types/Law";
 import { Clamp, getRandomFromList } from "../Utils/Math";
 import { Power } from "../Constants/Power";
+import { GAMESTATE } from "../Constants/GameState";
 
 export function handleDecision({
     type,
@@ -20,37 +21,45 @@ export function handleDecision({
     const state = get();
     const effect = hasAccepted ? item.acceptEffect : item.rejectEffect;
 
-    // --- Budget update ---
+    // Apply treasury changes
     const newTreasury = (state.budget.treasury ?? 0) + (effect.treasury ?? 0);
 
-    // --- Relations update (clamped) ---
+    // Apply relation changes
     const newRelations = { ...state.relations.current };
     Power.forEach((key) => {
         const delta = effect[key];
         if (typeof delta === "number") {
-            newRelations[key] = Clamp(newRelations[key], -10, 10);
+            newRelations[key] = handleRelations({
+                power: key,
+                amount: delta,
+                current: newRelations,
+            });
         }
     });
 
-    // --- Shared partial update ---
+    // Handle risk mechanics - random faction penalty on rejection
+    const riskTriggered = effect.risk && Math.random() < effect.risk;
+    if (riskTriggered && !hasAccepted) {
+        const angryPower = getRandomFromList(Power);
+        newRelations[angryPower] = handleRelations({
+            power: angryPower,
+            amount: -2,
+            current: newRelations,
+        });
+    }
+
+    // Shared state update
     const baseUpdate = {
         budget: { ...state.budget, treasury: newTreasury },
         relations: { ...state.relations, current: newRelations },
     };
 
-    // --- Deal branch (has text + risk) ---
+    // Type-specific state updates
     if (type === "deal") {
         const deal = item as Deal;
         let finalText = hasAccepted ? deal.acceptText : deal.rejectText;
-
-        if (effect.risk && Math.random() < effect.risk) {
-            if (hasAccepted && deal.acceptEffect.military) {
-                newRelations.military = Math.max(-10, newRelations.military - 2);
-            } else if (!hasAccepted) {
-                const angryPower = getRandomFromList(Power);
-                newRelations[angryPower] = Clamp(newRelations[angryPower], -10, 10);
-            }
-            finalText += " " + (deal.riskText ?? "");
+        if (riskTriggered && deal.riskText) {
+            finalText += " " + deal.riskText;
         }
 
         set({
@@ -62,18 +71,39 @@ export function handleDecision({
                 interactedWithDeals: new Set(state.deals.interactedWithDeals).add(deal),
             },
         });
-        return;
+    } else {
+        const law = item as Law;
+        set({
+            ...baseUpdate,
+            law: {
+                ...state.law,
+                lastLawOutcome: hasAccepted,
+                lawDecided: true,
+                interactedWithLaws: new Set(state.law.interactedWithLaws).add(law),
+            },
+        });
+    }
+}
+
+export function handleRelations({
+    power,
+    amount,
+    current,
+}: {
+    power: keyof GameState["relations"]["current"];
+    amount: number;
+    current: GameState["relations"]["current"];
+}) {
+    const newValue = Clamp(
+        current[power] + amount,
+        GAMESTATE.RELATIONS.MIN,
+        GAMESTATE.RELATIONS.MAX
+    );
+
+    if (newValue <= GAMESTATE.RELATIONS.MIN) {
+        console.warn(`Relation with ${power} reached minimum (${GAMESTATE.RELATIONS.MIN}).`);
+        // Add side effects here if needed
     }
 
-    // --- Law branch (no text / risk) ---
-    const law = item as Law;
-    set({
-        ...baseUpdate,
-        law: {
-            ...state.law,
-            lastLawOutcome: hasAccepted,
-            lawDecided: true,
-            interactedWithLaws: new Set(state.law.interactedWithLaws).add(law)
-        },
-    });
+    return newValue;
 }

@@ -10,7 +10,13 @@ import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision } from "./EffectHandler";
 
-export const useGameStore = create<GameState>((set, get) => ({
+export const INITIAL_STATE = ({ set, get }: {
+    set: {
+        (partial: GameState | Partial<GameState> | ((state: GameState) => GameState | Partial<GameState>), replace?: false): void;
+        (state: GameState | ((state: GameState) => GameState), replace: true): void;
+    };
+    get: () => GameState
+}): GameState => ({
     debug: {
         enabled: false,
         setDebugMode: (enabled: boolean) => set((state) => ({
@@ -256,52 +262,14 @@ export const useGameStore = create<GameState>((set, get) => ({
                 return state;
             });
         },
-        getBudgetItem: (id: string) => {
-            const { budget }: GameState = get();
-            if (Object.keys(budget.taxes).includes(id)) {
-                const key = id as Taxes;
-                return budget.taxes[key]
-            }
-            if (Object.keys(budget.expenditures).includes(id)) {
-                {
-                    const key = id as Expenditures;
-                    return budget.expenditures[key]
-                }
-            }
-            console.error('Unknown id for budget', id)
-            return 0;
-        },
     },
     log: [],
     relations: {
         current: GAMESTATE.RELATIONS.INITIAL,
         adjustRelations: (power, amount) => {
-            set((state: GameState) => {
-                const {
-                    relations: { current },
-                } = state;
 
-                const prevValue = current[power];
-                const newValue = Clamp(prevValue + amount, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-                // Check for special side effects
-                if (newValue <= GAMESTATE.RELATIONS.MIN) {
-                    console.warn(`Relation with ${power} reached minimum (${GAMESTATE.RELATIONS.MIN}).`);
-                    // You could add side effects here:
-                    // e.g., trigger game over, change phase, log event, etc.
-                    // setTimeout(() => get().gameManagement.setPhase("gameover"), 0);
-                }
-
-                return {
-                    ...state,
-                    relations: {
-                        ...state.relations,
-                        current: {
-                            ...current,
-                            [power]: newValue,
-                        },
-                    },
-                };
-            });
         },
     }
-}));
+})
+
+export const useGameStore = create<GameState>((set, get) => INITIAL_STATE({ set, get }));
