@@ -15,14 +15,14 @@ export function handelBudgetChange({ budget, id, amount }: {
 
     if (Object.keys(budget.expenditures).includes(id)) {
         const key = id as Expenditures;
-        const current = budget.expenditures[key] || 0;
+        const current = budget.expenditures[key];
         const newValue = Clamp(current + amount, GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN, GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MAX);
         return { expenditures: { ...budget.expenditures, [key]: newValue }, taxes: budget.taxes }
     }
 
     if (Object.keys(budget.taxes).includes(id)) {
         const key = id as Taxes;
-        const current = budget.taxes[key] || 0;
+        const current = budget.taxes[key];
         const newValue = Clamp(current + amount, GAMESTATE.BUDGET.BOUNDS.TAX.MIN, GAMESTATE.BUDGET.BOUNDS.TAX.MAX);
         return { taxes: { ...budget.taxes, [key]: newValue }, expenditures: budget.expenditures }
     }

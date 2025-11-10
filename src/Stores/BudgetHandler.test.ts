@@ -139,21 +139,6 @@ describe('handelBudgetChange', () => {
             expect(result.expenditures.health).toBe(mockBudget.expenditures.health);
         });
 
-        it('should handle undefined current value', () => {
-            const budgetWithUndefined = {
-                expenditures: { ...mockBudget.expenditures, health: undefined as any },
-                taxes: mockBudget.taxes,
-            } as GameState['budget'];
-
-            const result = handelBudgetChange({
-                budget: budgetWithUndefined,
-                id: 'health',
-                amount: 5,
-            });
-
-            expect(result.expenditures.health).toBe(5);
-        });
-
         it('should return unchanged budget for unknown id', () => {
             const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 

@@ -22,7 +22,7 @@ export function handleDecision({
     const effect = hasAccepted ? item.acceptEffect : item.rejectEffect;
 
     // Apply treasury changes
-    const newTreasury = (state.budget.treasury ?? 0) + (effect.treasury ?? 0);
+    const newTreasury = state.budget.treasury + (effect.treasury ?? 0);
 
     // Apply relation changes
     const newRelations = { ...state.relations.current };

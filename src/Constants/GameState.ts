@@ -52,6 +52,11 @@ export interface Meet {
 export interface Actions {
     BRIBE: Bribe;
     EXPROPIATE: Expropiate;
+    DIALOGUE: Dialogue;
+}
+
+export interface Dialogue {
+    BASE_SUCCESS_RATE: Initial;
 }
 
 export interface Bribe {
@@ -91,6 +96,13 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     },
     MEET: {
         ACTIONS: {
+            DIALOGUE: {
+                BASE_SUCCESS_RATE: {
+                    military: 0.4,
+                    business: 0.2,
+                    people: 0.8
+                }
+            },
             BRIBE: {
                 COSTS: {
                     military: 60,

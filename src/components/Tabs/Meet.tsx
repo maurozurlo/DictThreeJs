@@ -4,55 +4,68 @@ import { Icon } from '../Icon/Icon'
 import styles from './Tabs.module.css'
 import { useGameStore } from '../../Stores/GameState'
 import { useTranslation } from 'react-i18next'
-import { MEET_VALUES } from '../../Constants/Meet'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
+import { GAMESTATE } from '../../Constants/GameState'
 
 const Meet = () => {
-    const { t } = useTranslation();
-    const selectedPower = useGameStore((s) => s.meet.selectedPower);
-    /*    "meet": {
-        "bribe": "Bribe",
-        "eliminate": "Eliminate",
-        "expropiate": "Expropiate",
-        "dialogue": "Dialogue"
-    },
-    "power": {
-        "military": "Military",
-        "people": "People",
-        "business": "Elite"
-    }*/
+    const { t } = useTranslation()
+    const selectedPower = useGameStore((s) => s.meet.selectedPower)
+    const takeAction = useGameStore((s) => s.meet.takeAction)
+    const actionTaken = useGameStore((s) => s.meet.actionTaken)
+    const actionOutcomeText = useGameStore((s) => s.meet.actionOutcomeText)
 
-    return selectedPower === 'none' ? (
-        <Typography variant='caption' className={styles.title}>
-            {t('meet.none_selected')}
+    // --- Show result after action ---
+    if (actionTaken.taken && actionTaken.power) {
+        return (
+            <>
+                <Typography variant="caption" className={styles.title}>
+                    {t(`meet.${actionTaken.type}`)}: {t(`power.${actionTaken.power}`)}
+                </Typography>
+                <Typography variant="body">
+                    {actionOutcomeText}
+                </Typography>
+            </>
+        )
+    }
 
-        </Typography>
-    ) : (
-        <>
-            <Typography variant='caption' className={styles.title}>
-                {t('meet.selected')}: {t(`power.${selectedPower}`)}
-
+    // --- No power selected ---
+    if (selectedPower === 'none') {
+        return (
+            <Typography variant="caption" className={styles.title}>
+                {t('meet.none_selected')}
             </Typography>
+        )
+    }
+
+    // --- Actions for selected power ---
+    const bribeCost = GAMESTATE.MEET.ACTIONS.BRIBE.COSTS[selectedPower]
+    const expropiateGain = GAMESTATE.MEET.ACTIONS.EXPROPIATE.GAINS[selectedPower]
+
+    return (
+        <>
+            <Typography variant="caption" className={styles.title}>
+                {t('meet.selected')}: {t(`power.${selectedPower}`)}
+            </Typography>
+
             <div className={styles.actionsContainer}>
-                <Button>
-                    <Icon type='bribe' /> {t('meet.bribe')} (-{MoneyNumberFormatter(MEET_VALUES[selectedPower].bribe)})
+                <Button onClick={() => takeAction(selectedPower, 'bribe')}>
+                    <Icon type="bribe" /> {t('meet.bribe')} (
+                    -{MoneyNumberFormatter(bribeCost)})
                 </Button>
 
-
-                <Button>
-                    <Icon type='gun' /> {t('meet.eliminate')}
+                <Button onClick={() => takeAction(selectedPower, 'eliminate')}>
+                    <Icon type="gun" /> {t('meet.eliminate')}
                 </Button>
 
-
-
-                <Button>
-                    <Icon type='takeover' /> {t('meet.expropiate')} (+{MoneyNumberFormatter(MEET_VALUES[selectedPower].expropiate)})
+                <Button onClick={() => takeAction(selectedPower, 'expropriate')}>
+                    <Icon type="takeover" /> {t('meet.expropiate')} (
+                    +{MoneyNumberFormatter(expropiateGain)})
                 </Button>
-                <Button>
-                    <Icon type='charisma' /> {t('meet.dialogue')}
+
+                <Button onClick={() => takeAction(selectedPower, 'dialogue')}>
+                    <Icon type="charisma" /> {t('meet.dialogue')}
                 </Button>
             </div>
-
         </>
     )
 }
