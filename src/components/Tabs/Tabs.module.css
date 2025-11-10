@@ -110,5 +110,6 @@
         height: auto;
         justify-content: start;
         padding: .5rem 1rem;
+        min-width: 380px;
     }
 }

@@ -1,57 +1,56 @@
 {
     "tabs": {
-        "menu": "Menu",
+        "menu": "Menú",
         "log": "Diario",
-        "meet": "Reunir",
+        "meet": "Reunión",
         "laws": "Leyes",
         "deals": "Tratos",
         "budget": "Presupuesto",
-        "shop": "Compras",
+        "shop": "Tienda",
         "street": "Calle",
-        "unknown": "Unknown"
+        "unknown": "Desconocido"
     },
     "actionPanel": {
-        "someKey": "Some text",
-        "treasury": "Treasury",
-        "charisma": "Charisma"
+        "treasury": "Tesoro",
+        "charisma": "Carisma"
     },
     "log": {
-        "today": "El periodico de hoy:",
+        "today": "El periódico de hoy:",
         "sports": "Deportes",
         "weather": "El clima",
-        "no_charge": "Sin cargo"
+        "no_charge": "Sin costo"
     },
     "mainMenu": {
         "newGame": "Nueva partida",
         "loadGame": "Cargar partida",
         "settings": "Opciones",
         "help": "Ayuda",
-        "credits": "Creditos"
+        "credits": "Créditos"
     },
     "budget": {
-        "taxes": "Taxes",
-        "expenditures": "Expenditures",
-        "health": "Health",
-        "infrastructure": "Infrastructure",
-        "security": "Security",
-        "education": "Education",
-        "totalExpenses": "Total Expenses",
-        "totalTax": "Expected Income",
-        "peopleTax": "People Tax",
-        "businessTax": "Business Tax"
+        "taxes": "Impuestos",
+        "expenditures": "Gastos",
+        "health": "Salud",
+        "infrastructure": "Infraestructura",
+        "security": "Seguridad",
+        "education": "Educación",
+        "totalExpenses": "Gastos totales",
+        "totalTax": "Ingresos esperados",
+        "peopleTax": "Población",
+        "businessTax": "Empresas"
     },
     "meet": {
-        "none_selected": "Select a faction to begin the meeting",
-        "selected": "Selected",
-        "bribe": "Bribe",
-        "eliminate": "Eliminate",
-        "expropiate": "Expropiate",
-        "dialogue": "Dialogue"
+        "none_selected": "Selecciona una facción para comenzar la reunión",
+        "selected": "Seleccionado",
+        "bribe": "Sobornar",
+        "eliminate": "Eliminar",
+        "expropiate": "Expropiar",
+        "dialogue": "Dialogar"
     },
     "power": {
-        "military": "Military",
-        "people": "People",
-        "business": "Elite",
-        "none": "None"
+        "military": "Militares",
+        "people": "Pueblo",
+        "business": "Élite",
+        "none": "Ninguno"
     }
 }

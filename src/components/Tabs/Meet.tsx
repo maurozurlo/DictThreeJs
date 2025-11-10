@@ -65,8 +65,7 @@ const Meet = () => {
 
             <div className={styles.actionsContainer}>
                 <Button onClick={() => takeAction(selectedPower, 'bribe')}>
-                    <Icon type="bribe" /> {t('meet.bribe')} (
-                    -{MoneyNumberFormatter(bribeCost)})
+                    <Icon type="bribe" /> {t('meet.bribe')} (-{MoneyNumberFormatter(bribeCost)})
                 </Button>
 
                 <Button onClick={() => takeAction(selectedPower, 'eliminate')}>
@@ -74,8 +73,7 @@ const Meet = () => {
                 </Button>
 
                 <Button onClick={() => takeAction(selectedPower, 'expropriate')}>
-                    <Icon type="takeover" /> {t('meet.expropiate')} (
-                    +{MoneyNumberFormatter(expropiateGain)})
+                    <Icon type="takeover" /> {t('meet.expropiate')} (+{MoneyNumberFormatter(expropiateGain)})
                 </Button>
 
                 <Button onClick={() => takeAction(selectedPower, 'dialogue')}>

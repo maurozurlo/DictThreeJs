@@ -1,35 +1,35 @@
 {
     "deals": {
-        "accept": "Accept",
-        "reject": "Reject",
-        "outcome": "Outcome",
-        "no_current_deals": "No current deals",
+        "accept": "Aceptar",
+        "reject": "Rechazar",
+        "outcome": "Resultado",
+        "no_current_deals": "No hay acuerdos actuales",
         "1": {
-            "text": "A foreign spy offers you classified intelligence in exchange for $50M. Accept the deal?",
-            "acceptText": "You accepted the spy's offer. Gained valuable intelligence but risked exposure.",
-            "rejectText": "You rejected the spy's offer. Played it safe but missed potential advantage.",
-            "riskText": "The intelligence was a trap! Foreign relations suffer."
+            "text": "Un espía extranjero te ofrece información clasificada a cambio de $50M. ¿Aceptar el trato?",
+            "acceptText": "Aceptaste la oferta del espía. Obtuviste información valiosa, pero corriste el riesgo de ser descubierto.",
+            "rejectText": "Rechazaste la oferta del espía. Jugaste a lo seguro, pero perdiste una posible ventaja.",
+            "riskText": "¡La información era una trampa! Las relaciones exteriores se deterioran."
         },
         "2": {
-            "text": "A wealthy businessman offers you a $80M 'donation' for favorable policies. Accept?",
-            "acceptText": "You accepted the businessman's donation. Treasury boosted but ethics questioned.",
-            "rejectText": "You rejected the bribe. Maintained integrity but missed financial opportunity."
+            "text": "Un empresario adinerado te ofrece una 'donación' de $80M a cambio de políticas favorables. ¿Aceptar?",
+            "acceptText": "Aceptaste la donación del empresario. Las arcas del Estado aumentaron, pero tu ética quedó en duda.",
+            "rejectText": "Rechazaste el soborno. Mantuviste la integridad, pero perdiste una oportunidad financiera."
         },
         "3": {
-            "text": "Intelligence reports suggest a rival is planning against you. Spend $40M on counter-intelligence?",
-            "acceptText": "You invested in counter-intelligence. Potential threats neutralized.",
-            "rejectText": "You chose not to investigate. Saved money but remained vulnerable.",
-            "riskText": "Your rival successfully undermined your position with the military!"
+            "text": "Informes de inteligencia sugieren que un rival planea en tu contra. ¿Gastar $40M en contrainteligencia?",
+            "acceptText": "Invertiste en contrainteligencia. Las posibles amenazas fueron neutralizadas.",
+            "rejectText": "Decidiste no investigar. Ahorraste dinero, pero quedaste vulnerable.",
+            "riskText": "¡Tu rival logró socavar tu posición dentro del ejército!"
         },
         "4": {
-            "text": "A popular celebrity wants to endorse your regime for $30M. Worth the investment?",
-            "acceptText": "You hired the celebrity endorsement. Public image improved significantly.",
-            "rejectText": "You declined the celebrity deal. Saved money but missed PR opportunity."
+            "text": "Una celebridad popular quiere apoyar tu régimen por $30M. ¿Vale la inversión?",
+            "acceptText": "Contrataste el apoyo de la celebridad. La imagen pública mejoró considerablemente.",
+            "rejectText": "Rechazaste el acuerdo con la celebridad. Ahorraste dinero, pero perdiste una oportunidad de relaciones públicas."
         },
         "5": {
-            "text": "Black market arms dealers offer you military equipment for $60M. Make the deal?",
-            "acceptText": "You purchased black market weapons. Military strength increased but reputation damaged.",
-            "rejectText": "You refused the illegal arms deal. Maintained legitimacy but missed military advantage."
+            "text": "Vendedores de armas del mercado negro te ofrecen equipamiento militar por $60M. ¿Hacer el trato?",
+            "acceptText": "Compraste armas en el mercado negro. La fuerza militar aumentó, pero tu reputación se vio afectada.",
+            "rejectText": "Rechazaste el trato ilegal de armas. Mantuviste la legitimidad, pero perdiste una ventaja militar."
         }
     }
 }

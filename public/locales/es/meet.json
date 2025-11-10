@@ -1,10 +1,10 @@
 {
-    "bribe_success": "You bribed {{power}}. Relation +3, Treasury -${{cost}}M.",
-    "bribe_insufficient_funds": "Insufficient funds for bribery. Action failed.",
-    "eliminate_success": "You eliminated {{power}} leadership. {{power}} relation reset to neutral.",
-    "eliminate_backlash": "You eliminated {{power}} leadership. {{power}} reset to neutral, {{angryPower}} relation -2 (backlash).",
-    "expropriate_success": "You expropriated assets from {{power}}. Treasury +${{gain}}M, relation -3.",
-    "dialogue_fail": "Dialogue with {{power}} went terribly wrong! Relation -1.",
-    "dialogue_success": "Successful dialogue with {{power}}. Relation +1.",
-    "dialogue_neutral": "Dialogue with {{power}} was inconclusive. No change."
+    "bribe_success": "Sobornaste a {{power}}. Relación +3, Tesoro -${{cost}}M.",
+    "bribe_insufficient_funds": "Fondos insuficientes para el soborno. Acción fallida.",
+    "eliminate_success": "Eliminaste el liderazgo de {{power}}. La relación con {{power}} se reinicia a neutral.",
+    "eliminate_backlash": "Eliminaste el liderazgo de {{power}}. {{power}} reiniciado a neutral, relación con {{angryPower}} -2 (reacción adversa).",
+    "expropriate_success": "Expropiaste bienes de {{power}}. Tesoro +${{gain}}M, relación -3.",
+    "dialogue_fail": "El diálogo con {{power}} salió terriblemente mal. Relación -1.",
+    "dialogue_success": "Diálogo exitoso con {{power}}. Relación +1.",
+    "dialogue_neutral": "El diálogo con {{power}} fue inconcluso. Sin cambios."
 }

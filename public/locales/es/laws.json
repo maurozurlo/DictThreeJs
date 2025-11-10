@@ -1,12 +1,12 @@
 {
     "laws": {
-        "proposal": "Law Proposal",
-        "0": "Prueba ley",
-        "approve": "Aprove Law",
-        "reject": "Reject Law",
-        "approved": "Approved",
-        "rejected": "Rejected"
+        "proposal": "Propuesta de ley",
+        "0": "Ley de prueba",
+        "approve": "Aprobar ley",
+        "reject": "Rechazar ley",
+        "approved": "Aprobada",
+        "rejected": "Rechazada"
     },
-    "acted_upon_law": "You've already acted upon this law.",
-    "proposal_by": "Law Proposal by {{power}}"
+    "acted_upon_law": "Ya has tomado una decisión sobre esta ley.",
+    "proposal_by": "Propuesta de ley presentada por {{power}}"
 }
