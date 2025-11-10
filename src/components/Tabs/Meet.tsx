@@ -9,10 +9,25 @@ import { GAMESTATE } from '../../Constants/GameState'
 
 const Meet = () => {
     const { t } = useTranslation()
+    const { t: meetT } = useTranslation('meet');
     const selectedPower = useGameStore((s) => s.meet.selectedPower)
     const takeAction = useGameStore((s) => s.meet.takeAction)
     const actionTaken = useGameStore((s) => s.meet.actionTaken)
     const actionOutcomeText = useGameStore((s) => s.meet.actionOutcomeText)
+
+    const getOutcomeText = () => {
+        if (!actionOutcomeText) return null;
+        const extraParams = { power: '', angryPower: '' }
+        if ('params' in actionOutcomeText) {
+            if ('power' in actionOutcomeText.params!) {
+                extraParams.power = t(`power.${actionOutcomeText.params.power}`);
+            }
+            if ('angryPower' in actionOutcomeText.params!) {
+                extraParams.angryPower = t(`power.${actionOutcomeText.params.angryPower}`);
+            }
+        }
+        return meetT(actionOutcomeText.key, { ...actionOutcomeText.params, ...extraParams });
+    }
 
     // --- Show result after action ---
     if (actionTaken.taken && actionTaken.power) {
@@ -22,7 +37,8 @@ const Meet = () => {
                     {t(`meet.${actionTaken.type}`)}: {t(`power.${actionTaken.power}`)}
                 </Typography>
                 <Typography variant="body">
-                    {actionOutcomeText}
+
+                    {getOutcomeText()}
                 </Typography>
             </>
         )

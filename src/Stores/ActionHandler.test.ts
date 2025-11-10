@@ -72,7 +72,13 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(-60);
             expect(result.newRelations.military).toBe(3);
-            expect(result.resultText).toBe('You bribed the military. Relation +3, Treasury -$60M');
+            expect(result.resultText).toStrictEqual({
+                key: "bribe_success",
+                params: {
+                    cost: 60,
+                    power: "military",
+                },
+            });
         });
 
         it('should fail bribe when funds are insufficient', () => {
@@ -83,7 +89,9 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(false);
             expect(result.treasuryUpdate).toBe(0);
             expect(result.newRelations.military).toBe(0);
-            expect(result.resultText).toBe('Insufficient funds for bribery. Action failed.');
+            expect(result.resultText).toStrictEqual({
+                key: "bribe_insufficient_funds",
+            });
         });
 
         it('should use correct costs for different powers', () => {
@@ -110,7 +118,12 @@ describe('handleActionOutcome', () => {
             expect(result.newRelations.military).toBe(0);
             expect(result.newRelations.business).toBe(0);
             expect(result.newRelations.people).toBe(0);
-            expect(result.resultText).toBe('You eliminated military leadership. military relation reset to neutral.');
+            expect(result.resultText).toStrictEqual({
+                key: "eliminate_success",
+                params: {
+                    power: "military",
+                },
+            });
 
             vi.restoreAllMocks();
         });
@@ -128,8 +141,13 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(true);
             expect(result.newRelations.military).toBe(0);
             expect(result.newRelations.business).toBe(0); // 2 - 2 = 0
-            expect(result.resultText).toContain('backlash');
-            expect(result.resultText).toContain('business relation -2');
+            expect(result.resultText).toStrictEqual({
+                key: "eliminate_backlash",
+                params: {
+                    angryPower: "business",
+                    power: "military",
+                },
+            });
 
             vi.restoreAllMocks();
         });
@@ -158,7 +176,13 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(120);
             expect(result.newRelations.business).toBe(-3);
-            expect(result.resultText).toBe('You expropriated assets from business. Treasury +$120M, relation -3');
+            expect(result.resultText).toStrictEqual({
+                key: "expropriate_success",
+                params: {
+                    gain: 120,
+                    power: "business",
+                },
+            });
         });
 
         it('should use correct gains for different powers', () => {
@@ -190,7 +214,12 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(0);
             expect(result.newRelations.people).toBe(-1);
-            expect(result.resultText).toBe('Dialogue with people went terribly wrong! Relation -1');
+            expect(result.resultText).toStrictEqual({
+                key: "dialogue_fail",
+                params: {
+                    power: "people",
+                },
+            });
 
             vi.restoreAllMocks();
         });
@@ -204,7 +233,12 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(0);
             expect(result.newRelations.military).toBe(1);
-            expect(result.resultText).toBe('Successful dialogue with military. Relation +1');
+            expect(result.resultText).toStrictEqual({
+                key: "dialogue_success",
+                params: {
+                    power: "military",
+                },
+            });
 
             vi.restoreAllMocks();
         });
@@ -218,7 +252,12 @@ describe('handleActionOutcome', () => {
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(0);
             expect(result.newRelations.business).toBe(0);
-            expect(result.resultText).toBe('Dialogue with business was inconclusive. No change.');
+            expect(result.resultText).toStrictEqual({
+                key: "dialogue_neutral",
+                params: {
+                    power: "business",
+                },
+            });
 
             vi.restoreAllMocks();
         });

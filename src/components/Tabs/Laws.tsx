@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
 
 const Laws = () => {
+    const { t: commonT } = useTranslation()
     const { t } = useTranslation('laws')
     const currentLaw = useGameStore(s => s.law.current);
     const lawDecided = useGameStore(s => s.law.lawDecided)
@@ -14,9 +15,11 @@ const Laws = () => {
     return (
         currentLaw === null ? null :
             lawDecided ? (
-                <Typography variant='caption' className={styles.title}>You've already acted upon this law.</Typography>
+                <Typography variant='caption' className={styles.title}>{t('acted_upon_law')}</Typography>
             ) : <>
-                <Typography variant='caption' className={styles.title}>Law Proposal by {currentLaw.power}</Typography>
+                <Typography variant='caption' className={styles.title}>
+                    {t('proposal_by', { power: commonT(`power.${currentLaw.power}`) })}
+                </Typography>
                 <div className={styles.actionsContainer}>
                     <Button onClick={() => actUponLaw(true)} disabled={lawDecided}>
                         <Icon type='approve' /> {t('laws.approve')}

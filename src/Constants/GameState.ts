@@ -56,21 +56,21 @@ export interface Actions {
 }
 
 export interface Dialogue {
-    BASE_SUCCESS_RATE: Initial;
+    BASE_SUCCESS_RATE: PowerKeys;
 }
 
 export interface Bribe {
-    COSTS: Initial;
+    COSTS: PowerKeys;
 }
 
-export type Initial = Record<Power, number>
+export type PowerKeys = Record<Power, number>
 
 export interface Expropiate {
-    GAINS: Initial;
+    GAINS: PowerKeys;
 }
 
 export interface Relations {
-    INITIAL: Initial;
+    INITIAL: PowerKeys;
     MIN: number;
     MAX: number;
 }

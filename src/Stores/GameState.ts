@@ -226,7 +226,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 selectedPower: power,
             }
         })),
-        actionOutcomeText: '',
+        actionOutcomeText: null,
         actionTaken: { type: undefined, taken: false, power: undefined },
         takeAction: (power, action) => set((state) => {
             const { actionTaken, newRelations, resultText, treasuryUpdate } = handleActionOutcome(power, action, state);

@@ -6,5 +6,7 @@
         "reject": "Reject Law",
         "approved": "Approved",
         "rejected": "Rejected"
-    }
+    },
+    "acted_upon_law": "You've already acted upon this law.",
+    "proposal_by": "Law Proposal by {{power}}"
 }

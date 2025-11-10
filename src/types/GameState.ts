@@ -42,7 +42,7 @@ export type GameState = {
         actionTaken: { type?: MeetActionType, taken: boolean, power?: Power };
         setSelectedPower: (power: Power) => void;
         takeAction: (power: Power, action: MeetActionType) => void;
-        actionOutcomeText: string;
+        actionOutcomeText: { key: string, params?: Record<string, string | number> } | null;
     },
     budget: {
         treasury: number,
