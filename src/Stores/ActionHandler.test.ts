@@ -37,8 +37,15 @@ vi.mock('../Constants/GameState', () => ({
                         business: 120,
                         people: 40
                     }
+                },
+                DIALOGUE: {
+                    BASE_SUCCESS_RATE: {
+                        military: 0.4,
+                        business: 0.2,
+                        people: 0.8
+                    }
                 }
-            }
+            },
         }
     }
 }));
@@ -175,8 +182,8 @@ describe('handleActionOutcome', () => {
     });
 
     describe('dialogue action', () => {
-        it('should handle terrible dialogue outcome (10% chance)', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.05); // < 0.1
+        it('should handle terrible dialogue outcome (fails based on baseSuccessRate)', () => {
+            vi.spyOn(Math, 'random').mockReturnValue(0.01); // For people (0.8), fail < 0.02
 
             const result = handleActionOutcome('people', 'dialogue', mockState);
 
@@ -188,8 +195,9 @@ describe('handleActionOutcome', () => {
             vi.restoreAllMocks();
         });
 
-        it('should handle successful dialogue outcome (60% chance)', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.3); // >= 0.1 and < 0.7
+        it('should handle successful dialogue outcome (depends on baseSuccessRate)', () => {
+            // For military (0.4), success if roll >= 0.06 and < 0.42
+            vi.spyOn(Math, 'random').mockReturnValue(0.3);
 
             const result = handleActionOutcome('military', 'dialogue', mockState);
 
@@ -201,8 +209,9 @@ describe('handleActionOutcome', () => {
             vi.restoreAllMocks();
         });
 
-        it('should handle inconclusive dialogue outcome (30% chance)', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.8); // >= 0.7
+        it('should handle inconclusive dialogue outcome (above success threshold)', () => {
+            // For business (0.2), inconclusive if roll >= 0.56
+            vi.spyOn(Math, 'random').mockReturnValue(0.8);
 
             const result = handleActionOutcome('business', 'dialogue', mockState);
 
@@ -215,7 +224,8 @@ describe('handleActionOutcome', () => {
         });
 
         it('should clamp relations at maximum', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.5); // Success
+            // For people (0.8), success range ends at 0.14, so use 0.1
+            vi.spyOn(Math, 'random').mockReturnValue(0.1);
             mockState.relations.current.people = 10;
 
             const result = handleActionOutcome('people', 'dialogue', mockState);

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1762741946493" clover="3.2.0">
-  <project timestamp="1762741946493" name="All files">
-    <metrics statements="86" coveredstatements="86" conditionals="40" coveredconditionals="40" methods="20" coveredmethods="20" elements="146" coveredelements="146" complexity="0" loc="86" ncloc="86" packages="4" files="7" classes="7"/>
+<coverage generated="1762743435019" clover="3.2.0">
+  <project timestamp="1762743435019" name="All files">
+    <metrics statements="87" coveredstatements="87" conditionals="40" coveredconditionals="40" methods="20" coveredmethods="20" elements="147" coveredelements="147" complexity="0" loc="87" ncloc="87" packages="4" files="7" classes="7"/>
     <package name="Constants">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="GameState.ts" path="E:\GameDev\dict-three\src\Constants\GameState.ts">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="83" count="3" type="stmt"/>
+        <line num="88" count="3" type="stmt"/>
       </file>
     </package>
     <package name="Stores">
-      <metrics statements="62" coveredstatements="62" conditionals="34" coveredconditionals="34" methods="14" coveredmethods="14"/>
+      <metrics statements="63" coveredstatements="63" conditionals="34" coveredconditionals="34" methods="14" coveredmethods="14"/>
       <file name="ActionHandler.ts" path="E:\GameDev\dict-three\src\Stores\ActionHandler.ts">
-        <metrics statements="25" coveredstatements="25" conditionals="8" coveredconditionals="8" methods="10" coveredmethods="10"/>
+        <metrics statements="26" coveredstatements="26" conditionals="8" coveredconditionals="8" methods="10" coveredmethods="10"/>
         <line num="17" count="6" type="stmt"/>
         <line num="19" count="6" type="cond" truecount="2" falsecount="0"/>
         <line num="20" count="1" type="stmt"/>
@@ -26,18 +26,19 @@
         <line num="83" count="6" type="stmt"/>
         <line num="85" count="6" type="stmt"/>
         <line num="97" count="5" type="stmt"/>
-        <line num="99" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="100" count="1" type="stmt"/>
-        <line num="108" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="109" count="2" type="stmt"/>
-        <line num="116" count="2" type="stmt"/>
-        <line num="128" count="20" type="stmt"/>
-        <line num="130" count="20" type="stmt"/>
-        <line num="131" count="6" type="stmt"/>
-        <line num="132" count="3" type="stmt"/>
-        <line num="133" count="6" type="stmt"/>
-        <line num="134" count="5" type="stmt"/>
-        <line num="137" count="20" type="stmt"/>
+        <line num="98" count="5" type="stmt"/>
+        <line num="100" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="101" count="1" type="stmt"/>
+        <line num="109" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="110" count="2" type="stmt"/>
+        <line num="117" count="2" type="stmt"/>
+        <line num="129" count="20" type="stmt"/>
+        <line num="131" count="20" type="stmt"/>
+        <line num="132" count="6" type="stmt"/>
+        <line num="133" count="3" type="stmt"/>
+        <line num="134" count="6" type="stmt"/>
+        <line num="135" count="5" type="stmt"/>
+        <line num="138" count="20" type="stmt"/>
       </file>
       <file name="BudgetHandler.ts" path="E:\GameDev\dict-three\src\Stores\BudgetHandler.ts">
         <metrics statements="12" coveredstatements="12" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>

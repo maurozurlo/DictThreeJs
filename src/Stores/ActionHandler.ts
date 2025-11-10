@@ -94,9 +94,10 @@ function handleDialogue(
     power: Power,
     state: GameState,
 ): Omit<ActionResult, 'treasuryUpdate'> {
+    const baseSuccessRate = GAMESTATE.MEET.ACTIONS.DIALOGUE.BASE_SUCCESS_RATE[power];
     const roll = Math.random();
 
-    if (roll < 0.1) {
+    if (roll < 0.1 * (1 - baseSuccessRate)) {
         return {
             resultText: `Dialogue with ${power} went terribly wrong! Relation -1`,
             actionTaken: true,
@@ -105,7 +106,7 @@ function handleDialogue(
         };
     }
 
-    if (roll < 0.7) {
+    if (roll < 0.7 * (1 - baseSuccessRate)) {
         return {
             resultText: `Successful dialogue with ${power}. Relation +1`,
             actionTaken: true,
