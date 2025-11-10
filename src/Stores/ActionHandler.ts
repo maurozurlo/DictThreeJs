@@ -86,7 +86,7 @@ function handleExpropriate(
         resultText: `You expropriated assets from ${power}. Treasury +$${gain}M, relation -3`,
         treasuryUpdate: gain,
         actionTaken: true,
-        newRelations: { ...state.relations.current, power: handleRelations({ power, amount: -3, current: state.relations.current[power] }) }
+        newRelations: { ...state.relations.current, [power]: handleRelations({ power, amount: -3, current: state.relations.current[power] }) }
     };
 }
 
@@ -100,7 +100,7 @@ function handleDialogue(
         return {
             resultText: `Dialogue with ${power} went terribly wrong! Relation -1`,
             actionTaken: true,
-            newRelations: { ...state.relations.current, power: handleRelations({ power, amount: -1, current: state.relations.current[power] }) }
+            newRelations: { ...state.relations.current, [power]: handleRelations({ power, amount: -1, current: state.relations.current[power] }) }
 
         };
     }
@@ -109,7 +109,7 @@ function handleDialogue(
         return {
             resultText: `Successful dialogue with ${power}. Relation +1`,
             actionTaken: true,
-            newRelations: { ...state.relations.current, power: handleRelations({ power, amount: 1, current: state.relations.current[power] }) }
+            newRelations: { ...state.relations.current, [power]: handleRelations({ power, amount: 1, current: state.relations.current[power] }) }
         };
     }
 

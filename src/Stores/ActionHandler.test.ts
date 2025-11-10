@@ -4,8 +4,8 @@ import type { GameState } from '../types/GameState';
 
 // Mock the effect handler
 vi.mock('./EffectHandler', () => ({
-    handleRelations: ({ power, amount, current }: any) => {
-        const newValue = current[power] + amount;
+    handleRelations: ({ amount, current }: { amount: number, current: number }) => {
+        const newValue = current + amount;
         return Math.max(-10, Math.min(10, newValue));
     }
 }));

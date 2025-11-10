@@ -10,6 +10,7 @@ import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
+import { handelBudgetChange } from "./BudgetHandler";
 
 export const INITIAL_STATE = ({ set, get }: {
     set: {
@@ -226,14 +227,14 @@ export const INITIAL_STATE = ({ set, get }: {
             }
         })),
         actionOutcomeText: '',
-        actionTaken: false,
+        actionTaken: { type: undefined, taken: false, power: undefined },
         takeAction: (power, action) => set((state) => {
             const { actionTaken, newRelations, resultText, treasuryUpdate } = handleActionOutcome(power, action, state);
             return {
                 ...state,
                 meet: {
                     ...state.meet,
-                    actionTaken,
+                    actionTaken: { type: action, taken: actionTaken, power },
                     actionOutcomeText: resultText,
                 },
                 budget: {
@@ -251,37 +252,20 @@ export const INITIAL_STATE = ({ set, get }: {
         treasury: GAMESTATE.BUDGET.TREASURY,
         expenditures: GAMESTATE.BUDGET.EXPENDITURES,
         taxes: GAMESTATE.BUDGET.TAXES,
-        adjustBudgetItem: (id: string, amount: number) => {
+        adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => {
             set((state: GameState) => {
                 const { budget } = state;
+                const { taxes, expenditures } = handelBudgetChange({ budget, id, amount });
 
-                if (Object.keys(budget.expenditures).includes(id)) {
-                    const key = id as Expenditures;
-                    const current = budget.expenditures[key] || 0;
-                    const newValue = Clamp(current + amount, GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN, GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MAX);
-                    return {
-                        budget: {
-                            ...budget,
-                            expenditures: { ...budget.expenditures, [key]: newValue },
-                        },
-                    };
+                return {
+                    ...state,
+                    budget: {
+                        ...state.budget,
+                        taxes,
+                        expenditures
+                    }
                 }
-
-                if (Object.keys(budget.taxes).includes(id)) {
-                    const key = id as Taxes;
-                    const current = budget.taxes[key] || 0;
-                    const newValue = Clamp(current + amount, GAMESTATE.BUDGET.BOUNDS.TAX.MIN, GAMESTATE.BUDGET.BOUNDS.TAX.MAX);
-                    return {
-                        budget: {
-                            ...budget,
-                            taxes: { ...budget.taxes, [key]: newValue },
-                        },
-                    };
-                }
-
-                console.error('Unknown id for budget', id);
-                return state;
-            });
+            })
         },
     },
     log: [],

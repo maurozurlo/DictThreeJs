@@ -39,7 +39,7 @@ export type GameState = {
     };
     meet: {
         selectedPower: Power | 'none';
-        actionTaken: boolean;
+        actionTaken: { type?: MeetActionType, taken: boolean, power?: Power };
         setSelectedPower: (power: Power) => void;
         takeAction: (power: Power, action: MeetActionType) => void;
         actionOutcomeText: string;

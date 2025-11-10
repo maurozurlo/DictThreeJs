@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1762741690703" clover="3.2.0">
+  <project timestamp="1762741690703" name="All files">
+    <metrics statements="86" coveredstatements="86" conditionals="46" coveredconditionals="44" methods="20" coveredmethods="20" elements="152" coveredelements="150" complexity="0" loc="86" ncloc="86" packages="4" files="7" classes="7"/>
+    <package name="Constants">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="GameState.ts" path="E:\GameDev\dict-three\src\Constants\GameState.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="83" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="Stores">
+      <metrics statements="62" coveredstatements="62" conditionals="40" coveredconditionals="38" methods="14" coveredmethods="14"/>
+      <file name="ActionHandler.ts" path="E:\GameDev\dict-three\src\Stores\ActionHandler.ts">
+        <metrics statements="25" coveredstatements="25" conditionals="8" coveredconditionals="8" methods="10" coveredmethods="10"/>
+        <line num="17" count="6" type="stmt"/>
+        <line num="19" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="28" count="5" type="stmt"/>
+        <line num="49" count="3" type="stmt"/>
+        <line num="50" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="61" count="6" type="stmt"/>
+        <line num="62" count="2" type="stmt"/>
+        <line num="64" count="2" type="stmt"/>
+        <line num="83" count="6" type="stmt"/>
+        <line num="85" count="6" type="stmt"/>
+        <line num="97" count="5" type="stmt"/>
+        <line num="99" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="108" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="109" count="3" type="stmt"/>
+        <line num="116" count="1" type="stmt"/>
+        <line num="128" count="20" type="stmt"/>
+        <line num="130" count="20" type="stmt"/>
+        <line num="131" count="6" type="stmt"/>
+        <line num="132" count="3" type="stmt"/>
+        <line num="133" count="6" type="stmt"/>
+        <line num="134" count="5" type="stmt"/>
+        <line num="137" count="20" type="stmt"/>
+      </file>
+      <file name="BudgetHandler.ts" path="E:\GameDev\dict-three\src\Stores\BudgetHandler.ts">
+        <metrics statements="12" coveredstatements="12" conditionals="8" coveredconditionals="7" methods="1" coveredmethods="1"/>
+        <line num="16" count="14" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="8" type="stmt"/>
+        <line num="18" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="19" count="8" type="stmt"/>
+        <line num="20" count="8" type="stmt"/>
+        <line num="23" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="24" count="5" type="stmt"/>
+        <line num="25" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="26" count="5" type="stmt"/>
+        <line num="27" count="5" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+      </file>
+      <file name="EffectHandler.ts" path="E:\GameDev\dict-three\src\Stores\EffectHandler.ts">
+        <metrics statements="25" coveredstatements="25" conditionals="24" coveredconditionals="23" methods="3" coveredmethods="3"/>
+        <line num="21" count="8" type="stmt"/>
+        <line num="22" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="25" count="8" type="cond" truecount="3" falsecount="1"/>
+        <line num="28" count="8" type="stmt"/>
+        <line num="29" count="8" type="stmt"/>
+        <line num="30" count="24" type="stmt"/>
+        <line num="31" count="24" type="cond" truecount="2" falsecount="0"/>
+        <line num="32" count="7" type="stmt"/>
+        <line num="41" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="42" count="8" type="cond" truecount="4" falsecount="0"/>
+        <line num="43" count="1" type="stmt"/>
+        <line num="44" count="1" type="stmt"/>
+        <line num="52" count="8" type="stmt"/>
+        <line num="58" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="59" count="4" type="stmt"/>
+        <line num="60" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="61" count="4" type="cond" truecount="4" falsecount="0"/>
+        <line num="62" count="2" type="stmt"/>
+        <line num="65" count="4" type="stmt"/>
+        <line num="75" count="4" type="stmt"/>
+        <line num="76" count="4" type="stmt"/>
+        <line num="97" count="12" type="stmt"/>
+        <line num="103" count="12" type="cond" truecount="2" falsecount="0"/>
+        <line num="104" count="3" type="stmt"/>
+        <line num="108" count="12" type="stmt"/>
+      </file>
+    </package>
+    <package name="Utils">
+      <metrics statements="22" coveredstatements="22" conditionals="6" coveredconditionals="6" methods="6" coveredmethods="6"/>
+      <file name="Math.ts" path="E:\GameDev\dict-three\src\Utils\Math.ts">
+        <metrics statements="16" coveredstatements="16" conditionals="6" coveredconditionals="6" methods="5" coveredmethods="5"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="2" count="35" type="stmt"/>
+        <line num="6" count="203" type="stmt"/>
+        <line num="10" count="27" type="cond" truecount="2" falsecount="0"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="15" count="100" type="stmt"/>
+        <line num="17" count="26" type="cond" truecount="2" falsecount="0"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="22" count="25" type="stmt"/>
+        <line num="23" count="25" type="stmt"/>
+        <line num="27" count="107" type="cond" truecount="2" falsecount="0"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="30" count="106" type="stmt"/>
+        <line num="31" count="106" type="stmt"/>
+      </file>
+      <file name="UI.ts" path="E:\GameDev\dict-three\src\Utils\UI.ts">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="48" type="stmt"/>
+        <line num="5" count="48" type="stmt"/>
+        <line num="6" count="48" type="stmt"/>
+        <line num="7" count="48" type="stmt"/>
+        <line num="9" count="48" type="stmt"/>
+      </file>
+    </package>
+    <package name="types">
+      <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="Tabs.ts" path="E:\GameDev\dict-three\src\types\Tabs.ts">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="3" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
