@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Facto President</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>De Facto President</h1>
+            <p>Survive 10 rounds as the ruler of a totalitarian regime</p>
+        </header>
+
+        <div id="game-container">
+            <!-- Game Over Screen -->
+            <div id="game-over" class="screen hidden">
+                <div class="game-over-content">
+                    <h2 id="game-over-title">Game Over</h2>
+                    <p id="game-over-reason"></p>
+                    <p id="final-stats"></p>
+                    <button onclick="startNewGame()">Start New Game</button>
+                </div>
+            </div>
+
+            <!-- Victory Screen -->
+            <div id="victory" class="screen hidden">
+                <div class="victory-content">
+                    <h2>Victory!</h2>
+                    <p>Congratulations! You've survived all 10 rounds and maintained your grip on power.</p>
+                    <p id="victory-stats"></p>
+                    <button onclick="startNewGame()">Play Again</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen">
+                <!-- Status Panel -->
+                <div class="status-panel">
+                    <div class="round-info">
+                        <h3>Round <span id="current-round">1</span> / 10</h3>
+                        <div class="treasury">Treasury: $<span id="treasury">500</span>M</div>
+                    </div>
+
+                    <!-- Relations -->
+                    <div class="relations">
+                        <h4>Power Relations</h4>
+                        <div class="power-relation">
+                            <span>Military:</span>
+                            <div class="relation-bar">
+                                <div id="military-bar" class="relation-fill"></div>
+                                <span id="military-value">0</span>
+                            </div>
+                        </div>
+                        <div class="power-relation">
+                            <span>Business Elites:</span>
+                            <div class="relation-bar">
+                                <div id="business-bar" class="relation-fill"></div>
+                                <span id="business-value">0</span>
+                            </div>
+                        </div>
+                        <div class="power-relation">
+                            <span>People:</span>
+                            <div class="relation-bar">
+                                <div id="people-bar" class="relation-fill"></div>
+                                <span id="people-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budget -->
+                    <div class="budget">
+                        <h4>Budget Allocation</h4>
+                        <div class="budget-item">
+                            Health: $<span id="health-budget">25</span>M
+                            <input type="range" id="health-slider" min="1" max="10" value="1"
+                                onchange="updateBudget('health', this.value)">
+                        </div>
+                        <div class="budget-item">
+                            Infrastructure: $<span id="infrastructure-budget">25</span>M
+                            <input type="range" id="infrastructure-slider" min="1" max="10" value="1"
+                                onchange="updateBudget('infrastructure', this.value)">
+                        </div>
+                        <div class="budget-item">
+                            Security: $<span id="security-budget">25</span>M
+                            <input type="range" id="security-slider" min="1" max="10" value="1"
+                                onchange="updateBudget('security', this.value)">
+                        </div>
+                        <div class="budget-item">
+                            Education: $<span id="education-budget">25</span>M
+                            <input type="range" id="education-slider" min="1" max="10" value="1"
+                                onchange="updateBudget('education', this.value)">
+                        </div>
+                        <div class="total-expenses">
+                            Total Expenses: $<span id="total-expenses">100</span>M
+                        </div>
+                    </div>
+
+                    <!-- Tax Settings -->
+                    <div class="taxes">
+                        <h4>Tax Rates</h4>
+                        <div class="tax-item">
+                            People Tax: <span id="people-tax-rate">20</span>%
+                            <input type="range" id="people-tax-slider" min="10" max="50" value="20"
+                                onchange="updateTax('people', this.value)">
+                        </div>
+                        <div class="tax-item">
+                            Business Tax: <span id="business-tax-rate">30</span>%
+                            <input type="range" id="business-tax-slider" min="15" max="60" value="30"
+                                onchange="updateTax('business', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Game Area -->
+                <div class="game-area">
+                    <!-- Round Event -->
+                    <div id="round-event" class="event-panel">
+                        <h3>Round Event</h3>
+                        <p id="event-text"></p>
+                    </div>
+
+                    <!-- Mini-Challenge -->
+                    <div id="challenge-panel" class="event-panel" style="display: none;">
+                        <h3>🎯 Challenge Opportunity</h3>
+                        <p id="challenge-text"></p>
+                        <div class="law-actions">
+                            <button onclick="handleChallenge(true)">Accept</button>
+                            <button onclick="handleChallenge(false)">Decline</button>
+                        </div>
+                    </div>
+
+                    <!-- Challenge Result -->
+                    <div id="challenge-result-panel" class="event-panel" style="display: none;">
+                        <h3>Challenge Result</h3>
+                        <p id="challenge-result"></p>
+                        <button onclick="continueFromChallenge()">Continue</button>
+                    </div>
+
+                    <!-- Periodic Event -->
+                    <div id="periodic-event-panel" class="event-panel" style="display: none;">
+                        <h3 id="periodic-title">🌟 Special Event</h3>
+                        <p id="periodic-text"></p>
+                        <div id="periodic-options" class="law-actions">
+                            <!-- Options will be dynamically generated -->
+                        </div>
+                    </div>
+
+                    <!-- Periodic Event Result -->
+                    <div id="periodic-result-panel" class="event-panel" style="display: none;">
+                        <h3>Event Result</h3>
+                        <p id="periodic-result"></p>
+                        <button onclick="continueFromPeriodicEvent()">Continue</button>
+                    </div>
+
+                    <!-- Law Proposal -->
+                    <div id="law-panel" class="law-panel">
+                        <h3>Law Proposal</h3>
+                        <p id="law-text"></p>
+                        <div class="law-actions">
+                            <button id="approve-law" onclick="decideLaw(true)">Approve Law</button>
+                            <button id="reject-law" onclick="decideLaw(false)">Reject Law</button>
+                        </div>
+                    </div>
+
+                    <!-- Power Actions -->
+                    <div id="power-actions" class="power-actions">
+                        <h3>Choose Your Action This Round</h3>
+                        <p>Select one power to interact with:</p>
+                        <div class="power-buttons">
+                            <div class="power-group">
+                                <h4>Military</h4>
+                                <button onclick="performAction('military', 'bribe')">Bribe ($60M)</button>
+                                <button onclick="performAction('military', 'eliminate')">Eliminate</button>
+                                <button onclick="performAction('military', 'expropriate')">Expropriate (+$80M)</button>
+                                <button onclick="performAction('military', 'dialogue')">Dialogue</button>
+                            </div>
+                            <div class="power-group">
+                                <h4>Business Elites</h4>
+                                <button onclick="performAction('business', 'bribe')">Bribe ($80M)</button>
+                                <button onclick="performAction('business', 'eliminate')">Eliminate</button>
+                                <button onclick="performAction('business', 'expropriate')">Expropriate (+$120M)</button>
+                                <button onclick="performAction('business', 'dialogue')">Dialogue</button>
+                            </div>
+                            <div class="power-group">
+                                <h4>People</h4>
+                                <button onclick="performAction('people', 'bribe')">Bribe ($40M)</button>
+                                <button onclick="performAction('people', 'eliminate')">Eliminate</button>
+                                <button onclick="performAction('people', 'expropriate')">Expropriate (+$30M)</button>
+                                <button onclick="performAction('people', 'dialogue')">Dialogue</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Results -->
+                    <div id="action-results" class="action-results hidden">
+                        <h3>Action Results</h3>
+                        <p id="action-text"></p>
+                        <p id="budget-text"></p>
+                        <button id="next-round" onclick="nextRound()">Continue to Next Round</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
