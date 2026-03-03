@@ -35,12 +35,6 @@ const ActionPanel = () => {
 
             <div className={styles.respect}>
                 <div className={styles.respectPowers}>
-
-                    <div className={styles.respectItem}>
-                        <Icon type='people' />
-                        <span className={styles.respectNumber}>{relations.people}</span>
-
-                    </div>
                     <div className={styles.respectItem}>
                         <Icon type='business' />
                         <span className={styles.respectNumber}>{relations.business}</span>
@@ -48,6 +42,11 @@ const ActionPanel = () => {
                     <div className={styles.respectItem}>
                         <Icon type='military' />
                         <span className={styles.respectNumber}>{relations.military}</span>
+                    </div>
+                    <div className={styles.respectItem}>
+                        <Icon type='people' />
+                        <span className={styles.respectNumber}>{relations.people}</span>
+
                     </div>
                 </div>
 
