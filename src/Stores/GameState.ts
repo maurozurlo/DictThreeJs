@@ -10,7 +10,7 @@ import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations, applyBudgetEffects } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
-import { handelBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
+import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import { PERIODIC_EVENTS } from "../assets/periodicEvents";
 import { MINI_CHALLENGES } from "../assets/miniChallenges";
 import type { Power } from "../types/Power";
@@ -134,8 +134,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         }),
                     },
                 },
-                gameManagement: {
-                    ...state.gameManagement,
+                meet: {
+                    ...state.meet,
                     selectedPower: 'none',
                 }
             }));
@@ -558,7 +558,7 @@ export const INITIAL_STATE = ({ set, get }: {
         adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => {
             set((state: GameState) => {
                 const { budget } = state;
-                const { taxes, expenditures } = handelBudgetChange({ budget, id, amount });
+                const { taxes, expenditures } = handleBudgetChange({ budget, id, amount });
 
                 return {
                     ...state,

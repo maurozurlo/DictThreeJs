@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { handelBudgetChange } from './BudgetHandler';
+import { handleBudgetChange } from './BudgetHandler';
 import { GAMESTATE } from '../Constants/GameState';
 import type { GameState } from '../types/GameState';
 
-describe('handelBudgetChange', () => {
+describe('handleBudgetChange', () => {
     const mockBudget: GameState['budget'] = {
         treasury: 100,
         expenditures: {
@@ -20,7 +20,7 @@ describe('handelBudgetChange', () => {
 
     describe('expenditures', () => {
         it('should increase expenditure value within bounds', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'health',
                 amount: 2,
@@ -31,7 +31,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should decrease expenditure value within bounds', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'security',
                 amount: -3,
@@ -42,7 +42,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should clamp expenditure to MAX when exceeding upper bound', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'health',
                 amount: 100,
@@ -52,7 +52,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should clamp expenditure to MIN when exceeding lower bound', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'education',
                 amount: -100,
@@ -62,7 +62,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should not modify other expenditures', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'health',
                 amount: 1,
@@ -76,7 +76,7 @@ describe('handelBudgetChange', () => {
 
     describe('taxes', () => {
         it('should increase tax value within bounds', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'peopleTaxes',
                 amount: 5,
@@ -87,7 +87,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should decrease tax value within bounds', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'businessTaxes',
                 amount: -10,
@@ -98,7 +98,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should clamp tax to MAX when exceeding upper bound', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'peopleTaxes',
                 amount: 100,
@@ -108,7 +108,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should clamp tax to MIN when exceeding lower bound', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'businessTaxes',
                 amount: -100,
@@ -118,7 +118,7 @@ describe('handelBudgetChange', () => {
         });
 
         it('should not modify other taxes', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'peopleTaxes',
                 amount: 1,
@@ -130,7 +130,7 @@ describe('handelBudgetChange', () => {
 
     describe('edge cases', () => {
         it('should handle zero amount change', () => {
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'health',
                 amount: 0,
@@ -142,7 +142,7 @@ describe('handelBudgetChange', () => {
         it('should return unchanged budget for unknown id', () => {
             const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
-            const result = handelBudgetChange({
+            const result = handleBudgetChange({
                 budget: mockBudget,
                 id: 'unknownId' as any,
                 amount: 5,
@@ -160,7 +160,7 @@ describe('handelBudgetChange', () => {
         it('should not mutate original budget', () => {
             const originalBudget = JSON.parse(JSON.stringify(mockBudget));
 
-            handelBudgetChange({
+            handleBudgetChange({
                 budget: mockBudget,
                 id: 'health',
                 amount: 3,

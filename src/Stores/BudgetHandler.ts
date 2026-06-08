@@ -48,7 +48,7 @@ export type BudgetChangeResult = {
     taxes: GameState["budget"]["taxes"],
     expenditures: GameState["budget"]["expenditures"]
 }
-export function handelBudgetChange({ budget, id, amount }: {
+export function handleBudgetChange({ budget, id, amount }: {
     budget: GameState["budget"];
     id: Expenditures | Taxes;
     amount: number;

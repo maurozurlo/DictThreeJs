@@ -74,7 +74,7 @@ function handleEliminate(
 }
 
 function handleExpropriate(power: Power, state: GameState): ActionResult {
-    const gain = GAMESTATE.MEET.ACTIONS.EXPROPIATE.GAINS[power];
+    const gain = GAMESTATE.MEET.ACTIONS.EXPROPRIATE.GAINS[power];
 
     return {
         resultText: { key: "expropriate_success", params: { power, gain } },

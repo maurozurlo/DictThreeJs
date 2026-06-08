@@ -55,7 +55,7 @@ const Meet = () => {
 
     // --- Actions for selected power ---
     const bribeCost = GAMESTATE.MEET.ACTIONS.BRIBE.COSTS[selectedPower]
-    const expropiateGain = GAMESTATE.MEET.ACTIONS.EXPROPIATE.GAINS[selectedPower]
+    const expropiateGain = GAMESTATE.MEET.ACTIONS.EXPROPRIATE.GAINS[selectedPower]
 
     return (
         <>

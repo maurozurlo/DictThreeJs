@@ -53,7 +53,7 @@ export interface Meet {
 
 export interface Actions {
     BRIBE: Bribe;
-    EXPROPIATE: Expropiate;
+    EXPROPRIATE: Expropriate;
     DIALOGUE: Dialogue;
 }
 
@@ -67,7 +67,7 @@ export interface Bribe {
 
 export type PowerKeys = Record<Power, number>
 
-export interface Expropiate {
+export interface Expropriate {
     GAINS: PowerKeys;
 }
 
@@ -80,7 +80,7 @@ export interface Relations {
 export interface Rounds {
     START: number;
     MAX: number;
-    TIME_LENGHT_MS: number;
+    TIME_LENGTH_MS: number;
 }
 
 export interface TabsConfig {
@@ -110,7 +110,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     ROUNDS: {
         START: 1,
         MAX: 10,
-        TIME_LENGHT_MS: 5 * 60 * 1000
+        TIME_LENGTH_MS: 5 * 60 * 1000
     },
     TABS: {
         START_TAB: Tabs.Log
@@ -143,7 +143,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
                     people: 40
                 }
             },
-            EXPROPIATE: {
+            EXPROPRIATE: {
                 GAINS: {
                     military: 80,
                     business: 120,

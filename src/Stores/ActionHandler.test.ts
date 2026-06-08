@@ -31,7 +31,7 @@ vi.mock('../Constants/GameState', () => ({
                         people: 60
                     }
                 },
-                EXPROPIATE: {
+                EXPROPRIATE: {
                     GAINS: {
                         military: 50,
                         business: 120,
