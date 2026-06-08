@@ -112,7 +112,7 @@ function handleDialogue(
     // High charisma expands the success zone; low charisma shrinks it
     const charismaBonus = Math.max(-0.25, Math.min(0.25, charisma * 0.03));
     const failThreshold = 0.1 * (1 - baseSuccessRate);
-    const successThreshold = Math.max(failThreshold + 0.01, Math.min(0.95, 0.7 * (1 - baseSuccessRate) + charismaBonus));
+    const successThreshold = Math.max(failThreshold + 0.01, Math.min(0.95, failThreshold + baseSuccessRate * 0.7 + charismaBonus));
     const roll = Math.random();
 
     if (roll < failThreshold) {

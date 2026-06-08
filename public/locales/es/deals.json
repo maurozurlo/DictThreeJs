@@ -30,6 +30,59 @@
             "text": "Vendedores de armas del mercado negro te ofrecen equipamiento militar por $60M. ¿Hacer el trato?",
             "acceptText": "Compraste armas en el mercado negro. La fuerza militar aumentó, pero tu reputación se vio afectada.",
             "rejectText": "Rechazaste el trato ilegal de armas. Mantuviste la legitimidad, pero perdiste una ventaja militar."
+        },
+        "6": {
+            "text": "Un fabricante de armas ofrece equipamiento militar de primer nivel por $70M. ¿Equipar tus fuerzas?",
+            "acceptText": "Firmaste el contrato de adquisición. Tus tropas ahora tienen el mejor equipo que el dinero puede comprar.",
+            "rejectText": "Rechazaste la compra. Los generales murmuran sobre el atraso."
+        },
+        "7": {
+            "text": "Un general extranjero propone un pacto secreto de defensa mutua con $50M en ayuda. ¿Firmarlo?",
+            "acceptText": "Firmaste el pacto. El prestigio militar crece y las arcas se llenan.",
+            "rejectText": "Lo rechazaste pero mantuviste el diálogo. Los generales respetan la cautela.",
+            "riskText": "¡El pacto se filtra a la prensa — tus aliados están furiosos por la exposición!"
+        },
+        "8": {
+            "text": "Un consorcio quiere operar fuerzas de seguridad privadas usando instalaciones estatales por $30M/año. ¿Permitirlo?",
+            "acceptText": "Autorizaste el acuerdo. Los negocios prosperan, aunque los militares resienten la competencia.",
+            "rejectText": "Rechazaste la privatización. Los militares se relajan; los empresarios refunfuñan."
+        },
+        "9": {
+            "text": "Una empresa tecnológica ofrece $100M por un monopolio exclusivo de operación de 10 años. ¿Concederlo?",
+            "acceptText": "Otorgaste el monopolio. El tesoro se llena, pero los ciudadanos sienten la presión.",
+            "rejectText": "Rechazaste entregar el mercado. Los empresarios están decepcionados."
+        },
+        "10": {
+            "text": "Una empresa petrolera extranjera quiere derechos de extracción nacionales a cambio de $120M. ¿Aceptar?",
+            "acceptText": "Firmaste la concesión de perforación. El dinero fluye mientras los militares vigilan con recelo.",
+            "rejectText": "Rechazaste el trato. Los empresarios aplauden tu contención."
+        },
+        "11": {
+            "text": "Un conglomerado mediático ofrece $40M por derechos exclusivos de transmisión nacional. ¿Concederlos?",
+            "acceptText": "Cediste las ondas aéreas. Los ingresos suben, pero el público nota el estrechamiento de voces.",
+            "rejectText": "Mantuviste el panorama mediático abierto. El pueblo aprecia la prensa libre."
+        },
+        "12": {
+            "text": "Un magnate naviero propone enrutar todo el comercio por puertos nacionales a cambio de un 15%. ¿Acordar?",
+            "acceptText": "Cerraste el trato. El dinero del flete entra y los empresarios están satisfechos.",
+            "rejectText": "Rechazaste el arreglo. El magnate está molesto.",
+            "riskText": "¡El cartel naviero sabotea una instalación portuaria clave en represalia!"
+        },
+        "13": {
+            "text": "Una ONG humanitaria ofrece distribuir ayuda a nivel nacional con un coste logístico de $20M. ¿Permitirlo?",
+            "acceptText": "Abriste las fronteras a los trabajadores humanitarios. Los ciudadanos ven a un líder que se preocupa.",
+            "rejectText": "Bloqueaste a la ONG. La sospecha de influencia extranjera mantiene al pueblo en guardia."
+        },
+        "14": {
+            "text": "Una federación sindical respaldará tu gobierno a cambio de $60M en reformas laborales. ¿Aceptar?",
+            "acceptText": "Financiaste las reformas. Los trabajadores se agrupan bajo tu bandera, aunque los generales arquean una ceja.",
+            "rejectText": "Rechazaste a los sindicatos. Los militares aprueban; los trabajadores están amargados."
+        },
+        "15": {
+            "text": "Un gobierno extranjero ofrece cofinanciar un festival cultural nacional sin coste directo. ¿Permitirlo?",
+            "acceptText": "Las calles se llenan de celebración. Ciudadanos y empresarios aplauden el espectáculo.",
+            "rejectText": "Rechazaste educadamente. Es mejor no deber favores.",
+            "riskText": "¡El festival se convierte en un detonante — los organizadores lo usan para movilizar a la oposición!"
         }
     }
 }

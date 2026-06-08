@@ -532,8 +532,11 @@ export const INITIAL_STATE = ({ set, get }: {
             // --- 9. Check for periodic event ---
             const periodicEvent = PERIODIC_EVENTS.find(e => e.round === newRound) ?? null;
             if (periodicEvent) {
-                const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals);
-                const updatedDeals = new Set(state.deals.interactedWithDeals);
+                const periodicDealPool = state.deals.interactedWithDeals.size >= DEALS.length
+                    ? new Set<typeof DEALS[number]>()
+                    : state.deals.interactedWithDeals;
+                const randomDeal = getRandomUniqueItem(DEALS, periodicDealPool);
+                const updatedDeals = new Set(periodicDealPool);
                 if (randomDeal) updatedDeals.add(randomDeal);
                 const updatedLaws = new Set(state.law.interactedWithLaws);
                 const randomLaw = pickNextLaw(updatedLaws);
@@ -569,8 +572,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 ? MINI_CHALLENGES[Math.floor(Math.random() * MINI_CHALLENGES.length)]
                 : null;
 
-            const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals);
-            const updatedDeals = new Set(state.deals.interactedWithDeals);
+            const normalDealPool = state.deals.interactedWithDeals.size >= DEALS.length
+                ? new Set<typeof DEALS[number]>()
+                : state.deals.interactedWithDeals;
+            const randomDeal = getRandomUniqueItem(DEALS, normalDealPool);
+            const updatedDeals = new Set(normalDealPool);
             if (randomDeal) updatedDeals.add(randomDeal);
             const updatedLaws = new Set(state.law.interactedWithLaws);
             const randomLaw = pickNextLaw(updatedLaws);

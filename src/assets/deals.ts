@@ -42,5 +42,88 @@ export const DEALS: Deal[] = [
         rejectText: 'deals.5.rejectText',
         acceptEffect: { treasury: -60, military: 2, people: -1 },
         rejectEffect: { people: 1 }
+    },
+    {
+        id: 6,
+        text: 'deals.6.text',
+        acceptText: 'deals.6.acceptText',
+        rejectText: 'deals.6.rejectText',
+        acceptEffect: { treasury: -70, military: 3 },
+        rejectEffect: { military: -1 }
+    },
+    {
+        id: 7,
+        text: 'deals.7.text',
+        acceptText: 'deals.7.acceptText',
+        rejectText: 'deals.7.rejectText',
+        acceptEffect: { treasury: 50, military: 2, risk: 0.4 },
+        rejectEffect: { military: 1 },
+        riskText: 'deals.7.riskText'
+    },
+    {
+        id: 8,
+        text: 'deals.8.text',
+        acceptText: 'deals.8.acceptText',
+        rejectText: 'deals.8.rejectText',
+        acceptEffect: { treasury: -30, military: -1, business: 2 },
+        rejectEffect: { military: 1, business: -1 }
+    },
+    {
+        id: 9,
+        text: 'deals.9.text',
+        acceptText: 'deals.9.acceptText',
+        rejectText: 'deals.9.rejectText',
+        acceptEffect: { treasury: 100, business: 2, people: -2 },
+        rejectEffect: { business: -1 }
+    },
+    {
+        id: 10,
+        text: 'deals.10.text',
+        acceptText: 'deals.10.acceptText',
+        rejectText: 'deals.10.rejectText',
+        acceptEffect: { treasury: 120, business: 1, military: -1 },
+        rejectEffect: { business: 1 }
+    },
+    {
+        id: 11,
+        text: 'deals.11.text',
+        acceptText: 'deals.11.acceptText',
+        rejectText: 'deals.11.rejectText',
+        acceptEffect: { treasury: 40, business: 1, people: -1 },
+        rejectEffect: { people: 1 }
+    },
+    {
+        id: 12,
+        text: 'deals.12.text',
+        acceptText: 'deals.12.acceptText',
+        rejectText: 'deals.12.rejectText',
+        acceptEffect: { treasury: 80, business: 1, risk: 0.25 },
+        rejectEffect: { business: -1 },
+        riskText: 'deals.12.riskText'
+    },
+    {
+        id: 13,
+        text: 'deals.13.text',
+        acceptText: 'deals.13.acceptText',
+        rejectText: 'deals.13.rejectText',
+        acceptEffect: { treasury: -20, people: 2 },
+        rejectEffect: { people: -1 }
+    },
+    {
+        id: 14,
+        text: 'deals.14.text',
+        acceptText: 'deals.14.acceptText',
+        rejectText: 'deals.14.rejectText',
+        acceptEffect: { treasury: -60, people: 3 },
+        rejectEffect: { people: -1, military: 1 }
+    },
+    {
+        id: 15,
+        text: 'deals.15.text',
+        acceptText: 'deals.15.acceptText',
+        rejectText: 'deals.15.rejectText',
+        acceptEffect: { people: 1, business: 1, risk: 0.3 },
+        rejectEffect: { people: -1 },
+        riskText: 'deals.15.riskText'
     }
 ];

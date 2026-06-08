@@ -118,7 +118,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     INCOME: {
         PEOPLE_BASE: 200,
         BUSINESS_BASE: 150,
-        EXPENDITURE_COST_PER_LEVEL: 25,
+        EXPENDITURE_COST_PER_LEVEL: 10,
         TAX_PENALTY_PEOPLE_THRESHOLD: 30,
         TAX_PENALTY_BUSINESS_THRESHOLD: 45,
     },
@@ -165,14 +165,14 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
             },
         },
         EXPENDITURES: {
-            health: 1,
-            infrastructure: 1,
-            security: 1,
-            education: 1,
+            health: 3,
+            infrastructure: 3,
+            security: 3,
+            education: 3,
         },
         TAXES: {
-            peopleTaxes: 20,
-            businessTaxes: 30
+            peopleTaxes: 30,
+            businessTaxes: 40
         }
     },
     CHARISMA: {

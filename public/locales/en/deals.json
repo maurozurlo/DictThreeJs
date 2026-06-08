@@ -30,6 +30,59 @@
             "text": "Black market arms dealers offer you military equipment for $60M. Make the deal?",
             "acceptText": "You purchased black market weapons. Military strength increased but reputation damaged.",
             "rejectText": "You refused the illegal arms deal. Maintained legitimacy but missed military advantage."
+        },
+        "6": {
+            "text": "A weapons manufacturer offers top-tier military equipment for $70M. Equip your forces?",
+            "acceptText": "You signed the procurement contract. Your troops now have the best gear money can buy.",
+            "rejectText": "You declined the purchase. The generals grumble about falling behind."
+        },
+        "7": {
+            "text": "A foreign general proposes a secret mutual defence pact worth $50M in aid. Sign it?",
+            "acceptText": "You signed the pact. Military prestige grows and coffers swell.",
+            "rejectText": "You declined but kept dialogue open. The generals respect the caution.",
+            "riskText": "The pact leaks to the press — your allies are furious at the exposure!"
+        },
+        "8": {
+            "text": "A conglomerate wants to operate private security forces using state facilities for $30M/year. Allow it?",
+            "acceptText": "You authorised the arrangement. Business thrives, though the brass resents the competition.",
+            "rejectText": "You rejected the privatisation. The military relaxes; business sulks."
+        },
+        "9": {
+            "text": "A tech giant offers $100M for an exclusive 10-year operating monopoly. Grant it?",
+            "acceptText": "You granted the monopoly. The treasury swells, but citizens feel the squeeze.",
+            "rejectText": "You declined to hand over the market. Business is disappointed."
+        },
+        "10": {
+            "text": "A foreign oil company wants national drilling rights in exchange for $120M. Accept?",
+            "acceptText": "You signed the drilling concession. The money flows in while the military eyes foreign boots on the ground.",
+            "rejectText": "You declined the deal. Business tips its hat at your restraint."
+        },
+        "11": {
+            "text": "A media conglomerate offers $40M for exclusive national broadcast rights. Grant them?",
+            "acceptText": "You handed over the airwaves. Revenues rise, but the public notices the narrowing of voices.",
+            "rejectText": "You kept the media landscape open. The people appreciate the free press."
+        },
+        "12": {
+            "text": "A shipping magnate proposes routing all trade through national ports for a 15% cut. Agree?",
+            "acceptText": "You struck the deal. Freight money pours in and business is satisfied.",
+            "rejectText": "You rejected the arrangement. The magnate is annoyed.",
+            "riskText": "The shipping cartel sabotages a key port installation in retaliation!"
+        },
+        "13": {
+            "text": "A humanitarian NGO offers to distribute aid nationwide — at a modest $20M logistical cost. Allow it?",
+            "acceptText": "You opened the borders to aid workers. Citizens see a leader who cares.",
+            "rejectText": "You blocked the NGO. Suspicion of foreign influence keeps the people wary."
+        },
+        "14": {
+            "text": "A union federation will endorse your government in exchange for $60M in labour reforms. Accept?",
+            "acceptText": "You funded the reforms. Workers rally to your banner, though the generals raise an eyebrow.",
+            "rejectText": "You rebuffed the unions. The military approves; the workers are bitter."
+        },
+        "15": {
+            "text": "A foreign government offers to co-fund a national cultural festival at no direct cost. Allow it?",
+            "acceptText": "The streets fill with celebration. Citizens and business cheer the spectacle.",
+            "rejectText": "You politely declined. Better to avoid owing favours.",
+            "riskText": "The festival becomes a flashpoint — organisers are using it to rally opposition!"
         }
     }
 }
