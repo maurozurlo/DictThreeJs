@@ -8,6 +8,7 @@ import Card from '../Card/Card'
 import Button from '../Button/Button'
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
+import { getGameDate } from '../../Utils/GameDate'
 
 
 const Log = ({ isActive }: TabProps) => {
@@ -15,16 +16,14 @@ const Log = ({ isActive }: TabProps) => {
     const periodicEvent = useGameStore((s) => s.periodicEvent)
     const miniChallenge = useGameStore((s) => s.miniChallenge)
     const logEntries = useGameStore((s) => s.log)
-
-    const hasPendingEvent = (periodicEvent.current && !periodicEvent.decided) ||
-        (miniChallenge.current && !miniChallenge.decided)
-    void hasPendingEvent // referenced by tabsLocked in store; kept for future use
+    const round = useGameStore((s) => s.gameManagement.round)
+    const dailyEventHeadline = useGameStore((s) => s.dailyEvent.current?.headline)
 
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>
             <div className={styles.pageContainer}>
                 <Typography variant='h2'>{t('log.today')}</Typography>
-                <Newspaper />
+                <Newspaper headline={dailyEventHeadline} date={getGameDate(round)} />
 
                 {/* --- Periodic Event Section --- */}
                 {periodicEvent.current && (

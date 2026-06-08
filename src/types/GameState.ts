@@ -6,6 +6,7 @@ import type { Expenditures, Taxes } from "./Budget";
 import type { Law } from "./Law";
 import type { PeriodicEvent } from "./PeriodicEvent";
 import type { MiniChallenge } from "./MiniChallenge";
+import type { DailyEvent } from "./DailyEvent";
 
 export type CameraState = {
     cameraPos: [number, number, number];
@@ -41,11 +42,16 @@ export type GameState = {
         dayEnded: boolean;
         lastRoundIncome: number;
         lastRoundExpenses: number;
+        timerStartedAt: number | null;
         charisma: {
             current: number,
             adjustCharisma: (amount: number) => void;
         };
         nextRound: () => void;
+        expireTimer: () => void;
+    };
+    dailyEvent: {
+        current: DailyEvent | null;
     };
     periodicEvent: {
         current: PeriodicEvent | null;

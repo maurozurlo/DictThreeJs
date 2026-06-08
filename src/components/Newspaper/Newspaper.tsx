@@ -1,24 +1,36 @@
 import './Newspaper.css'
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type NewspaperProps = {
-    mainTitle?: string;
+    headline?: string;
+    date?: string;
 }
 
-const Newspaper = ({ mainTitle }: NewspaperProps) => {
-    const { t } = useTranslation()
+function useRandomWidths(count: number, min: number, range: number) {
+    return useMemo(() => Array.from({ length: count }, () => Math.random() * range + min), []);
+}
+
+const Newspaper = ({ headline, date }: NewspaperProps) => {
+    const { t } = useTranslation();
+    const weatherWidths = useRandomWidths(8, 60, 40);
+    const leftStoryWidths = useRandomWidths(32, 70, 30);
+    const centerCol1Widths = useRandomWidths(25, 70, 30);
+    const centerCol2Widths = useRandomWidths(20, 70, 30);
+    const centerCol2BotWidths = useRandomWidths(4, 70, 30);
+    const centerCol3Widths = useRandomWidths(25, 70, 30);
+    const sportsWidths = useRandomWidths(12, 70, 30);
+    const rightWidths = useRandomWidths(20, 70, 30);
+
     return (
         <div className="newspaper-container">
-            {/* Header Section */}
             <header className="newspaper-header">
-                {/* Decorative Lines */}
                 <div className="header-decorations">
                     <div className="decoration-left">
                         {[...Array(5)].map((_, i) => (
                             <div key={i} className="decoration-line"></div>
                         ))}
                     </div>
-                    {/* Main Title */}
                     <div className="title-section">
                         <h1 className="main-title">The Daily Obedience</h1>
                     </div>
@@ -28,98 +40,75 @@ const Newspaper = ({ mainTitle }: NewspaperProps) => {
                         ))}
                     </div>
                 </div>
-
-
-
-                {/* Date and Info */}
                 <div className="date-info">
-                    <span>November 24th, 1982</span>
+                    <span>{date ?? '—'}</span>
                     <span>{t('log.no_charge')}</span>
                 </div>
             </header>
 
-            {/* Main Content Area */}
             <div className="content-grid">
-                {/* Left Column */}
                 <div className="left-column">
-                    {/* Weather Section */}
                     <div className="weather-box">
-                        <div className="box-header">
-                            <h3>{t('log.weather')}</h3>
-                        </div>
+                        <div className="box-header"><h3>{t('log.weather')}</h3></div>
                         <div className="box-content">
-                            {[...Array(8)].map((_, i) => (
-                                <div key={i} className="content-line weather-line" style={{ width: `${Math.random() * 40 + 60}%` }}></div>
+                            {weatherWidths.map((w, i) => (
+                                <div key={i} className="content-line weather-line" style={{ width: `${w}%` }}></div>
                             ))}
                         </div>
                     </div>
-
                     <div className="grestin-story">
                         <div className="story-content">
-                            {[...Array(32)].map((_, i) => (
-                                <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                            {leftStoryWidths.map((w, i) => (
+                                <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Center Columns */}
                 <div className="center-column">
-                    {/* Main Headline */}
                     <div className="main-headline">
-                        <h1>{mainTitle}</h1>
-                        <p>Increased Trade And Cooperation Predicted</p>
+                        <h1>{headline ?? ''}</h1>
                     </div>
-
-                    {/* Article Columns */}
                     <div className="article-columns">
                         <div className="article-column">
-                            {[...Array(25)].map((_, i) => (
-                                <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                            {centerCol1Widths.map((w, i) => (
+                                <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                             ))}
                         </div>
                         <div className="article-column">
-                            {[...Array(20)].map((_, i) => (
-                                <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                            {centerCol2Widths.map((w, i) => (
+                                <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                             ))}
-                            {/* Photo placeholder */}
                             <div className="photo-placeholder"></div>
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                            {centerCol2BotWidths.map((w, i) => (
+                                <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                             ))}
                         </div>
                         <div className="article-column">
-                            {[...Array(25)].map((_, i) => (
-                                <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                            {centerCol3Widths.map((w, i) => (
+                                <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column */}
                 <div className="right-column">
-                    {/* Sports Section */}
                     <div className="sports-box">
-                        <div className="box-header">
-                            <h3>{t('log.sports')}</h3>
-                        </div>
+                        <div className="box-header"><h3>{t('log.sports')}</h3></div>
                         <div className="box-content">
-                            {[...Array(12)].map((_, i) => (
-                                <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                            {sportsWidths.map((w, i) => (
+                                <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                             ))}
                         </div>
                     </div>
-
-                    {/* Additional Articles */}
                     <div className="additional-content">
-                        {[...Array(20)].map((_, i) => (
-                            <div key={i} className="content-line" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
+                        {rightWidths.map((w, i) => (
+                            <div key={i} className="content-line" style={{ width: `${w}%` }}></div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Bottom Border */}
             <div className="bottom-border">
                 <div className="bottom-decorations">
                     {[...Array(8)].map((_, i) => (
@@ -128,7 +117,7 @@ const Newspaper = ({ mainTitle }: NewspaperProps) => {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default Newspaper

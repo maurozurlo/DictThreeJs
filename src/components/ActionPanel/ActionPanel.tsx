@@ -8,6 +8,7 @@ import { Tabs } from '../../types/Tabs'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { getCharismaLeft } from '../../Utils/UI'
 import { useTranslation } from 'react-i18next'
+import { useRoundTimer } from '../../Hooks/useRoundTimer'
 
 
 const ActionPanel = () => {
@@ -16,6 +17,7 @@ const ActionPanel = () => {
     const relations = useGameStore((s) => s.relations.current);
     const money = useGameStore((s) => s.budget.treasury);
     const charisma = useGameStore(s => s.gameManagement.charisma.current)
+    const { displayTime } = useRoundTimer()
 
     return (
         <div className={styles.actionPanel}>
@@ -24,7 +26,7 @@ const ActionPanel = () => {
                     <Icon type='clock' className={styles.bigClock}><div className={styles.hours} />
                         <div className={styles.minutes} /></Icon>
 
-                    <Typography variant={'caption'} className={styles.time}>12:34</Typography>
+                    <Typography variant={'caption'} className={styles.time}>{displayTime}</Typography>
                 </div>
 
                 <div className={styles.budget}>

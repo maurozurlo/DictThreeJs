@@ -14,6 +14,9 @@ import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import { PERIODIC_EVENTS } from "../assets/periodicEvents";
 import { MINI_CHALLENGES } from "../assets/miniChallenges";
 import type { Power } from "../types/Power";
+import { getRandomDailyEvent } from "./DailyEventHandler";
+import { getRandomUniqueItemForPower } from "../Utils/Laws";
+import { Power as PowerList } from "../Constants/Power";
 
 /** Helper: check all day-end conditions and return whether the day is finished */
 function isDayComplete(state: GameState): boolean {
@@ -295,6 +298,7 @@ export const INITIAL_STATE = ({ set, get }: {
         dayEnded: false,
         lastRoundIncome: 0,
         lastRoundExpenses: 0,
+        timerStartedAt: null,
         setPhase: (phase) => {
             if (phase === 'start') {
                 return set((state) => {
@@ -317,6 +321,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             round: GAMESTATE.ROUNDS.START,
                             dayEnded: false,
                             endReason: null,
+                            timerStartedAt: Date.now(),
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
                         },
                         relations: {
@@ -330,6 +335,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             taxes: { ...GAMESTATE.BUDGET.TAXES },
                         },
                         log: [],
+                        dailyEvent: { current: getRandomDailyEvent() },
                         meet: {
                             ...state.meet,
                             actionTaken: { type: undefined, taken: false, power: undefined },
@@ -382,6 +388,30 @@ export const INITIAL_STATE = ({ set, get }: {
                 })
             }
         },
+        expireTimer: () => {
+            const state = get();
+            // Only penalise if the player didn't take a Meet action this round
+            if (!state.meet.actionTaken.taken) {
+                const round = state.gameManagement.round;
+                const newRelations = { ...state.relations.current };
+                PowerList.forEach((p) => {
+                    newRelations[p] = Clamp(newRelations[p] - round, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                });
+                const newCharisma = Clamp(
+                    state.gameManagement.charisma.current - 1,
+                    GAMESTATE.CHARISMA.MIN,
+                    GAMESTATE.CHARISMA.MAX
+                );
+                set((s) => ({
+                    relations: { ...s.relations, current: newRelations },
+                    gameManagement: {
+                        ...s.gameManagement,
+                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
+                    },
+                }));
+            }
+            get().gameManagement.nextRound();
+        },
         nextRound: () => {
             const state = get();
 
@@ -392,26 +422,53 @@ export const INITIAL_STATE = ({ set, get }: {
             // --- 2. Budget → relation effects ---
             const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current);
 
-            // --- 3. Tax penalty effects ---
+            // --- 3. Tax penalty + charisma corrosion (Plan G) ---
             const taxMessages: string[] = [];
+            let newCharisma = state.gameManagement.charisma.current;
             if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
                 newRelations.people = Clamp(newRelations.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
                 taxMessages.push("High people taxes causing unrest! People relation -1");
             }
             if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
                 newRelations.business = Clamp(newRelations.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
                 taxMessages.push("High business taxes angering elites! Business relation -1");
             }
 
-            // --- 4. Build log entries ---
+            // --- 4. Daily event effect (Plan D) ---
+            const currentEvent = state.dailyEvent?.current ?? null;
+            const eventMessages: string[] = [];
+            if (currentEvent) {
+                newRelations[currentEvent.power] = Clamp(
+                    newRelations[currentEvent.power] + currentEvent.mod,
+                    GAMESTATE.RELATIONS.MIN,
+                    GAMESTATE.RELATIONS.MAX
+                );
+                eventMessages.push(currentEvent.headline);
+            }
+
+            // --- 5. Build log entries ---
             const roundSummary = `Day ${state.gameManagement.round} — Collected $${financials.totalIncome}M, Paid $${financials.expenses}M`;
-            const allMessages = [roundSummary, ...logMessages, ...taxMessages];
+            const allMessages = [roundSummary, ...logMessages, ...taxMessages, ...eventMessages];
             const newLog = [...state.log, allMessages];
 
-            // --- 5. Increment round ---
+            // --- 6. Increment round, draw next daily event ---
             const newRound = state.gameManagement.round + 1;
+            const nextDailyEvent = getRandomDailyEvent();
 
-            // --- 6. Check game-over / victory ---
+            // --- 7. Biased law selection (Plan G) ---
+            const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
+                if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
+                    return getRandomUniqueItemForPower(LAWS, usedLaws, 'people') ?? getRandomUniqueItem(LAWS, usedLaws);
+                }
+                if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
+                    return getRandomUniqueItemForPower(LAWS, usedLaws, 'business') ?? getRandomUniqueItem(LAWS, usedLaws);
+                }
+                return getRandomUniqueItem(LAWS, usedLaws);
+            };
+
+            // --- 8. Check game-over / victory ---
             const bankruptcy = newTreasury <= 0;
             const overthrown = (Object.keys(newRelations) as Power[]).find(p => newRelations[p] <= GAMESTATE.RELATIONS.MIN);
 
@@ -428,6 +485,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
                 return;
@@ -446,6 +504,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
                 return;
@@ -464,26 +523,27 @@ export const INITIAL_STATE = ({ set, get }: {
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
                 return;
             }
 
-            // --- 7. Check for periodic event ---
+            // --- 9. Check for periodic event ---
             const periodicEvent = PERIODIC_EVENTS.find(e => e.round === newRound) ?? null;
             if (periodicEvent) {
-                // Prepare next new law and deal
                 const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals);
                 const updatedDeals = new Set(state.deals.interactedWithDeals);
                 if (randomDeal) updatedDeals.add(randomDeal);
-                const randomLaw = getRandomUniqueItem(LAWS, state.law.interactedWithLaws);
                 const updatedLaws = new Set(state.law.interactedWithLaws);
+                const randomLaw = pickNextLaw(updatedLaws);
                 if (randomLaw) updatedLaws.add(randomLaw);
 
                 set((s) => ({
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
+                    dailyEvent: { current: nextDailyEvent },
                     periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultText: null },
                     miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
@@ -494,14 +554,16 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...s.gameManagement,
                         dayEnded: false,
                         round: newRound,
+                        timerStartedAt: Date.now(),
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
                 return;
             }
 
-            // --- 8. 40% chance for mini-challenge ---
+            // --- 10. 40% chance for mini-challenge ---
             const hasMiniChallenge = Math.random() < 0.4;
             const miniChallengeToShow = hasMiniChallenge
                 ? MINI_CHALLENGES[Math.floor(Math.random() * MINI_CHALLENGES.length)]
@@ -510,14 +572,15 @@ export const INITIAL_STATE = ({ set, get }: {
             const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals);
             const updatedDeals = new Set(state.deals.interactedWithDeals);
             if (randomDeal) updatedDeals.add(randomDeal);
-            const randomLaw = getRandomUniqueItem(LAWS, state.law.interactedWithLaws);
             const updatedLaws = new Set(state.law.interactedWithLaws);
+            const randomLaw = pickNextLaw(updatedLaws);
             if (randomLaw) updatedLaws.add(randomLaw);
 
             set((s) => ({
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
                 log: newLog,
+                dailyEvent: { current: nextDailyEvent },
                 periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
                 miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultText: null },
                 meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
@@ -528,8 +591,10 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.gameManagement,
                     dayEnded: false,
                     round: newRound,
+                    timerStartedAt: Date.now(),
                     lastRoundIncome: financials.totalIncome,
                     lastRoundExpenses: financials.expenses,
+                    charisma: { ...s.gameManagement.charisma, current: newCharisma },
                 }
             }));
         }
@@ -602,6 +667,9 @@ export const INITIAL_STATE = ({ set, get }: {
         },
     },
     log: [],
+    dailyEvent: {
+        current: null,
+    },
     relations: {
         current: GAMESTATE.RELATIONS.INITIAL,
         adjustRelations: (power, amount) => {
