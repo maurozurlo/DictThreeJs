@@ -3,6 +3,47 @@ import type { Expenditures, Taxes } from "../types/Budget";
 import type { GameState } from "../types/GameState";
 import { Clamp } from "../Utils/Math";
 
+export type RoundFinancials = {
+    peopleIncome: number;
+    businessIncome: number;
+    totalIncome: number;
+    expenses: number;
+    netChange: number;
+};
+
+/**
+ * Calculates round income and expenses based on POC logic.
+ * - People income = base × (peopleTaxes / 100)
+ * - Business income = base × (businessTaxes / 100), modified by infrastructure & education levels
+ * - Expenses = sum of all expenditure levels × cost per level
+ */
+export function calculateRoundFinancials(budget: GameState["budget"]): RoundFinancials {
+    const { INCOME } = GAMESTATE;
+    const { peopleTaxes, businessTaxes } = budget.taxes;
+    const { infrastructure, education, health, security } = budget.expenditures;
+
+    let peopleIncome = Math.floor(INCOME.PEOPLE_BASE * (peopleTaxes / 100));
+    let businessIncome = Math.floor(INCOME.BUSINESS_BASE * (businessTaxes / 100));
+
+    // Poor infrastructure reduces business tax income by 30%
+    if (infrastructure < 3) {
+        businessIncome = Math.floor(businessIncome * 0.7);
+    } else if (infrastructure > 7) {
+        businessIncome = Math.floor(businessIncome * 1.1);
+    }
+
+    // Poor education reduces business income by 15%
+    if (education < 3) {
+        businessIncome = Math.floor(businessIncome * 0.85);
+    }
+
+    const totalIncome = peopleIncome + businessIncome;
+    const expenses = (health + infrastructure + security + education) * INCOME.EXPENDITURE_COST_PER_LEVEL;
+    const netChange = totalIncome - expenses;
+
+    return { peopleIncome, businessIncome, totalIncome, expenses, netChange };
+}
+
 export type BudgetChangeResult = {
     taxes: GameState["budget"]["taxes"],
     expenditures: GameState["budget"]["expenditures"]

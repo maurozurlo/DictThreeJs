@@ -1,0 +1,35 @@
+.eventPanel {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    border-left: 4px solid var(--accent-color);
+    background: rgba(255, 200, 50, 0.05);
+    border-radius: 0 8px 8px 0;
+    transition: opacity 0.3s ease;
+}
+
+.eventPanel.resolved {
+    opacity: 0.6;
+    border-left-color: var(--body-color, #aaa);
+}
+
+.eventTitle {
+    color: var(--accent-color);
+    margin-bottom: 0.75rem;
+}
+
+.optionsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.challengeButtons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.resultCard {
+    margin-top: 1rem;
+}

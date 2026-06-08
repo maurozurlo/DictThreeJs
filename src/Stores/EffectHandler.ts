@@ -5,6 +5,57 @@ import { Clamp, getRandomFromList } from "../Utils/Math";
 import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
 
+export type BudgetEffectResult = {
+    newRelations: GameState["relations"]["current"];
+    logMessages: string[];
+};
+
+/**
+ * Applies end-of-round budget effects to faction relations.
+ * Low/high spending thresholds penalise or reward specific factions.
+ */
+export function applyBudgetEffects(
+    budget: GameState["budget"],
+    relations: GameState["relations"]["current"]
+): BudgetEffectResult {
+    const { BUDGET_EFFECTS } = GAMESTATE;
+    const cur = { ...relations };
+    const logMessages: string[] = [];
+
+    // Security budget effects
+    if (budget.expenditures.security < BUDGET_EFFECTS.SECURITY.LOW) {
+        cur.military = Clamp(cur.military - 2, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        logMessages.push("Military complains about underfunding! Military relation -2");
+    } else if (budget.expenditures.security > BUDGET_EFFECTS.SECURITY.HIGH) {
+        cur.military = Clamp(cur.military + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        logMessages.push("Military feels well-funded! Military relation +1");
+    }
+
+    // Health budget effects
+    if (budget.expenditures.health < BUDGET_EFFECTS.HEALTH.LOW) {
+        cur.people = Clamp(cur.people - 2, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        logMessages.push("Health services are failing! People relation -2");
+    } else if (budget.expenditures.health > BUDGET_EFFECTS.HEALTH.HIGH) {
+        cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        logMessages.push("Health system praised! People relation +1");
+    }
+
+    // Infrastructure budget effects
+    if (budget.expenditures.infrastructure < BUDGET_EFFECTS.INFRASTRUCTURE.LOW) {
+        cur.business = Clamp(cur.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        cur.people = Clamp(cur.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        logMessages.push("Infrastructure failing! People & Business relation -1");
+    } else if (budget.expenditures.infrastructure > BUDGET_EFFECTS.INFRASTRUCTURE.HIGH) {
+        cur.business = Clamp(cur.business + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+        logMessages.push("Infrastructure praised! People & Business relation +1");
+    }
+
+    return { newRelations: cur, logMessages };
+}
+
+
+
 export function handleDecision({
     type,
     item,

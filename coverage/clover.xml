@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1762746327999" clover="3.2.0">
-  <project timestamp="1762746327999" name="All files">
-    <metrics statements="87" coveredstatements="87" conditionals="40" coveredconditionals="40" methods="20" coveredmethods="20" elements="147" coveredelements="147" complexity="0" loc="87" ncloc="87" packages="4" files="7" classes="7"/>
+<coverage generated="1772507720118" clover="3.2.0">
+  <project timestamp="1772507720119" name="All files">
+    <metrics statements="126" coveredstatements="87" conditionals="58" coveredconditionals="40" methods="22" coveredmethods="20" elements="206" coveredelements="147" complexity="0" loc="126" ncloc="126" packages="4" files="7" classes="7"/>
     <package name="Constants">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="GameState.ts" path="E:\GameDev\dict-three\src\Constants\GameState.ts">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="88" count="3" type="stmt"/>
+        <line num="109" count="3" type="stmt"/>
       </file>
     </package>
     <package name="Stores">
-      <metrics statements="63" coveredstatements="63" conditionals="34" coveredconditionals="34" methods="14" coveredmethods="14"/>
+      <metrics statements="102" coveredstatements="63" conditionals="52" coveredconditionals="34" methods="16" coveredmethods="14"/>
       <file name="ActionHandler.ts" path="E:\GameDev\dict-three\src\Stores\ActionHandler.ts">
         <metrics statements="26" coveredstatements="26" conditionals="8" coveredconditionals="8" methods="10" coveredmethods="10"/>
         <line num="14" count="6" type="stmt"/>
@@ -30,8 +30,8 @@
         <line num="101" count="5" type="cond" truecount="2" falsecount="0"/>
         <line num="102" count="1" type="stmt"/>
         <line num="116" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="117" count="2" type="stmt"/>
-        <line num="131" count="2" type="stmt"/>
+        <line num="117" count="3" type="stmt"/>
+        <line num="131" count="1" type="stmt"/>
         <line num="143" count="20" type="stmt"/>
         <line num="145" count="20" type="stmt"/>
         <line num="146" count="6" type="stmt"/>
@@ -41,47 +41,86 @@
         <line num="152" count="20" type="stmt"/>
       </file>
       <file name="BudgetHandler.ts" path="E:\GameDev\dict-three\src\Stores\BudgetHandler.ts">
-        <metrics statements="12" coveredstatements="12" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
-        <line num="16" count="13" type="cond" truecount="2" falsecount="0"/>
-        <line num="17" count="7" type="stmt"/>
-        <line num="18" count="7" type="stmt"/>
-        <line num="19" count="7" type="stmt"/>
-        <line num="20" count="7" type="stmt"/>
-        <line num="23" count="6" type="cond" truecount="2" falsecount="0"/>
-        <line num="24" count="5" type="stmt"/>
-        <line num="25" count="5" type="stmt"/>
-        <line num="26" count="5" type="stmt"/>
-        <line num="27" count="5" type="stmt"/>
-        <line num="30" count="1" type="stmt"/>
-        <line num="31" count="1" type="stmt"/>
+        <metrics statements="27" coveredstatements="12" conditionals="10" coveredconditionals="4" methods="2" coveredmethods="1"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="29" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="31" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="36" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
+        <line num="44" count="0" type="stmt"/>
+        <line num="57" count="13" type="cond" truecount="2" falsecount="0"/>
+        <line num="58" count="7" type="stmt"/>
+        <line num="59" count="7" type="stmt"/>
+        <line num="60" count="7" type="stmt"/>
+        <line num="61" count="7" type="stmt"/>
+        <line num="64" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="65" count="5" type="stmt"/>
+        <line num="66" count="5" type="stmt"/>
+        <line num="67" count="5" type="stmt"/>
+        <line num="68" count="5" type="stmt"/>
+        <line num="71" count="1" type="stmt"/>
+        <line num="72" count="1" type="stmt"/>
       </file>
       <file name="EffectHandler.ts" path="E:\GameDev\dict-three\src\Stores\EffectHandler.ts">
-        <metrics statements="25" coveredstatements="25" conditionals="22" coveredconditionals="22" methods="3" coveredmethods="3"/>
-        <line num="21" count="8" type="stmt"/>
-        <line num="22" count="8" type="cond" truecount="2" falsecount="0"/>
-        <line num="25" count="8" type="cond" truecount="2" falsecount="0"/>
-        <line num="28" count="8" type="stmt"/>
-        <line num="29" count="8" type="stmt"/>
-        <line num="30" count="24" type="stmt"/>
-        <line num="31" count="24" type="cond" truecount="2" falsecount="0"/>
-        <line num="32" count="7" type="stmt"/>
-        <line num="41" count="8" type="cond" truecount="2" falsecount="0"/>
-        <line num="42" count="8" type="cond" truecount="4" falsecount="0"/>
-        <line num="43" count="1" type="stmt"/>
-        <line num="44" count="1" type="stmt"/>
-        <line num="52" count="8" type="stmt"/>
-        <line num="58" count="8" type="cond" truecount="2" falsecount="0"/>
-        <line num="59" count="4" type="stmt"/>
-        <line num="60" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="61" count="4" type="cond" truecount="4" falsecount="0"/>
-        <line num="62" count="2" type="stmt"/>
-        <line num="65" count="4" type="stmt"/>
-        <line num="75" count="4" type="stmt"/>
-        <line num="76" count="4" type="stmt"/>
-        <line num="97" count="12" type="stmt"/>
-        <line num="103" count="12" type="cond" truecount="2" falsecount="0"/>
-        <line num="104" count="3" type="stmt"/>
-        <line num="108" count="12" type="stmt"/>
+        <metrics statements="49" coveredstatements="25" conditionals="34" coveredconditionals="22" methods="4" coveredmethods="3"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="26" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="27" count="0" type="stmt"/>
+        <line num="28" count="0" type="stmt"/>
+        <line num="29" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="30" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="35" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="38" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="44" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="45" count="0" type="stmt"/>
+        <line num="46" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="48" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="49" count="0" type="stmt"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="72" count="8" type="stmt"/>
+        <line num="73" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="76" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="79" count="8" type="stmt"/>
+        <line num="80" count="8" type="stmt"/>
+        <line num="81" count="24" type="stmt"/>
+        <line num="82" count="24" type="cond" truecount="2" falsecount="0"/>
+        <line num="83" count="7" type="stmt"/>
+        <line num="92" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="93" count="8" type="cond" truecount="4" falsecount="0"/>
+        <line num="94" count="1" type="stmt"/>
+        <line num="95" count="1" type="stmt"/>
+        <line num="103" count="8" type="stmt"/>
+        <line num="109" count="8" type="cond" truecount="2" falsecount="0"/>
+        <line num="110" count="4" type="stmt"/>
+        <line num="111" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="112" count="4" type="cond" truecount="4" falsecount="0"/>
+        <line num="113" count="2" type="stmt"/>
+        <line num="116" count="4" type="stmt"/>
+        <line num="126" count="4" type="stmt"/>
+        <line num="127" count="4" type="stmt"/>
+        <line num="148" count="12" type="stmt"/>
+        <line num="154" count="12" type="cond" truecount="2" falsecount="0"/>
+        <line num="155" count="3" type="stmt"/>
+        <line num="159" count="12" type="stmt"/>
       </file>
     </package>
     <package name="Utils">

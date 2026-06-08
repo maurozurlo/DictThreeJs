@@ -11,18 +11,17 @@ const Navbar = () => {
     const setCurrentTab = useGameStore((s) => s.tabs.setActiveTab);
     const displayTabs = useGameStore((s) => s.tabs.activeTab) !== Tabs.Menu;
     const round = useGameStore(s => s.gameManagement.round)
+    const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
     const { t } = useTranslation();
 
     const tabConfig: { tab: Tabs, icon: IconType, label: string, disabled?: boolean }[] = [
         { tab: Tabs.Log, icon: 'news', label: t('tabs.log') },
-        { tab: Tabs.Meet, icon: 'meet', label: t('tabs.meet') },
-        { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws') },
-        { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals') },
-        { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget') },
-        //{ tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
-        //{ tab: Tabs.Street, icon: 'street', label: t('tabs.street') },
-        //{ tab: Tabs.Secret, icon: 'secret', label: '???', disabled: true },
+        { tab: Tabs.Meet, icon: 'meet', label: t('tabs.meet'), disabled: tabsLocked },
+        { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws'), disabled: tabsLocked },
+        { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals'), disabled: tabsLocked },
+        { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: tabsLocked },
     ];
+
 
     return (
         <header className={styles.navbar}>

@@ -8,9 +8,22 @@ import { Clamp, getRandomFromList, getRandomUniqueItem } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { GameState } from "../types/GameState";
 import { LAWS } from "../assets/laws";
-import { handleDecision, handleRelations } from "./EffectHandler";
+import { handleDecision, handleRelations, applyBudgetEffects } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
-import { handelBudgetChange } from "./BudgetHandler";
+import { handelBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
+import { PERIODIC_EVENTS } from "../assets/periodicEvents";
+import { MINI_CHALLENGES } from "../assets/miniChallenges";
+import type { Power } from "../types/Power";
+
+/** Helper: check all day-end conditions and return whether the day is finished */
+function isDayComplete(state: GameState): boolean {
+    const lawDone = state.law.lawDecided;
+    const dealDone = state.deals.dealDecided;
+    const meetDone = state.meet.actionTaken.taken;
+    const periodicDone = state.periodicEvent.current === null || state.periodicEvent.decided;
+    const challengeDone = state.miniChallenge.current === null || state.miniChallenge.decided;
+    return lawDone && dealDone && meetDone && periodicDone && challengeDone;
+}
 
 export const INITIAL_STATE = ({ set, get }: {
     set: {
@@ -91,7 +104,11 @@ export const INITIAL_STATE = ({ set, get }: {
     },
     tabs: {
         activeTab: GAMESTATE.TABS.START_TAB,
+        tabsLocked: false,
         setActiveTab: (tab: Tabs) => {
+            // Don't allow tab switching when tabs are locked
+            if (get().tabs.tabsLocked) return;
+
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
 
@@ -134,6 +151,13 @@ export const INITIAL_STATE = ({ set, get }: {
             const current = state.law.current;
             if (!current) return;
             handleDecision({ type: "law", item: current, hasAccepted, get, set });
+            // After this decision, check if all day actions are complete
+            setTimeout(() => {
+                const s = get();
+                if (isDayComplete(s)) {
+                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
+                }
+            }, 0);
         },
     },
     deals: {
@@ -147,14 +171,132 @@ export const INITIAL_STATE = ({ set, get }: {
             const current = state.deals.current;
             if (!current) return;
             handleDecision({ type: "deal", item: current, hasAccepted, get, set });
+            setTimeout(() => {
+                const s = get();
+                if (isDayComplete(s)) {
+                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
+                }
+            }, 0);
+        },
+    },
+    periodicEvent: {
+        current: null,
+        decided: false,
+        resultText: null,
+        resolve: (optionIndex: number) => {
+            const state = get();
+            const event = state.periodicEvent.current;
+            if (!event || state.periodicEvent.decided) return;
+
+            const option = event.options[optionIndex];
+            const effect = option.effect;
+
+            // Apply treasury change
+            const newTreasury = state.budget.treasury + (effect.treasury ?? 0);
+
+            // Apply relation changes
+            const newRelations = { ...state.relations.current };
+            (Object.keys(newRelations) as Power[]).forEach((power) => {
+                const delta = effect[power];
+                if (typeof delta === 'number') {
+                    newRelations[power] = Clamp(
+                        newRelations[power] + delta,
+                        GAMESTATE.RELATIONS.MIN,
+                        GAMESTATE.RELATIONS.MAX
+                    );
+                }
+            });
+
+            set((s) => ({
+                periodicEvent: {
+                    ...s.periodicEvent,
+                    decided: true,
+                    resultText: option.result,
+                },
+                budget: { ...s.budget, treasury: newTreasury },
+                relations: { ...s.relations, current: newRelations },
+                tabs: { ...s.tabs, tabsLocked: false },
+            }));
+
+            setTimeout(() => {
+                const s = get();
+                if (isDayComplete(s)) {
+                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
+                }
+            }, 0);
+        },
+    },
+    miniChallenge: {
+        current: null,
+        decided: false,
+        resultText: null,
+        resolve: (accepted: boolean) => {
+            const state = get();
+            const challenge = state.miniChallenge.current;
+            if (!challenge || state.miniChallenge.decided) return;
+
+            const effect = accepted ? challenge.acceptEffect : challenge.rejectEffect;
+            let resultText = accepted ? challenge.acceptText : challenge.rejectText;
+
+            // Apply treasury change
+            let newTreasury = state.budget.treasury + (effect.treasury ?? 0);
+
+            // Apply relation changes
+            const newRelations = { ...state.relations.current };
+            (Object.keys(newRelations) as Power[]).forEach((power) => {
+                const delta = effect[power];
+                if (typeof delta === 'number') {
+                    newRelations[power] = Clamp(
+                        newRelations[power] + delta,
+                        GAMESTATE.RELATIONS.MIN,
+                        GAMESTATE.RELATIONS.MAX
+                    );
+                }
+            });
+
+            // Handle risk
+            if (effect.risk && Math.random() < effect.risk) {
+                resultText += " " + (challenge.riskText ?? "");
+                // Risk penalty: random power loses 2 on rejection
+                if (!accepted) {
+                    const powers: Power[] = ['military', 'business', 'people'];
+                    const angryPower = powers[Math.floor(Math.random() * powers.length)];
+                    newRelations[angryPower] = Clamp(
+                        newRelations[angryPower] - 2,
+                        GAMESTATE.RELATIONS.MIN,
+                        GAMESTATE.RELATIONS.MAX
+                    );
+                }
+            }
+
+            set((s) => ({
+                miniChallenge: {
+                    ...s.miniChallenge,
+                    decided: true,
+                    resultText,
+                },
+                budget: { ...s.budget, treasury: newTreasury },
+                relations: { ...s.relations, current: newRelations },
+                tabs: { ...s.tabs, tabsLocked: false },
+            }));
+
+            setTimeout(() => {
+                const s = get();
+                if (isDayComplete(s)) {
+                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
+                }
+            }, 0);
         },
     },
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
         phase: 'idle',
+        endReason: null,
+        dayEnded: false,
+        lastRoundIncome: 0,
+        lastRoundExpenses: 0,
         setPhase: (phase) => {
             if (phase === 'start') {
-
                 return set((state) => {
                     // DEAL
                     const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals)
@@ -170,6 +312,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             ...state.tabs,
                             shouldDisplayTabs: true,
                             activeTab: Tabs.Log,
+                            tabsLocked: false,
                         },
                         gameManagement: {
                             ...state.gameManagement,
@@ -179,16 +322,17 @@ export const INITIAL_STATE = ({ set, get }: {
                         deals: {
                             ...state.deals,
                             current: randomDeal,
+                            dealDecided: false,
                             interactedWithDeals: updatedDeals,
                         },
                         law: {
                             ...state.law,
                             current: randomLaw,
-                            passedLaws: updatedLaws
+                            lawDecided: false,
+                            interactedWithLaws: updatedLaws
                         }
                     }
-                }
-                )
+                })
             }
 
             return set((state) => ({
@@ -216,6 +360,157 @@ export const INITIAL_STATE = ({ set, get }: {
                     }
                 })
             }
+        },
+        nextRound: () => {
+            const state = get();
+
+            // --- 1. Financial resolution ---
+            const financials = calculateRoundFinancials(state.budget);
+            let newTreasury = state.budget.treasury + financials.netChange;
+
+            // --- 2. Budget → relation effects ---
+            const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current);
+
+            // --- 3. Tax penalty effects ---
+            const taxMessages: string[] = [];
+            if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
+                newRelations.people = Clamp(newRelations.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                taxMessages.push("High people taxes causing unrest! People relation -1");
+            }
+            if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
+                newRelations.business = Clamp(newRelations.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                taxMessages.push("High business taxes angering elites! Business relation -1");
+            }
+
+            // --- 4. Build log entries ---
+            const roundSummary = `Day ${state.gameManagement.round} — Collected $${financials.totalIncome}M, Paid $${financials.expenses}M`;
+            const allMessages = [roundSummary, ...logMessages, ...taxMessages];
+            const newLog = [...state.log, allMessages];
+
+            // --- 5. Increment round ---
+            const newRound = state.gameManagement.round + 1;
+
+            // --- 6. Check game-over / victory ---
+            const bankruptcy = newTreasury <= 0;
+            const overthrown = (Object.keys(newRelations) as Power[]).find(p => newRelations[p] <= GAMESTATE.RELATIONS.MIN);
+
+            if (bankruptcy) {
+                set((s) => ({
+                    budget: { ...s.budget, treasury: newTreasury },
+                    relations: { ...s.relations, current: newRelations },
+                    log: newLog,
+                    gameManagement: {
+                        ...s.gameManagement,
+                        dayEnded: false,
+                        endReason: "Economic collapse! Your treasury has run out of funds.",
+                        phase: 'lose',
+                        round: newRound,
+                        lastRoundIncome: financials.totalIncome,
+                        lastRoundExpenses: financials.expenses,
+                    }
+                }));
+                return;
+            }
+
+            if (overthrown) {
+                set((s) => ({
+                    budget: { ...s.budget, treasury: newTreasury },
+                    relations: { ...s.relations, current: newRelations },
+                    log: newLog,
+                    gameManagement: {
+                        ...s.gameManagement,
+                        dayEnded: false,
+                        endReason: `The ${overthrown} has overthrown your government! Relations dropped to -10.`,
+                        phase: 'lose',
+                        round: newRound,
+                        lastRoundIncome: financials.totalIncome,
+                        lastRoundExpenses: financials.expenses,
+                    }
+                }));
+                return;
+            }
+
+            if (newRound > GAMESTATE.ROUNDS.MAX) {
+                set((s) => ({
+                    budget: { ...s.budget, treasury: newTreasury },
+                    relations: { ...s.relations, current: newRelations },
+                    log: newLog,
+                    gameManagement: {
+                        ...s.gameManagement,
+                        dayEnded: false,
+                        endReason: null,
+                        phase: 'victory',
+                        round: newRound,
+                        lastRoundIncome: financials.totalIncome,
+                        lastRoundExpenses: financials.expenses,
+                    }
+                }));
+                return;
+            }
+
+            // --- 7. Check for periodic event ---
+            const periodicEvent = PERIODIC_EVENTS.find(e => e.round === newRound) ?? null;
+            if (periodicEvent) {
+                // Prepare next new law and deal
+                const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals);
+                const updatedDeals = new Set(state.deals.interactedWithDeals);
+                if (randomDeal) updatedDeals.add(randomDeal);
+                const randomLaw = getRandomUniqueItem(LAWS, state.law.interactedWithLaws);
+                const updatedLaws = new Set(state.law.interactedWithLaws);
+                if (randomLaw) updatedLaws.add(randomLaw);
+
+                set((s) => ({
+                    budget: { ...s.budget, treasury: newTreasury },
+                    relations: { ...s.relations, current: newRelations },
+                    log: newLog,
+                    periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultText: null },
+                    miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
+                    meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
+                    law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
+                    deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals },
+                    tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: true },
+                    gameManagement: {
+                        ...s.gameManagement,
+                        dayEnded: false,
+                        round: newRound,
+                        lastRoundIncome: financials.totalIncome,
+                        lastRoundExpenses: financials.expenses,
+                    }
+                }));
+                return;
+            }
+
+            // --- 8. 40% chance for mini-challenge ---
+            const hasMiniChallenge = Math.random() < 0.4;
+            const miniChallengeToShow = hasMiniChallenge
+                ? MINI_CHALLENGES[Math.floor(Math.random() * MINI_CHALLENGES.length)]
+                : null;
+
+            const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals);
+            const updatedDeals = new Set(state.deals.interactedWithDeals);
+            if (randomDeal) updatedDeals.add(randomDeal);
+            const randomLaw = getRandomUniqueItem(LAWS, state.law.interactedWithLaws);
+            const updatedLaws = new Set(state.law.interactedWithLaws);
+            if (randomLaw) updatedLaws.add(randomLaw);
+
+            set((s) => ({
+                budget: { ...s.budget, treasury: newTreasury },
+                relations: { ...s.relations, current: newRelations },
+                log: newLog,
+                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
+                miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultText: null },
+                meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
+                law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
+                deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals },
+                tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: hasMiniChallenge },
+                gameManagement: {
+                    ...s.gameManagement,
+                    dayEnded: false,
+                    round: newRound,
+                    lastRoundIncome: financials.totalIncome,
+                    lastRoundExpenses: financials.expenses,
+                }
+            }));
         }
     },
     meet: {
@@ -230,7 +525,7 @@ export const INITIAL_STATE = ({ set, get }: {
         actionTaken: { type: undefined, taken: false, power: undefined },
         takeAction: (power, action) => set((state) => {
             const { actionTaken, newRelations, resultText, treasuryUpdate } = handleActionOutcome(power, action, state);
-            return {
+            const nextState = {
                 ...state,
                 meet: {
                     ...state.meet,
@@ -246,6 +541,14 @@ export const INITIAL_STATE = ({ set, get }: {
                     current: newRelations,
                 }
             };
+            // Check if day is complete after action
+            if (isDayComplete(nextState as GameState)) {
+                return {
+                    ...nextState,
+                    gameManagement: { ...nextState.gameManagement, dayEnded: true }
+                };
+            }
+            return nextState;
         })
     },
     budget: {

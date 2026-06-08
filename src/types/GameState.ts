@@ -4,6 +4,8 @@ import type { Deal } from "./Deal";
 import type { MeetActionType, Power } from "./Power";
 import type { Expenditures, Taxes } from "./Budget";
 import type { Law } from "./Law";
+import type { PeriodicEvent } from "./PeriodicEvent";
+import type { MiniChallenge } from "./MiniChallenge";
 
 export type CameraState = {
     cameraPos: [number, number, number];
@@ -16,6 +18,8 @@ export type CameraState = {
     setCameraPositions: (positions: Vector3[], targets?: Vector3[]) => void;
 };
 
+export type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose';
+
 export type GameState = {
     debug: {
         enabled: boolean;
@@ -27,15 +31,33 @@ export type GameState = {
     tabs: {
         activeTab: Tabs;
         setActiveTab: (tab: Tabs) => void;
+        tabsLocked: boolean;
     };
     gameManagement: {
-        phase: 'idle' | 'start' | 'event' | 'gameover';
-        setPhase: (phase: 'idle' | 'start' | 'event' | 'gameover') => void;
+        phase: GamePhase;
+        setPhase: (phase: GamePhase) => void;
         round: number,
+        endReason: string | null;
+        dayEnded: boolean;
+        lastRoundIncome: number;
+        lastRoundExpenses: number;
         charisma: {
             current: number,
             adjustCharisma: (amount: number) => void;
-        }
+        };
+        nextRound: () => void;
+    };
+    periodicEvent: {
+        current: PeriodicEvent | null;
+        decided: boolean;
+        resultText: string | null;
+        resolve: (optionIndex: number) => void;
+    };
+    miniChallenge: {
+        current: MiniChallenge | null;
+        decided: boolean;
+        resultText: string | null;
+        resolve: (accepted: boolean) => void;
     };
     meet: {
         selectedPower: Power | 'none';

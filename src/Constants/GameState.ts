@@ -6,8 +6,10 @@ export interface GAME_STATE_CONSTANTS {
     TABS: TabsConfig;
     MEET: Meet;
     BUDGET: Budget;
+    INCOME: Income;
     CHARISMA: Charisma;
     RELATIONS: Relations;
+    BUDGET_EFFECTS: BudgetEffects;
 }
 
 export interface Budget {
@@ -85,6 +87,25 @@ export interface TabsConfig {
     START_TAB: Tabs;
 }
 
+export interface Income {
+    PEOPLE_BASE: number;
+    BUSINESS_BASE: number;
+    EXPENDITURE_COST_PER_LEVEL: number;
+    TAX_PENALTY_PEOPLE_THRESHOLD: number;
+    TAX_PENALTY_BUSINESS_THRESHOLD: number;
+}
+
+export interface BudgetEffectThreshold {
+    LOW: number;
+    HIGH: number;
+}
+
+export interface BudgetEffects {
+    SECURITY: BudgetEffectThreshold;
+    HEALTH: BudgetEffectThreshold;
+    INFRASTRUCTURE: BudgetEffectThreshold;
+}
+
 export const GAMESTATE: GAME_STATE_CONSTANTS = {
     ROUNDS: {
         START: 1,
@@ -93,6 +114,18 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     },
     TABS: {
         START_TAB: Tabs.Log
+    },
+    INCOME: {
+        PEOPLE_BASE: 200,
+        BUSINESS_BASE: 150,
+        EXPENDITURE_COST_PER_LEVEL: 25,
+        TAX_PENALTY_PEOPLE_THRESHOLD: 30,
+        TAX_PENALTY_BUSINESS_THRESHOLD: 45,
+    },
+    BUDGET_EFFECTS: {
+        SECURITY: { LOW: 3, HIGH: 7 },
+        HEALTH: { LOW: 3, HIGH: 7 },
+        INFRASTRUCTURE: { LOW: 3, HIGH: 7 },
     },
     MEET: {
         ACTIONS: {
@@ -140,7 +173,6 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         TAXES: {
             peopleTaxes: 20,
             businessTaxes: 30
-
         }
     },
     CHARISMA: {
