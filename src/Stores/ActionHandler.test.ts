@@ -62,6 +62,9 @@ describe('handleActionOutcome', () => {
                     business: 0,
                     people: 0
                 }
+            },
+            gameManagement: {
+                charisma: { current: 0 }
             }
         } as unknown as GameState;
     });

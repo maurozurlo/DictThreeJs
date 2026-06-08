@@ -4,6 +4,7 @@ import type { Law } from "../types/Law";
 import { Clamp, getRandomFromList } from "../Utils/Math";
 import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
+import type { Expenditures, Taxes } from "../types/Budget";
 
 export type BudgetEffectResult = {
     newRelations: GameState["relations"]["current"];
@@ -88,6 +89,32 @@ export function handleDecision({
         }
     });
 
+    // Apply budget expenditure / tax key effects from laws
+    const newExpenditures = { ...state.budget.expenditures };
+    const newTaxes = { ...state.budget.taxes };
+    const expenditureKeys: Expenditures[] = ["security", "health", "infrastructure", "education"];
+    const taxKeys: Taxes[] = ["businessTaxes", "peopleTaxes"];
+    expenditureKeys.forEach((key) => {
+        const delta = effect[key as keyof typeof effect];
+        if (typeof delta === "number") {
+            newExpenditures[key] = Clamp(
+                newExpenditures[key] + delta,
+                GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN,
+                GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MAX
+            );
+        }
+    });
+    taxKeys.forEach((key) => {
+        const delta = effect[key as keyof typeof effect];
+        if (typeof delta === "number") {
+            newTaxes[key] = Clamp(
+                newTaxes[key] + delta,
+                GAMESTATE.BUDGET.BOUNDS.TAX.MIN,
+                GAMESTATE.BUDGET.BOUNDS.TAX.MAX
+            );
+        }
+    });
+
     // Handle risk mechanics - random faction penalty on rejection
     const riskTriggered = effect.risk && Math.random() < effect.risk;
     if (riskTriggered && !hasAccepted) {
@@ -99,10 +126,29 @@ export function handleDecision({
         });
     }
 
+    // Charisma scoring for laws: +1 if the player chose the option with better Power outcome
+    let charismaDelta = 0;
+    if (type === "law") {
+        const acceptScore = Power.reduce((sum, p) => sum + ((item.acceptEffect[p] as number | undefined) ?? 0), 0);
+        const rejectScore = Power.reduce((sum, p) => sum + ((item.rejectEffect[p] as number | undefined) ?? 0), 0);
+        if (hasAccepted && acceptScore > rejectScore) charismaDelta = 1;
+        else if (!hasAccepted && rejectScore > acceptScore) charismaDelta = 1;
+    }
+
+    const newCharisma = Clamp(
+        state.gameManagement.charisma.current + charismaDelta,
+        GAMESTATE.CHARISMA.MIN,
+        GAMESTATE.CHARISMA.MAX
+    );
+
     // Shared state update
     const baseUpdate = {
-        budget: { ...state.budget, treasury: newTreasury },
+        budget: { ...state.budget, treasury: newTreasury, expenditures: newExpenditures, taxes: newTaxes },
         relations: { ...state.relations, current: newRelations },
+        gameManagement: {
+            ...state.gameManagement,
+            charisma: { ...state.gameManagement.charisma, current: newCharisma },
+        },
     };
 
     // Type-specific state updates

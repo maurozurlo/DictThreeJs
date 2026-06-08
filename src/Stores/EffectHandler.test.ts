@@ -78,9 +78,16 @@ describe('handleDecision', () => {
 
     beforeEach(() => {
         mockState = {
-            budget: { treasury: 100 },
+            budget: {
+                treasury: 100,
+                expenditures: { health: 1, infrastructure: 1, security: 1, education: 1 },
+                taxes: { peopleTaxes: 20, businessTaxes: 30 }
+            },
             relations: {
                 current: { military: 0, business: 0, people: 0 }
+            },
+            gameManagement: {
+                charisma: { current: 0 }
             },
             deals: {
                 dealDecided: false,
@@ -116,8 +123,8 @@ describe('handleDecision', () => {
                 set: mockSet
             });
 
-            expect(mockSet).toHaveBeenCalledWith({
-                budget: { treasury: 50 },
+            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
+                budget: expect.objectContaining({ treasury: 50 }),
                 relations: {
                     current: { military: 2, business: -1, people: 0 }
                 },
@@ -126,7 +133,7 @@ describe('handleDecision', () => {
                     lastLawOutcome: true,
                     interactedWithLaws: expect.any(Set)
                 }
-            });
+            }));
         });
 
         it('should reject a law and apply reject effects', () => {
@@ -146,8 +153,8 @@ describe('handleDecision', () => {
                 set: mockSet
             });
 
-            expect(mockSet).toHaveBeenCalledWith({
-                budget: { treasury: 100 },
+            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
+                budget: expect.objectContaining({ treasury: 100 }),
                 relations: {
                     current: { military: -1, business: 0, people: 1 }
                 },
@@ -156,7 +163,7 @@ describe('handleDecision', () => {
                     lastLawOutcome: false,
                     interactedWithLaws: expect.any(Set)
                 }
-            });
+            }));
         });
     });
 
@@ -179,8 +186,8 @@ describe('handleDecision', () => {
                 set: mockSet
             });
 
-            expect(mockSet).toHaveBeenCalledWith({
-                budget: { treasury: 180 },
+            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
+                budget: expect.objectContaining({ treasury: 180 }),
                 relations: {
                     current: { military: 0, business: 2, people: 0 }
                 },
@@ -189,7 +196,7 @@ describe('handleDecision', () => {
                     lastDealOutcome: 'Deal accepted!',
                     interactedWithDeals: expect.any(Set)
                 }
-            });
+            }));
         });
 
         it('should handle risky deal when risk triggers on rejection', () => {
@@ -214,8 +221,8 @@ describe('handleDecision', () => {
                 set: mockSet
             });
 
-            expect(mockSet).toHaveBeenCalledWith({
-                budget: { treasury: 100 },
+            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
+                budget: expect.objectContaining({ treasury: 100 }),
                 relations: {
                     current: { military: 0, business: -2, people: 0 }
                 },
@@ -224,7 +231,7 @@ describe('handleDecision', () => {
                     lastDealOutcome: 'Rejected Things went wrong!',
                     interactedWithDeals: expect.any(Set)
                 }
-            });
+            }));
 
             vi.restoreAllMocks();
         });
@@ -250,8 +257,8 @@ describe('handleDecision', () => {
                 set: mockSet
             });
 
-            expect(mockSet).toHaveBeenCalledWith({
-                budget: { treasury: 100 },
+            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
+                budget: expect.objectContaining({ treasury: 100 }),
                 relations: {
                     current: { military: 0, business: 0, people: 0 }
                 },
@@ -260,7 +267,7 @@ describe('handleDecision', () => {
                     lastDealOutcome: 'Rejected',
                     interactedWithDeals: expect.any(Set)
                 }
-            });
+            }));
 
             vi.restoreAllMocks();
         });
@@ -287,8 +294,8 @@ describe('handleDecision', () => {
             });
 
             // Should not have -2 penalty even though risk triggered
-            expect(mockSet).toHaveBeenCalledWith({
-                budget: { treasury: 200 },
+            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
+                budget: expect.objectContaining({ treasury: 200 }),
                 relations: {
                     current: { military: 0, business: 0, people: 0 }
                 },
@@ -297,7 +304,7 @@ describe('handleDecision', () => {
                     lastDealOutcome: 'Accepted Things went wrong!',
                     interactedWithDeals: expect.any(Set)
                 }
-            });
+            }));
 
             vi.restoreAllMocks();
         });

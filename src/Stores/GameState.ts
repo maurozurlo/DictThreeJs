@@ -298,41 +298,62 @@ export const INITIAL_STATE = ({ set, get }: {
         setPhase: (phase) => {
             if (phase === 'start') {
                 return set((state) => {
-                    // DEAL
-                    const randomDeal = getRandomUniqueItem(DEALS, state.deals.interactedWithDeals)
-                    const updatedDeals = new Set(state.deals.interactedWithDeals);
-                    if (randomDeal) updatedDeals.add(randomDeal);
-                    // LAW
-                    const randomLaw = getRandomUniqueItem(LAWS, state.law.interactedWithLaws)
-                    const updatedLaws = new Set(state.law.interactedWithLaws)
-                    if (randomLaw) updatedLaws.add(randomLaw)
+                    const freshLaws = new Set<typeof LAWS[number]>();
+                    const freshDeals = new Set<typeof DEALS[number]>();
+                    const randomLaw = getRandomUniqueItem(LAWS, freshLaws);
+                    const randomDeal = getRandomUniqueItem(DEALS, freshDeals);
+                    if (randomLaw) freshLaws.add(randomLaw);
+                    if (randomDeal) freshDeals.add(randomDeal);
 
                     return {
                         tabs: {
                             ...state.tabs,
-                            shouldDisplayTabs: true,
                             activeTab: Tabs.Log,
                             tabsLocked: false,
                         },
                         gameManagement: {
                             ...state.gameManagement,
                             phase,
-                            round: GAMESTATE.ROUNDS.START
+                            round: GAMESTATE.ROUNDS.START,
+                            dayEnded: false,
+                            endReason: null,
+                            charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
                         },
+                        relations: {
+                            ...state.relations,
+                            current: { ...GAMESTATE.RELATIONS.INITIAL },
+                        },
+                        budget: {
+                            ...state.budget,
+                            treasury: GAMESTATE.BUDGET.TREASURY,
+                            expenditures: { ...GAMESTATE.BUDGET.EXPENDITURES },
+                            taxes: { ...GAMESTATE.BUDGET.TAXES },
+                        },
+                        log: [],
+                        meet: {
+                            ...state.meet,
+                            actionTaken: { type: undefined, taken: false, power: undefined },
+                            actionOutcomeText: null,
+                            selectedPower: 'none',
+                        },
+                        periodicEvent: { ...state.periodicEvent, current: null, decided: false, resultText: null },
+                        miniChallenge: { ...state.miniChallenge, current: null, decided: false, resultText: null },
                         deals: {
                             ...state.deals,
                             current: randomDeal,
                             dealDecided: false,
-                            interactedWithDeals: updatedDeals,
+                            interactedWithDeals: freshDeals,
+                            lastDealOutcome: null,
                         },
                         law: {
                             ...state.law,
                             current: randomLaw,
                             lawDecided: false,
-                            interactedWithLaws: updatedLaws
-                        }
-                    }
-                })
+                            interactedWithLaws: freshLaws,
+                            lastLawOutcome: null,
+                        },
+                    };
+                });
             }
 
             return set((state) => ({
@@ -524,7 +545,12 @@ export const INITIAL_STATE = ({ set, get }: {
         actionOutcomeText: null,
         actionTaken: { type: undefined, taken: false, power: undefined },
         takeAction: (power, action) => set((state) => {
-            const { actionTaken, newRelations, resultText, treasuryUpdate } = handleActionOutcome(power, action, state);
+            const { actionTaken, newRelations, resultText, treasuryUpdate, charismaDelta } = handleActionOutcome(power, action, state);
+            const newCharisma = Clamp(
+                state.gameManagement.charisma.current + charismaDelta,
+                GAMESTATE.CHARISMA.MIN,
+                GAMESTATE.CHARISMA.MAX
+            );
             const nextState = {
                 ...state,
                 meet: {
@@ -539,7 +565,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 relations: {
                     ...state.relations,
                     current: newRelations,
-                }
+                },
+                gameManagement: {
+                    ...state.gameManagement,
+                    charisma: { ...state.gameManagement.charisma, current: newCharisma },
+                },
             };
             // Check if day is complete after action
             if (isDayComplete(nextState as GameState)) {

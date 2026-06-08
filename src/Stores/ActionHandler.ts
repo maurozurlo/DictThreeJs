@@ -8,6 +8,7 @@ type ActionResult = {
     newRelations: Record<Power, number>;
     treasuryUpdate: number;
     actionTaken: boolean;
+    charismaDelta: number;
 };
 
 function handleBribe(power: Power, state: GameState): ActionResult {
@@ -18,6 +19,7 @@ function handleBribe(power: Power, state: GameState): ActionResult {
             resultText: { key: "bribe_insufficient_funds" },
             treasuryUpdate: 0,
             actionTaken: false,
+            charismaDelta: 0,
             newRelations: { ...state.relations.current },
         };
     }
@@ -26,6 +28,7 @@ function handleBribe(power: Power, state: GameState): ActionResult {
         resultText: { key: "bribe_success", params: { power, cost } },
         treasuryUpdate: -cost,
         actionTaken: true,
+        charismaDelta: 0,
         newRelations: {
             ...state.relations.current,
             [power]: handleRelations({
@@ -42,12 +45,19 @@ function handleEliminate(
     newRelations: Record<Power, number>,
     state: GameState
 ): Omit<ActionResult, "treasuryUpdate"> {
-    const hasBacklash = Math.random() < 0.3;
+    const charisma = state.gameManagement.charisma.current;
+    // Backlash base 30%; high charisma halves it, low charisma raises it by 50%
+    let backlashChance = 0.3;
+    if (charisma >= 5) backlashChance = 0.15;
+    else if (charisma <= -5) backlashChance = 0.45;
+
+    const hasBacklash = Math.random() < backlashChance;
 
     if (!hasBacklash) {
         return {
             resultText: { key: "eliminate_success", params: { power } },
             actionTaken: true,
+            charismaDelta: -2,
             newRelations: {
                 ...state.relations.current,
                 [power]: 0,
@@ -61,6 +71,7 @@ function handleEliminate(
     return {
         resultText: { key: "eliminate_backlash", params: { power, angryPower } },
         actionTaken: true,
+        charismaDelta: -2,
         newRelations: {
             ...state.relations.current,
             [power]: 0,
@@ -80,6 +91,7 @@ function handleExpropriate(power: Power, state: GameState): ActionResult {
         resultText: { key: "expropriate_success", params: { power, gain } },
         treasuryUpdate: gain,
         actionTaken: true,
+        charismaDelta: 0,
         newRelations: {
             ...state.relations.current,
             [power]: handleRelations({
@@ -96,12 +108,18 @@ function handleDialogue(
     state: GameState
 ): Omit<ActionResult, "treasuryUpdate"> {
     const baseSuccessRate = GAMESTATE.MEET.ACTIONS.DIALOGUE.BASE_SUCCESS_RATE[power];
+    const charisma = state.gameManagement.charisma.current;
+    // High charisma expands the success zone; low charisma shrinks it
+    const charismaBonus = Math.max(-0.25, Math.min(0.25, charisma * 0.03));
+    const failThreshold = 0.1 * (1 - baseSuccessRate);
+    const successThreshold = Math.max(failThreshold + 0.01, Math.min(0.95, 0.7 * (1 - baseSuccessRate) + charismaBonus));
     const roll = Math.random();
 
-    if (roll < 0.1 * (1 - baseSuccessRate)) {
+    if (roll < failThreshold) {
         return {
             resultText: { key: "dialogue_fail", params: { power } },
             actionTaken: true,
+            charismaDelta: 0,
             newRelations: {
                 ...state.relations.current,
                 [power]: handleRelations({
@@ -113,10 +131,11 @@ function handleDialogue(
         };
     }
 
-    if (roll < 0.7 * (1 - baseSuccessRate)) {
+    if (roll < successThreshold) {
         return {
             resultText: { key: "dialogue_success", params: { power } },
             actionTaken: true,
+            charismaDelta: 0,
             newRelations: {
                 ...state.relations.current,
                 [power]: handleRelations({
@@ -131,6 +150,7 @@ function handleDialogue(
     return {
         resultText: { key: "dialogue_neutral", params: { power } },
         actionTaken: true,
+        charismaDelta: 0,
         newRelations: { ...state.relations.current },
     };
 }
