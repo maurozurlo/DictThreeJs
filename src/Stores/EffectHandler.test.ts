@@ -91,7 +91,8 @@ describe('handleDecision', () => {
             },
             deals: {
                 dealDecided: false,
-                lastDealOutcome: '',
+                lastDealOutcome: null,
+                lastDealAccepted: null,
                 interactedWithDeals: new Set()
             },
             law: {
@@ -191,11 +192,11 @@ describe('handleDecision', () => {
                 relations: {
                     current: { military: 0, business: 2, people: 0 }
                 },
-                deals: {
+                deals: expect.objectContaining({
                     dealDecided: true,
                     lastDealOutcome: 'Deal accepted!',
                     interactedWithDeals: expect.any(Set)
-                }
+                })
             }));
         });
 
@@ -226,11 +227,11 @@ describe('handleDecision', () => {
                 relations: {
                     current: { military: 0, business: -2, people: 0 }
                 },
-                deals: {
+                deals: expect.objectContaining({
                     dealDecided: true,
                     lastDealOutcome: 'Rejected Things went wrong!',
                     interactedWithDeals: expect.any(Set)
-                }
+                })
             }));
 
             vi.restoreAllMocks();
@@ -262,11 +263,11 @@ describe('handleDecision', () => {
                 relations: {
                     current: { military: 0, business: 0, people: 0 }
                 },
-                deals: {
+                deals: expect.objectContaining({
                     dealDecided: true,
                     lastDealOutcome: 'Rejected',
                     interactedWithDeals: expect.any(Set)
-                }
+                })
             }));
 
             vi.restoreAllMocks();
@@ -299,11 +300,11 @@ describe('handleDecision', () => {
                 relations: {
                     current: { military: 0, business: 0, people: 0 }
                 },
-                deals: {
+                deals: expect.objectContaining({
                     dealDecided: true,
                     lastDealOutcome: 'Accepted Things went wrong!',
                     interactedWithDeals: expect.any(Set)
-                }
+                })
             }));
 
             vi.restoreAllMocks();

@@ -8,6 +8,11 @@ import type { PeriodicEvent } from "./PeriodicEvent";
 import type { MiniChallenge } from "./MiniChallenge";
 import type { DailyEvent } from "./DailyEvent";
 
+export type RoundLogEntry = {
+    date: string;
+    lines: string[];
+};
+
 export type CameraState = {
     cameraPos: [number, number, number];
     cameraTarget?: Vector3;
@@ -49,6 +54,8 @@ export type GameState = {
         };
         nextRound: () => void;
         expireTimer: () => void;
+        saveGame: () => void;
+        loadGame: (data: Record<string, unknown>) => void;
     };
     dailyEvent: {
         current: DailyEvent | null;
@@ -85,7 +92,7 @@ export type GameState = {
         lastLawOutcome: boolean | null;
         actUponLaw: (hasAccepted: boolean) => void;
     },
-    log: string[][],
+    log: RoundLogEntry[],
     relations: {
         current: Record<Power, number>
         adjustRelations: (p: Power, a: number) => void;
@@ -96,5 +103,6 @@ export type GameState = {
         interactedWithDeals: Set<Deal>,
         actUponDeal: (hasAccepted: boolean) => void;
         lastDealOutcome: string | null;
+        lastDealAccepted: boolean | null;
     }
 };

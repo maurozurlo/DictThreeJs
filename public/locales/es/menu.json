@@ -22,6 +22,7 @@
     },
     "mainMenu": {
         "newGame": "Nueva partida",
+        "saveGame": "Guardar partida",
         "loadGame": "Cargar partida",
         "settings": "Opciones",
         "help": "Ayuda",

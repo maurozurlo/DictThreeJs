@@ -17,6 +17,8 @@ import type { Power } from "../types/Power";
 import { getRandomDailyEvent } from "./DailyEventHandler";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
+import { getGameDate } from "../Utils/GameDate";
+import { exportSave } from "../Utils/SaveLoad";
 
 /** Helper: check all day-end conditions and return whether the day is finished */
 function isDayComplete(state: GameState): boolean {
@@ -168,6 +170,7 @@ export const INITIAL_STATE = ({ set, get }: {
         dealDecided: false,
         interactedWithDeals: new Set(),
         lastDealOutcome: null,
+        lastDealAccepted: null,
 
         actUponDeal: (hasAccepted: boolean) => {
             const state = get();
@@ -350,6 +353,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             dealDecided: false,
                             interactedWithDeals: freshDeals,
                             lastDealOutcome: null,
+                            lastDealAccepted: null,
                         },
                         law: {
                             ...state.law,
@@ -448,10 +452,24 @@ export const INITIAL_STATE = ({ set, get }: {
                 eventMessages.push(currentEvent.headline);
             }
 
-            // --- 5. Build log entries ---
-            const roundSummary = `Day ${state.gameManagement.round} — Collected $${financials.totalIncome}M, Paid $${financials.expenses}M`;
-            const allMessages = [roundSummary, ...logMessages, ...taxMessages, ...eventMessages];
-            const newLog = [...state.log, allMessages];
+            // --- 5. Build log entry ---
+            const logLines: string[] = [];
+            if (state.law.lawDecided && state.law.current) {
+                const verb = state.law.lastLawOutcome ? "Passed" : "Rejected";
+                logLines.push(`${verb} law: ${state.law.current.label}`);
+            }
+            if (state.deals.dealDecided && state.deals.current) {
+                const verb = state.deals.lastDealAccepted ? "Accepted" : "Declined";
+                logLines.push(`${verb} the proposed deal`);
+            }
+            if (state.meet.actionTaken.taken && state.meet.actionTaken.power && state.meet.actionTaken.type) {
+                logLines.push(`Met with ${state.meet.actionTaken.power}: ${state.meet.actionTaken.type}`);
+            }
+            logLines.push(`Collected $${financials.totalIncome}M, Paid $${financials.expenses}M`);
+            logLines.push(...logMessages, ...taxMessages, ...eventMessages);
+            if (newCharisma > state.gameManagement.charisma.current) logLines.push("Charisma improving");
+            else if (newCharisma < state.gameManagement.charisma.current) logLines.push("Charisma dropping");
+            const newLog = [...state.log, { date: getGameDate(state.gameManagement.round), lines: logLines }];
 
             // --- 6. Increment round, draw next daily event ---
             const newRound = state.gameManagement.round + 1;
@@ -551,7 +569,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                     law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
-                    deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals },
+                    deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
                     tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: true },
                     gameManagement: {
                         ...s.gameManagement,
@@ -591,7 +609,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultText: null },
                 meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                 law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
-                deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals },
+                deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
                 tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: hasMiniChallenge },
                 gameManagement: {
                     ...s.gameManagement,
@@ -602,6 +620,76 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundExpenses: financials.expenses,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                 }
+            }));
+        },
+        saveGame: () => {
+            exportSave(get());
+        },
+        loadGame: (data: Record<string, unknown>) => {
+            const gm = data.gameManagement as Record<string, unknown> ?? {};
+            const savedBudget = data.budget as Record<string, unknown> ?? {};
+            const savedRelations = data.relations as Record<string, unknown> ?? {};
+            const savedLaw = data.law as Record<string, unknown> ?? {};
+            const savedDeals = data.deals as Record<string, unknown> ?? {};
+            const savedMeet = data.meet as Record<string, unknown> ?? {};
+
+            // Restore current law/deal by id so undecided rounds resume correctly
+            const savedLawId = (savedLaw.current as Record<string, unknown> | null)?.id;
+            const restoredLaw = typeof savedLawId === 'number' ? (LAWS.find(l => l.id === savedLawId) ?? null) : null;
+            const savedDealId = (savedDeals.current as Record<string, unknown> | null)?.id;
+            const restoredDeal = typeof savedDealId === 'number' ? (DEALS.find(d => d.id === savedDealId) ?? null) : null;
+
+            set((s) => ({
+                gameManagement: {
+                    ...s.gameManagement,
+                    round: (gm.round as number) ?? s.gameManagement.round,
+                    phase: (gm.phase as GameState['gameManagement']['phase']) ?? s.gameManagement.phase,
+                    endReason: (gm.endReason as string | null) ?? null,
+                    dayEnded: (gm.dayEnded as boolean) ?? false,
+                    lastRoundIncome: (gm.lastRoundIncome as number) ?? 0,
+                    lastRoundExpenses: (gm.lastRoundExpenses as number) ?? 0,
+                    timerStartedAt: Date.now(),
+                    charisma: {
+                        ...s.gameManagement.charisma,
+                        current: ((gm.charisma as Record<string, unknown>)?.current as number) ?? s.gameManagement.charisma.current,
+                    },
+                },
+                budget: {
+                    ...s.budget,
+                    treasury: (savedBudget.treasury as number) ?? s.budget.treasury,
+                    expenditures: (savedBudget.expenditures as typeof s.budget.expenditures) ?? s.budget.expenditures,
+                    taxes: (savedBudget.taxes as typeof s.budget.taxes) ?? s.budget.taxes,
+                },
+                relations: {
+                    ...s.relations,
+                    current: (savedRelations.current as typeof s.relations.current) ?? s.relations.current,
+                },
+                log: (data.log as GameState['log']) ?? [],
+                dailyEvent: { current: (data.dailyEvent as Record<string, unknown>)?.current as GameState['dailyEvent']['current'] ?? null },
+                law: {
+                    ...s.law,
+                    current: restoredLaw,
+                    lawDecided: (savedLaw.lawDecided as boolean) ?? false,
+                    lastLawOutcome: (savedLaw.lastLawOutcome as boolean | null) ?? null,
+                    interactedWithLaws: new Set(),
+                },
+                deals: {
+                    ...s.deals,
+                    current: restoredDeal,
+                    dealDecided: (savedDeals.dealDecided as boolean) ?? false,
+                    lastDealOutcome: (savedDeals.lastDealOutcome as string | null) ?? null,
+                    lastDealAccepted: (savedDeals.lastDealAccepted as boolean | null) ?? null,
+                    interactedWithDeals: new Set(),
+                },
+                meet: {
+                    ...s.meet,
+                    actionTaken: (savedMeet.actionTaken as typeof s.meet.actionTaken) ?? { type: undefined, taken: false, power: undefined },
+                    actionOutcomeText: (savedMeet.actionOutcomeText as typeof s.meet.actionOutcomeText) ?? null,
+                    selectedPower: 'none',
+                },
+                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
+                miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
+                tabs: { ...s.tabs, activeTab: (data.tabs as Record<string, unknown>)?.activeTab as Tabs ?? Tabs.Log, tabsLocked: false },
             }));
         }
     },

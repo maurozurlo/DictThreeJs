@@ -165,6 +165,7 @@ export function handleDecision({
                 ...state.deals,
                 dealDecided: true,
                 lastDealOutcome: finalText,
+                lastDealAccepted: hasAccepted,
                 interactedWithDeals: new Set(state.deals.interactedWithDeals).add(deal),
             },
         });

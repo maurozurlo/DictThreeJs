@@ -80,9 +80,10 @@ const Log = ({ isActive }: TabProps) => {
 
                 {/* --- Log History --- */}
                 <Typography variant='h2'>{t('tabs.log')}</Typography>
-                {logEntries.slice().reverse().map((entries, i) => (
+                {logEntries.slice().reverse().map((entry, i) => (
                     <Card key={i}>
-                        {entries.map((msg, j) => (
+                        <Typography variant='h2'>{entry.date}</Typography>
+                        {entry.lines.map((msg, j) => (
                             <Typography key={j} variant='body'>{msg}</Typography>
                         ))}
                     </Card>
