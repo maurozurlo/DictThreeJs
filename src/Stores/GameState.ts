@@ -6,7 +6,7 @@ import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
-import type { GameState } from "../types/GameState";
+import type { GameState, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations, applyBudgetEffects } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
@@ -20,15 +20,6 @@ import { Power as PowerList } from "../Constants/Power";
 import { getGameDate } from "../Utils/GameDate";
 import { exportSave } from "../Utils/SaveLoad";
 
-/** Helper: check all day-end conditions and return whether the day is finished */
-function isDayComplete(state: GameState): boolean {
-    const lawDone = state.law.lawDecided;
-    const dealDone = state.deals.dealDecided;
-    const meetDone = state.meet.actionTaken.taken;
-    const periodicDone = state.periodicEvent.current === null || state.periodicEvent.decided;
-    const challengeDone = state.miniChallenge.current === null || state.miniChallenge.decided;
-    return lawDone && dealDone && meetDone && periodicDone && challengeDone;
-}
 
 export const INITIAL_STATE = ({ set, get }: {
     set: {
@@ -111,8 +102,8 @@ export const INITIAL_STATE = ({ set, get }: {
         activeTab: GAMESTATE.TABS.START_TAB,
         tabsLocked: false,
         setActiveTab: (tab: Tabs) => {
-            // Secret tab bypasses lock; all others respect it
-            if (get().tabs.tabsLocked && tab !== Tabs.Secret) return;
+            // Menu, Secret and Shop tabs bypass lock; all others respect it
+            if (get().tabs.tabsLocked && tab !== Tabs.Secret && tab !== Tabs.Shop && tab !== Tabs.Menu) return;
 
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
@@ -127,25 +118,33 @@ export const INITIAL_STATE = ({ set, get }: {
                 newCameraPos = new Vector3(1.5, 0.7, 1.0);
             }
 
-            set((state) => ({
-                tabs: {
-                    ...state.tabs,
-                    activeTab: tab,
-                },
-                scene: {
-                    ...state.scene,
-                    camera: {
-                        ...state.scene.camera,
-                        ...(newCameraPos && {
-                            cameraPos: [newCameraPos.x, newCameraPos.y, newCameraPos.z],
-                        }),
-                    },
-                },
-                meet: {
-                    ...state.meet,
-                    selectedPower: 'none',
+            set((s) => {
+                const now = Date.now();
+                let { timerStartedAt, timerPausedAt } = s.gameManagement;
+                const isInGame = s.gameManagement.phase === 'start';
+
+                if (tab === Tabs.Menu && isInGame && timerPausedAt === null) {
+                    timerPausedAt = now;
+                } else if (s.tabs.activeTab === Tabs.Menu && isInGame && timerPausedAt !== null) {
+                    timerStartedAt = timerStartedAt !== null ? timerStartedAt + (now - timerPausedAt) : null;
+                    timerPausedAt = null;
                 }
-            }));
+
+                return {
+                    tabs: { ...s.tabs, activeTab: tab },
+                    scene: {
+                        ...s.scene,
+                        camera: {
+                            ...s.scene.camera,
+                            ...(newCameraPos && {
+                                cameraPos: [newCameraPos.x, newCameraPos.y, newCameraPos.z],
+                            }),
+                        },
+                    },
+                    meet: { ...s.meet, selectedPower: 'none' },
+                    gameManagement: { ...s.gameManagement, timerStartedAt, timerPausedAt },
+                };
+            });
         },
     },
     law: {
@@ -158,13 +157,6 @@ export const INITIAL_STATE = ({ set, get }: {
             const current = state.law.current;
             if (!current) return;
             handleDecision({ type: "law", item: current, hasAccepted, get, set });
-            // After this decision, check if all day actions are complete
-            setTimeout(() => {
-                const s = get();
-                if (isDayComplete(s)) {
-                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
-                }
-            }, 0);
         },
     },
     deals: {
@@ -179,12 +171,6 @@ export const INITIAL_STATE = ({ set, get }: {
             const current = state.deals.current;
             if (!current) return;
             handleDecision({ type: "deal", item: current, hasAccepted, get, set });
-            setTimeout(() => {
-                const s = get();
-                if (isDayComplete(s)) {
-                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
-                }
-            }, 0);
         },
     },
     periodicEvent: {
@@ -225,13 +211,6 @@ export const INITIAL_STATE = ({ set, get }: {
                 relations: { ...s.relations, current: newRelations },
                 tabs: { ...s.tabs, tabsLocked: false },
             }));
-
-            setTimeout(() => {
-                const s = get();
-                if (isDayComplete(s)) {
-                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
-                }
-            }, 0);
         },
     },
     miniChallenge: {
@@ -287,13 +266,44 @@ export const INITIAL_STATE = ({ set, get }: {
                 relations: { ...s.relations, current: newRelations },
                 tabs: { ...s.tabs, tabsLocked: false },
             }));
-
-            setTimeout(() => {
-                const s = get();
-                if (isDayComplete(s)) {
-                    set((st) => ({ gameManagement: { ...st.gameManagement, dayEnded: true } }));
-                }
-            }, 0);
+        },
+    },
+    shop: {
+        frozenFactions: new Set<Power>(),
+        statueCount: 0,
+        buy: (item: ShopItemId) => {
+            const state = get();
+            const FREEZE_COST = 80;
+            const STATUE_COSTS = [100, 150, 200];
+            const FREEZE_MAP: Record<string, Power> = {
+                media_coverage: 'people',
+                media_shielding: 'military',
+                media_blackout: 'business',
+            };
+            if (item === 'statue') {
+                const { statueCount } = state.shop;
+                if (statueCount >= 3) return;
+                const cost = STATUE_COSTS[statueCount];
+                if (state.budget.treasury < cost) return;
+                set((s) => {
+                    const newCharisma = Clamp(s.gameManagement.charisma.current + 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
+                    return {
+                        budget: { ...s.budget, treasury: s.budget.treasury - cost },
+                        shop: { ...s.shop, statueCount: s.shop.statueCount + 1 },
+                        gameManagement: { ...s.gameManagement, charisma: { ...s.gameManagement.charisma, current: newCharisma } },
+                    };
+                });
+            } else {
+                const faction = FREEZE_MAP[item];
+                if (!faction || state.shop.frozenFactions.has(faction)) return;
+                if (state.budget.treasury < FREEZE_COST) return;
+                const newFrozen = new Set(state.shop.frozenFactions);
+                newFrozen.add(faction);
+                set((s) => ({
+                    budget: { ...s.budget, treasury: s.budget.treasury - FREEZE_COST },
+                    shop: { ...s.shop, frozenFactions: newFrozen },
+                }));
+            }
         },
     },
     specialEnding: {
@@ -337,6 +347,7 @@ export const INITIAL_STATE = ({ set, get }: {
         lastRoundIncome: 0,
         lastRoundExpenses: 0,
         timerStartedAt: null,
+        timerPausedAt: null,
         meetCounts: { military: 0, business: 0, people: 0 },
         setPhase: (phase) => {
             if (phase === 'start') {
@@ -361,6 +372,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             dayEnded: false,
                             endReason: null,
                             timerStartedAt: Date.now(),
+                            timerPausedAt: null,
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
                             meetCounts: { military: 0, business: 0, people: 0 },
                         },
@@ -370,6 +382,11 @@ export const INITIAL_STATE = ({ set, get }: {
                             faction: null,
                             used: false,
                             outcome: null,
+                        },
+                        shop: {
+                            ...state.shop,
+                            frozenFactions: new Set<Power>(),
+                            statueCount: 0,
                         },
                         relations: {
                             ...state.relations,
@@ -441,12 +458,13 @@ export const INITIAL_STATE = ({ set, get }: {
             // Only penalise if the player didn't take a Meet action this round
             if (!state.meet.actionTaken.taken) {
                 const round = state.gameManagement.round;
-                // Cap penalty at -3 and apply only to the 2 lowest-relation factions
                 const penalty = Math.min(round, 3);
+                const frozenFactions = state.shop.frozenFactions;
                 const newRelations = { ...state.relations.current };
                 const toPenalise = [...PowerList]
                     .sort((a, b) => newRelations[a] - newRelations[b])
-                    .slice(0, 2);
+                    .slice(0, 2)
+                    .filter(p => !frozenFactions.has(p));
                 toPenalise.forEach((p) => {
                     newRelations[p] = Clamp(newRelations[p] - penalty, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
                 });
@@ -596,6 +614,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 return;
             }
 
+            // --- 8.4. Restore frozen factions (all-change freeze powerup) ---
+            state.shop.frozenFactions.forEach(faction => {
+                newRelations[faction] = state.relations.current[faction];
+            });
+
             // --- 8.5. Unlock special ending at round 9 if any faction is at max ---
             const factionsAtMax = (Object.keys(newRelations) as Power[]).filter(
                 p => newRelations[p] >= GAMESTATE.RELATIONS.MAX
@@ -631,7 +654,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                     law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
                     deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
-                    tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: true },
+                    tabs: { ...s.tabs, activeTab: Tabs.Log },
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -641,6 +664,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         lastRoundExpenses: financials.expenses,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     },
+                    shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
                         specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
                     } : {}),
@@ -672,9 +696,9 @@ export const INITIAL_STATE = ({ set, get }: {
                 periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
                 miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultText: null },
                 meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
-                law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
+                law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                 deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
-                tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: hasMiniChallenge },
+                tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: false },
                 gameManagement: {
                     ...s.gameManagement,
                     dayEnded: false,
@@ -684,6 +708,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundExpenses: financials.expenses,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                 },
+                shop: { ...s.shop, frozenFactions: new Set<Power>() },
                 ...(specialEndingFaction ? {
                     specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
                 } : {}),
@@ -716,6 +741,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundIncome: (gm.lastRoundIncome as number) ?? 0,
                     lastRoundExpenses: (gm.lastRoundExpenses as number) ?? 0,
                     timerStartedAt: Date.now(),
+                    timerPausedAt: null,
                     charisma: {
                         ...s.gameManagement.charisma,
                         current: ((gm.charisma as Record<string, unknown>)?.current as number) ?? s.gameManagement.charisma.current,
@@ -757,6 +783,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
                 miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
                 tabs: { ...s.tabs, activeTab: (data.tabs as Record<string, unknown>)?.activeTab as Tabs ?? Tabs.Log, tabsLocked: false },
+                shop: {
+                    ...s.shop,
+                    statueCount: ((data.shop as Record<string, unknown>)?.statueCount as number) ?? 0,
+                    frozenFactions: new Set((data.shop as Record<string, unknown>)?.frozenFactions as Power[] ?? []),
+                },
             }));
         }
     },
@@ -801,13 +832,6 @@ export const INITIAL_STATE = ({ set, get }: {
                     } : state.gameManagement.meetCounts,
                 },
             };
-            // Check if day is complete after action
-            if (isDayComplete(nextState as GameState)) {
-                return {
-                    ...nextState,
-                    gameManagement: { ...nextState.gameManagement, dayEnded: true }
-                };
-            }
             return nextState;
         })
     },

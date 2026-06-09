@@ -22,6 +22,32 @@ const Log = ({ isActive }: TabProps) => {
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>
             <div className={styles.pageContainer}>
+                {/* --- Mini Challenge Section --- */}
+                {miniChallenge.current && (
+                    <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: miniChallenge.decided })}>
+                        <Typography variant='h2' className={eventStyles.eventTitle}>
+                            🎲 Opportunity
+                        </Typography>
+                        <Typography variant='body'>{miniChallenge.current.text}</Typography>
+
+                        {!miniChallenge.decided ? (
+                            <div className={eventStyles.challengeButtons}>
+                                <Button onClick={() => miniChallenge.resolve(true)}>
+                                    ✓ Accept
+                                </Button>
+                                <Button onClick={() => miniChallenge.resolve(false)}>
+                                    ✗ Reject
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className={eventStyles.resultCard}>
+                                <Card>
+                                    <Typography variant='body'>{miniChallenge.resultText}</Typography>
+                                </Card>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <Typography variant='h2'>{t('log.today')}</Typography>
                 <Newspaper headline={dailyEventHeadline} date={getGameDate(round)} />
 
@@ -51,32 +77,7 @@ const Log = ({ isActive }: TabProps) => {
                     </div>
                 )}
 
-                {/* --- Mini Challenge Section --- */}
-                {miniChallenge.current && (
-                    <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: miniChallenge.decided })}>
-                        <Typography variant='h2' className={eventStyles.eventTitle}>
-                            🎲 Opportunity
-                        </Typography>
-                        <Typography variant='body'>{miniChallenge.current.text}</Typography>
 
-                        {!miniChallenge.decided ? (
-                            <div className={eventStyles.challengeButtons}>
-                                <Button onClick={() => miniChallenge.resolve(true)}>
-                                    ✓ Accept
-                                </Button>
-                                <Button onClick={() => miniChallenge.resolve(false)}>
-                                    ✗ Reject
-                                </Button>
-                            </div>
-                        ) : (
-                            <div className={eventStyles.resultCard}>
-                                <Card>
-                                    <Typography variant='body'>{miniChallenge.resultText}</Typography>
-                                </Card>
-                            </div>
-                        )}
-                    </div>
-                )}
 
                 {/* --- Log History --- */}
                 <Typography variant='h2'>{t('tabs.log')}</Typography>

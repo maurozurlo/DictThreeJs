@@ -19,10 +19,6 @@ export default function App() {
   const phase = useGameStore(s => s.gameManagement.phase)
   const round = useGameStore(s => s.gameManagement.round)
   const endReason = useGameStore(s => s.gameManagement.endReason)
-  const dayEnded = useGameStore(s => s.gameManagement.dayEnded)
-  const lastRoundIncome = useGameStore(s => s.gameManagement.lastRoundIncome)
-  const lastRoundExpenses = useGameStore(s => s.gameManagement.lastRoundExpenses)
-  const nextRound = useGameStore(s => s.gameManagement.nextRound)
   const setPhase = useGameStore(s => s.gameManagement.setPhase)
   const treasury = useGameStore(s => s.budget.treasury)
   const relations = useGameStore(s => s.relations.current)
@@ -39,36 +35,6 @@ export default function App() {
         {tab === Tabs.Laws ? <DictatorHands /> : null}
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
 
-        {/* Day-Ended Overlay */}
-        {dayEnded && phase !== 'lose' && phase !== 'victory' && phase !== 'special_ending' && (
-          <div className={styles.overlay}>
-            <div className={styles.overlayCard}>
-              <Typography variant="h2" className={styles.overlayTitle}>
-                📅 Day {round} Has Ended
-              </Typography>
-              <div className={styles.statRow}>
-                <span>Tax income:</span>
-                <span className={styles.positive}>+${lastRoundIncome}M</span>
-              </div>
-              <div className={styles.statRow}>
-                <span>Budget expenses:</span>
-                <span className={styles.negative}>-${lastRoundExpenses}M</span>
-              </div>
-              <div className={styles.statRow}>
-                <span>Net:</span>
-                <span className={lastRoundIncome - lastRoundExpenses >= 0 ? styles.positive : styles.negative}>
-                  {lastRoundIncome - lastRoundExpenses >= 0 ? '+' : ''}${lastRoundIncome - lastRoundExpenses}M
-                </span>
-              </div>
-              <Typography variant="body" className={styles.overlayMessage}>
-                You remain in power for another day.
-              </Typography>
-              <Button onClick={() => nextRound()}>
-                Continue to Day {round + 1} →
-              </Button>
-            </div>
-          </div>
-        )}
 
         {/* Lose Overlay */}
         {phase === 'lose' && (

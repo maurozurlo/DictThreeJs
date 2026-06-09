@@ -7,6 +7,10 @@ h1 {
     }
 }
 
+h2 {
+    color: var(--accent-muted);
+}
+
 p {
     margin: .5rem 0;
     color: var(--text-body);

@@ -13,6 +13,8 @@ export type RoundLogEntry = {
     lines: string[];
 };
 
+export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue';
+
 export type CameraState = {
     cameraPos: [number, number, number];
     cameraTarget?: Vector3;
@@ -48,6 +50,7 @@ export type GameState = {
         lastRoundIncome: number;
         lastRoundExpenses: number;
         timerStartedAt: number | null;
+        timerPausedAt: number | null;
         charisma: {
             current: number,
             adjustCharisma: (amount: number) => void;
@@ -105,6 +108,11 @@ export type GameState = {
         current: Record<Power, number>
         adjustRelations: (p: Power, a: number) => void;
     },
+    shop: {
+        frozenFactions: Set<Power>;
+        statueCount: number;
+        buy: (item: ShopItemId) => void;
+    };
     deals: {
         current: Deal | null,
         dealDecided: boolean,

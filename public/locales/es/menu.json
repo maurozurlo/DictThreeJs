@@ -26,7 +26,8 @@
         "loadGame": "Cargar partida",
         "settings": "Opciones",
         "help": "Ayuda",
-        "credits": "Créditos"
+        "credits": "Créditos",
+        "continue": "Continuar"
     },
     "budget": {
         "taxes": "Impuestos",
@@ -35,8 +36,9 @@
         "infrastructure": "Infraestructura",
         "security": "Seguridad",
         "education": "Educación",
-        "totalExpenses": "Gastos totales",
-        "totalTax": "Ingresos esperados",
+        "totalExpenses": "Gastos",
+        "totalTax": "Ingresos",
+        "net": "Neto",
         "peopleTax": "Población",
         "businessTax": "Empresas"
     },

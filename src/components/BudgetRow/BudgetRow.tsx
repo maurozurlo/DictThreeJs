@@ -12,9 +12,10 @@ type BudgetRowProps = {
     id: Expenditures | Taxes
     label: string
     isTax?: boolean
+    projectedValue?: string
 }
 
-export const BudgetRow = ({ id, label, isTax = false }: BudgetRowProps) => {
+export const BudgetRow = ({ id, label, isTax = false, projectedValue }: BudgetRowProps) => {
     const { t } = useTranslation();
     const value = useGameStore(s =>
         isTax ? s.budget.taxes[id as Taxes] : s.budget.expenditures[id as Expenditures]
@@ -39,6 +40,9 @@ export const BudgetRow = ({ id, label, isTax = false }: BudgetRowProps) => {
                 <Typography variant="body" color="accent">
                     {isTax ? TaxNumberFormatter(value) : ExpendNumberFormatter(value)}
                 </Typography>
+                {projectedValue && (
+                    <span style={{ opacity: 0.6, fontSize: '0.65rem' }}>≈ {projectedValue}</span>
+                )}
 
                 <Button onClick={() => adjust(id, 1)}>
                     <Icon type="plus" />

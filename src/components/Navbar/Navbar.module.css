@@ -36,3 +36,28 @@
     color: var(--text-color);
     font-size: 1rem;
 }
+
+.tabWrapper {
+    position: relative;
+}
+
+.dot {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 7px;
+    height: 7px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.gameTitleClickable {
+    cursor: pointer;
+    opacity: 0.85;
+
+    &:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+}

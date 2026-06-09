@@ -3,25 +3,30 @@ import type { TabProps } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next'
 import Typography from '../Typography/Typography'
 import { BudgetRow } from '../BudgetRow/BudgetRow'
-import { EXPENDITURES, ExpendNumberFormatter, MoneyNumberFormatter, TAXES } from '../../Constants/Budget'
+import { EXPENDITURES, TAXES } from '../../Constants/Budget'
 import { useGameStore } from '../../Stores/GameState'
 import TabLayout from './TabLayout'
+import { calculateRoundFinancials } from '../../Stores/BudgetHandler'
 
 
 const Budget = ({ isActive }: TabProps) => {
     const { t } = useTranslation();
-    const expenditures = useGameStore(s => s.budget.expenditures)
-    const totalExpenditures = Object.values(expenditures).reduce((a, b) => a + b, 0)
-    const taxes = useGameStore(s => s.budget.taxes)
-    const totalTax = Object.values(taxes).reduce((a, b) => a + b, 0) // TODO: Logic for this will require a formula, based on respect, charisma and difficulty maybe
+    const budget = useGameStore(s => s.budget)
+    const financials = calculateRoundFinancials(budget)
+    const net = financials.netChange
 
     return (
         <TabLayout
             headerTitle={t('tabs.budget')}
             sideMenu={<>
-                <Typography variant="h3">{t('budget.totalExpenses')}: {ExpendNumberFormatter(totalExpenditures)}</Typography>
+                <Typography variant="h3">{t('budget.totalTax')}: +${financials.totalIncome}m</Typography>
                 |
-                <Typography variant="h3">{t('budget.totalTax')}: {MoneyNumberFormatter(totalTax)}</Typography></>}
+                <Typography variant="h3">{t('budget.totalExpenses')}: -${financials.expenses}m</Typography>
+                |
+                <span style={{ fontFamily: 'inherit', fontSize: 'inherit', color: net >= 0 ? '#27ae60' : '#e74c3c' }}>
+                    {t('budget.net')}: {net >= 0 ? '+' : ''}${net}m
+                </span>
+            </>}
             isActive={isActive}>
             <div className={styles.columns}>
                 <div className={styles.column}>

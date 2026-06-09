@@ -26,7 +26,8 @@
     "loadGame": "Load Game",
     "settings": "Settings",
     "help": "Help",
-    "credits": "Credits"
+    "credits": "Credits",
+    "continue": "Continue"
   },
   "budget": {
     "taxes": "Taxes",
@@ -35,8 +36,9 @@
     "infrastructure": "Infrastructure",
     "security": "Security",
     "education": "Education",
-    "totalExpenses": "Total Expenses",
-    "totalTax": "Expected Income",
+    "totalExpenses": "Expenses",
+    "totalTax": "Income",
+    "net": "Net",
     "peopleTax": "People Tax",
     "businessTax": "Business Tax"
   },

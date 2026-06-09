@@ -16,13 +16,14 @@ export function useRoundTimer(): { displayTime: string } {
     const phase = useGameStore((s) => s.gameManagement.phase);
     const dayEnded = useGameStore((s) => s.gameManagement.dayEnded);
     const timerStartedAt = useGameStore((s) => s.gameManagement.timerStartedAt);
+    const timerPausedAt = useGameStore((s) => s.gameManagement.timerPausedAt);
     const expireTimer = useGameStore((s) => s.gameManagement.expireTimer);
 
     const [displayTime, setDisplayTime] = useState('9:00 AM');
     const expiredRef = useRef(false);
 
     useEffect(() => {
-        if (phase !== 'start' || dayEnded || !timerStartedAt) {
+        if (phase !== 'start' || dayEnded || !timerStartedAt || timerPausedAt !== null) {
             return;
         }
         expiredRef.current = false;
@@ -41,7 +42,7 @@ export function useRoundTimer(): { displayTime: string } {
         tick();
         const id = setInterval(tick, 1000);
         return () => clearInterval(id);
-    }, [phase, dayEnded, timerStartedAt, expireTimer]);
+    }, [phase, dayEnded, timerStartedAt, timerPausedAt, expireTimer]);
 
     return { displayTime };
 }

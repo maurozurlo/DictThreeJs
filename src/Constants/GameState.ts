@@ -113,7 +113,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         TIME_LENGTH_MS: 5 * 60 * 1000
     },
     TABS: {
-        START_TAB: Tabs.Log
+        START_TAB: Tabs.Menu
     },
     INCOME: {
         PEOPLE_BASE: 200,

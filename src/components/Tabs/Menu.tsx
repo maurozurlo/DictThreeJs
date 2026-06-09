@@ -7,15 +7,19 @@ import { useGameStore } from '../../Stores/GameState'
 import { useTranslation } from 'react-i18next'
 import { useRef } from 'react'
 import { importSave } from '../../Utils/SaveLoad'
+import { Tabs } from '../../types/Tabs'
 
 
 const Menu = ({ isActive }: TabProps) => {
     const setGamePhase = useGameStore((s) => s.gameManagement.setPhase);
+    const setActiveTab = useGameStore((s) => s.tabs.setActiveTab);
     const saveGame = useGameStore((s) => s.gameManagement.saveGame);
     const loadGame = useGameStore((s) => s.gameManagement.loadGame);
     const phase = useGameStore((s) => s.gameManagement.phase);
     const { t } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const isInGame = phase === 'start';
 
     const handleLoadClick = () => fileInputRef.current?.click();
 
@@ -40,8 +44,15 @@ const Menu = ({ isActive }: TabProps) => {
                 <hr />
 
                 <div className={styles.menuButtons}>
-                    <Button variant='primary' onClick={() => setGamePhase('start')}>{t('mainMenu.newGame')}</Button>
-                    {phase === 'start' && (
+                    {isInGame && (
+                        <Button variant='primary' onClick={() => setActiveTab(Tabs.Log)}>
+                            {t('mainMenu.continue')}
+                        </Button>
+                    )}
+                    <Button variant='primary' onClick={() => setGamePhase('start')}>
+                        {t('mainMenu.newGame')}
+                    </Button>
+                    {isInGame && (
                         <Button variant='primary' onClick={saveGame}>{t('mainMenu.saveGame')}</Button>
                     )}
                     <Button variant='primary' onClick={handleLoadClick}>{t('mainMenu.loadGame')}</Button>
