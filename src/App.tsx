@@ -26,6 +26,8 @@ export default function App() {
   const setPhase = useGameStore(s => s.gameManagement.setPhase)
   const treasury = useGameStore(s => s.budget.treasury)
   const relations = useGameStore(s => s.relations.current)
+  const specialEnding = useGameStore(s => s.specialEnding)
+  const meetCounts = useGameStore(s => s.gameManagement.meetCounts)
 
   return (
     <>
@@ -38,7 +40,7 @@ export default function App() {
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
 
         {/* Day-Ended Overlay */}
-        {dayEnded && phase !== 'lose' && phase !== 'victory' && (
+        {dayEnded && phase !== 'lose' && phase !== 'victory' && phase !== 'special_ending' && (
           <div className={styles.overlay}>
             <div className={styles.overlayCard}>
               <Typography variant="h2" className={styles.overlayTitle}>
@@ -87,6 +89,27 @@ export default function App() {
                 <span>People: {relations.people}</span>
               </div>
               <Button onClick={() => setPhase('start')}>New Game</Button>
+            </div>
+          </div>
+        )}
+
+        {/* Special Ending Overlay */}
+        {phase === 'special_ending' && (
+          <div className={clsx(styles.overlay, specialEnding.outcome === 'good' ? styles.victoryOverlay : styles.loseOverlay)}>
+            <div className={styles.overlayCard}>
+              <Typography variant="h2" className={styles.overlayTitle}>
+                {specialEnding.outcome === 'good' ? '★ A Different Path' : '✝ The End'}
+              </Typography>
+              <Typography variant="body" className={styles.overlayMessage}>
+                {endReason}
+              </Typography>
+              <div className={styles.finalRelations}>
+                <span>Military: {relations.military} ({meetCounts.military} meets)</span>
+                <span>Business: {relations.business} ({meetCounts.business} meets)</span>
+                <span>People: {relations.people} ({meetCounts.people} meets)</span>
+              </div>
+              <Typography variant="body">Final treasury: ${treasury}M</Typography>
+              <Button onClick={() => setPhase('start')}>Play Again</Button>
             </div>
           </div>
         )}

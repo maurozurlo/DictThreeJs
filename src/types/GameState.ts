@@ -24,7 +24,7 @@ export type CameraState = {
     setCameraPositions: (positions: Vector3[], targets?: Vector3[]) => void;
 };
 
-export type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose';
+export type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose' | 'special_ending';
 
 export type GameState = {
     debug: {
@@ -52,10 +52,18 @@ export type GameState = {
             current: number,
             adjustCharisma: (amount: number) => void;
         };
+        meetCounts: Record<Power, number>;
         nextRound: () => void;
         expireTimer: () => void;
         saveGame: () => void;
         loadGame: (data: Record<string, unknown>) => void;
+    };
+    specialEnding: {
+        available: boolean;
+        faction: Power | null;
+        used: boolean;
+        outcome: 'good' | 'bad' | null;
+        use: () => void;
     };
     dailyEvent: {
         current: DailyEvent | null;

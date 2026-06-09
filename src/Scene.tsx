@@ -7,6 +7,7 @@ import { useFreeCameraControls } from "./Hooks/useFreeCameraControls";
 import People from "./3d/People";
 import Elite from "./3d/Elite";
 import Military from "./3d/Military";
+import SecretRoom from "./3d/SecretRoom";
 import { useGameStore } from "./Stores/GameState";
 
 function CameraControllerFree() {
@@ -31,6 +32,7 @@ export function Scene() {
             <Elite />
             <People />
             <Military />
+            <SecretRoom />
         </Canvas>
     );
 }

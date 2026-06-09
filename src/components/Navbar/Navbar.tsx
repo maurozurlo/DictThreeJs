@@ -12,6 +12,7 @@ const Navbar = () => {
     const displayTabs = useGameStore((s) => s.tabs.activeTab) !== Tabs.Menu;
     const round = useGameStore(s => s.gameManagement.round)
     const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
+    const secretAvailable = useGameStore(s => s.specialEnding.available)
     const { t } = useTranslation();
 
     const tabConfig: { tab: Tabs, icon: IconType, label: string, disabled?: boolean }[] = [
@@ -20,6 +21,7 @@ const Navbar = () => {
         { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws'), disabled: tabsLocked },
         { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals'), disabled: tabsLocked },
         { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: tabsLocked },
+        ...(secretAvailable ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
     ];
 
 

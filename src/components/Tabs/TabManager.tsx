@@ -4,6 +4,7 @@ import Menu from './Menu';
 import Log from './Log'
 import Budget from './Budget';
 import Deals from './Deals';
+import Secret from './Secret';
 
 
 const TabManager = () => {
@@ -15,6 +16,7 @@ const TabManager = () => {
             <Log isActive={currentTab === Tabs.Log} />
             <Budget isActive={currentTab === Tabs.Budget} />
             <Deals isActive={currentTab === Tabs.Deals} />
+            <Secret isActive={currentTab === Tabs.Secret} />
         </>
     )
 }

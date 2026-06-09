@@ -111,8 +111,8 @@ export const INITIAL_STATE = ({ set, get }: {
         activeTab: GAMESTATE.TABS.START_TAB,
         tabsLocked: false,
         setActiveTab: (tab: Tabs) => {
-            // Don't allow tab switching when tabs are locked
-            if (get().tabs.tabsLocked) return;
+            // Secret tab bypasses lock; all others respect it
+            if (get().tabs.tabsLocked && tab !== Tabs.Secret) return;
 
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
@@ -123,6 +123,8 @@ export const INITIAL_STATE = ({ set, get }: {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
                 newCameraPos = cameraPositions[2];
+            } else if (tab === Tabs.Secret) {
+                newCameraPos = new Vector3(1.5, 0.7, 1.0);
             }
 
             set((state) => ({
@@ -294,6 +296,39 @@ export const INITIAL_STATE = ({ set, get }: {
             }, 0);
         },
     },
+    specialEnding: {
+        available: false,
+        faction: null,
+        used: false,
+        outcome: null,
+        use: () => {
+            const state = get();
+            if (state.specialEnding.used || !state.specialEnding.faction) return;
+            const charisma = state.gameManagement.charisma.current;
+            const goodChance = 0.5 + (charisma / 10) * 0.25;
+            const isGood = Math.random() < goodChance;
+            const faction = state.specialEnding.faction;
+            const narratives: Record<string, { good: string; bad: string }> = {
+                military: {
+                    good: "You press the button. A blinding flash illuminates the horizon. Hours later, the reports come in — the entire population has perished. Your enemies, your allies, everyone. You sit alone on a throne of ash. Emperor of the Wasteland.",
+                    bad: "You press the button. The missiles fly — but not toward your own people. The neighboring country is annihilated. The military erupts in celebration. You drink with them through the night. You never see the blade that finds your throat."
+                },
+                business: {
+                    good: "You seize the accounts and vanish. The jet is waiting, the beach house keys already in your pocket. You spend your final years in luxury, untouchable and forgotten. It was a good run.",
+                    bad: "You reach for the accounts. At the airport, uniformed men step forward. The money is counterfeit — a trap laid by the very people you trusted. You are taken to a cell. The official report says suicide."
+                },
+                people: {
+                    good: "You sit in the garden and, for the first time, let your guard down. Something has changed. You call for free elections. The people flood the streets. You watch from a window, surprised to feel relief. You live quietly for decades, tending your garden, until you die peacefully at ninety-four.",
+                    bad: "You close your eyes in the garden, finally at ease. The jasmine is beautiful. You never hear him coming. An anarchist steps from between the flowers. Your last thought is the smell of jasmine."
+                }
+            };
+            const endReason = isGood ? narratives[faction].good : narratives[faction].bad;
+            set((s) => ({
+                specialEnding: { ...s.specialEnding, used: true, outcome: isGood ? 'good' : 'bad' },
+                gameManagement: { ...s.gameManagement, phase: 'special_ending', endReason },
+            }));
+        }
+    },
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
         phase: 'idle',
@@ -302,6 +337,7 @@ export const INITIAL_STATE = ({ set, get }: {
         lastRoundIncome: 0,
         lastRoundExpenses: 0,
         timerStartedAt: null,
+        meetCounts: { military: 0, business: 0, people: 0 },
         setPhase: (phase) => {
             if (phase === 'start') {
                 return set((state) => {
@@ -326,6 +362,14 @@ export const INITIAL_STATE = ({ set, get }: {
                             endReason: null,
                             timerStartedAt: Date.now(),
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
+                            meetCounts: { military: 0, business: 0, people: 0 },
+                        },
+                        specialEnding: {
+                            ...state.specialEnding,
+                            available: false,
+                            faction: null,
+                            used: false,
+                            outcome: null,
                         },
                         relations: {
                             ...state.relations,
@@ -552,6 +596,18 @@ export const INITIAL_STATE = ({ set, get }: {
                 return;
             }
 
+            // --- 8.5. Unlock special ending at round 9 if any faction is at max ---
+            const factionsAtMax = (Object.keys(newRelations) as Power[]).filter(
+                p => newRelations[p] >= GAMESTATE.RELATIONS.MAX
+            );
+            let specialEndingFaction: Power | null = null;
+            if (newRound === 9 && factionsAtMax.length > 0 && !state.specialEnding.used) {
+                const counts = state.gameManagement.meetCounts;
+                specialEndingFaction = factionsAtMax.reduce((best, p) =>
+                    counts[p] >= counts[best] ? p : best
+                );
+            }
+
             // --- 9. Check for periodic event ---
             const periodicEvent = PERIODIC_EVENTS.find(e => e.round === newRound) ?? null;
             if (periodicEvent) {
@@ -584,7 +640,10 @@ export const INITIAL_STATE = ({ set, get }: {
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                    }
+                    },
+                    ...(specialEndingFaction ? {
+                        specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
+                    } : {}),
                 }));
                 return;
             }
@@ -624,7 +683,10 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundIncome: financials.totalIncome,
                     lastRoundExpenses: financials.expenses,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                }
+                },
+                ...(specialEndingFaction ? {
+                    specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
+                } : {}),
             }));
         },
         saveGame: () => {
@@ -733,6 +795,10 @@ export const INITIAL_STATE = ({ set, get }: {
                 gameManagement: {
                     ...state.gameManagement,
                     charisma: { ...state.gameManagement.charisma, current: newCharisma },
+                    meetCounts: actionTaken ? {
+                        ...state.gameManagement.meetCounts,
+                        [power]: state.gameManagement.meetCounts[power] + 1,
+                    } : state.gameManagement.meetCounts,
                 },
             };
             // Check if day is complete after action
