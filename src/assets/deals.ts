@@ -49,7 +49,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.6.acceptText',
         rejectText: 'deals.6.rejectText',
         acceptEffect: { treasury: -70, military: 3 },
-        rejectEffect: { military: -1 }
+        rejectEffect: { military: -2 }
     },
     {
         id: 7,
@@ -66,7 +66,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.8.acceptText',
         rejectText: 'deals.8.rejectText',
         acceptEffect: { treasury: -30, military: -1, business: 2 },
-        rejectEffect: { military: 1, business: -1 }
+        rejectEffect: { military: 1, business: -2 }
     },
     {
         id: 9,
@@ -74,7 +74,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.9.acceptText',
         rejectText: 'deals.9.rejectText',
         acceptEffect: { treasury: 100, business: 2, people: -2 },
-        rejectEffect: { business: -1 }
+        rejectEffect: { business: -2 }
     },
     {
         id: 10,
@@ -98,7 +98,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.12.acceptText',
         rejectText: 'deals.12.rejectText',
         acceptEffect: { treasury: 80, business: 1, risk: 0.25 },
-        rejectEffect: { business: -1 },
+        rejectEffect: { business: -2, military: -1 },
         riskText: 'deals.12.riskText'
     },
     {
@@ -107,7 +107,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.13.acceptText',
         rejectText: 'deals.13.rejectText',
         acceptEffect: { treasury: -20, people: 2 },
-        rejectEffect: { people: -1 }
+        rejectEffect: { people: -2 }
     },
     {
         id: 14,
@@ -115,7 +115,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.14.acceptText',
         rejectText: 'deals.14.rejectText',
         acceptEffect: { treasury: -60, people: 3 },
-        rejectEffect: { people: -1, military: 1 }
+        rejectEffect: { people: -2, military: 1 }
     },
     {
         id: 15,
@@ -123,7 +123,7 @@ export const DEALS: Deal[] = [
         acceptText: 'deals.15.acceptText',
         rejectText: 'deals.15.rejectText',
         acceptEffect: { people: 1, business: 1, risk: 0.3 },
-        rejectEffect: { people: -1 },
+        rejectEffect: { people: -2, business: -1 },
         riskText: 'deals.15.riskText'
     }
 ];

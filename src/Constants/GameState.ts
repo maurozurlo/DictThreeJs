@@ -117,7 +117,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     },
     INCOME: {
         PEOPLE_BASE: 200,
-        BUSINESS_BASE: 150,
+        BUSINESS_BASE: 180,
         EXPENDITURE_COST_PER_LEVEL: 10,
         TAX_PENALTY_PEOPLE_THRESHOLD: 30,
         TAX_PENALTY_BUSINESS_THRESHOLD: 45,
@@ -132,7 +132,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
             DIALOGUE: {
                 BASE_SUCCESS_RATE: {
                     military: 0.4,
-                    business: 0.2,
+                    business: 0.3,
                     people: 0.8
                 }
             },

@@ -232,4 +232,32 @@ export const DAILY_EVENTS: DailyEvent[] = [
         mod: 2,
         chance: 8
     },
+    {
+        power: "people",
+        key: "daily_events.national_holiday_celebration",
+        headline: "Citizens Celebrate National Holiday with Record Turnout",
+        mod: 1,
+        chance: 20
+    },
+    {
+        power: "people",
+        key: "daily_events.government_aid_praised",
+        headline: "Government Aid Reaches Remote Villages, Wins Public Praise",
+        mod: 1,
+        chance: 22
+    },
+    {
+        power: "people",
+        key: "daily_events.healthcare_clinic_opens",
+        headline: "New Healthcare Clinic Opens in Capital, Crowds Show Gratitude",
+        mod: 1,
+        chance: 20
+    },
+    {
+        power: "people",
+        key: "daily_events.student_grant_programme",
+        headline: "Student Grant Programme Hailed as Breakthrough by Families",
+        mod: 1,
+        chance: 18
+    },
 ];

@@ -91,7 +91,7 @@ function handleExpropriate(power: Power, state: GameState): ActionResult {
         resultText: { key: "expropriate_success", params: { power, gain } },
         treasuryUpdate: gain,
         actionTaken: true,
-        charismaDelta: 0,
+        charismaDelta: -1,
         newRelations: {
             ...state.relations.current,
             [power]: handleRelations({

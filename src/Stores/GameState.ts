@@ -397,9 +397,14 @@ export const INITIAL_STATE = ({ set, get }: {
             // Only penalise if the player didn't take a Meet action this round
             if (!state.meet.actionTaken.taken) {
                 const round = state.gameManagement.round;
+                // Cap penalty at -3 and apply only to the 2 lowest-relation factions
+                const penalty = Math.min(round, 3);
                 const newRelations = { ...state.relations.current };
-                PowerList.forEach((p) => {
-                    newRelations[p] = Clamp(newRelations[p] - round, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                const toPenalise = [...PowerList]
+                    .sort((a, b) => newRelations[a] - newRelations[b])
+                    .slice(0, 2);
+                toPenalise.forEach((p) => {
+                    newRelations[p] = Clamp(newRelations[p] - penalty, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
                 });
                 const newCharisma = Clamp(
                     state.gameManagement.charisma.current - 1,

@@ -63,7 +63,7 @@ export const LAWS: Law[] = [
         id: 8,
         label: "Increase military salaries",
         power: "military",
-        acceptEffect: { treasury: COSTS.MEDIUM, security: GAINS.MEDIUM },
+        acceptEffect: { treasury: -COSTS.MEDIUM, military: GAINS.SMALL, security: GAINS.MEDIUM },
         rejectEffect: { military: -GAINS.SMALL, business: GAINS.SMALL }
     },
     {
@@ -121,7 +121,7 @@ export const LAWS: Law[] = [
         id: 16,
         label: "Subsidize major industries",
         power: "business",
-        acceptEffect: { treasury: COSTS.LARGE, people: -GAINS.SMALL, business: GAINS.SMALL },
+        acceptEffect: { treasury: -COSTS.LARGE, people: -GAINS.SMALL, business: GAINS.SMALL },
         rejectEffect: { business: -GAINS.SMALL, military: GAINS.SMALL }
     },
     {
