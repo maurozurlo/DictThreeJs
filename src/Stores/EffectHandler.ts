@@ -1,4 +1,5 @@
 import type { GameState } from "../types/GameState";
+import i18n from '../i18n';
 import type { Deal } from "../types/Deal";
 import type { Law } from "../types/Law";
 import { Clamp, getRandomFromList } from "../Utils/Math";
@@ -26,30 +27,30 @@ export function applyBudgetEffects(
     // Security budget effects
     if (budget.expenditures.security < BUDGET_EFFECTS.SECURITY.LOW) {
         cur.military = Clamp(cur.military - 2, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push("Military complains about underfunding! Military relation -2");
+        logMessages.push(i18n.t('log.budget_military_low'));
     } else if (budget.expenditures.security > BUDGET_EFFECTS.SECURITY.HIGH) {
         cur.military = Clamp(cur.military + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push("Military feels well-funded! Military relation +1");
+        logMessages.push(i18n.t('log.budget_military_high'));
     }
 
     // Health budget effects
     if (budget.expenditures.health < BUDGET_EFFECTS.HEALTH.LOW) {
         cur.people = Clamp(cur.people - 2, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push("Health services are failing! People relation -2");
+        logMessages.push(i18n.t('log.budget_health_low'));
     } else if (budget.expenditures.health > BUDGET_EFFECTS.HEALTH.HIGH) {
         cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push("Health system praised! People relation +1");
+        logMessages.push(i18n.t('log.budget_health_high'));
     }
 
     // Infrastructure budget effects
     if (budget.expenditures.infrastructure < BUDGET_EFFECTS.INFRASTRUCTURE.LOW) {
         cur.business = Clamp(cur.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         cur.people = Clamp(cur.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push("Infrastructure failing! People & Business relation -1");
+        logMessages.push(i18n.t('log.budget_infra_low'));
     } else if (budget.expenditures.infrastructure > BUDGET_EFFECTS.INFRASTRUCTURE.HIGH) {
         cur.business = Clamp(cur.business + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push("Infrastructure praised! People & Business relation +1");
+        logMessages.push(i18n.t('log.budget_infra_high'));
     }
 
     return { newRelations: cur, logMessages };

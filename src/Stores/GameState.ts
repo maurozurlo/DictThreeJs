@@ -561,12 +561,12 @@ export const INITIAL_STATE = ({ set, get }: {
             if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
                 newRelations.people = Clamp(newRelations.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
                 newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-                taxMessages.push("High people taxes causing unrest! People relation -1");
+                taxMessages.push(i18n.t('log.tax_penalty_people'));
             }
             if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
                 newRelations.business = Clamp(newRelations.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
                 newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-                taxMessages.push("High business taxes angering elites! Business relation -1");
+                taxMessages.push(i18n.t('log.tax_penalty_business'));
             }
 
             // --- 4. Daily event effect (Plan D) ---
@@ -584,20 +584,22 @@ export const INITIAL_STATE = ({ set, get }: {
             // --- 5. Build log entry ---
             const logLines: string[] = [];
             if (state.law.lawDecided && state.law.current) {
-                const verb = state.law.lastLawOutcome ? "Passed" : "Rejected";
-                logLines.push(`${verb} law: ${i18n.t(`laws.labels.${state.law.current.id}`, { ns: 'laws' })}`);
+                const verbKey = state.law.lastLawOutcome ? 'log.passed_law' : 'log.rejected_law';
+                logLines.push(i18n.t(verbKey, { label: i18n.t(`laws.labels.${state.law.current.id}`, { ns: 'laws' }) }));
             }
             if (state.deals.dealDecided && state.deals.current) {
-                const verb = state.deals.lastDealAccepted ? "Accepted" : "Declined";
-                logLines.push(`${verb} the proposed deal`);
+                logLines.push(i18n.t(state.deals.lastDealAccepted ? 'log.accepted_deal' : 'log.declined_deal'));
             }
             if (state.meet.actionTaken.taken && state.meet.actionTaken.power && state.meet.actionTaken.type) {
-                logLines.push(`Met with ${state.meet.actionTaken.power}: ${state.meet.actionTaken.type}`);
+                logLines.push(i18n.t('log.met_with', {
+                    power: i18n.t(`power.${state.meet.actionTaken.power}`),
+                    action: i18n.t(`meet.${state.meet.actionTaken.type}`),
+                }));
             }
-            logLines.push(`Collected $${financials.totalIncome}M, Paid $${financials.expenses}M`);
+            logLines.push(i18n.t('log.financials', { income: financials.totalIncome, expenses: financials.expenses }));
             logLines.push(...logMessages, ...taxMessages, ...eventMessages);
-            if (newCharisma > state.gameManagement.charisma.current) logLines.push("Charisma improving");
-            else if (newCharisma < state.gameManagement.charisma.current) logLines.push("Charisma dropping");
+            if (newCharisma > state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_up'));
+            else if (newCharisma < state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_down'));
             const newLog = [...state.log, { date: getGameDate(state.gameManagement.round), lines: logLines }];
 
             // --- 6. Increment round, draw next daily event ---
