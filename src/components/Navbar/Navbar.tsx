@@ -4,7 +4,6 @@ import Button from '../Button/Button'
 import { Icon, type IconType } from '../Icon/Icon'
 import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
-import LanguageSwitcher from '../LanguageSwitcher'
 import { useTranslation } from 'react-i18next';
 import { GAMESTATE } from '../../Constants/GameState'
 
@@ -71,7 +70,6 @@ const Navbar = () => {
             )}
 
             <div className={styles.gameInfo}>
-                <LanguageSwitcher />
                 {displayTabs && <div>{t('nav.rounds')}: {round}/{GAMESTATE.ROUNDS.MAX}</div>}
             </div>
         </header>

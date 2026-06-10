@@ -5,7 +5,7 @@ import Typography from '../Typography/Typography'
 import Button from '../Button/Button'
 import { useGameStore } from '../../Stores/GameState'
 import { useTranslation } from 'react-i18next'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { importSave } from '../../Utils/SaveLoad'
 import { Tabs } from '../../types/Tabs'
 
@@ -16,8 +16,9 @@ const Menu = ({ isActive }: TabProps) => {
     const saveGame = useGameStore((s) => s.gameManagement.saveGame);
     const loadGame = useGameStore((s) => s.gameManagement.loadGame);
     const phase = useGameStore((s) => s.gameManagement.phase);
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showSettings, setShowSettings] = useState(false);
 
     const isInGame = phase === 'start';
 
@@ -57,7 +58,27 @@ const Menu = ({ isActive }: TabProps) => {
                     )}
                     <Button variant='primary' onClick={handleLoadClick}>{t('mainMenu.loadGame')}</Button>
                     <Button variant='primary'>{t('mainMenu.help')}</Button>
-                    <Button variant='primary'>{t('mainMenu.settings')}</Button>
+                    <Button variant='primary' onClick={() => setShowSettings(s => !s)}>
+                        {t('mainMenu.settings')}
+                    </Button>
+
+                    {showSettings && (
+                        <div className={styles.settingsPanel}>
+                            <div className={styles.settingsRow}>
+                                <label htmlFor="lang-select">{t('mainMenu.language')}</label>
+                                <select
+                                    id="lang-select"
+                                    className={styles.settingsSelect}
+                                    value={i18n.language.startsWith('es') ? 'es' : 'en'}
+                                    onChange={e => i18n.changeLanguage(e.target.value)}
+                                >
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                </select>
+                            </div>
+                        </div>
+                    )}
+
                     <Button variant='primary'>{t('mainMenu.credits')}</Button>
                 </div>
 

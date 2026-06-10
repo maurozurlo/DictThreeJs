@@ -41,7 +41,8 @@
     "settings": "Settings",
     "help": "Help",
     "credits": "Credits",
-    "continue": "Continue"
+    "continue": "Continue",
+    "language": "Language"
   },
   "budget": {
     "taxes": "Taxes",
