@@ -30,7 +30,7 @@
 #   Superseded entries:     Grep pattern="status: superseded"
 
 version: 1
-last_updated: ""
+last_updated: "2026-06-10 (ADR-0003)"
 
 # ─── STATE OWNERSHIP ─────────────────────────────────────────────────────────
 # Who is the authoritative owner of each piece of shared game state.
@@ -43,7 +43,18 @@ last_updated: ""
 # interface: how other systems access this state (read-only property, method call,
 #   signal, shared resource, etc.) — this is the contract other ADRs depend on.
 
-state_ownership: []
+state_ownership:
+  - state: game_state
+    status: active
+    owner_system: useGameStore
+    adr: docs/architecture/adr-0002-state-management-pattern.md
+    interface: "useGameStore(selector) — components subscribe via selector; direct store.getState() access outside handlers is forbidden"
+    write_access: store-action-methods-only
+    referenced_by:
+      - docs/architecture/adr-0001-tech-stack-choice.md
+      - docs/architecture/adr-0002-state-management-pattern.md
+    added: 2026-06-10
+    revised: ""
 
 # Example:
 #
@@ -71,7 +82,20 @@ state_ownership: []
 #
 # pattern options: signal | direct_call | event_bus | shared_resource | rpc | none
 
-interfaces: []
+interfaces:
+  - contract: camera_position_write
+    status: active
+    pattern: shared_resource
+    producer: UI layer (setActiveTab in GameState.ts)
+    consumers:
+      - CameraController.tsx (reads via useFrame, lerps toward target)
+    adr: docs/architecture/adr-0003-react-threejs-integration.md
+    signal_signature: "scene.camera.cameraPos: [number, number, number] — always a tuple, never a Vector3"
+    referenced_by:
+      - docs/architecture/adr-0001-tech-stack-choice.md
+      - docs/architecture/adr-0003-react-threejs-integration.md
+    added: 2026-06-10
+    revised: ""
 
 # Example:
 #
@@ -131,7 +155,29 @@ performance_budgets: []
 # Register an API decision when the choice is non-obvious and other ADRs might
 # make a different choice for the same purpose without knowing this was decided.
 
-api_decisions: []
+api_decisions:
+  - purpose: store_access
+    status: active
+    api: useGameStore(selector)
+    not: direct store import or accessing store.getState() outside handlers
+    adr: docs/architecture/adr-0001-tech-stack-choice.md
+    reason: "Fine-grained selectors prevent full-tree re-renders; components subscribe only to the slice they need"
+    referenced_by:
+      - docs/architecture/adr-0001-tech-stack-choice.md
+    added: 2026-06-10
+    revised: ""
+
+  - purpose: 3d_rendering
+    status: active
+    api: React Three Fiber (@react-three/fiber) + @react-three/drei
+    not: Raw Three.js without R3F
+    adr: docs/architecture/adr-0001-tech-stack-choice.md
+    reason: "R3F integrates with React Suspense and hooks, keeping 3D scene in the same component model as UI; drei provides camera helpers and loaders"
+    referenced_by:
+      - docs/architecture/adr-0001-tech-stack-choice.md
+      - docs/architecture/adr-0003-react-threejs-integration.md
+    added: 2026-06-10
+    revised: "2026-06-10 — corrected from 'raw Three.js' after reading Scene.tsx"
 
 # Example:
 #
@@ -157,7 +203,41 @@ api_decisions: []
 # Register a pattern when an ADR explicitly bans it AND other ADRs might
 # unknowingly use it (i.e., it's a tempting but wrong approach for this project).
 
-forbidden_patterns: []
+forbidden_patterns:
+  - pattern: any_in_handler_files
+    status: active
+    description: "TypeScript `any` type is banned in Handler files (BudgetHandler, ActionHandler, EffectHandler, DailyEventHandler, and any future *Handler.ts files)."
+    why: "Handlers contain the core game logic and must be fully type-safe. `any` breaks the contract that handler functions are testable pure functions."
+    adr: docs/architecture/adr-0001-tech-stack-choice.md
+    added: 2026-06-10
+
+  - pattern: full_store_selector
+    status: active
+    description: "Components must never select the entire Zustand store object (e.g., `useGameStore(s => s)` or `useGameStore()` with no selector)."
+    why: "Full-store selectors cause the component to re-render on every state change regardless of relevance, negating Zustand's fine-grained subscription benefit."
+    adr: docs/architecture/adr-0001-tech-stack-choice.md
+    added: 2026-06-10
+
+  - pattern: handler_store_import
+    status: active
+    description: "Handler files (*Handler.ts) must not import from Stores/GameState.ts or call useGameStore directly."
+    why: "Handlers must be pure functions testable without instantiating the store. Store coupling makes them impossible to unit-test in isolation."
+    adr: docs/architecture/adr-0002-state-management-pattern.md
+    added: 2026-06-10
+
+  - pattern: inline_business_logic_in_set
+    status: active
+    description: "Multi-step business logic (formulas, probability, multi-faction effects) must not be written inline inside set() callbacks. Extract to a Handler function."
+    why: "Inline logic in set() callbacks is untestable, hard to read, and creates the same problem as monolithic reducers — the reason the Handler pattern exists."
+    adr: docs/architecture/adr-0002-state-management-pattern.md
+    added: 2026-06-10
+
+  - pattern: ui_imports_3d
+    status: active
+    description: "UI components (src/components/, src/Features/, src/Tabs/) must not import from src/3d/."
+    why: "The 3D layer is a visual output driven by Zustand state. UI components should write to the store, not reach into the 3D layer directly. Cross-imports create bidirectional coupling that breaks when the scene is refactored."
+    adr: docs/architecture/adr-0003-react-threejs-integration.md
+    added: 2026-06-10
 
 # Example:
 #

@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   test: {
     coverage: {
-      enabled: true,
       provider: 'v8' // or 'istanbul'
     },
   }

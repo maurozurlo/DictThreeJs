@@ -24,33 +24,168 @@
 #
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
-version: 1
-last_updated: ""
+version: 2
+last_updated: "2026-06-10"
 
-requirements: []
+requirements:
+  # --- Platform ---
+  - id: TR-platform-001
+    system: platform
+    gdd: design/gdd/game-concept.md
+    requirement: "Browser deployment — no install, static build"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-platform-002
+    system: platform
+    gdd: design/gdd/game-concept.md
+    requirement: "i18n multi-language support"
+    created: 2026-06-10
+    revised: ""
+    status: active
 
-# --- EXAMPLE ENTRIES (remove when first real entries are added) ---
-#
-# - id: TR-combat-001
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Player takes damage from enemies based on attack power minus defence"
-#   created: 2026-03-10
-#   revised: ""
-#   status: active
-#
-# - id: TR-combat-002
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Combo window timing is 0.4 seconds between hits"
-#   created: 2026-03-10
-#   revised: "2026-04-01"
-#   status: active
-#
-# - id: TR-combat-003
-#   system: combat
-#   gdd: design/gdd/combat-system.md
-#   requirement: "Old damage formula using raw stats"
-#   created: 2026-03-10
-#   revised: ""
-#   status: superseded-by: TR-combat-001
+  # --- Save / Load ---
+  - id: TR-save-001
+    system: save
+    gdd: design/gdd/game-concept.md
+    requirement: "JSON export/import save and load"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-save-002
+    system: save
+    gdd: design/gdd/game-concept.md
+    requirement: "Set<> state types serialized to arrays for persistence"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-save-003
+    system: save
+    gdd: design/gdd/game-concept.md
+    requirement: "Relations history tracked per round and persisted for end-game stats screen"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- State Management ---
+  - id: TR-state-001
+    system: state
+    gdd: design/gdd/game-concept.md
+    requirement: "15+ nested state namespaces with atomic multi-slice round resolution"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-state-002
+    system: state
+    gdd: design/gdd/game-concept.md
+    requirement: "Core game formulas are pure functions and independently unit-testable"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-state-003
+    system: state
+    gdd: design/gdd/game-concept.md
+    requirement: "Round resolution is deterministic for identical inputs"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- Budget ---
+  - id: TR-budget-001
+    system: budget
+    gdd: design/gdd/game-concept.md
+    requirement: "Income, expense, and tax-penalty formulas per round"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- Relations ---
+  - id: TR-relations-001
+    system: relations
+    gdd: design/gdd/game-concept.md
+    requirement: "Faction relations range -10..+10; -10 triggers overthrow game-over"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- Charisma ---
+  - id: TR-charisma-001
+    system: charisma
+    gdd: design/gdd/game-concept.md
+    requirement: "Charisma meta-resource -10..+10 with effects on dialogue, backlash, ending"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- Meet Actions ---
+  - id: TR-meet-001
+    system: meet
+    gdd: design/gdd/game-concept.md
+    requirement: "Clicking a faction representative in the 3D Meet view initiates interaction"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-meet-002
+    system: meet
+    gdd: design/gdd/game-concept.md
+    requirement: "Meet action outcomes (Dialogue, Bribe, Expropriate, Eliminate) with effects"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- RNG / Determinism ---
+  - id: TR-rng-001
+    system: rng
+    gdd: design/gdd/game-concept.md
+    requirement: "Probability mechanics (dialogue success, eliminate backlash, daily/mini events, special ending) require an RNG strategy compatible with the determinism requirement"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- Events ---
+  - id: TR-events-001
+    system: events
+    gdd: design/gdd/game-concept.md
+    requirement: "Event scheduling — daily random, periodic scripted at fixed rounds (3/6/9), mini-challenge 40% chance; periodic events lock tabs"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- Timer ---
+  - id: TR-timer-001
+    system: timer
+    gdd: design/gdd/game-concept.md
+    requirement: "Real-time per-round countdown timer; expiry without a Meet action penalizes the two weakest factions"
+    created: 2026-06-10
+    revised: ""
+    status: active
+
+  # --- 3D Scene ---
+  - id: TR-scene-001
+    system: scene
+    gdd: design/gdd/game-concept.md
+    requirement: "Tab switching drives the camera to contextually relevant positions with smooth lerp"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-scene-002
+    system: scene
+    gdd: design/gdd/game-concept.md
+    requirement: "Purchased statues are visible in the 3D scene, driven by shop.statueCount"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-scene-003
+    system: scene
+    gdd: design/gdd/game-concept.md
+    requirement: "Street View visualization reflecting country state (planned/deferred)"
+    created: 2026-06-10
+    revised: ""
+    status: active
+  - id: TR-scene-004
+    system: scene
+    gdd: design/gdd/game-concept.md
+    requirement: "Debug free-camera with WASD/mouse-look bypassing tab-driven positions"
+    created: 2026-06-10
+    revised: ""
+    status: active
