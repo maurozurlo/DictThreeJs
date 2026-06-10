@@ -110,7 +110,7 @@ describe('handleDecision', () => {
         it('should accept a law and apply effects', () => {
             const law: Law = {
                 id: 1,
-                label: 'Test Law',
+
                 power: 'military',
                 acceptEffect: { treasury: -50, military: 2, business: -1 },
                 rejectEffect: { military: -1 }
@@ -140,7 +140,7 @@ describe('handleDecision', () => {
         it('should reject a law and apply reject effects', () => {
             const law: Law = {
                 id: 1,
-                label: 'Test Law',
+
                 power: 'military',
                 acceptEffect: { treasury: -50, military: 2 },
                 rejectEffect: { military: -1, people: 1 }
@@ -317,7 +317,7 @@ describe('handleDecision', () => {
 
             const law: Law = {
                 id: 1,
-                label: 'Test Law',
+
                 power: 'military',
                 acceptEffect: { military: 5 },
                 rejectEffect: {}
@@ -340,7 +340,7 @@ describe('handleDecision', () => {
 
             const law: Law = {
                 id: 1,
-                label: 'Test Law',
+
                 power: 'people',
                 acceptEffect: { people: -5 },
                 rejectEffect: {}

@@ -5,7 +5,6 @@ export type LawEffect = Partial<Record<Power | 'treasury' | 'risk' | Taxes | Exp
 
 export type Law = {
     id: number;
-    label: string;
     power: Power;
     acceptEffect: LawEffect;
     rejectEffect: LawEffect;

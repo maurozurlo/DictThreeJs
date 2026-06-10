@@ -13,11 +13,13 @@ import { getGameDate } from '../../Utils/GameDate'
 
 const Log = ({ isActive }: TabProps) => {
     const { t } = useTranslation()
+    const { t: dailyEventT } = useTranslation('daily_events')
     const periodicEvent = useGameStore((s) => s.periodicEvent)
     const miniChallenge = useGameStore((s) => s.miniChallenge)
     const logEntries = useGameStore((s) => s.log)
     const round = useGameStore((s) => s.gameManagement.round)
-    const dailyEventHeadline = useGameStore((s) => s.dailyEvent.current?.headline)
+    const dailyEventKey = useGameStore((s) => s.dailyEvent.current?.key)
+    const dailyEventHeadline = dailyEventKey ? dailyEventT(dailyEventKey) : undefined
 
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>

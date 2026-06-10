@@ -13,6 +13,7 @@ import { handleActionOutcome } from "./ActionHandler";
 import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import { PERIODIC_EVENTS } from "../assets/periodicEvents";
 import { MINI_CHALLENGES } from "../assets/miniChallenges";
+import i18n from '../i18n';
 import type { Power } from "../types/Power";
 import { getRandomDailyEvent } from "./DailyEventHandler";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
@@ -577,14 +578,14 @@ export const INITIAL_STATE = ({ set, get }: {
                     GAMESTATE.RELATIONS.MIN,
                     GAMESTATE.RELATIONS.MAX
                 );
-                eventMessages.push(currentEvent.headline);
+                eventMessages.push(i18n.t(currentEvent.key, { ns: 'daily_events' }));
             }
 
             // --- 5. Build log entry ---
             const logLines: string[] = [];
             if (state.law.lawDecided && state.law.current) {
                 const verb = state.law.lastLawOutcome ? "Passed" : "Rejected";
-                logLines.push(`${verb} law: ${state.law.current.label}`);
+                logLines.push(`${verb} law: ${i18n.t(`laws.labels.${state.law.current.id}`, { ns: 'laws' })}`);
             }
             if (state.deals.dealDecided && state.deals.current) {
                 const verb = state.deals.lastDealAccepted ? "Accepted" : "Declined";

@@ -28,7 +28,7 @@ const DictatorHands = () => {
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className={styles.contentLine} style={{ width: `${Math.random() * 30 + 10}%` }}></div>
                     ))}
-                    <Typography variant='body' color='dark'>{currentLaw.label}</Typography>
+                    <Typography variant='body' color='dark'>{t(`laws.labels.${currentLaw.id}`)}</Typography>
                     {[...Array(36)].map((_, i) => (
                         <div key={i} className={styles.contentLine} style={{ width: `${Math.random() * 30 + 10}%` }}></div>
                     ))}
