@@ -74,7 +74,7 @@ const Log = ({ isActive }: TabProps) => {
                             <div className={eventStyles.optionsGrid}>
                                 {periodicEvent.current.options.map((opt, i) => (
                                     <Button key={i} onClick={() => periodicEvent.resolve(i)}>
-                                        {periodicT(`${periodicEvent.current.id}.options.${opt.id}.text`)}
+                                        {periodicT(`${periodicEvent.current!.id}.options.${opt.id}.text`)}
                                     </Button>
                                 ))}
                             </div>
