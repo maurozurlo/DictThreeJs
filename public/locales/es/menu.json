@@ -93,5 +93,9 @@
     },
     "nav": {
         "rounds": "Rondas"
+    },
+    "currency": {
+        "symbol": "$",
+        "unit": "m"
     }
 }

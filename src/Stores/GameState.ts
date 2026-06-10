@@ -880,8 +880,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     actionOutcomeText: (savedMeet.actionOutcomeText as typeof s.meet.actionOutcomeText) ?? null,
                     selectedPower: 'none',
                 },
-                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
-                miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
+                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultKey: null },
+                miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null },
                 tabs: { ...s.tabs, activeTab: (data.tabs as Record<string, unknown>)?.activeTab as Tabs ?? Tabs.Log, tabsLocked: false },
                 shop: {
                     ...s.shop,

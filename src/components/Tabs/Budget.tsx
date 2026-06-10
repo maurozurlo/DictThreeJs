@@ -3,7 +3,7 @@ import type { TabProps } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next'
 import Typography from '../Typography/Typography'
 import { BudgetRow } from '../BudgetRow/BudgetRow'
-import { EXPENDITURES, TAXES } from '../../Constants/Budget'
+import { EXPENDITURES, TAXES, MoneyNumberFormatter } from '../../Constants/Budget'
 import { useGameStore } from '../../Stores/GameState'
 import TabLayout from './TabLayout'
 import { calculateRoundFinancials } from '../../Stores/BudgetHandler'
@@ -19,12 +19,12 @@ const Budget = ({ isActive }: TabProps) => {
         <TabLayout
             headerTitle={t('tabs.budget')}
             sideMenu={<>
-                <Typography variant="h3">{t('budget.totalTax')}: +${financials.totalIncome}m</Typography>
+                <Typography variant="h3">{t('budget.totalTax')}: +{MoneyNumberFormatter(financials.totalIncome)}</Typography>
                 |
-                <Typography variant="h3">{t('budget.totalExpenses')}: -${financials.expenses}m</Typography>
+                <Typography variant="h3">{t('budget.totalExpenses')}: -{MoneyNumberFormatter(financials.expenses)}</Typography>
                 |
                 <span style={{ fontFamily: 'inherit', fontSize: 'inherit', color: net >= 0 ? '#27ae60' : '#e74c3c' }}>
-                    {t('budget.net')}: {net >= 0 ? '+' : ''}${net}m
+                    {t('budget.net')}: {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
                 </span>
             </>}
             isActive={isActive}>

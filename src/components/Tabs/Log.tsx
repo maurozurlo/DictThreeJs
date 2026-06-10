@@ -46,7 +46,14 @@ const Log = ({ isActive }: TabProps) => {
                         ) : (
                             <div className={eventStyles.resultCard}>
                                 <Card>
-                                    <Typography variant='body'>{miniChallenge.resultText}</Typography>
+                                    <Typography variant='body'>
+                                        {miniChallenge.resultKey ? miniT(miniChallenge.resultKey) : null}
+                                    </Typography>
+                                    {miniChallenge.riskTriggered && (
+                                        <Typography variant='body'>
+                                            {miniT(`${miniChallenge.current.id}.risk`)}
+                                        </Typography>
+                                    )}
                                 </Card>
                             </div>
                         )}
@@ -74,7 +81,9 @@ const Log = ({ isActive }: TabProps) => {
                         ) : (
                             <div className={eventStyles.resultCard}>
                                 <Card>
-                                    <Typography variant='body'>{periodicEvent.resultText}</Typography>
+                                    <Typography variant='body'>
+                                        {periodicEvent.resultKey ? periodicT(periodicEvent.resultKey) : null}
+                                    </Typography>
                                 </Card>
                             </div>
                         )}

@@ -143,28 +143,28 @@ const ActionPanel = () => {
                         <Typography variant="h2" color="accent">{t('actionPanel.day_ended', { round })}</Typography>
                         <div className={styles.skipStatRow}>
                             <span>{t('actionPanel.tax_income')}</span>
-                            <span className={styles.positive}>+${lastRoundIncome}M</span>
+                            <span className={styles.positive}>+{MoneyNumberFormatter(lastRoundIncome)}</span>
                         </div>
                         {extraIncome > 0 && (
                             <div className={styles.skipStatRow}>
                                 <span>{t('actionPanel.bonus_income')}</span>
-                                <span className={styles.positive}>+${extraIncome}M</span>
+                                <span className={styles.positive}>+{MoneyNumberFormatter(extraIncome)}</span>
                             </div>
                         )}
                         <div className={styles.skipStatRow}>
                             <span>{t('actionPanel.budget_expenses')}</span>
-                            <span className={styles.negative}>-${lastRoundExpenses}M</span>
+                            <span className={styles.negative}>-{MoneyNumberFormatter(lastRoundExpenses)}</span>
                         </div>
                         {extraExpenses > 0 && (
                             <div className={styles.skipStatRow}>
                                 <span>{t('actionPanel.extra_expenses')}</span>
-                                <span className={styles.negative}>-${extraExpenses}M</span>
+                                <span className={styles.negative}>-{MoneyNumberFormatter(extraExpenses)}</span>
                             </div>
                         )}
                         <div className={styles.skipStatRow}>
                             <span>{t('actionPanel.net')}</span>
                             <span className={net >= 0 ? styles.positive : styles.negative}>
-                                {net >= 0 ? '+' : ''}${net}M
+                                {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
                             </span>
                         </div>
                         <Button onClick={nextRound}>
@@ -180,16 +180,16 @@ const ActionPanel = () => {
                         <Typography variant="h2">{t('actionPanel.day_ended', { round })}</Typography>
                         <div className={styles.skipStatRow}>
                             <span>{t('actionPanel.tax_income')}</span>
-                            <span className={styles.positive}>+${projected.totalIncome}M</span>
+                            <span className={styles.positive}>+{MoneyNumberFormatter(projected.totalIncome)}</span>
                         </div>
                         <div className={styles.skipStatRow}>
                             <span>{t('actionPanel.budget_expenses')}</span>
-                            <span className={styles.negative}>-${projected.expenses}M</span>
+                            <span className={styles.negative}>-{MoneyNumberFormatter(projected.expenses)}</span>
                         </div>
                         <div className={styles.skipStatRow}>
                             <span>{t('actionPanel.net')}</span>
                             <span className={projectedNet >= 0 ? styles.positive : styles.negative}>
-                                {projectedNet >= 0 ? '+' : ''}${projectedNet}M
+                                {projectedNet >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(projectedNet))}
                             </span>
                         </div>
                         <Button onClick={handleSkipModalContinue}>

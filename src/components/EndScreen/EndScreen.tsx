@@ -5,6 +5,7 @@ import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import styles from './EndScreen.module.css'
 import { useTranslation } from 'react-i18next'
+import { MoneyNumberFormatter } from '../../Constants/Budget'
 
 type Tier = {
     tier: string
@@ -135,12 +136,12 @@ const EndScreen = () => {
 
                     {/* Treasury */}
                     <Section title={t('endscreen.sections.treasury')}>
-                        <StatRow label={t('endscreen.stats.final')} value={`$${treasury}M`} positive={treasury > 0} />
-                        <StatRow label={t('endscreen.stats.peak')} value={`$${stats.peakTreasury}M`} positive={true} />
-                        <StatRow label={t('endscreen.stats.lowest')} value={`$${stats.lowestTreasury}M`} positive={stats.lowestTreasury > 0} />
-                        <StatRow label={t('endscreen.stats.total_earned')} value={`$${stats.totalIncomeEarned + stats.totalExtrasEarned}M`} />
-                        <StatRow label={t('endscreen.stats.total_spent')} value={`$${stats.totalExpensesSpent + stats.totalExtrasSpent}M`} />
-                        <StatRow label={t('endscreen.stats.net')} value={`${totalNet >= 0 ? '+' : ''}$${totalNet}M`} positive={totalNet >= 0} />
+                        <StatRow label={t('endscreen.stats.final')} value={MoneyNumberFormatter(treasury)} positive={treasury > 0} />
+                        <StatRow label={t('endscreen.stats.peak')} value={MoneyNumberFormatter(stats.peakTreasury)} positive={true} />
+                        <StatRow label={t('endscreen.stats.lowest')} value={MoneyNumberFormatter(stats.lowestTreasury)} positive={stats.lowestTreasury > 0} />
+                        <StatRow label={t('endscreen.stats.total_earned')} value={MoneyNumberFormatter(stats.totalIncomeEarned + stats.totalExtrasEarned)} />
+                        <StatRow label={t('endscreen.stats.total_spent')} value={MoneyNumberFormatter(stats.totalExpensesSpent + stats.totalExtrasSpent)} />
+                        <StatRow label={t('endscreen.stats.net')} value={`${totalNet >= 0 ? '+' : '-'}${MoneyNumberFormatter(Math.abs(totalNet))}`} positive={totalNet >= 0} />
                     </Section>
 
                     {/* Decisions */}
