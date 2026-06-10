@@ -164,9 +164,9 @@ requirements:
   - id: TR-scene-001
     system: scene
     gdd: design/gdd/game-concept.md
-    requirement: "Tab switching drives the camera to contextually relevant positions with smooth lerp"
+    requirement: "Tab switching drives the camera to contextually relevant positions; transitions use a fade-to-black overlay on the tab content panel (~200ms) with instant camera teleport at peak opacity"
     created: 2026-06-10
-    revised: ""
+    revised: "2026-06-10"
     status: active
   - id: TR-scene-002
     system: scene

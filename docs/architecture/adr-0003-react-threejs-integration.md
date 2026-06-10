@@ -1,7 +1,7 @@
 # ADR-0003: React / Three.js Integration — R3F Canvas Boundary and Zustand Camera Bridge
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-06-10
@@ -37,7 +37,10 @@ without creating circular dependencies between the UI and rendering layers.
 ### Constraints
 - UI components must not import from `src/3d/` — the 3D layer is a visual
   output, not a UI concern
-- Camera transitions must be smooth (lerp), not instant cuts
+- Camera position changes during tab switches must be visually concealed from
+  the player via a **fade-to-black overlay** (~200ms total: 100ms fade-in,
+  camera teleports at peak opacity, 100ms fade-out). The lerp approach was
+  replaced because the floating camera motion was jarring. See story 1-4.
 - The 3D scene must be replaceable or expandable without changing UI components
 - Debug mode requires free-camera WASD/look controls that bypass the tab-driven
   camera positions
@@ -51,10 +54,16 @@ without creating circular dependencies between the UI and rendering layers.
 ## Decision
 
 Use a **Zustand camera bridge** pattern: camera position is stored in Zustand
-state, the R3F `CameraController` component reads this state every frame via
-`useFrame` and lerps toward it, and UI components write to this state when
+state, the R3F `CameraController` component reads this state and teleports
+the camera to it instantly, and UI components write to this state when
 switching tabs. The `<Canvas>` element is a self-contained leaf in the React
 tree that React never re-renders into directly.
+
+Tab transitions are visually masked by a **CSS fade-to-black overlay**
+(`FadeOverlay.tsx`) rendered in `App.tsx`. The `useFadeTransition` hook
+(used in `Navbar.tsx`) intercepts tab change clicks, triggers the fade,
+waits for peak opacity (~100ms), then calls `setActiveTab` (which teleports
+the camera), and immediately begins the fade-out. Total duration: ~200ms.
 
 ### Rendering Boundary
 
@@ -97,22 +106,34 @@ Camera positions for Meet/Laws/Street are set by the 3D scene at mount time
 via `setCameraPositions()`, which populates `scene.camera.cameraPositions[]`.
 
 **Read side** (3D scene): `CameraController.tsx` subscribes to `cameraPos` via
-`useGameStore()` and lerps toward it each frame:
+`useGameStore()` and sets the camera position directly each frame (no lerp):
 
 ```typescript
 // CameraController.tsx
-const { scene: { camera: { cameraPos } } } = useGameStore();
-const currentPos = useRef(new Vector3(...cameraPos));
+const cameraPos = useGameStore(s => s.scene.camera.cameraPos);
 
 useFrame(() => {
-  currentPos.current.lerp(new Vector3(...cameraPos), 0.1); // lerp factor 0.1
-  ref.current.position.copy(currentPos.current);
+  if (!ref.current) return;
+  ref.current.position.set(...cameraPos);
 });
 ```
 
-This decouples the write side (UI event) from the read side (render loop).
-The UI does not know or care how smoothly the camera moves; the camera does not
-know or care what caused the position to change.
+The visual masking of the teleport is the responsibility of `FadeOverlay.tsx`
+(DOM layer), not `CameraController.tsx` (3D layer). This respects the
+UI / 3D layer boundary.
+
+**Fade orchestration** (UI layer): `useFadeTransition(setActiveTab)` is used in
+`Navbar.tsx`. When a tab is clicked:
+1. `setFading(true)` → CSS overlay fades to black (100ms transition)
+2. After 100ms: `setActiveTab(tab)` fires (camera teleports; the tab content panel is hidden behind the overlay)
+3. `setFading(false)` → overlay fades back out (100ms transition)
+
+The constant `FADE_DURATION_MS = 100` lives in `src/Hooks/useFadeTransition.ts`.
+
+**Scope of the fade**: The overlay is `position: absolute` inside a container
+div that wraps `<TabManager />` in `App.tsx`. It covers **only the tab content
+panel** — the Navbar remains fully visible throughout the transition, and the
+3D scene canvas behind the UI is never affected. Total visible transition: ~200ms.
 
 ### Debug Camera Override
 
@@ -225,7 +246,8 @@ App.tsx
 - Adding a new tab with a new camera position requires one line in `setActiveTab()`
   and registering the position at mount time
 - Debug free-camera mode is isolated and has no impact on production code paths
-- Smooth lerp transitions are encapsulated entirely in `CameraController.tsx`
+- Fade-to-black transitions are encapsulated in `useFadeTransition.ts` and `FadeOverlay.tsx`; `CameraController.tsx` only concerns itself with position, not timing
+- Camera teleport is instantaneous — no frame budget consumed by lerp per-frame calculations
 
 ### Negative
 - Camera position is stored as a plain `[x, y, z]` tuple in Zustand — Vector3
@@ -277,7 +299,8 @@ street view), consider:
    lighting, character animation states) — keeping it separate from game state
 
 ## Validation Criteria
-- Switching tabs moves the camera smoothly to the expected position (manual test)
+- Switching tabs shows a ~200ms fade-to-black on the tab content panel, then the new tab content appears (manual test)
+- Camera teleports to the expected position at peak fade opacity (not visible to player)
 - No UI component imports from `src/3d/` (grep check)
 - `shop.statueCount` change is reflected in the 3D scene without a page reload
 - Debug free-camera activates in debug mode and does not persist to next session
