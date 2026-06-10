@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Typography from '../../components/Typography/Typography';
 import styles from './Laws.module.css'
@@ -10,6 +11,19 @@ const DictatorHands = () => {
     const currentLaw = useGameStore(s => s.law.current)
     const lastLawOutcome = useGameStore(s => s.law.lastLawOutcome)
 
+    const topWidths = useMemo(
+        () => Array.from({ length: 6 }, () => Math.random() * 30 + 10),
+        [currentLaw?.id]
+    );
+    const bottomWidths = useMemo(
+        () => Array.from({ length: 36 }, () => Math.random() * 30 + 10),
+        [currentLaw?.id]
+    );
+    const stampRotation = useMemo(
+        () => getRandomNumberInRange(-10, 35),
+        [lastLawOutcome]
+    );
+
     return currentLaw ? (
         <>
             <div className={styles.law}>
@@ -17,7 +31,7 @@ const DictatorHands = () => {
                 <div className={styles.lawContainer}>
                     {lastLawOutcome !== null ? (
                         <Typography variant='h2'
-                            style={{ transform: `rotate(${getRandomNumberInRange(-10, 35)}deg)` }}
+                            style={{ transform: `rotate(${stampRotation}deg)` }}
                             className={clsx({
                                 [styles.approvedStamp]: lastLawOutcome,
                                 [styles.rejectedStamp]: !lastLawOutcome
@@ -25,12 +39,12 @@ const DictatorHands = () => {
                             {lastLawOutcome ? t('laws.approved') : t('laws.rejected')}
                         </Typography>
                     ) : null}
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className={styles.contentLine} style={{ width: `${Math.random() * 30 + 10}%` }}></div>
+                    {topWidths.map((w, i) => (
+                        <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
                     ))}
                     <Typography variant='body' color='dark'>{t(`laws.labels.${currentLaw.id}`)}</Typography>
-                    {[...Array(36)].map((_, i) => (
-                        <div key={i} className={styles.contentLine} style={{ width: `${Math.random() * 30 + 10}%` }}></div>
+                    {bottomWidths.map((w, i) => (
+                        <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
                     ))}
                 </div>
             </div>

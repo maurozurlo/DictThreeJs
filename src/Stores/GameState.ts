@@ -747,7 +747,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultKey: null },
                     miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
-                    law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
+                    law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                     deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
                     tabs: { ...s.tabs, activeTab: Tabs.Log },
                     gameManagement: {
