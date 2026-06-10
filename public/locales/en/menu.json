@@ -48,7 +48,11 @@
     "budget_health_low": "Health services are failing! People relation -2",
     "budget_health_high": "Health system praised! People relation +1",
     "budget_infra_low": "Infrastructure failing! People & Business relation -1",
-    "budget_infra_high": "Infrastructure praised! People & Business relation +1"
+    "budget_infra_high": "Infrastructure praised! People & Business relation +1",
+    "mini_challenge_title": "Opportunity",
+    "newspaper_name": "The Daily Obedience",
+    "mini_challenge_accept": "Accept",
+    "mini_challenge_reject": "Reject"
   },
   "mainMenu": {
     "newGame": "New Game",

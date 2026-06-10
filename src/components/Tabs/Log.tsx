@@ -14,6 +14,8 @@ import { getGameDate } from '../../Utils/GameDate'
 const Log = ({ isActive }: TabProps) => {
     const { t } = useTranslation()
     const { t: dailyEventT } = useTranslation('daily_events')
+    const { t: periodicT } = useTranslation('periodic_events')
+    const { t: miniT } = useTranslation('mini_challenges')
     const periodicEvent = useGameStore((s) => s.periodicEvent)
     const miniChallenge = useGameStore((s) => s.miniChallenge)
     const logEntries = useGameStore((s) => s.log)
@@ -28,17 +30,17 @@ const Log = ({ isActive }: TabProps) => {
                 {miniChallenge.current && (
                     <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: miniChallenge.decided })}>
                         <Typography variant='h2' className={eventStyles.eventTitle}>
-                            🎲 Opportunity
+                            🎲 {t('log.mini_challenge_title')}
                         </Typography>
-                        <Typography variant='body'>{miniChallenge.current.text}</Typography>
+                        <Typography variant='body'>{miniT(`${miniChallenge.current.id}.text`)}</Typography>
 
                         {!miniChallenge.decided ? (
                             <div className={eventStyles.challengeButtons}>
                                 <Button onClick={() => miniChallenge.resolve(true)}>
-                                    ✓ Accept
+                                    ✓ {t('log.mini_challenge_accept')}
                                 </Button>
                                 <Button onClick={() => miniChallenge.resolve(false)}>
-                                    ✗ Reject
+                                    ✗ {t('log.mini_challenge_reject')}
                                 </Button>
                             </div>
                         ) : (
@@ -57,15 +59,15 @@ const Log = ({ isActive }: TabProps) => {
                 {periodicEvent.current && (
                     <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: periodicEvent.decided })}>
                         <Typography variant='h2' className={eventStyles.eventTitle}>
-                            ⚡ {periodicEvent.current.title}
+                            ⚡ {periodicT(`${periodicEvent.current.id}.title`)}
                         </Typography>
-                        <Typography variant='body'>{periodicEvent.current.text}</Typography>
+                        <Typography variant='body'>{periodicT(`${periodicEvent.current.id}.text`)}</Typography>
 
                         {!periodicEvent.decided ? (
                             <div className={eventStyles.optionsGrid}>
                                 {periodicEvent.current.options.map((opt, i) => (
                                     <Button key={i} onClick={() => periodicEvent.resolve(i)}>
-                                        {opt.text}
+                                        {periodicT(`${periodicEvent.current.id}.options.${opt.id}.text`)}
                                     </Button>
                                 ))}
                             </div>

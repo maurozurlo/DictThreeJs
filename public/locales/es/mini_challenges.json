@@ -1,0 +1,30 @@
+{
+  "propaganda_campaign": {
+    "text":   "",
+    "accept": "",
+    "reject": ""
+  },
+  "silence_journalist": {
+    "text":   "",
+    "accept": "",
+    "reject": "",
+    "risk":   ""
+  },
+  "protest_response": {
+    "text":   "",
+    "accept": "",
+    "reject": ""
+  },
+  "remove_rival": {
+    "text":   "",
+    "accept": "",
+    "reject": "",
+    "risk":   ""
+  },
+  "buy_loyalty": {
+    "text":   "",
+    "accept": "",
+    "reject": "",
+    "risk":   ""
+  }
+}

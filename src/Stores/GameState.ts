@@ -198,7 +198,7 @@ export const INITIAL_STATE = ({ set, get }: {
     periodicEvent: {
         current: null,
         decided: false,
-        resultText: null,
+        resultKey: null,
         resolve: (optionIndex: number) => {
             const state = get();
             const event = state.periodicEvent.current;
@@ -228,7 +228,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 periodicEvent: {
                     ...s.periodicEvent,
                     decided: true,
-                    resultText: option.result,
+                    resultKey: `${event.id}.options.${option.id}.result`,
                 },
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
@@ -244,14 +244,15 @@ export const INITIAL_STATE = ({ set, get }: {
     miniChallenge: {
         current: null,
         decided: false,
-        resultText: null,
+        resultKey: null,
+        riskTriggered: false,
         resolve: (accepted: boolean) => {
             const state = get();
             const challenge = state.miniChallenge.current;
             if (!challenge || state.miniChallenge.decided) return;
 
             const effect = accepted ? challenge.acceptEffect : challenge.rejectEffect;
-            let resultText = accepted ? challenge.acceptText : challenge.rejectText;
+            const resultKey = `${challenge.id}.${accepted ? 'accept' : 'reject'}`;
 
             // Apply treasury change
             let newTreasury = state.budget.treasury + (effect.treasury ?? 0);
@@ -270,8 +271,9 @@ export const INITIAL_STATE = ({ set, get }: {
             });
 
             // Handle risk
+            let riskTriggered = false;
             if (effect.risk && Math.random() < effect.risk) {
-                resultText += " " + (challenge.riskText ?? "");
+                riskTriggered = true;
                 // Risk penalty: random power loses 2 on rejection
                 if (!accepted) {
                     const powers: Power[] = ['military', 'business', 'people'];
@@ -289,7 +291,8 @@ export const INITIAL_STATE = ({ set, get }: {
                 miniChallenge: {
                     ...s.miniChallenge,
                     decided: true,
-                    resultText,
+                    resultKey,
+                    riskTriggered,
                 },
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
@@ -468,8 +471,8 @@ export const INITIAL_STATE = ({ set, get }: {
                             actionOutcomeText: null,
                             selectedPower: 'none',
                         },
-                        periodicEvent: { ...state.periodicEvent, current: null, decided: false, resultText: null },
-                        miniChallenge: { ...state.miniChallenge, current: null, decided: false, resultText: null },
+                        periodicEvent: { ...state.periodicEvent, current: null, decided: false, resultKey: null },
+                        miniChallenge: { ...state.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
                         deals: {
                             ...state.deals,
                             current: randomDeal,
@@ -741,8 +744,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     log: newLog,
                     stats: buildStatsUpdate(s),
                     dailyEvent: { current: nextDailyEvent },
-                    periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultText: null },
-                    miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
+                    periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultKey: null },
+                    miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                     law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws },
                     deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
@@ -788,8 +791,8 @@ export const INITIAL_STATE = ({ set, get }: {
                 log: newLog,
                 stats: buildStatsUpdate(s),
                 dailyEvent: { current: nextDailyEvent },
-                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
-                miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultText: null },
+                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultKey: null },
+                miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultKey: null, riskTriggered: false },
                 meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                 law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                 deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },

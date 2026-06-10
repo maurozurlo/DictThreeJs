@@ -101,13 +101,14 @@ export type GameState = {
     periodicEvent: {
         current: PeriodicEvent | null;
         decided: boolean;
-        resultText: string | null;
+        resultKey: string | null;
         resolve: (optionIndex: number) => void;
     };
     miniChallenge: {
         current: MiniChallenge | null;
         decided: boolean;
-        resultText: string | null;
+        resultKey: string | null;
+        riskTriggered: boolean;
         resolve: (accepted: boolean) => void;
     };
     meet: {

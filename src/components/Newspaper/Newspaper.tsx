@@ -32,7 +32,7 @@ const Newspaper = ({ headline, date }: NewspaperProps) => {
                         ))}
                     </div>
                     <div className="title-section">
-                        <h1 className="main-title">The Daily Obedience</h1>
+                        <h1 className="main-title">{t('log.newspaper_name')}</h1>
                     </div>
                     <div className="decoration-right">
                         {[...Array(5)].map((_, i) => (

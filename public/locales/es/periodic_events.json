@@ -1,0 +1,29 @@
+{
+  "international_summit": {
+    "title": "",
+    "text": "",
+    "options": {
+      "host_lavish":    { "text": "", "result": "" },
+      "modest_meeting": { "text": "", "result": "" },
+      "skip":           { "text": "", "result": "" }
+    }
+  },
+  "economic_crisis": {
+    "title": "",
+    "text": "",
+    "options": {
+      "stimulus":    { "text": "", "result": "" },
+      "bailouts":    { "text": "", "result": "" },
+      "free_market": { "text": "", "result": "" }
+    }
+  },
+  "natural_disaster": {
+    "title": "",
+    "text": "",
+    "options": {
+      "full_response": { "text": "", "result": "" },
+      "basic_relief":  { "text": "", "result": "" },
+      "minimal":       { "text": "", "result": "" }
+    }
+  }
+}

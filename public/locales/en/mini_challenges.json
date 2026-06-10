@@ -1,0 +1,30 @@
+{
+  "propaganda_campaign": {
+    "text":   "State media proposes a $45M propaganda campaign to boost your image. Authorize it?",
+    "accept": "The campaign floods the airwaves. Citizens grow weary, but your image is polished.",
+    "reject": "You declined the campaign. The media looks elsewhere for stories."
+  },
+  "silence_journalist": {
+    "text":   "An investigative journalist is about to publish a damaging exposé. Have them silenced?",
+    "accept": "The story never runs. Your secrets are safe, but whispers spread in the shadows.",
+    "reject": "You let the press run its course. Some stories are better faced head-on.",
+    "risk":   "The exposé publishes, triggering a wave of public outrage!"
+  },
+  "protest_response": {
+    "text":   "Protests are erupting in the capital. Deploy security forces to disperse them?",
+    "accept": "The streets are cleared. Order is restored, but scars remain in public memory.",
+    "reject": "You show restraint. The protests eventually wind down on their own."
+  },
+  "remove_rival": {
+    "text":   "A shadowy operative offers to permanently remove a political rival for $80M. Authorize it?",
+    "accept": "The rival disappears quietly. The generals nod approvingly.",
+    "reject": "You decline. Some problems are better left to time.",
+    "risk":   "The operation is traced back to you! International condemnation follows."
+  },
+  "buy_loyalty": {
+    "text":   "A high-ranking officer is planning to defect to the opposition. Buy their loyalty for $50M?",
+    "accept": "You secure their loyalty. They become one of your most devoted commanders.",
+    "reject": "You let them go. Perhaps they will cause no trouble.",
+    "risk":   "The defector leaks your military strategies to your enemies!"
+  }
+}

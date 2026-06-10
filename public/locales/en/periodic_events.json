@@ -1,0 +1,29 @@
+{
+  "international_summit": {
+    "title": "International Summit",
+    "text": "World leaders are watching your performance. Choose your approach:",
+    "options": {
+      "host_lavish":    { "text": "Host lavish summit ($100M)",       "result": "The summit was impressive but expensive. International prestige gained." },
+      "modest_meeting": { "text": "Modest diplomatic meeting ($30M)", "result": "A reasonable diplomatic approach. Modest costs, modest gains." },
+      "skip":           { "text": "Skip the summit (Free)",           "result": "You avoided the summit. Saved money but damaged international relations." }
+    }
+  },
+  "economic_crisis": {
+    "title": "Economic Crisis",
+    "text": "A financial crisis hits the nation. How do you respond?",
+    "options": {
+      "stimulus":    { "text": "Massive stimulus package ($150M)",  "result": "The stimulus worked! Economy stabilized and public confidence restored." },
+      "bailouts":    { "text": "Targeted business bailouts ($80M)", "result": "Businesses recovered but people felt abandoned during the crisis." },
+      "free_market": { "text": "Let market forces decide (Free)",   "result": "The crisis deepened. Only the military appreciated your 'tough' stance." }
+    }
+  },
+  "natural_disaster": {
+    "title": "Natural Disaster",
+    "text": "A major earthquake strikes the capital. Emergency response needed:",
+    "options": {
+      "full_response": { "text": "Full emergency response ($120M)", "result": "Swift response saved lives. The people are grateful for your leadership." },
+      "basic_relief":  { "text": "Basic relief efforts ($50M)",     "result": "Adequate response provided. Situation managed without major issues." },
+      "minimal":       { "text": "Minimal intervention ($10M)",     "result": "Poor response caused suffering. Only businesses benefited from reduced spending." }
+    }
+  }
+}
