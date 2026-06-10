@@ -39,7 +39,7 @@ const Menu = ({ isActive }: TabProps) => {
         <div className={clsx(styles.Tab, styles.TabMenu, { [styles.isActive]: isActive })}>
             <div className={styles.centeredContainer}>
                 <Typography variant={'h1'}>
-                    Dictator Simulator
+                    {t('gameTitle')}
                 </Typography>
                 <hr />
 

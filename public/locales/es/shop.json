@@ -1,0 +1,26 @@
+{
+    "shop": {
+        "treasury": "Tesoro: ${{amount}}M",
+        "active_this_round": "Activo esta ronda",
+        "cost": "Costo: ${{amount}}M",
+        "buy": "Comprar — ${{amount}}M",
+        "media_coverage": {
+            "name": "Cobertura mediática especializada",
+            "description": "Congela todos los cambios de relación con el pueblo al final de esta ronda."
+        },
+        "media_shielding": {
+            "name": "Blindaje mediático",
+            "description": "Congela todos los cambios de relación con el ejército al final de esta ronda."
+        },
+        "media_blackout": {
+            "name": "Apagón mediático",
+            "description": "Congela todos los cambios de relación con las empresas al final de esta ronda."
+        },
+        "statue": {
+            "name": "Estatua Gigante",
+            "description": "Aumenta tu Carisma permanentemente en +1. Un monumento a tu gloria aparece en la ciudad.",
+            "owned": "Poseídas: {{count}} / 3",
+            "full": "La ciudad no puede albergar más estatuas."
+        }
+    }
+}

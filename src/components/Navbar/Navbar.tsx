@@ -48,7 +48,7 @@ const Navbar = () => {
                     className={clsx(styles.gameTitle, { [styles.gameTitleClickable]: phase !== 'idle' && activeTab !== Tabs.Menu })}
                     onClick={() => phase !== 'idle' && activeTab !== Tabs.Menu && setCurrentTab(Tabs.Menu)}
                 >
-                    Dictator Simulator
+                    {t('gameTitle')}
                 </div>
             </div>
 

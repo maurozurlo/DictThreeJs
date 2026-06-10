@@ -1,0 +1,26 @@
+{
+    "shop": {
+        "treasury": "Treasury: ${{amount}}M",
+        "active_this_round": "Active this round",
+        "cost": "Cost: ${{amount}}M",
+        "buy": "Buy — ${{amount}}M",
+        "media_coverage": {
+            "name": "Specialized Media Coverage",
+            "description": "Freezes all People relation changes at end of this round."
+        },
+        "media_shielding": {
+            "name": "Media Shielding",
+            "description": "Freezes all Military relation changes at end of this round."
+        },
+        "media_blackout": {
+            "name": "Media Blackout",
+            "description": "Freezes all Business relation changes at end of this round."
+        },
+        "statue": {
+            "name": "Giant Statue",
+            "description": "Permanently increases your Charisma by +1. A monument to your glory appears in the city.",
+            "owned": "Owned: {{count}} / 3",
+            "full": "The city cannot fit any more statues."
+        }
+    }
+}

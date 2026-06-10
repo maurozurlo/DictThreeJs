@@ -1,4 +1,5 @@
 {
+  "gameTitle": "Dictator Simulator",
   "tabs": {
     "menu": "Menu",
     "log": "Log",
@@ -12,13 +13,26 @@
   },
   "actionPanel": {
     "treasury": "Treasury",
-    "charisma": "Charisma"
+    "charisma": "Charisma",
+    "advance_warning": "Advance? Unused actions have consequences.",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "next_round": "Next Round →",
+    "skip": "Skip →",
+    "day_ended": "📅 Day {{round}} Has Ended",
+    "tax_income": "Tax income:",
+    "bonus_income": "Bonus income:",
+    "budget_expenses": "Budget expenses:",
+    "extra_expenses": "Extra expenses:",
+    "net": "Net:",
+    "continue_day": "Continue to Day {{day}} →"
   },
   "log": {
     "today": "Today's paper:",
     "sports": "Sports",
     "weather": "The Weather",
-    "no_charge": "No charge"
+    "no_charge": "No charge",
+    "no_entries": "No log entries yet."
   },
   "mainMenu": {
     "newGame": "New Game",

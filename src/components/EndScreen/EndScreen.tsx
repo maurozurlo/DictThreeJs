@@ -4,11 +4,12 @@ import type { Power } from '../../types/Power'
 import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import styles from './EndScreen.module.css'
+import { useTranslation } from 'react-i18next'
 
 type Tier = {
     tier: string
-    name: string
-    flavour: string
+    nameKey: string
+    flavourKey: string
     color: string
 }
 
@@ -21,25 +22,25 @@ function calcTier(
     treasury: number
 ): Tier {
     if (phase === 'lose') {
-        if (round <= 4) return { tier: 'F', name: 'Brief Experiment in Authoritarianism', flavour: 'A bold attempt. Tragically brief.', color: '#e74c3c' }
+        if (round <= 4) return { tier: 'F', nameKey: 'endscreen.tiers.lose_early.name',     flavourKey: 'endscreen.tiers.lose_early.flavour',     color: '#e74c3c' }
         switch (endCause) {
-            case 'military':   return { tier: 'D', name: 'Retired at Gunpoint',                    flavour: "The generals had a meeting. You weren't invited.",       color: '#c0392b' }
-            case 'business':   return { tier: 'D', name: 'Hostile Takeover, Personal Edition',      flavour: 'Capitalism got you before you could get capitalism.',    color: '#c0392b' }
-            case 'people':     return { tier: 'D', name: 'Democratically Removed (Permanently)',    flavour: 'The people have spoken. Loudly. With torches.',          color: '#c0392b' }
-            case 'bankruptcy': return { tier: 'D', name: 'Fiscally Challenged Former Leader',       flavour: "You ran out of other people's money.",                   color: '#c0392b' }
-            default:           return { tier: 'D', name: 'Deposed Dictator',                        flavour: 'Your reign has ended. As they all do.',                  color: '#c0392b' }
+            case 'military':   return { tier: 'D', nameKey: 'endscreen.tiers.lose_military.name',  flavourKey: 'endscreen.tiers.lose_military.flavour',  color: '#c0392b' }
+            case 'business':   return { tier: 'D', nameKey: 'endscreen.tiers.lose_business.name',  flavourKey: 'endscreen.tiers.lose_business.flavour',  color: '#c0392b' }
+            case 'people':     return { tier: 'D', nameKey: 'endscreen.tiers.lose_people.name',    flavourKey: 'endscreen.tiers.lose_people.flavour',    color: '#c0392b' }
+            case 'bankruptcy': return { tier: 'D', nameKey: 'endscreen.tiers.lose_bankruptcy.name',flavourKey: 'endscreen.tiers.lose_bankruptcy.flavour',color: '#c0392b' }
+            default:           return { tier: 'D', nameKey: 'endscreen.tiers.lose_default.name',   flavourKey: 'endscreen.tiers.lose_default.flavour',   color: '#c0392b' }
         }
     }
 
     const avg = (relations.military + relations.business + relations.people) / 3
     const score = avg * 3 + charisma * 2 + Math.min(treasury / 100, 10)
 
-    if (score >= 40) return { tier: 'S', name: 'Supreme Overlord',              flavour: "They'll build statues. You already did.",                       color: '#f1c40f' }
-    if (score >= 25) return { tier: 'A', name: 'Seasoned Autocrat',             flavour: 'Ruled with purpose and only mild atrocities.',                  color: '#27ae60' }
-    if (score >= 10) return { tier: 'B', name: 'The Pragmatist',                flavour: 'Did what had to be done. Mostly legal.',                        color: '#3498db' }
-    if (score >= 0)  return { tier: 'C', name: 'Mediocre Majesty',              flavour: 'Survived through luck, bribery, and stubbornness.',             color: '#9b59b6' }
-    if (score >= -15) return { tier: 'D', name: 'Accidental Dictator',          flavour: "Still standing. Nobody's more surprised than you.",             color: '#e67e22' }
-    return              { tier: 'F', name: "Democracy's Problem Now",            flavour: "Won on a technicality. Please don't tell the UN.",              color: '#e74c3c' }
+    if (score >= 40) return { tier: 'S', nameKey: 'endscreen.tiers.S.name', flavourKey: 'endscreen.tiers.S.flavour', color: '#f1c40f' }
+    if (score >= 25) return { tier: 'A', nameKey: 'endscreen.tiers.A.name', flavourKey: 'endscreen.tiers.A.flavour', color: '#27ae60' }
+    if (score >= 10) return { tier: 'B', nameKey: 'endscreen.tiers.B.name', flavourKey: 'endscreen.tiers.B.flavour', color: '#3498db' }
+    if (score >= 0)  return { tier: 'C', nameKey: 'endscreen.tiers.C.name', flavourKey: 'endscreen.tiers.C.flavour', color: '#9b59b6' }
+    if (score >= -15) return { tier: 'D', nameKey: 'endscreen.tiers.D_accidental.name', flavourKey: 'endscreen.tiers.D_accidental.flavour', color: '#e67e22' }
+    return               { tier: 'F', nameKey: 'endscreen.tiers.F.name', flavourKey: 'endscreen.tiers.F.flavour', color: '#e74c3c' }
 }
 
 function relationColor(val: number): string {
@@ -75,6 +76,8 @@ function factionPeakLow(history: GameStats['relationsHistory'], key: Power) {
 }
 
 const EndScreen = () => {
+    const { t } = useTranslation('endscreen')
+    const { t: menuT } = useTranslation('menu')
     const phase = useGameStore(s => s.gameManagement.phase)
     const round = useGameStore(s => s.gameManagement.round)
     const endReason = useGameStore(s => s.gameManagement.endReason)
@@ -98,7 +101,7 @@ const EndScreen = () => {
                 {/* Header */}
                 <div className={styles.header}>
                     <Typography variant="h2" className={styles.outcome}>
-                        {isWin ? '🏆 Victory' : '☠ Game Over'}
+                        {isWin ? t('endscreen.outcome.victory') : t('endscreen.outcome.game_over')}
                     </Typography>
                     {endReason && (
                         <p className={styles.endReason}>{endReason}</p>
@@ -109,55 +112,55 @@ const EndScreen = () => {
                 <div className={styles.tierBlock} style={{ borderColor: tier.color }}>
                     <span className={styles.tierLetter} style={{ color: tier.color }}>{tier.tier}</span>
                     <div className={styles.tierText}>
-                        <span className={styles.tierName} style={{ color: tier.color }}>{tier.name}</span>
-                        <span className={styles.tierFlavour}>"{tier.flavour}"</span>
+                        <span className={styles.tierName} style={{ color: tier.color }}>{t(tier.nameKey)}</span>
+                        <span className={styles.tierFlavour}>"{t(tier.flavourKey)}"</span>
                     </div>
                 </div>
 
                 <div className={styles.grid}>
                     {/* Relations */}
-                    <Section title="RELATIONS">
+                    <Section title={t('endscreen.sections.relations')}>
                         <div className={styles.factionGrid}>
                             {(['military', 'business', 'people'] as Power[]).map(p => (
                                 <div key={p} className={styles.factionCol}>
-                                    <span className={styles.factionName}>{p}</span>
+                                    <span className={styles.factionName}>{menuT(`power.${p}`)}</span>
                                     <span className={styles.factionFinal} style={{ color: relationColor(relations[p]) }}>{relations[p]}</span>
                                     <span className={styles.factionSub}>↑{factionPeakLow(stats.relationsHistory, p).peak} ↓{factionPeakLow(stats.relationsHistory, p).low}</span>
                                 </div>
                             ))}
                         </div>
-                        <StatRow label="Rounds survived" value={String(roundsPlayed)} />
-                        <StatRow label="Final charisma" value={charisma >= 0 ? `+${charisma}` : String(charisma)} positive={charisma > 0 ? true : charisma < 0 ? false : undefined} />
+                        <StatRow label={t('endscreen.stats.rounds_survived')} value={String(roundsPlayed)} />
+                        <StatRow label={t('endscreen.stats.final_charisma')} value={charisma >= 0 ? `+${charisma}` : String(charisma)} positive={charisma > 0 ? true : charisma < 0 ? false : undefined} />
                     </Section>
 
                     {/* Treasury */}
-                    <Section title="TREASURY">
-                        <StatRow label="Final" value={`$${treasury}M`} positive={treasury > 0} />
-                        <StatRow label="Peak" value={`$${stats.peakTreasury}M`} positive={true} />
-                        <StatRow label="Lowest" value={`$${stats.lowestTreasury}M`} positive={stats.lowestTreasury > 0} />
-                        <StatRow label="Total earned" value={`$${stats.totalIncomeEarned + stats.totalExtrasEarned}M`} />
-                        <StatRow label="Total spent" value={`$${stats.totalExpensesSpent + stats.totalExtrasSpent}M`} />
-                        <StatRow label="Net across run" value={`${totalNet >= 0 ? '+' : ''}$${totalNet}M`} positive={totalNet >= 0} />
+                    <Section title={t('endscreen.sections.treasury')}>
+                        <StatRow label={t('endscreen.stats.final')} value={`$${treasury}M`} positive={treasury > 0} />
+                        <StatRow label={t('endscreen.stats.peak')} value={`$${stats.peakTreasury}M`} positive={true} />
+                        <StatRow label={t('endscreen.stats.lowest')} value={`$${stats.lowestTreasury}M`} positive={stats.lowestTreasury > 0} />
+                        <StatRow label={t('endscreen.stats.total_earned')} value={`$${stats.totalIncomeEarned + stats.totalExtrasEarned}M`} />
+                        <StatRow label={t('endscreen.stats.total_spent')} value={`$${stats.totalExpensesSpent + stats.totalExtrasSpent}M`} />
+                        <StatRow label={t('endscreen.stats.net')} value={`${totalNet >= 0 ? '+' : ''}$${totalNet}M`} positive={totalNet >= 0} />
                     </Section>
 
                     {/* Decisions */}
-                    <Section title="DECISIONS">
-                        <StatRow label="Laws passed" value={String(stats.lawsPassed)} positive={true} />
-                        <StatRow label="Laws rejected" value={String(stats.lawsRejected)} />
-                        <StatRow label="Deals accepted" value={String(stats.dealsAccepted)} positive={true} />
-                        <StatRow label="Deals rejected" value={String(stats.dealsRejected)} />
+                    <Section title={t('endscreen.sections.decisions')}>
+                        <StatRow label={t('endscreen.stats.laws_passed')} value={String(stats.lawsPassed)} positive={true} />
+                        <StatRow label={t('endscreen.stats.laws_rejected')} value={String(stats.lawsRejected)} />
+                        <StatRow label={t('endscreen.stats.deals_accepted')} value={String(stats.dealsAccepted)} positive={true} />
+                        <StatRow label={t('endscreen.stats.deals_rejected')} value={String(stats.dealsRejected)} />
                     </Section>
 
                     {/* Meetings */}
-                    <Section title="MEETINGS">
-                        <StatRow label="Military" value={String(meetCounts.military)} />
-                        <StatRow label="Business (Elite)" value={String(meetCounts.business)} />
-                        <StatRow label="People" value={String(meetCounts.people)} />
-                        <StatRow label="Total" value={String(meetCounts.military + meetCounts.business + meetCounts.people)} />
+                    <Section title={t('endscreen.sections.meetings')}>
+                        <StatRow label={menuT('power.military')} value={String(meetCounts.military)} />
+                        <StatRow label={t('endscreen.stats.business_elite')} value={String(meetCounts.business)} />
+                        <StatRow label={menuT('power.people')} value={String(meetCounts.people)} />
+                        <StatRow label={t('endscreen.stats.total')} value={String(meetCounts.military + meetCounts.business + meetCounts.people)} />
                     </Section>
                 </div>
 
-                <Button onClick={() => setPhase('start')}>Play Again</Button>
+                <Button onClick={() => setPhase('start')}>{t('endscreen.play_again')}</Button>
             </div>
         </div>
     )

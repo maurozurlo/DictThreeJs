@@ -1,4 +1,5 @@
 {
+    "gameTitle": "Simulador de Dictador",
     "tabs": {
         "menu": "Menú",
         "log": "Diario",
@@ -12,13 +13,26 @@
     },
     "actionPanel": {
         "treasury": "Tesoro",
-        "charisma": "Carisma"
+        "charisma": "Carisma",
+        "advance_warning": "¿Avanzar? Las acciones sin usar tienen consecuencias.",
+        "confirm": "Confirmar",
+        "cancel": "Cancelar",
+        "next_round": "Siguiente ronda →",
+        "skip": "Omitir →",
+        "day_ended": "📅 El día {{round}} ha terminado",
+        "tax_income": "Ingresos fiscales:",
+        "bonus_income": "Ingresos extra:",
+        "budget_expenses": "Gastos del presupuesto:",
+        "extra_expenses": "Gastos extra:",
+        "net": "Neto:",
+        "continue_day": "Continuar al día {{day}} →"
     },
     "log": {
         "today": "El periódico de hoy:",
         "sports": "Deportes",
         "weather": "El clima",
-        "no_charge": "Sin costo"
+        "no_charge": "Sin costo",
+        "no_entries": "Aún no hay entradas en el diario."
     },
     "mainMenu": {
         "newGame": "Nueva partida",
@@ -55,5 +69,8 @@
         "people": "Pueblo",
         "business": "Élite",
         "none": "Ninguno"
+    },
+    "nav": {
+        "rounds": "Rondas"
     }
 }

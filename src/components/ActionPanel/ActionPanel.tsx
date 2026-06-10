@@ -113,10 +113,10 @@ const ActionPanel = () => {
                 <div className={styles.actions}>
                     {showConfirm ?
                         <div className={styles.confirmBox}>
-                            <Typography variant="body">Advance? Unused actions have consequences.</Typography>
+                            <Typography variant="body">{t('actionPanel.advance_warning')}</Typography>
                             <div className={styles.confirmButtons}>
-                                <Button onClick={handleConfirm}>Confirm</Button>
-                                <Button onClick={() => setShowConfirm(false)}>Cancel</Button>
+                                <Button onClick={handleConfirm}>{t('actionPanel.confirm')}</Button>
+                                <Button onClick={() => setShowConfirm(false)}>{t('actionPanel.cancel')}</Button>
                             </div>
                         </div>
                         :
@@ -128,7 +128,7 @@ const ActionPanel = () => {
                             <div className={styles.nextRound}>
                                 {phase === 'start' && !dayEnded && (
                                     <Button onClick={handleNextRound}>
-                                        {allActionsDone ? 'Next Round →' : 'Skip →'}
+                                        {allActionsDone ? t('actionPanel.next_round') : t('actionPanel.skip')}
                                     </Button>
                                 )}
                             </div>
@@ -140,35 +140,35 @@ const ActionPanel = () => {
             {dayEnded && phase === 'start' && (
                 <div className={styles.skipOverlay}>
                     <div className={styles.skipCard}>
-                        <Typography variant="h2" color="accent">📅 Day {round} Has Ended</Typography>
+                        <Typography variant="h2" color="accent">{t('actionPanel.day_ended', { round })}</Typography>
                         <div className={styles.skipStatRow}>
-                            <span>Tax income:</span>
+                            <span>{t('actionPanel.tax_income')}</span>
                             <span className={styles.positive}>+${lastRoundIncome}M</span>
                         </div>
                         {extraIncome > 0 && (
                             <div className={styles.skipStatRow}>
-                                <span>Bonus income:</span>
+                                <span>{t('actionPanel.bonus_income')}</span>
                                 <span className={styles.positive}>+${extraIncome}M</span>
                             </div>
                         )}
                         <div className={styles.skipStatRow}>
-                            <span>Budget expenses:</span>
+                            <span>{t('actionPanel.budget_expenses')}</span>
                             <span className={styles.negative}>-${lastRoundExpenses}M</span>
                         </div>
                         {extraExpenses > 0 && (
                             <div className={styles.skipStatRow}>
-                                <span>Extra expenses:</span>
+                                <span>{t('actionPanel.extra_expenses')}</span>
                                 <span className={styles.negative}>-${extraExpenses}M</span>
                             </div>
                         )}
                         <div className={styles.skipStatRow}>
-                            <span>Net:</span>
+                            <span>{t('actionPanel.net')}</span>
                             <span className={net >= 0 ? styles.positive : styles.negative}>
                                 {net >= 0 ? '+' : ''}${net}M
                             </span>
                         </div>
                         <Button onClick={nextRound}>
-                            Continue to Day {round + 1} →
+                            {t('actionPanel.continue_day', { day: round + 1 })}
                         </Button>
                     </div>
                 </div>
@@ -177,23 +177,23 @@ const ActionPanel = () => {
             {showSkipModal && (
                 <div className={styles.skipOverlay}>
                     <div className={styles.skipCard}>
-                        <Typography variant="h2">📅 Day {round} Has Ended</Typography>
+                        <Typography variant="h2">{t('actionPanel.day_ended', { round })}</Typography>
                         <div className={styles.skipStatRow}>
-                            <span>Tax income:</span>
+                            <span>{t('actionPanel.tax_income')}</span>
                             <span className={styles.positive}>+${projected.totalIncome}M</span>
                         </div>
                         <div className={styles.skipStatRow}>
-                            <span>Budget expenses:</span>
+                            <span>{t('actionPanel.budget_expenses')}</span>
                             <span className={styles.negative}>-${projected.expenses}M</span>
                         </div>
                         <div className={styles.skipStatRow}>
-                            <span>Net:</span>
+                            <span>{t('actionPanel.net')}</span>
                             <span className={projectedNet >= 0 ? styles.positive : styles.negative}>
                                 {projectedNet >= 0 ? '+' : ''}${projectedNet}M
                             </span>
                         </div>
                         <Button onClick={handleSkipModalContinue}>
-                            Continue to Day {round + 1} →
+                            {t('actionPanel.continue_day', { day: round + 1 })}
                         </Button>
                     </div>
                 </div>
