@@ -29,6 +29,8 @@ const ActionPanel = () => {
     const expireTimer = useGameStore(s => s.gameManagement.expireTimer)
     const budget = useGameStore(s => s.budget)
     const round = useGameStore(s => s.gameManagement.round)
+    const extraIncome = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
+    const extraExpenses = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
     const meetTaken = useGameStore(s => s.meet.actionTaken.taken)
     const lawDecided = useGameStore(s => s.law.lawDecided)
     const dealDecided = useGameStore(s => s.deals.dealDecided)
@@ -143,10 +145,22 @@ const ActionPanel = () => {
                             <span>Tax income:</span>
                             <span className={styles.positive}>+${lastRoundIncome}M</span>
                         </div>
+                        {extraIncome > 0 && (
+                            <div className={styles.skipStatRow}>
+                                <span>Bonus income:</span>
+                                <span className={styles.positive}>+${extraIncome}M</span>
+                            </div>
+                        )}
                         <div className={styles.skipStatRow}>
                             <span>Budget expenses:</span>
                             <span className={styles.negative}>-${lastRoundExpenses}M</span>
                         </div>
+                        {extraExpenses > 0 && (
+                            <div className={styles.skipStatRow}>
+                                <span>Extra expenses:</span>
+                                <span className={styles.negative}>-${extraExpenses}M</span>
+                            </div>
+                        )}
                         <div className={styles.skipStatRow}>
                             <span>Net:</span>
                             <span className={net >= 0 ? styles.positive : styles.negative}>

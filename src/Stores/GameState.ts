@@ -6,7 +6,7 @@ import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
-import type { GameState, ShopItemId } from "../types/GameState";
+import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations, applyBudgetEffects } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
@@ -157,6 +157,13 @@ export const INITIAL_STATE = ({ set, get }: {
             const current = state.law.current;
             if (!current) return;
             handleDecision({ type: "law", item: current, hasAccepted, get, set });
+            set((s) => ({
+                stats: {
+                    ...s.stats,
+                    lawsPassed: hasAccepted ? s.stats.lawsPassed + 1 : s.stats.lawsPassed,
+                    lawsRejected: !hasAccepted ? s.stats.lawsRejected + 1 : s.stats.lawsRejected,
+                },
+            }));
         },
     },
     deals: {
@@ -170,7 +177,21 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const current = state.deals.current;
             if (!current) return;
+            const effect = hasAccepted ? current.acceptEffect : current.rejectEffect;
+            const delta = effect.treasury ?? 0;
             handleDecision({ type: "deal", item: current, hasAccepted, get, set });
+            set((s) => ({
+                stats: {
+                    ...s.stats,
+                    dealsAccepted: hasAccepted ? s.stats.dealsAccepted + 1 : s.stats.dealsAccepted,
+                    dealsRejected: !hasAccepted ? s.stats.dealsRejected + 1 : s.stats.dealsRejected,
+                },
+                gameManagement: {
+                    ...s.gameManagement,
+                    currentRoundExtraIncome: delta > 0 ? s.gameManagement.currentRoundExtraIncome + delta : s.gameManagement.currentRoundExtraIncome,
+                    currentRoundExtraExpenses: delta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(delta) : s.gameManagement.currentRoundExtraExpenses,
+                },
+            }));
         },
     },
     periodicEvent: {
@@ -201,6 +222,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 }
             });
 
+            const periodicDelta = effect.treasury ?? 0;
             set((s) => ({
                 periodicEvent: {
                     ...s.periodicEvent,
@@ -210,6 +232,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
                 tabs: { ...s.tabs, tabsLocked: false },
+                gameManagement: {
+                    ...s.gameManagement,
+                    currentRoundExtraIncome: periodicDelta > 0 ? s.gameManagement.currentRoundExtraIncome + periodicDelta : s.gameManagement.currentRoundExtraIncome,
+                    currentRoundExtraExpenses: periodicDelta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(periodicDelta) : s.gameManagement.currentRoundExtraExpenses,
+                },
             }));
         },
     },
@@ -256,6 +283,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 }
             }
 
+            const challengeDelta = effect.treasury ?? 0;
             set((s) => ({
                 miniChallenge: {
                     ...s.miniChallenge,
@@ -265,6 +293,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
                 tabs: { ...s.tabs, tabsLocked: false },
+                gameManagement: {
+                    ...s.gameManagement,
+                    currentRoundExtraIncome: challengeDelta > 0 ? s.gameManagement.currentRoundExtraIncome + challengeDelta : s.gameManagement.currentRoundExtraIncome,
+                    currentRoundExtraExpenses: challengeDelta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(challengeDelta) : s.gameManagement.currentRoundExtraExpenses,
+                },
             }));
         },
     },
@@ -339,13 +372,29 @@ export const INITIAL_STATE = ({ set, get }: {
             }));
         }
     },
+    stats: {
+        lawsPassed: 0,
+        lawsRejected: 0,
+        dealsAccepted: 0,
+        dealsRejected: 0,
+        totalIncomeEarned: 0,
+        totalExpensesSpent: 0,
+        totalExtrasEarned: 0,
+        totalExtrasSpent: 0,
+        peakTreasury: GAMESTATE.BUDGET.TREASURY,
+        lowestTreasury: GAMESTATE.BUDGET.TREASURY,
+        relationsHistory: [],
+    },
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
         phase: 'idle',
         endReason: null,
+        endCause: null,
         dayEnded: false,
         lastRoundIncome: 0,
         lastRoundExpenses: 0,
+        currentRoundExtraIncome: 0,
+        currentRoundExtraExpenses: 0,
         timerStartedAt: null,
         timerPausedAt: null,
         meetCounts: { military: 0, business: 0, people: 0 },
@@ -365,12 +414,24 @@ export const INITIAL_STATE = ({ set, get }: {
                             activeTab: Tabs.Log,
                             tabsLocked: false,
                         },
+                        stats: {
+                            lawsPassed: 0, lawsRejected: 0,
+                            dealsAccepted: 0, dealsRejected: 0,
+                            totalIncomeEarned: 0, totalExpensesSpent: 0,
+                            totalExtrasEarned: 0, totalExtrasSpent: 0,
+                            peakTreasury: GAMESTATE.BUDGET.TREASURY,
+                            lowestTreasury: GAMESTATE.BUDGET.TREASURY,
+                            relationsHistory: [],
+                        },
                         gameManagement: {
                             ...state.gameManagement,
                             phase,
                             round: GAMESTATE.ROUNDS.START,
                             dayEnded: false,
                             endReason: null,
+                            endCause: null,
+                            currentRoundExtraIncome: 0,
+                            currentRoundExtraExpenses: 0,
                             timerStartedAt: Date.now(),
                             timerPausedAt: null,
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
@@ -540,6 +601,21 @@ export const INITIAL_STATE = ({ set, get }: {
 
             // --- 6. Increment round, draw next daily event ---
             const newRound = state.gameManagement.round + 1;
+            const buildStatsUpdate = (s: GameState): GameStats => ({
+                ...s.stats,
+                totalIncomeEarned: s.stats.totalIncomeEarned + financials.totalIncome,
+                totalExpensesSpent: s.stats.totalExpensesSpent + financials.expenses,
+                totalExtrasEarned: s.stats.totalExtrasEarned + s.gameManagement.currentRoundExtraIncome,
+                totalExtrasSpent: s.stats.totalExtrasSpent + s.gameManagement.currentRoundExtraExpenses,
+                peakTreasury: Math.max(s.stats.peakTreasury, newTreasury),
+                lowestTreasury: Math.min(s.stats.lowestTreasury, newTreasury),
+                relationsHistory: [...s.stats.relationsHistory, {
+                    round: state.gameManagement.round,
+                    military: newRelations.military,
+                    business: newRelations.business,
+                    people: newRelations.people,
+                }],
+            });
             const nextDailyEvent = getRandomDailyEvent();
 
             // --- 7. Biased law selection (Plan G) ---
@@ -562,14 +638,18 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
+                    stats: buildStatsUpdate(s),
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
                         endReason: "Economic collapse! Your treasury has run out of funds.",
+                        endCause: 'bankruptcy' as EndCause,
                         phase: 'lose',
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        currentRoundExtraIncome: 0,
+                        currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
@@ -581,14 +661,18 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
+                    stats: buildStatsUpdate(s),
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
                         endReason: `The ${overthrown} has overthrown your government! Relations dropped to -10.`,
+                        endCause: overthrown as EndCause,
                         phase: 'lose',
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        currentRoundExtraIncome: 0,
+                        currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
@@ -600,14 +684,18 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
+                    stats: buildStatsUpdate(s),
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
                         endReason: null,
+                        endCause: null,
                         phase: 'victory',
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        currentRoundExtraIncome: 0,
+                        currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
@@ -648,6 +736,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
+                    stats: buildStatsUpdate(s),
                     dailyEvent: { current: nextDailyEvent },
                     periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultText: null },
                     miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultText: null },
@@ -662,6 +751,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         timerStartedAt: Date.now(),
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        currentRoundExtraIncome: 0,
+                        currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
@@ -692,6 +783,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
                 log: newLog,
+                stats: buildStatsUpdate(s),
                 dailyEvent: { current: nextDailyEvent },
                 periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultText: null },
                 miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultText: null },
@@ -706,6 +798,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     timerStartedAt: Date.now(),
                     lastRoundIncome: financials.totalIncome,
                     lastRoundExpenses: financials.expenses,
+                    currentRoundExtraIncome: 0,
+                    currentRoundExtraExpenses: 0,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },

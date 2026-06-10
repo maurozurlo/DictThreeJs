@@ -15,6 +15,29 @@ export type RoundLogEntry = {
 
 export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue';
 
+export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | null;
+
+export type RelationSnapshot = {
+    round: number;
+    military: number;
+    business: number;
+    people: number;
+};
+
+export type GameStats = {
+    lawsPassed: number;
+    lawsRejected: number;
+    dealsAccepted: number;
+    dealsRejected: number;
+    totalIncomeEarned: number;
+    totalExpensesSpent: number;
+    totalExtrasEarned: number;
+    totalExtrasSpent: number;
+    peakTreasury: number;
+    lowestTreasury: number;
+    relationsHistory: RelationSnapshot[];
+};
+
 export type CameraState = {
     cameraPos: [number, number, number];
     cameraTarget?: Vector3;
@@ -46,9 +69,12 @@ export type GameState = {
         setPhase: (phase: GamePhase) => void;
         round: number,
         endReason: string | null;
+        endCause: EndCause;
         dayEnded: boolean;
         lastRoundIncome: number;
         lastRoundExpenses: number;
+        currentRoundExtraIncome: number;
+        currentRoundExtraExpenses: number;
         timerStartedAt: number | null;
         timerPausedAt: number | null;
         charisma: {
@@ -61,6 +87,7 @@ export type GameState = {
         saveGame: () => void;
         loadGame: (data: Record<string, unknown>) => void;
     };
+    stats: GameStats;
     specialEnding: {
         available: boolean;
         faction: Power | null;
