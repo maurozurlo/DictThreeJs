@@ -70,7 +70,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function factionPeakLow(history: GameStats['relationsHistory'], key: Power) {
     if (!history.length) return { peak: '—', low: '—' }
-    const vals = history.map(r => r[key])
+    const vals = history.map(r => (r as Record<Power, number>)[key])
     return { peak: String(Math.max(...vals)), low: String(Math.min(...vals)) }
 }
 
@@ -89,10 +89,6 @@ const EndScreen = () => {
     const tier = calcTier(phase, endCause, round, relations, charisma, treasury)
     const isWin = phase === 'victory' || phase === 'special_ending'
     const roundsPlayed = round - 1
-
-    const milPL = factionPeakLow(stats.relationsHistory, 'military')
-    const bisPL = factionPeakLow(stats.relationsHistory, 'business')
-    const pepPL = factionPeakLow(stats.relationsHistory, 'people')
 
     const totalNet = stats.totalIncomeEarned + stats.totalExtrasEarned - stats.totalExpensesSpent - stats.totalExtrasSpent
 
