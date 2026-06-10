@@ -92,7 +92,7 @@ const Log = ({ isActive }: TabProps) => {
                     </Card>
                 ))}
                 {logEntries.length === 0 && (
-                    <Card>No log entries yet.</Card>
+                    <Card>{t('log.no_entries')}</Card>
                 )}
             </div>
         </div>

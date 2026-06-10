@@ -116,6 +116,7 @@
     width: 100%;
 
     label {
+        color: var(--accent-color);
         font-size: .8rem;
         opacity: .7;
         text-transform: uppercase;
