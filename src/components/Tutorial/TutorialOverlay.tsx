@@ -13,7 +13,7 @@ interface StepConfig {
     subnoteKey?: string
     /** undefined = show Got-it button; null = no button (auto-advance only) */
     ctaKey?: string | null
-    tooltipSide: 'center' | 'top' | 'bottom' | 'left' | 'right'
+    tooltipSide: 'center' | 'top' | 'bottom' | 'bottom-right' | 'left' | 'right'
     oval?: boolean
 }
 
@@ -28,7 +28,7 @@ const STEPS: StepConfig[] = [
     { selector: '[data-tutorial="tab-Shop"]',       bodyKey: 'step7.body',  subnoteKey: 'step7.subnote',  tooltipSide: 'bottom' },
     { selector: '[data-tutorial="tab-Street"]',     bodyKey: 'step8.body',  subnoteKey: 'step8.subnote',  tooltipSide: 'bottom' },
     { selector: '[data-tutorial="tab-Log"]',        bodyKey: 'step9.body',                                tooltipSide: 'bottom' },
-    { selector: '[data-tutorial="advance-btn"]',    bodyKey: 'step10.body', subnoteKey: 'step10.subnote', tooltipSide: 'bottom' },
+    { selector: '[data-tutorial="advance-btn"]',    bodyKey: 'step10.body', subnoteKey: 'step10.subnote', tooltipSide: 'bottom-right' },
 ]
 const TOTAL_STEPS = STEPS.length
 
@@ -48,6 +48,8 @@ function tooltipStyle(rect: DOMRect | null, side: StepConfig['tooltipSide']): Re
     switch (side) {
         case 'bottom':
             return { position: 'fixed', top: rect.bottom + GAP, left: rect.left + rect.width / 2, transform: 'translateX(-50%)' }
+        case 'bottom-right':
+            return { position: 'fixed', top: rect.bottom + GAP, right: window.innerWidth - rect.right }
         case 'top':
             return { position: 'fixed', bottom: window.innerHeight - rect.top + GAP, left: rect.left + rect.width / 2, transform: 'translateX(-50%)' }
         case 'left':
