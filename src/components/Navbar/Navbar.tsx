@@ -80,7 +80,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
             <div className={styles.navRight}>
                 {displayTabs && phase === 'start' && !dayEnded && (
                     <Button variant="primary" onClick={requestAdvanceRound}>
-                        {allActionsDone ? '>' : '>>'}
+                        {allActionsDone ? '>>' : '>'}
                     </Button>
                 )}
             </div>

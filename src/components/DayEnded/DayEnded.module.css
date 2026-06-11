@@ -1,0 +1,12 @@
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-family: 'PressStart2P', sans-serif;
+    font-size: 0.7rem;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.positive { color: #27ae60; }
+.negative { color: #e74c3c; }

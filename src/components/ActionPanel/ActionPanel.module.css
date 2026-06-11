@@ -23,7 +23,6 @@
     flex-direction: column;
     gap: .5rem;
     justify-content: center;
-    padding: 1rem;
     margin: 19px 0 19px 19px;
     border-right: 4px solid var(--hud-border-dark);
 
@@ -60,6 +59,18 @@
         transform: scale(2) translateY(0px);
         position: relative;
 
+    }
+
+    .budget{
+        display: flex;
+        flex-direction: column;
+
+    span{
+    padding-top: .5rem;
+    padding-bottom: .25rem;
+    padding-inline: 1rem;
+        border-top: 1px solid var(--hud-panel-bg);
+    }
     }
 }
 
@@ -129,20 +140,3 @@
     padding: 1rem;
 }
 
-.positive {
-    color: #27ae60;
-}
-
-.negative {
-    color: #e74c3c;
-}
-
-.skipStatRow {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    font-family: 'PressStart2P', sans-serif;
-    font-size: 0.7rem;
-    padding: 0.25rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}

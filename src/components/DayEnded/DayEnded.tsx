@@ -1,0 +1,62 @@
+import { useGameStore } from '../../Stores/GameState'
+import { MoneyNumberFormatter } from '../../Constants/Budget'
+import Typography from '../Typography/Typography'
+import Button from '../Button/Button'
+import { useTranslation } from 'react-i18next'
+import { Modal, ModalCard } from '../Modal/Modal'
+import styles from './DayEnded.module.css'
+
+const DayEnded = () => {
+    const { t } = useTranslation()
+    const phase             = useGameStore(s => s.gameManagement.phase)
+    const dayEnded          = useGameStore(s => s.gameManagement.dayEnded)
+    const round             = useGameStore(s => s.gameManagement.round)
+    const lastRoundIncome   = useGameStore(s => s.gameManagement.lastRoundIncome)
+    const lastRoundExpenses = useGameStore(s => s.gameManagement.lastRoundExpenses)
+    const extraIncome       = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
+    const extraExpenses     = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
+    const nextRound         = useGameStore(s => s.gameManagement.nextRound)
+
+    if (!dayEnded || phase !== 'start') return null
+
+    const net = lastRoundIncome + extraIncome - lastRoundExpenses - extraExpenses
+
+    return (
+        <Modal>
+            <ModalCard>
+                <Typography variant="h2" color="accent">{t('actionPanel.day_ended', { round })}</Typography>
+                <div className={styles.statRow}>
+                    <span>{t('actionPanel.tax_income')}</span>
+                    <span className={styles.positive}>+{MoneyNumberFormatter(lastRoundIncome)}</span>
+                </div>
+                {extraIncome > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.bonus_income')}</span>
+                        <span className={styles.positive}>+{MoneyNumberFormatter(extraIncome)}</span>
+                    </div>
+                )}
+                <div className={styles.statRow}>
+                    <span>{t('actionPanel.budget_expenses')}</span>
+                    <span className={styles.negative}>-{MoneyNumberFormatter(lastRoundExpenses)}</span>
+                </div>
+                {extraExpenses > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.extra_expenses')}</span>
+                        <span className={styles.negative}>-{MoneyNumberFormatter(extraExpenses)}</span>
+                    </div>
+                )}
+                <div className={styles.statRow}>
+                    <span>{t('actionPanel.net')}</span>
+                    <span className={net >= 0 ? styles.positive : styles.negative}>
+                        {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
+                    </span>
+                </div>
+                <Button onClick={nextRound}>
+                    {t('actionPanel.continue_day', { day: round + 1 })}
+                </Button>
+            </ModalCard>
+        </Modal>
+    )
+}
+
+export default DayEnded
