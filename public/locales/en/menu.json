@@ -76,7 +76,8 @@
     "totalTax": "Income",
     "net": "Net",
     "peopleTax": "People Tax",
-    "businessTax": "Business Tax"
+    "businessTax": "Business Tax",
+    "rounds_left": "~{{rounds}} rounds left"
   },
   "meet": {
     "none_selected": "Select a faction to begin the meeting",

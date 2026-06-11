@@ -12,8 +12,10 @@ import { calculateRoundFinancials } from '../../Stores/BudgetHandler'
 const Budget = ({ isActive }: TabProps) => {
     const { t } = useTranslation();
     const budget = useGameStore(s => s.budget)
+    const treasury = useGameStore(s => s.budget.treasury)
     const financials = calculateRoundFinancials(budget)
     const net = financials.netChange
+    const roundsLeft = net < 0 ? Math.floor(treasury / Math.abs(net)) : null
 
     return (
         <TabLayout
@@ -25,6 +27,7 @@ const Budget = ({ isActive }: TabProps) => {
                 |
                 <span style={{ fontFamily: 'inherit', fontSize: 'inherit', color: net >= 0 ? '#27ae60' : '#e74c3c' }}>
                     {t('budget.net')}: {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
+                    {roundsLeft !== null && ` · ${t('budget.rounds_left', { rounds: roundsLeft })}`}
                 </span>
             </>}
             isActive={isActive}>

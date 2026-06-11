@@ -165,10 +165,10 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
             },
         },
         EXPENDITURES: {
-            health: 3,
-            infrastructure: 3,
-            security: 3,
-            education: 3,
+            health: 5,
+            infrastructure: 5,
+            security: 5,
+            education: 5,
         },
         TAXES: {
             peopleTaxes: 30,

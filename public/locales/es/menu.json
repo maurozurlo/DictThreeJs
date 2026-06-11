@@ -76,7 +76,8 @@
         "totalTax": "Ingresos",
         "net": "Neto",
         "peopleTax": "Población",
-        "businessTax": "Empresas"
+        "businessTax": "Empresas",
+        "rounds_left": "~{{rounds}} rondas restantes"
     },
     "meet": {
         "none_selected": "Selecciona una facción para comenzar la reunión",
