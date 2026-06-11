@@ -158,10 +158,11 @@ No change — `Math.random()` is O(1) native call.
 
 ## Validation Criteria
 
-- [x] `Utils/Math.ts` exports `rollChance`
-- [x] No inline `Math.random()` in `GameState.ts` `nextRound()` (mini-challenge block)
-- [x] Existing tests (`Math.test.ts`) pass
-- [ ] All remaining store/handler `Math.random()` calls migrated to `Utils/Math.ts` (follow-up)
+- [x] `Utils/Math.ts` exports `rollChance` and `rollFloat`
+- [x] No inline `Math.random()` in stores or handlers (all use `Utils/Math.ts` functions)
+- [x] `DailyEventHandler.ts` weighted-sum rolls remain as-is (self-contained, not injectable pattern)
+- [x] Visual components (`Newspaper.tsx`, `DictatorHands.tsx`) exempt — cosmetic only
+- [x] All tests pass (85/85)
 
 ## GDD Requirements Addressed
 

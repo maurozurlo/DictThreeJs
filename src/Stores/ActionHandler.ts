@@ -2,6 +2,7 @@ import { GAMESTATE } from "../Constants/GameState";
 import type { GameState } from "../types/GameState";
 import type { MeetActionType, Power } from "../types/Power";
 import { handleRelations } from "./EffectHandler";
+import { getRandomFromList, rollChance, rollFloat } from "../Utils/Math";
 
 type ActionResult = {
     resultText: { key: string; params?: Record<string, string | number> };
@@ -51,7 +52,7 @@ function handleEliminate(
     if (charisma >= 5) backlashChance = 0.15;
     else if (charisma <= -5) backlashChance = 0.45;
 
-    const hasBacklash = Math.random() < backlashChance;
+    const hasBacklash = rollChance(backlashChance);
 
     if (!hasBacklash) {
         return {
@@ -66,7 +67,7 @@ function handleEliminate(
     }
 
     const otherPowers = Object.keys(newRelations).filter((p) => p !== power) as Power[];
-    const angryPower = otherPowers[Math.floor(Math.random() * otherPowers.length)];
+    const angryPower = getRandomFromList(otherPowers);
 
     return {
         resultText: { key: "eliminate_backlash", params: { power, angryPower } },
@@ -113,7 +114,7 @@ function handleDialogue(
     const charismaBonus = Math.max(-0.25, Math.min(0.25, charisma * 0.03));
     const failThreshold = 0.1 * (1 - baseSuccessRate);
     const successThreshold = Math.max(failThreshold + 0.01, Math.min(0.95, failThreshold + baseSuccessRate * 0.7 + charismaBonus));
-    const roll = Math.random();
+    const roll = rollFloat();
 
     if (roll < failThreshold) {
         return {

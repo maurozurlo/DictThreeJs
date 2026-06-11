@@ -35,3 +35,8 @@ export function getRandomFromList<T>(list: T[]): T {
 export function rollChance(p: number): boolean {
     return Math.random() < p;
 }
+
+/** Returns a random float in [0, 1). Use for multi-threshold rolls. */
+export function rollFloat(): number {
+    return Math.random();
+}

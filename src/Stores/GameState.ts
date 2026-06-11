@@ -4,7 +4,7 @@ import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
-import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
+import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
@@ -272,12 +272,12 @@ export const INITIAL_STATE = ({ set, get }: {
 
             // Handle risk
             let riskTriggered = false;
-            if (effect.risk && Math.random() < effect.risk) {
+            if (effect.risk && rollChance(effect.risk)) {
                 riskTriggered = true;
                 // Risk penalty: random power loses 2 on rejection
                 if (!accepted) {
                     const powers: Power[] = ['military', 'business', 'people'];
-                    const angryPower = powers[Math.floor(Math.random() * powers.length)];
+                    const angryPower = getRandomFromList(powers);
                     newRelations[angryPower] = Clamp(
                         newRelations[angryPower] - 2,
                         GAMESTATE.RELATIONS.MIN,
@@ -353,7 +353,7 @@ export const INITIAL_STATE = ({ set, get }: {
             if (state.specialEnding.used || !state.specialEnding.faction) return;
             const charisma = state.gameManagement.charisma.current;
             const goodChance = 0.5 + (charisma / 10) * 0.25;
-            const isGood = Math.random() < goodChance;
+            const isGood = rollChance(goodChance);
             const faction = state.specialEnding.faction;
             const narratives: Record<string, { good: string; bad: string }> = {
                 military: {

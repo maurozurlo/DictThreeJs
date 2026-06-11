@@ -1,4 +1,5 @@
 import type { Power } from "../types/Power";
+import { getRandomFromList } from "./Math";
 
 export function getRandomUniqueItemForPower<T extends { power: Power }>(
     items: T[],
@@ -7,5 +8,5 @@ export function getRandomUniqueItemForPower<T extends { power: Power }>(
 ): T | null {
     const available = items.filter(i => i.power === power && !used.has(i));
     if (available.length === 0) return null;
-    return available[Math.floor(Math.random() * available.length)];
+    return getRandomFromList(available);
 }

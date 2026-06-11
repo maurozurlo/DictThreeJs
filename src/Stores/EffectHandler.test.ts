@@ -5,12 +5,14 @@ import type { Deal } from '../types/Deal';
 import type { Law } from '../types/Law';
 import * as MathUtils from '../Utils/Math';
 
-// Mock the math utilities
-vi.mock('../Utils/Math', () => ({
-    Clamp: (value: number, min: number, max: number) =>
-        Math.max(min, Math.min(max, value)),
-    getRandomFromList: vi.fn((arr: string[]) => arr[0])
-}));
+// Mock the math utilities — spread real module so rollChance/rollFloat remain functional
+vi.mock('../Utils/Math', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../Utils/Math')>();
+    return {
+        ...actual,
+        getRandomFromList: vi.fn((arr: string[]) => arr[0]),
+    };
+});
 
 // Mock constants
 vi.mock('../Constants/Power', () => ({

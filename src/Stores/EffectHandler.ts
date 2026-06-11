@@ -2,7 +2,7 @@ import type { GameState } from "../types/GameState";
 import i18n from '../i18n';
 import type { Deal } from "../types/Deal";
 import type { Law } from "../types/Law";
-import { Clamp, getRandomFromList } from "../Utils/Math";
+import { Clamp, getRandomFromList, rollChance } from "../Utils/Math";
 import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
 import type { Expenditures, Taxes } from "../types/Budget";
@@ -117,7 +117,7 @@ export function handleDecision({
     });
 
     // Handle risk mechanics - random faction penalty on rejection
-    const riskTriggered = effect.risk && Math.random() < effect.risk;
+    const riskTriggered = effect.risk && rollChance(effect.risk);
     if (riskTriggered && !hasAccepted) {
         const angryPower = getRandomFromList(Power);
         newRelations[angryPower] = handleRelations({
