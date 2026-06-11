@@ -291,7 +291,7 @@ describe('handleDecision', () => {
                 },
                 deals: expect.objectContaining({
                     dealDecided: true,
-                    lastDealOutcome: 'Deal accepted!',
+                    lastDealOutcome: ['Deal accepted!'],
                     interactedWithDeals: expect.any(Set)
                 })
             }));
@@ -326,7 +326,7 @@ describe('handleDecision', () => {
                 },
                 deals: expect.objectContaining({
                     dealDecided: true,
-                    lastDealOutcome: 'Rejected Things went wrong!',
+                    lastDealOutcome: ['Rejected', 'Things went wrong!'],
                     interactedWithDeals: expect.any(Set)
                 })
             }));
@@ -362,7 +362,7 @@ describe('handleDecision', () => {
                 },
                 deals: expect.objectContaining({
                     dealDecided: true,
-                    lastDealOutcome: 'Rejected',
+                    lastDealOutcome: ['Rejected'],
                     interactedWithDeals: expect.any(Set)
                 })
             }));
@@ -399,7 +399,7 @@ describe('handleDecision', () => {
                 },
                 deals: expect.objectContaining({
                     dealDecided: true,
-                    lastDealOutcome: 'Accepted Things went wrong!',
+                    lastDealOutcome: ['Accepted', 'Things went wrong!'],
                     interactedWithDeals: expect.any(Set)
                 })
             }));

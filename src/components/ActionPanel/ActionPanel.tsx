@@ -9,9 +9,11 @@ import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { getCharismaLeft } from '../../Utils/UI'
 import { useTranslation } from 'react-i18next'
 import { useRoundTimer } from '../../Hooks/useRoundTimer'
+import { useDebugControls } from '../../Hooks/useDebugControls'
 import { GAMESTATE } from '../../Constants/GameState'
 
 const ActionPanel = () => {
+    useDebugControls()
     const { t } = useTranslation()
     const activeTab = useGameStore((s) => s.tabs.activeTab)
     const relations = useGameStore((s) => s.relations.current)

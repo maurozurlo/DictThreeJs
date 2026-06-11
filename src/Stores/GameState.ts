@@ -14,7 +14,7 @@ import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import { PERIODIC_EVENTS } from "../assets/periodicEvents";
 import { MINI_CHALLENGES } from "../assets/miniChallenges";
 import i18n from '../i18n';
-import type { Power } from "../types/Power";
+import type { Power, MeetActionType } from "../types/Power";
 import { getRandomDailyEvent } from "./DailyEventHandler";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
@@ -169,6 +169,24 @@ export const INITIAL_STATE = ({ set, get }: {
         interactedWithLaws: new Set(),
         lawDecided: false,
         lastLawOutcome: null,
+        swapLaw: () => {
+            set((state) => {
+                const updatedLaws = new Set(state.law.interactedWithLaws);
+                const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
+                    if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
+                        return getRandomUniqueItemForPower(LAWS, usedLaws, 'people') ?? getRandomUniqueItem(LAWS, usedLaws);
+                    }
+                    if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
+                        return getRandomUniqueItemForPower(LAWS, usedLaws, 'business') ?? getRandomUniqueItem(LAWS, usedLaws);
+                    }
+                    return getRandomUniqueItem(LAWS, usedLaws);
+                };
+                const nextLaw = pickNextLaw(updatedLaws);
+                if (!nextLaw) return {};
+                updatedLaws.add(nextLaw);
+                return { law: { ...state.law, current: nextLaw, interactedWithLaws: updatedLaws, lawDecided: false, lastLawOutcome: null } };
+            });
+        },
         actUponLaw: (hasAccepted: boolean) => {
             const state = get();
             const current = state.law.current;
@@ -525,12 +543,11 @@ export const INITIAL_STATE = ({ set, get }: {
         },
         charisma: {
             current: GAMESTATE.CHARISMA.INITIAL,
-            adjustCharisma: (amount) => {
+            adjustCharisma: (amount: number) => {
                 set((s) => {
                     const prevValue = s.gameManagement.charisma.current
                     const newValue = Clamp(prevValue + amount, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
                     return {
-                        ...s,
                         gameManagement: {
                             ...s.gameManagement,
                             charisma: {
@@ -538,7 +555,7 @@ export const INITIAL_STATE = ({ set, get }: {
                                 current: newValue
                             }
                         }
-                    }
+                    };
                 })
             }
         },
@@ -947,7 +964,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.deals,
                     current: restoredDeal,
                     dealDecided: (savedDeals.dealDecided as boolean) ?? false,
-                    lastDealOutcome: (savedDeals.lastDealOutcome as string | null) ?? null,
+                    lastDealOutcome: (savedDeals.lastDealOutcome as string[] | null) ?? null,
                     lastDealAccepted: (savedDeals.lastDealAccepted as boolean | null) ?? null,
                     interactedWithDeals: new Set(),
                 },
@@ -978,15 +995,14 @@ export const INITIAL_STATE = ({ set, get }: {
         })),
         actionOutcomeText: null,
         actionTaken: { type: undefined, taken: false, power: undefined },
-        takeAction: (power, action) => set((state) => {
+        takeAction: (power: Power, action: MeetActionType) => set((state) => {
             const { actionTaken, newRelations, resultText, treasuryUpdate, charismaDelta } = handleActionOutcome(power, action, state);
             const newCharisma = Clamp(
                 state.gameManagement.charisma.current + charismaDelta,
                 GAMESTATE.CHARISMA.MIN,
                 GAMESTATE.CHARISMA.MAX
             );
-            const nextState = {
-                ...state,
+            return {
                 meet: {
                     ...state.meet,
                     actionTaken: { type: action, taken: actionTaken, power },
@@ -1009,13 +1025,20 @@ export const INITIAL_STATE = ({ set, get }: {
                     } : state.gameManagement.meetCounts,
                 },
             };
-            return nextState;
         })
     },
     budget: {
         treasury: GAMESTATE.BUDGET.TREASURY,
         expenditures: GAMESTATE.BUDGET.EXPENDITURES,
         taxes: GAMESTATE.BUDGET.TAXES,
+        adjustTreasury: (amount: number) => {
+            set((state) => ({
+                budget: {
+                    ...state.budget,
+                    treasury: state.budget.treasury + amount
+                }
+            }))
+        },
         adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => {
             set((state: GameState) => {
                 const { budget } = state;
@@ -1043,12 +1066,12 @@ export const INITIAL_STATE = ({ set, get }: {
     },
     relations: {
         current: GAMESTATE.RELATIONS.INITIAL,
-        adjustRelations: (power, amount) => {
+        adjustRelations: (power: Power, amount: number) => {
             set((state) => {
                 const newValue = handleRelations({
                     power,
                     amount,
-                    current: state.relations.current[power],
+                    current: state.relations.current[power as keyof typeof state.relations.current],
                 });
                 return {
                     relations: {

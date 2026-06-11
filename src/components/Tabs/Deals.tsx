@@ -35,7 +35,12 @@ const Deals = ({ isActive }: TabProps) => {
                     </div>
                     {dealDecided ? <>
                         <Typography variant='h3'>{t('deals.outcome')}</Typography>
-                        <Typography variant='body'>{outcome ? t(outcome) : ""}</Typography>
+                        {outcome && outcome.length ?
+                            <span>
+                                {outcome.map((line) => (
+                                    <Typography key={line} variant='body'>{t(line)}</Typography>
+                                ))}
+                            </span> : ""}
                     </> : null}
                 </Card>
 

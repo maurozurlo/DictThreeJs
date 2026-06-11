@@ -167,9 +167,14 @@ export function handleDecision({
     // Type-specific state updates
     if (type === "deal") {
         const deal = item as Deal;
-        let finalText = hasAccepted ? deal.acceptText : deal.rejectText;
+        const finalText = []
+        if (hasAccepted) {
+            finalText.push(deal.acceptText);
+        } else {
+            finalText.push(deal.rejectText);
+        }
         if (riskTriggered && deal.riskText) {
-            finalText += " " + deal.riskText;
+            finalText.push(deal.riskText);
         }
 
         set({

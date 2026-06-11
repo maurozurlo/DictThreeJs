@@ -163,6 +163,7 @@ export type GameState = {
         expenditures: Record<Expenditures, number>;
         taxes: Record<Taxes, number>;
         adjustBudgetItem: (id: Expenditures | Taxes, amount: number) => void;
+        adjustTreasury: (amount: number) => void;
     },
     law: {
         current: Law | null,
@@ -170,6 +171,7 @@ export type GameState = {
         lawDecided: boolean;
         lastLawOutcome: boolean | null;
         actUponLaw: (hasAccepted: boolean) => void;
+        swapLaw: () => void;
     },
     log: RoundLogEntry[],
     relations: {
@@ -186,7 +188,7 @@ export type GameState = {
         dealDecided: boolean,
         interactedWithDeals: Set<Deal>,
         actUponDeal: (hasAccepted: boolean) => void;
-        lastDealOutcome: string | null;
+        lastDealOutcome: string[] | null;
         lastDealAccepted: boolean | null;
     };
     tutorial: {
