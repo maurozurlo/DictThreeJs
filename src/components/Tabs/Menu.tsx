@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useRef, useState } from 'react'
 import { importSave } from '../../Utils/SaveLoad'
 import { Tabs } from '../../types/Tabs'
+import HelpOverlay from '../HelpOverlay/HelpOverlay'
 
 
 const Menu = ({ isActive }: TabProps) => {
@@ -19,6 +20,7 @@ const Menu = ({ isActive }: TabProps) => {
     const { t, i18n } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showSettings, setShowSettings] = useState(false);
+    const [showHelp, setShowHelp] = useState(false);
 
     const isInGame = phase === 'start';
 
@@ -37,6 +39,7 @@ const Menu = ({ isActive }: TabProps) => {
     };
 
     return (
+        <>
         <div className={clsx(styles.Tab, styles.TabMenu, { [styles.isActive]: isActive })}>
             <div className={styles.centeredContainer}>
                 <Typography variant={'h1'}>
@@ -57,7 +60,7 @@ const Menu = ({ isActive }: TabProps) => {
                         <Button variant='primary' onClick={saveGame}>{t('mainMenu.saveGame')}</Button>
                     )}
                     <Button variant='primary' onClick={handleLoadClick}>{t('mainMenu.loadGame')}</Button>
-                    <Button variant='primary'>{t('mainMenu.help')}</Button>
+                    <Button variant='primary' onClick={() => setShowHelp(true)}>{t('mainMenu.help')}</Button>
                     <Button variant='primary' onClick={() => setShowSettings(s => !s)}>
                         {t('mainMenu.settings')}
                     </Button>
@@ -91,6 +94,9 @@ const Menu = ({ isActive }: TabProps) => {
                 />
             </div>
         </div>
+
+        {showHelp && <HelpOverlay onClose={() => setShowHelp(false)} />}
+        </>
     )
 }
 
