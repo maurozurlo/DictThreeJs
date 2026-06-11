@@ -9,11 +9,12 @@ import Elite from "./3d/Elite";
 import Military from "./3d/Military";
 import SecretRoom from "./3d/SecretRoom";
 import Statue from "./3d/Statue";
+import StreetView from "./3d/StreetView";
 import { useGameStore } from "./Stores/GameState";
 
 function CameraControllerFree() {
     console.log("Free camera mode enabled");
-    useFreeCameraControls(4); // speed = 4
+    useFreeCameraControls(0.3, 0.002, 0.3);
     return null;
 }
 
@@ -35,6 +36,7 @@ export function Scene() {
             <Military />
             <SecretRoom />
             <Statue />
+            <StreetView />
         </Canvas>
     );
 }

@@ -40,6 +40,9 @@ export type GameStats = {
 
 export type CameraState = {
     cameraPos: [number, number, number];
+    cameraFov: number;
+    /** Euler pitch (x) and yaw (y) in radians, applied in CameraController */
+    cameraRotation: [number, number];
     cameraTarget?: Vector3;
     cameraPositions: Vector3[];
     cameraTargets: Vector3[];
@@ -54,7 +57,9 @@ export type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose' | 'speci
 export type GameState = {
     debug: {
         enabled: boolean;
+        fov: number;
         setDebugMode: (enabled: boolean) => void;
+        setFov: (fov: number) => void;
     },
     scene: {
         camera: CameraState;

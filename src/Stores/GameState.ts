@@ -31,16 +31,19 @@ export const INITIAL_STATE = ({ set, get }: {
 }): GameState => ({
     debug: {
         enabled: false,
+        fov: 34,
         setDebugMode: (enabled: boolean) => set((state) => ({
-            debug: {
-                ...state.debug,
-                enabled,
-            }
-        }))
+            debug: { ...state.debug, enabled },
+        })),
+        setFov: (fov: number) => set((state) => ({
+            debug: { ...state.debug, fov },
+        })),
     },
     scene: {
         camera: {
             cameraPos: [-1.336, 0.63, 0.302],
+            cameraFov: 34,
+            cameraRotation: [0, 0] as [number, number],
             cameraTarget: undefined,
             cameraPositions: [],
             cameraTargets: [],
@@ -114,10 +117,13 @@ export const INITIAL_STATE = ({ set, get }: {
             } else if (tab === Tabs.Laws) {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
-                newCameraPos = cameraPositions[2];
+                newCameraPos = new Vector3(0.312, 0.641, 0.046);
             } else if (tab === Tabs.Secret) {
                 newCameraPos = new Vector3(1.5, 0.7, 1.0);
             }
+
+            const newCameraFov = tab === Tabs.Street ? 59 : 34;
+            const newCameraRotation: [number, number] = tab === Tabs.Street ? [-0.256, 0.024] : [0, 0];
 
             set((s) => {
                 const now = Date.now();
@@ -137,6 +143,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...s.scene,
                         camera: {
                             ...s.scene.camera,
+                            cameraFov: newCameraFov,
+                            cameraRotation: newCameraRotation,
                             ...(newCameraPos && {
                                 cameraPos: [newCameraPos.x, newCameraPos.y, newCameraPos.z],
                             }),

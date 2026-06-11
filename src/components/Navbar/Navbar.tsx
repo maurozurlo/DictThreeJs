@@ -40,6 +40,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
         { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals'), disabled: tabsLocked },
         { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: tabsLocked },
         { tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
+        { tab: Tabs.Street, icon: 'street', label: t('tabs.street') },
         ...(secretAvailable ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
     ];
 

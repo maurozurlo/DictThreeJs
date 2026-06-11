@@ -1,3 +1,7 @@
+interface Window {
+    DEBUG_POSITIONS: { x: number; y: number; z: number; rx: number; ry: number; fov: number }[];
+}
+
 declare module 'three/examples/jsm/loaders/FBXLoader' {
     import { Group, LoadingManager, Loader } from 'three';
 

@@ -1,68 +1,56 @@
-// useFreeCameraControls.tsx
 import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { useGameStore } from "../Stores/GameState";
 
-export function useFreeCameraControls(speed: number = 2, lookSpeed: number = 0.002) {
+// Populated by pressing I in debug mode. Read from the browser console.
+window.DEBUG_POSITIONS = window.DEBUG_POSITIONS ?? [];
+
+export function useFreeCameraControls(speed: number = 1, lookSpeed: number = 0.002, verticalSpeed: number = speed) {
     const { camera, gl } = useThree();
-    const move = useRef({
-        forward: false,
-        back: false,
-        left: false,
-        right: false,
-        up: false,
-        down: false,
-    });
+    const setFov = useGameStore((s) => s.debug.setFov);
+    const move = useRef({ forward: false, back: false, left: false, right: false, up: false, down: false });
     const rotation = useRef({ x: 0, y: 0 });
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             switch (e.code) {
-                case "KeyW":
-                    move.current.forward = true;
+                case "KeyW": move.current.forward = true; break;
+                case "KeyS": move.current.back    = true; break;
+                case "KeyA": move.current.left    = true; break;
+                case "KeyD": move.current.right   = true; break;
+                case "KeyQ": move.current.up      = true; break;
+                case "KeyE": move.current.down    = true; break;
+                case "KeyI": {
+                    const p = camera.position;
+                    const perspCam = camera as THREE.PerspectiveCamera;
+                    const entry = {
+                        x:   Math.round(p.x * 1000) / 1000,
+                        y:   Math.round(p.y * 1000) / 1000,
+                        z:   Math.round(p.z * 1000) / 1000,
+                        rx:  Math.round(rotation.current.x * 10000) / 10000,
+                        ry:  Math.round(rotation.current.y * 10000) / 10000,
+                        fov: Math.round(perspCam.fov * 10) / 10,
+                    };
+                    window.DEBUG_POSITIONS.push(entry);
+                    console.log(
+                        `[DEBUG] Position saved (${window.DEBUG_POSITIONS.length}):`,
+                        entry,
+                        '\nAll: window.DEBUG_POSITIONS'
+                    );
                     break;
-                case "KeyS":
-                    move.current.back = true;
-                    break;
-                case "KeyA":
-                    move.current.left = true;
-                    break;
-                case "KeyD":
-                    move.current.right = true;
-                    break;
-                case "ShiftLeft":
-                case "ShiftRight":
-                    move.current.up = true;
-                    break;
-                case "ControlLeft":
-                case "ControlRight":
-                    move.current.down = true;
-                    break;
+                }
             }
         };
 
         const onKeyUp = (e: KeyboardEvent) => {
             switch (e.code) {
-                case "KeyW":
-                    move.current.forward = false;
-                    break;
-                case "KeyS":
-                    move.current.back = false;
-                    break;
-                case "KeyA":
-                    move.current.left = false;
-                    break;
-                case "KeyD":
-                    move.current.right = false;
-                    break;
-                case "ShiftLeft":
-                case "ShiftRight":
-                    move.current.up = false;
-                    break;
-                case "ControlLeft":
-                case "ControlRight":
-                    move.current.down = false;
-                    break;
+                case "KeyW": move.current.forward = false; break;
+                case "KeyS": move.current.back    = false; break;
+                case "KeyA": move.current.left    = false; break;
+                case "KeyD": move.current.right   = false; break;
+                case "KeyQ": move.current.up      = false; break;
+                case "KeyE": move.current.down    = false; break;
             }
         };
 
@@ -70,54 +58,60 @@ export function useFreeCameraControls(speed: number = 2, lookSpeed: number = 0.0
             if (document.pointerLockElement === gl.domElement) {
                 rotation.current.x -= e.movementY * lookSpeed;
                 rotation.current.y -= e.movementX * lookSpeed;
-                rotation.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotation.current.x)); // clamp vertical
+                rotation.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotation.current.x));
             }
         };
 
-        const onClick = () => {
-            gl.domElement.requestPointerLock();
+        const onClick = () => gl.domElement.requestPointerLock();
+
+        const onWheel = (e: WheelEvent) => {
+            const perspCam = camera as THREE.PerspectiveCamera;
+            const next = Math.min(120, Math.max(10, perspCam.fov + e.deltaY * 0.05));
+            perspCam.fov = next;
+            perspCam.updateProjectionMatrix();
+            setFov(Math.round(next * 10) / 10);
         };
 
         document.addEventListener("keydown", onKeyDown);
         document.addEventListener("keyup", onKeyUp);
         document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("wheel", onWheel, { passive: true });
         gl.domElement.addEventListener("click", onClick);
 
         return () => {
             document.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("keyup", onKeyUp);
             document.removeEventListener("mousemove", onMouseMove);
+            document.removeEventListener("wheel", onWheel);
             gl.domElement.removeEventListener("click", onClick);
         };
-    }, [gl, lookSpeed]);
+    }, [camera, gl, lookSpeed, setFov]);
 
     useFrame((_, delta) => {
         const direction = new THREE.Vector3();
-        const right = new THREE.Vector3();
-        const forward = new THREE.Vector3();
+        const forward   = new THREE.Vector3();
+        const right     = new THREE.Vector3();
 
-        // apply rotation
         camera.rotation.x = rotation.current.x;
         camera.rotation.y = rotation.current.y;
 
-        // forward/back movement
         camera.getWorldDirection(forward);
         forward.y = 0;
         forward.normalize();
 
-        // right/left movement
         right.crossVectors(camera.up, forward).normalize();
 
         if (move.current.forward) direction.add(forward);
-        if (move.current.back) direction.sub(forward);
-        if (move.current.left) direction.add(right);
-        if (move.current.right) direction.sub(right);
-        if (move.current.up) direction.add(camera.up);
-        if (move.current.down) direction.sub(camera.up);
+        if (move.current.back)    direction.sub(forward);
+        if (move.current.left)    direction.add(right);
+        if (move.current.right)   direction.sub(right);
 
         if (direction.lengthSq() > 0) {
             direction.normalize();
             camera.position.addScaledVector(direction, speed * delta);
         }
+
+        if (move.current.up)   camera.position.addScaledVector(camera.up,  verticalSpeed * delta);
+        if (move.current.down) camera.position.addScaledVector(camera.up, -verticalSpeed * delta);
     });
 }

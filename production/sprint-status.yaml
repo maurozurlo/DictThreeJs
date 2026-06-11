@@ -71,11 +71,11 @@ stories:
     name: "Street View: static scene (placeholder cubes)"
     file: "production/stories/1-6-street-static-scene.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-10"
 
   - id: "1-7"
     name: "Log.tsx: commit in-progress changes"

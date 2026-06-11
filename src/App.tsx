@@ -15,6 +15,7 @@ import { useFadeTransition } from "./Hooks/useFadeTransition";
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
   const debugEnabled = useGameStore((s) => s.debug.enabled);
+  const debugFov = useGameStore((s) => s.debug.fov);
   const tab = useGameStore(s => s.tabs.activeTab)
   const phase = useGameStore(s => s.gameManagement.phase)
 
@@ -23,7 +24,9 @@ export default function App() {
   return (
     <>
       <Suspense fallback="Loading...">
-        <div className={clsx("debug-banner", { 'hidden': !debugEnabled })}>DEBUG MODE</div>
+        <div className={clsx("debug-banner", { 'hidden': !debugEnabled })}>
+          DEBUG MODE &nbsp;|&nbsp; FOV: {debugFov} &nbsp;|&nbsp; scroll to adjust · I to save pos
+        </div>
         <Navbar transitionTo={transitionTo} />
         <FadeOverlay visible={fading} />
         <TabManager />
