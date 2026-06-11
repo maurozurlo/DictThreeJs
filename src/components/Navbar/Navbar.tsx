@@ -18,6 +18,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
     const round = useGameStore(s => s.gameManagement.round)
     const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
     const secretAvailable = useGameStore(s => s.specialEnding.available)
+    const debugEnabled = useGameStore(s => s.debug.enabled)
     const phase = useGameStore(s => s.gameManagement.phase)
     const lawDecided = useGameStore(s => s.law.lawDecided)
     const dealDecided = useGameStore(s => s.deals.dealDecided)
@@ -41,7 +42,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
         { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: tabsLocked },
         { tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
         { tab: Tabs.Street, icon: 'street', label: t('tabs.street') },
-        ...(secretAvailable ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
+        ...((secretAvailable || debugEnabled) ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
     ];
 
     const canGoHome = phase !== 'idle' && activeTab !== Tabs.Menu;

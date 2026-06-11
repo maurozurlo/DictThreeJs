@@ -19,9 +19,14 @@ export interface PlazaConfig {
     statueSlots: Vec3[];
 }
 
+export interface Waypoint extends Vec3 {
+    /** Yaw (camera.rotation.y) facing toward the next waypoint, recorded in debug mode */
+    ry?: number;
+}
+
 export interface WaypointPath {
     id: string;
-    waypoints: Vec3[];
+    waypoints: Waypoint[];
     /** If true, entity returns to waypoint[0] after reaching the last */
     loop: boolean;
 }

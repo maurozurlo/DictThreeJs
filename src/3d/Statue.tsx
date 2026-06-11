@@ -1,19 +1,23 @@
 import { useGameStore } from "../Stores/GameState";
 
 const POSITIONS: [number, number, number][] = [
-    [0.15, 0.2, 0.7],
-    [0.30, 0.2, 0.7],
-    [0.45, 0.2, 0.7],
+    [0.969, 0.079, -1.643],
+    [1.219, 0.079, -1.644],
+    [1.523, 0.079, -1.634],
 ];
 
+const STATUE_HALF_HEIGHT = 0.175; // half of box height 0.35
+
 function Statue() {
-    const statueCount = useGameStore(s => s.shop.statueCount);
-    if (statueCount === 0) return null;
+    const statueCount  = useGameStore(s => s.shop.statueCount);
+    const debugEnabled = useGameStore(s => s.debug.enabled);
+    const visibleCount = debugEnabled ? POSITIONS.length : statueCount;
+    if (visibleCount === 0) return null;
 
     return (
         <>
-            {POSITIONS.slice(0, statueCount).map((pos, i) => (
-                <mesh key={i} position={pos}>
+            {POSITIONS.slice(0, visibleCount).map((pos, i) => (
+                <mesh key={i} position={[pos[0], pos[1] + STATUE_HALF_HEIGHT, pos[2]]}>
                     <boxGeometry args={[0.05, 0.35, 0.05]} />
                     <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.25} />
                 </mesh>

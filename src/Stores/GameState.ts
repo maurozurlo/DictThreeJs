@@ -20,6 +20,7 @@ import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
 import { getGameDate } from "../Utils/GameDate";
 import { exportSave } from "../Utils/SaveLoad";
+import { SECRET_ROOMS } from "../assets/secretRooms";
 
 
 export const INITIAL_STATE = ({ set, get }: {
@@ -105,12 +106,16 @@ export const INITIAL_STATE = ({ set, get }: {
     tabs: {
         activeTab: GAMESTATE.TABS.START_TAB,
         tabsLocked: false,
+        secretRoomIndex: 0,
         setActiveTab: (tab: Tabs) => {
             // Menu, Secret and Shop tabs bypass lock; all others respect it
             if (get().tabs.tabsLocked && tab !== Tabs.Secret && tab !== Tabs.Shop && tab !== Tabs.Menu) return;
 
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
+            let newCameraFov = 34;
+            let newCameraRotation: [number, number] = [0, 0];
+            let newSecretRoomIndex = get().tabs.secretRoomIndex;
 
             if (tab === Tabs.Meet) {
                 newCameraPos = cameraPositions[0];
@@ -118,12 +123,15 @@ export const INITIAL_STATE = ({ set, get }: {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
                 newCameraPos = new Vector3(0.312, 0.641, 0.046);
+                newCameraFov = 59;
+                newCameraRotation = [-0.256, 0.024];
             } else if (tab === Tabs.Secret) {
-                newCameraPos = new Vector3(1.5, 0.7, 1.0);
+                newSecretRoomIndex = (get().tabs.secretRoomIndex + 1) % SECRET_ROOMS.length;
+                const room = SECRET_ROOMS[newSecretRoomIndex];
+                newCameraPos = new Vector3(...room.pos);
+                newCameraFov = room.fov;
+                newCameraRotation = room.rotation;
             }
-
-            const newCameraFov = tab === Tabs.Street ? 59 : 34;
-            const newCameraRotation: [number, number] = tab === Tabs.Street ? [-0.256, 0.024] : [0, 0];
 
             set((s) => {
                 const now = Date.now();
@@ -138,7 +146,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 }
 
                 return {
-                    tabs: { ...s.tabs, activeTab: tab },
+                    tabs: { ...s.tabs, activeTab: tab, secretRoomIndex: newSecretRoomIndex },
                     scene: {
                         ...s.scene,
                         camera: {

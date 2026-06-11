@@ -39,18 +39,22 @@ export const STREET_LAYOUT: StreetLayout = {
 
     pedestrianPaths: [
         {
-            id: 'sidewalk-left',
+            id: 'square-loop-right',
             waypoints: [
-                { x: -0.10, y: 0, z: -0.35 },
-                { x: -0.10, y: 0, z:  0.25 },
+                { x:  0.47,  y: 0.045, z:  0.101, ry:  0.02   },
+                { x:  0.436, y: 0.045, z: -2.155, ry: -1.434  },
+                { x:  2.262, y: 0.045, z: -2.187, ry: -2.884  },
+                { x:  2.226, y: 0.045, z:  0.104, ry: -4.46   },
             ],
             loop: true,
         },
         {
-            id: 'sidewalk-right',
+            id: 'square-loop-left',
             waypoints: [
-                { x:  0.10, y: 0, z:  0.25 },
-                { x:  0.10, y: 0, z: -0.35 },
+                { x: -0.426, y: 0.085, z: -0.002, ry:  0.1   },
+                { x: -0.479, y: 0.085, z: -2.166, ry:  1.744 },
+                { x: -1.994, y: 0.085, z: -2.079, ry:  3.346 },
+                { x: -2.069, y: 0.085, z: -0.003, ry:  4.76  },
             ],
             loop: true,
         },
@@ -58,22 +62,45 @@ export const STREET_LAYOUT: StreetLayout = {
 
     vehiclePaths: [
         {
-            id: 'main-road',
+            id: 'car-loop-a',
             waypoints: [
-                { x: 0, y: 0, z: -0.40 },
-                { x: 0, y: 0, z:  0.30 },
+                { x: -0.164, y: 0.105, z:  0.139, ry:  8.090 },
+                { x: -2.162, y: 0.105, z:  0.222, ry:  6.624 },
+                { x: -1.943, y: 0.105, z: -2.332, ry:  4.85  },
+                { x: -0.136, y: 0.105, z: -2.239, ry:  3.214 },
+            ],
+            loop: true,
+        },
+        {
+            id: 'car-loop-b',
+            waypoints: [
+                { x:  0.153, y: 0.024, z:  0.310, ry:  0.038  },
+                { x:  0.356, y: 0.024, z: -2.373, ry: -1.54   },
+                { x:  2.344, y: 0.024, z: -2.306, ry: -2.57   },
+                { x:  2.408, y: 0.024, z:  0.562, ry: -4.714  },
+            ],
+            loop: true,
+        },
+        {
+            id: 'car-loop-c',
+            waypoints: [
+                { x:  2.812, y: 0.024, z: -2.586, ry: -4.672  },
+                { x: -2.482, y: 0.024, z: -2.602, ry: -4.706  },
+                { x: -2.738, y: 0.024, z: -7.577, ry: -7.838  },
+                { x:  4.541, y: 0.024, z: -7.785, ry: -9.114  },
             ],
             loop: true,
         },
     ],
 
     pedestrians: [
-        { id: 'ped-0', pathId: 'sidewalk-left',  speed: 0.5 },
-        { id: 'ped-1', pathId: 'sidewalk-right', speed: 0.4 },
-        { id: 'ped-2', pathId: 'sidewalk-left',  speed: 0.6 },
+        { id: 'ped-0', pathId: 'square-loop-right', speed: 0.5 },
+        { id: 'ped-1', pathId: 'square-loop-left',  speed: 0.5 },
     ],
 
     vehicles: [
-        { id: 'car-0', pathId: 'main-road', speed: 1.2 },
+        { id: 'car-0', pathId: 'car-loop-a', speed: 1.0 },
+        { id: 'car-1', pathId: 'car-loop-b', speed: 1.0 },
+        { id: 'car-2', pathId: 'car-loop-c', speed: 1.0 },
     ],
 };

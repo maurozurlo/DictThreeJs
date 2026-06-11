@@ -1,23 +1,156 @@
+import { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
 import { Tabs } from '../types/Tabs';
 import { STREET_LAYOUT } from '../assets/streetLayout';
+import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
 
-const BUILDING_COLOR  = '#7a6e62';
-const PLAZA_COLOR     = '#b8a98a';
-const GROUND_COLOR    = '#5a6b4a';
-const ROAD_COLOR      = '#4a4a4a';
+const BUILDING_COLOR   = '#7a6e62';
+const PLAZA_COLOR      = '#b8a98a';
+const GROUND_COLOR     = '#5a6b4a';
+const ROAD_COLOR       = '#4a4a4a';
 const PEDESTRIAN_COLOR = '#4a90d9';
-const VEHICLE_COLOR   = '#d94a4a';
+const VEHICLE_COLOR    = '#d94a4a';
 
-function StreetView() {
-    const activeTab = useGameStore((s) => s.tabs.activeTab);
-    if (activeTab !== Tabs.Street) return null;
+const PED_HALF_HEIGHT = 0.09;  // half of 0.18
+const CAR_HALF_HEIGHT = 0.05;  // half of 0.10
 
-    const { buildings, plaza, pedestrians, vehicles, pedestrianPaths, vehiclePaths } = STREET_LAYOUT;
+interface PedWalkerProps {
+    ped: PedestrianConfig;
+    path: WaypointPath;
+    debugEnabled: boolean;
+}
+
+function PedWalker({ ped, path, debugEnabled }: PedWalkerProps) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const pos     = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
+    const nextIdx = useRef(1 % path.waypoints.length);
+
+    useFrame((_, delta) => {
+        const target    = path.waypoints[nextIdx.current];
+        const targetPos = new THREE.Vector3(target.x, target.y, target.z);
+        const toTarget  = targetPos.clone().sub(pos.current);
+        const dist      = toTarget.length();
+        const step      = ped.speed * delta;
+
+        if (dist <= step) {
+            pos.current.copy(targetPos);
+            nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
+        } else {
+            toTarget.normalize();
+            pos.current.addScaledVector(toTarget, step);
+        }
+
+        if (meshRef.current) {
+            meshRef.current.position.set(pos.current.x, pos.current.y + PED_HALF_HEIGHT, pos.current.z);
+            // Facing direction: the ry recorded at the waypoint we departed from
+            const fromIdx = (nextIdx.current - 1 + path.waypoints.length) % path.waypoints.length;
+            const facingRy = path.waypoints[fromIdx].ry ?? 0;
+            meshRef.current.rotation.y = facingRy;
+        }
+    });
+
+    const start = path.waypoints[0];
 
     return (
-        // Group origin = street scene anchor point. Adjust position to align
-        // with where CameraStart002 in the FBX is pointing.
+        <>
+            <mesh
+                ref={meshRef}
+                position={[start.x, start.y + PED_HALF_HEIGHT, start.z]}
+            >
+                <boxGeometry args={[0.08, 0.18, 0.08]} />
+                <meshStandardMaterial color={PEDESTRIAN_COLOR} />
+            </mesh>
+
+            {debugEnabled && path.waypoints.map((wp, i) => (
+                // Arrow rotated by ry: box body points in -Z, arrowhead at -Z tip.
+                // A cube's "front face" in Three.js is the -Z face, same as camera forward.
+                <group key={i} position={[wp.x, wp.y + 0.12, wp.z]} rotation={[0, wp.ry ?? 0, 0]}>
+                    <mesh position={[0, 0, -0.15]}>
+                        <boxGeometry args={[0.015, 0.015, 0.30]} />
+                        <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.8} />
+                    </mesh>
+                    <mesh position={[0, 0, -0.33]} rotation={[Math.PI / 2, 0, 0]}>
+                        <coneGeometry args={[0.03, 0.06, 6]} />
+                        <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.8} />
+                    </mesh>
+                </group>
+            ))}
+        </>
+    );
+}
+
+interface CarWalkerProps {
+    vehicle: VehicleConfig;
+    path: WaypointPath;
+    debugEnabled: boolean;
+}
+
+function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const pos     = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
+    const nextIdx = useRef(1 % path.waypoints.length);
+
+    useFrame((_, delta) => {
+        const target    = path.waypoints[nextIdx.current];
+        const targetPos = new THREE.Vector3(target.x, target.y, target.z);
+        const toTarget  = targetPos.clone().sub(pos.current);
+        const dist      = toTarget.length();
+        const step      = vehicle.speed * delta;
+
+        if (dist <= step) {
+            pos.current.copy(targetPos);
+            nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
+        } else {
+            toTarget.normalize();
+            pos.current.addScaledVector(toTarget, step);
+        }
+
+        if (meshRef.current) {
+            meshRef.current.position.set(pos.current.x, pos.current.y + CAR_HALF_HEIGHT, pos.current.z);
+            const fromIdx  = (nextIdx.current - 1 + path.waypoints.length) % path.waypoints.length;
+            const facingRy = path.waypoints[fromIdx].ry ?? 0;
+            meshRef.current.rotation.y = facingRy;
+        }
+    });
+
+    const start = path.waypoints[0];
+
+    return (
+        <>
+            <mesh
+                ref={meshRef}
+                position={[start.x, start.y + CAR_HALF_HEIGHT, start.z]}
+            >
+                <boxGeometry args={[0.15, 0.10, 0.28]} />
+                <meshStandardMaterial color={VEHICLE_COLOR} />
+            </mesh>
+
+            {debugEnabled && path.waypoints.map((wp, i) => (
+                <group key={i} position={[wp.x, wp.y + 0.15, wp.z]} rotation={[0, wp.ry ?? 0, 0]}>
+                    <mesh position={[0, 0, -0.15]}>
+                        <boxGeometry args={[0.015, 0.015, 0.30]} />
+                        <meshStandardMaterial color="orange" emissive="orange" emissiveIntensity={0.8} />
+                    </mesh>
+                    <mesh position={[0, 0, -0.33]} rotation={[Math.PI / 2, 0, 0]}>
+                        <coneGeometry args={[0.03, 0.06, 6]} />
+                        <meshStandardMaterial color="orange" emissive="orange" emissiveIntensity={0.8} />
+                    </mesh>
+                </group>
+            ))}
+        </>
+    );
+}
+
+function StreetView() {
+    const activeTab    = useGameStore((s) => s.tabs.activeTab);
+    const debugEnabled = useGameStore((s) => s.debug.enabled);
+    if (activeTab !== Tabs.Street) return null;
+
+    const { buildings, plaza, pedestrians, pedestrianPaths, vehicles, vehiclePaths } = STREET_LAYOUT;
+
+    return (
         <group position={[0, 0, 0]}>
             {/* Ground */}
             <mesh position={[0, -0.005, -0.05]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -31,12 +164,9 @@ function StreetView() {
                 <meshStandardMaterial color={ROAD_COLOR} />
             </mesh>
 
-            {/* Buildings — box centred at y = height/2 so base sits on ground */}
+            {/* Buildings */}
             {buildings.map((b) => (
-                <mesh
-                    key={b.id}
-                    position={[b.position.x, b.scale.y / 2, b.position.z]}
-                >
+                <mesh key={b.id} position={[b.position.x, b.scale.y / 2, b.position.z]}>
                     <boxGeometry args={[b.scale.x, b.scale.y, b.scale.z]} />
                     <meshStandardMaterial color={BUILDING_COLOR} />
                 </mesh>
@@ -48,29 +178,31 @@ function StreetView() {
                 <meshStandardMaterial color={PLAZA_COLOR} />
             </mesh>
 
-            {/* Pedestrians — small upright boxes at first waypoint */}
+            {/* Pedestrians */}
             {pedestrians.map((ped) => {
                 const path = pedestrianPaths.find((p) => p.id === ped.pathId);
                 if (!path) return null;
-                const wp = path.waypoints[0];
                 return (
-                    <mesh key={ped.id} position={[wp.x, 0.04, wp.z]}>
-                        <boxGeometry args={[0.03, 0.08, 0.03]} />
-                        <meshStandardMaterial color={PEDESTRIAN_COLOR} />
-                    </mesh>
+                    <PedWalker
+                        key={ped.id}
+                        ped={ped}
+                        path={path}
+                        debugEnabled={debugEnabled}
+                    />
                 );
             })}
 
-            {/* Vehicles — wider box at first waypoint */}
+            {/* Vehicles */}
             {vehicles.map((v) => {
                 const path = vehiclePaths.find((p) => p.id === v.pathId);
                 if (!path) return null;
-                const wp = path.waypoints[0];
                 return (
-                    <mesh key={v.id} position={[wp.x, 0.03, wp.z]}>
-                        <boxGeometry args={[0.10, 0.05, 0.07]} />
-                        <meshStandardMaterial color={VEHICLE_COLOR} />
-                    </mesh>
+                    <CarWalker
+                        key={v.id}
+                        vehicle={v}
+                        path={path}
+                        debugEnabled={debugEnabled}
+                    />
                 );
             })}
         </group>

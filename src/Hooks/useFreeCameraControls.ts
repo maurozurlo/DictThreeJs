@@ -8,9 +8,24 @@ window.DEBUG_POSITIONS = window.DEBUG_POSITIONS ?? [];
 
 export function useFreeCameraControls(speed: number = 1, lookSpeed: number = 0.002, verticalSpeed: number = speed) {
     const { camera, gl } = useThree();
-    const setFov = useGameStore((s) => s.debug.setFov);
-    const move = useRef({ forward: false, back: false, left: false, right: false, up: false, down: false });
+    const setFov         = useGameStore((s) => s.debug.setFov);
+    const storeCameraPos = useGameStore((s) => s.scene.camera.cameraPos);
+    const storeRotation  = useGameStore((s) => s.scene.camera.cameraRotation);
+    const storeFov       = useGameStore((s) => s.scene.camera.cameraFov);
+    const move     = useRef({ forward: false, back: false, left: false, right: false, up: false, down: false });
     const rotation = useRef({ x: 0, y: 0 });
+
+    // Snap to store position/rotation whenever setActiveTab fires (the only writer of cameraPos).
+    useEffect(() => {
+        camera.position.set(...storeCameraPos);
+        rotation.current.x = storeRotation[0];
+        rotation.current.y = storeRotation[1];
+        const perspCam = camera as THREE.PerspectiveCamera;
+        perspCam.fov = storeFov;
+        perspCam.updateProjectionMatrix();
+        setFov(storeFov);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [storeCameraPos, storeRotation, storeFov]);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {

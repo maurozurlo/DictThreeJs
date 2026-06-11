@@ -68,6 +68,7 @@ export type GameState = {
         activeTab: Tabs;
         setActiveTab: (tab: Tabs) => void;
         tabsLocked: boolean;
+        secretRoomIndex: number;
     };
     gameManagement: {
         phase: GamePhase;
