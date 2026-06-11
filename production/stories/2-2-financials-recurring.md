@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 2-2
 - **Sprint**: 2
-- **Status**: Ready
+- **Status**: In Progress
 - **Type**: Logic
 - **Layer**: Core
 - **TR-ID**: TR-lasting-002

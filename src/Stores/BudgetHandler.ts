@@ -1,6 +1,6 @@
 import { GAMESTATE } from "../Constants/GameState";
 import type { Expenditures, Taxes } from "../types/Budget";
-import type { GameState } from "../types/GameState";
+import type { ActiveRecurringEffect, GameState } from "../types/GameState";
 import { Clamp } from "../Utils/Math";
 
 export type RoundFinancials = {
@@ -8,16 +8,36 @@ export type RoundFinancials = {
     businessIncome: number;
     totalIncome: number;
     expenses: number;
+    /** Per-round income from active recurring effects (laws/deals). 0 when none active. */
+    recurringIncome: number;
+    /** Per-round expenses from active recurring effects (laws/deals). 0 when none active. */
+    recurringExpenses: number;
     netChange: number;
 };
+
+/** Sums incomeBonus and expenseBonus across all active recurring effects. */
+export function sumRecurringEffects(effects: ActiveRecurringEffect[]): {
+    recurringIncome: number;
+    recurringExpenses: number;
+} {
+    return {
+        recurringIncome: effects.reduce((sum, e) => sum + e.incomeBonus, 0),
+        recurringExpenses: effects.reduce((sum, e) => sum + e.expenseBonus, 0),
+    };
+}
 
 /**
  * Calculates round income and expenses based on POC logic.
  * - People income = base × (peopleTaxes / 100)
  * - Business income = base × (businessTaxes / 100), modified by infrastructure & education levels
  * - Expenses = sum of all expenditure levels × cost per level
+ * - Recurring income/expenses = sums over active recurring effects (laws/deals)
+ * - Net change includes both base and recurring terms
  */
-export function calculateRoundFinancials(budget: GameState["budget"]): RoundFinancials {
+export function calculateRoundFinancials(
+    budget: GameState["budget"],
+    activeRecurringEffects: ActiveRecurringEffect[] = []
+): RoundFinancials {
     const { INCOME } = GAMESTATE;
     const { peopleTaxes, businessTaxes } = budget.taxes;
     const { infrastructure, education, health, security } = budget.expenditures;
@@ -39,9 +59,10 @@ export function calculateRoundFinancials(budget: GameState["budget"]): RoundFina
 
     const totalIncome = peopleIncome + businessIncome;
     const expenses = (health + infrastructure + security + education) * INCOME.EXPENDITURE_COST_PER_LEVEL;
-    const netChange = totalIncome - expenses;
+    const { recurringIncome, recurringExpenses } = sumRecurringEffects(activeRecurringEffects);
+    const netChange = totalIncome + recurringIncome - expenses - recurringExpenses;
 
-    return { peopleIncome, businessIncome, totalIncome, expenses, netChange };
+    return { peopleIncome, businessIncome, totalIncome, expenses, recurringIncome, recurringExpenses, netChange };
 }
 
 export type BudgetChangeResult = {
