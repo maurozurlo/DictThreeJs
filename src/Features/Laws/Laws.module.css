@@ -2,71 +2,76 @@
     --hand-width: 350px;
     --hold-width: 47px;
     --hand-bottom: 45px;
-    /* slide animation defaults */
-    --start-displacement: 320px;
-    /* start offset (down) — adjust to taste */
     --slide-duration: 1500ms;
     --slide-easing: cubic-bezier(.22, .9, .35, 1);
+    --start-displacement: 320px;
 }
 
 @keyframes slideUpLaw {
-    from {
-        transform: translateY(var(--start-displacement));
-    }
-
-    to {
-        transform: translateY(0);
-    }
+    from { transform: translateY(var(--start-displacement)); }
+    to   { transform: translateY(0); }
 }
 
 @keyframes slideUpHand {
-    from {
-        transform: translateY(var(--start-displacement));
-    }
-
-    to {
-        transform: translateY(0);
-    }
+    from { transform: translateY(var(--start-displacement)); }
+    to   { transform: translateY(0); }
 }
 
 @keyframes slideUpHandFlip {
-    from {
-        transform: scaleX(-1) translateY(var(--start-displacement));
-    }
+    from { transform: scaleX(-1) translateY(var(--start-displacement)); }
+    to   { transform: scaleX(-1) translateY(0); }
+}
 
-    to {
-        transform: scaleX(-1) translateY(0);
-    }
+/* Full-width stage, anchored at the action panel top */
+.handsStage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--action-panel-height) - var(--hand-bottom));
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Centered row — max-width prevents the hands from spreading on wide screens */
+.handsLayout {
+    display: flex;
+    align-items: flex-end;
+    width: min(100%, 1200px);
+    pointer-events: auto;
 }
 
 .hand {
-    position: absolute;
-    bottom: calc(var(--action-panel-height) - var(--hand-bottom));
-    z-index: 1;
     width: var(--hand-width);
+    flex-shrink: 0;
     image-rendering: pixelated;
-    left: 20%;
+    /* hands render in front of the law paper */
+    position: relative;
+    z-index: 2;
 
-    /* start displaced and animate up to target */
     transform: translateY(var(--start-displacement));
-    will-change: transform, opacity;
+    will-change: transform;
     animation: slideUpHand var(--slide-duration) var(--slide-easing) both;
 
     &.right {
-        right: 20%;
-        left: auto;
         transform: scaleX(-1) translateY(var(--start-displacement));
         animation: slideUpHandFlip var(--slide-duration) var(--slide-easing) both;
     }
 }
 
 .law {
-    position: absolute;
-    bottom: calc(var(--action-panel-height));
-    left: calc(20% + var(--hand-width) - var(--hold-width));
-    right: calc(20% + var(--hand-width) - var(--hold-width));
+    flex: 1;
+    min-width: 300px;
     height: 500px;
-    min-width: 500px;
+    /* sit above the action panel (hands extend --hand-bottom px below the paper) */
+    margin-bottom: var(--hand-bottom);
+    /* overlap each hand's grip area */
+    margin-left: calc(-1 * var(--hold-width));
+    margin-right: calc(-1 * var(--hold-width));
+    position: relative;
     z-index: 1;
     background: url('/assets/sheet.png');
     background-repeat: no-repeat;
@@ -74,7 +79,7 @@
     padding: 2rem;
 
     transform: translateY(var(--start-displacement));
-    will-change: transform, opacity;
+    will-change: transform;
     animation: slideUpLaw var(--slide-duration) var(--slide-easing) both;
 }
 

@@ -25,33 +25,34 @@ const DictatorHands = () => {
     );
 
     return currentLaw ? (
-        <>
-            <div className={styles.law}>
-                <Typography variant='h1' color='dark'>{t('laws.proposal')}</Typography>
-                <div className={styles.lawContainer}>
-                    {lastLawOutcome !== null ? (
-                        <Typography variant='h2'
-                            style={{ transform: `rotate(${stampRotation}deg)` }}
-                            className={clsx({
-                                [styles.approvedStamp]: lastLawOutcome,
-                                [styles.rejectedStamp]: !lastLawOutcome
-                            })}>
-                            {lastLawOutcome ? t('laws.approved') : t('laws.rejected')}
-                        </Typography>
-                    ) : null}
-                    {topWidths.map((w, i) => (
-                        <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
-                    ))}
-                    <Typography variant='body' color='dark'>{t(`laws.labels.${currentLaw.id}`)}</Typography>
-                    {bottomWidths.map((w, i) => (
-                        <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
-                    ))}
+        <div className={styles.handsStage}>
+            <div className={styles.handsLayout}>
+                <img className={styles.hand} src='/assets/dicthand.png' />
+                <div className={styles.law}>
+                    <Typography variant='h1' color='dark'>{t('laws.proposal')}</Typography>
+                    <div className={styles.lawContainer}>
+                        {lastLawOutcome !== null ? (
+                            <Typography variant='h2'
+                                style={{ transform: `rotate(${stampRotation}deg)` }}
+                                className={clsx({
+                                    [styles.approvedStamp]: lastLawOutcome,
+                                    [styles.rejectedStamp]: !lastLawOutcome
+                                })}>
+                                {lastLawOutcome ? t('laws.approved') : t('laws.rejected')}
+                            </Typography>
+                        ) : null}
+                        {topWidths.map((w, i) => (
+                            <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
+                        ))}
+                        <Typography variant='body' color='dark'>{t(`laws.labels.${currentLaw.id}`)}</Typography>
+                        {bottomWidths.map((w, i) => (
+                            <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
+                        ))}
+                    </div>
                 </div>
+                <img className={clsx(styles.hand, styles.right)} src='/assets/dicthand.png' />
             </div>
-            <img className={styles.hand} src='/assets/dicthand.png' />
-            <img className={clsx(styles.hand, styles.right)} src='/assets/dicthand.png' />
-
-        </>
+        </div>
     ) : null
 }
 
