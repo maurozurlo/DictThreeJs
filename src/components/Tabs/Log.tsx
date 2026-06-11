@@ -35,12 +35,11 @@ const Log = ({ isActive }: TabProps) => {
             <div className={styles.pageContainer}>
                 {/* --- Mini Challenge Section --- */}
                 {miniChallenge.current && (
-                    <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: miniChallenge.decided })}>
+                    <div className={clsx(eventStyles.eventPanel)}>
                         <Typography variant='h2' className={eventStyles.eventTitle}>
                             🎲 {t('log.mini_challenge_title')}
                         </Typography>
                         <Typography variant='body'>{challengeText}</Typography>
-
                         {!miniChallenge.decided ? (
                             <div className={eventStyles.challengeButtons}>
                                 <Button onClick={() => miniChallenge.resolve(true)}>
@@ -66,9 +65,6 @@ const Log = ({ isActive }: TabProps) => {
                         )}
                     </div>
                 )}
-                <Typography variant='h2'>{t('log.today')}</Typography>
-                <Newspaper headline={dailyEventHeadline} date={getGameDate(round)} />
-
                 {/* --- Periodic Event Section --- */}
                 {periodicEvent.current && (
                     <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: periodicEvent.decided })}>
@@ -97,6 +93,8 @@ const Log = ({ isActive }: TabProps) => {
                     </div>
                 )}
 
+                <Typography variant='h2'>{t('log.today')}</Typography>
+                <Newspaper headline={dailyEventHeadline} date={getGameDate(round)} />
 
 
                 {/* --- Log History --- */}
