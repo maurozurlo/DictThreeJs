@@ -139,7 +139,8 @@ requirements:
     gdd: design/gdd/game-concept.md
     requirement: "Probability mechanics (dialogue success, eliminate backlash, daily/mini events, special ending) require an RNG strategy compatible with the determinism requirement"
     created: 2026-06-10
-    revised: ""
+    revised: "2026-06-10"
+    adr: docs/architecture/adr-0004-rng-determinism.md
     status: active
 
   # --- Events ---
@@ -148,7 +149,8 @@ requirements:
     gdd: design/gdd/game-concept.md
     requirement: "Event scheduling — daily random, periodic scripted at fixed rounds (3/6/9), mini-challenge 40% chance; periodic events lock tabs"
     created: 2026-06-10
-    revised: ""
+    revised: "2026-06-10"
+    adr: docs/architecture/adr-0005-event-scheduling.md
     status: active
 
   # --- Timer ---
@@ -157,7 +159,8 @@ requirements:
     gdd: design/gdd/game-concept.md
     requirement: "Real-time per-round countdown timer; expiry without a Meet action penalizes the two weakest factions"
     created: 2026-06-10
-    revised: ""
+    revised: "2026-06-10"
+    adr: docs/architecture/adr-0006-round-timer-game-loop.md
     status: active
 
   # --- 3D Scene ---

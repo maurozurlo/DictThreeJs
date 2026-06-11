@@ -4,7 +4,7 @@ import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
-import { Clamp, getRandomFromList, getRandomUniqueItem } from "../Utils/Math";
+import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
@@ -770,9 +770,9 @@ export const INITIAL_STATE = ({ set, get }: {
             }
 
             // --- 10. 40% chance for mini-challenge ---
-            const hasMiniChallenge = Math.random() < 0.4;
+            const hasMiniChallenge = rollChance(0.4);
             const miniChallengeToShow = hasMiniChallenge
-                ? MINI_CHALLENGES[Math.floor(Math.random() * MINI_CHALLENGES.length)]
+                ? getRandomFromList(MINI_CHALLENGES)
                 : null;
 
             const normalDealPool = state.deals.interactedWithDeals.size >= DEALS.length

@@ -30,3 +30,8 @@ export function getRandomFromList<T>(list: T[]): T {
     const randomIndex = Math.floor(Math.random() * list.length);
     return list[randomIndex];
 }
+
+/** Returns true with probability p (0–1). */
+export function rollChance(p: number): boolean {
+    return Math.random() < p;
+}
