@@ -49,10 +49,10 @@
         "budget_health_high": "¡El sistema de salud es elogiado! Relación con el pueblo +1",
         "budget_infra_low": "¡La infraestructura está fallando! Relación con pueblo y empresas -1",
         "budget_infra_high": "¡La infraestructura es elogiada! Relación con pueblo y empresas +1",
-        "mini_challenge_title": "",
-        "newspaper_name": "",
-        "mini_challenge_accept": "",
-        "mini_challenge_reject": ""
+        "mini_challenge_title": "Oportunidad",
+        "newspaper_name": "La Obediencia Diaria",
+        "mini_challenge_accept": "Aceptar",
+        "mini_challenge_reject": "Rechazar"
     },
     "mainMenu": {
         "newGame": "Nueva partida",
