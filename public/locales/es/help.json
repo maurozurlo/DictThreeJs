@@ -1,0 +1,62 @@
+{
+  "title": "CÓMO JUGAR",
+  "close": "Entendido",
+  "objective": {
+    "title": "OBJETIVO",
+    "body1": "Eres un dictador. Sobrevive los 10 días en el poder sin perder la lealtad del Ejército, los Empresarios o el Pueblo — y sin quedarte en bancarrota.",
+    "body2": "Si el respeto de cualquier facción llega al límite, o tu tesorería llega a cero, tu reinado termina antes. Dura los 10 días para ganar."
+  },
+  "daily_loop": {
+    "title": "EL CICLO DIARIO",
+    "body1": "Cada día dura 2 minutos reales (9:00 AM → 5:00 PM en el juego). Antes de que el reloj llegue a cero, realiza una acción en cada pestaña: Reunión, Leyes y Tratos. Puedes adelantar el día una vez que hayas terminado.",
+    "body2": "Cuando termina el día, se cobran impuestos y se pagan gastos. El resultado neto cambia tu tesorería."
+  },
+  "stats": {
+    "title": "ESTADÍSTICAS",
+    "treasury_label": "Tesorería",
+    "treasury_desc": "Tu dinero. Los ingresos provienen de impuestos; los gastos del gasto público. Si llega a $0 = fin del juego.",
+    "relations_label": "Ejército / Empresarios / Pueblo",
+    "relations_desc": "La lealtad de cada facción, de -10 a +10. Si cualquiera llega al mínimo, el juego termina.",
+    "charisma_label": "Carisma",
+    "charisma_desc": "Tu influencia personal, de -10 a +10. Mayor carisma mejora tu tasa de éxito en Diálogo."
+  },
+  "meet": {
+    "title": "REUNIÓN",
+    "intro": "Una vez al día, elige una facción y realiza una acción:",
+    "dialogue_label": "Diálogo",
+    "dialogue_desc": "Gratis. Un llamado basado en el azar. Mayor carisma significa mejores probabilidades de ganar su respeto.",
+    "bribe_label": "Soborno",
+    "bribe_desc": "Gasta dinero para garantizar un aumento de relaciones. Los costos varían por facción.",
+    "expropriate_label": "Expropiar",
+    "expropriate_desc": "Confisca sus bienes para una inyección de efectivo. Las relaciones sufrirán.",
+    "eliminate_label": "Eliminar",
+    "eliminate_desc": "Elimina a su representante permanentemente. Alto riesgo. Usa con moderación."
+  },
+  "budget": {
+    "title": "PRESUPUESTO",
+    "intro": "Ajusta tus tasas de impuestos y el gasto público desde la pestaña Presupuesto. Los cambios tienen efecto al final de cada día.",
+    "taxes_label": "Impuestos al Pueblo / Impuestos a Empresarios",
+    "taxes_desc": "0–50%. Tasas más altas generan más ingresos, pero erosionan la lealtad de las facciones.",
+    "spending_label": "Salud / Infraestructura / Seguridad / Educación",
+    "spending_desc": "Niveles de gasto 1–10. Mayor gasto cuesta más por día, pero genera buena voluntad."
+  },
+  "laws": {
+    "title": "LEYES",
+    "body": "Cada día una facción propone una ley. Apruébala y ganan respeto; recházala y lo pierden. Cada facción puede ver tus decisiones — equilibra sus necesidades con cuidado."
+  },
+  "deals": {
+    "title": "TRATOS",
+    "body": "Cada día llega un trato de una parte interesada. Lee la oferta con cuidado — aceptar o rechazar tendrá consecuencias. El resultado se revela inmediatamente después de decidir."
+  },
+  "tips": {
+    "title": "CONSEJOS",
+    "neglect_label": "No descuides a nadie",
+    "neglect_desc": "Es fácil dejar que una facción se aleje mientras manejas las otras. Revisa las tres barras de relaciones cada día.",
+    "clock_label": "Vigila el reloj",
+    "clock_desc": "El día termina automáticamente cuando se acaba el tiempo. Asegúrate de haber tomado las tres acciones antes.",
+    "treasury_label": "La tesorería es un colchón",
+    "treasury_desc": "Mantén algo de dinero en reserva. Un trato o evento puede costarte inesperadamente — estar en quiebra no deja opciones.",
+    "charisma_label": "El carisma se acumula",
+    "charisma_desc": "Un carisma positivo hace que el Diálogo sea confiable, ahorrándote dinero en sobornos cada vez que funciona."
+  }
+}

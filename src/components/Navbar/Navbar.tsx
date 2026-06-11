@@ -60,9 +60,9 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
             </div>
 
             {displayTabs && (
-                <div className={styles.buttonContainer}>
+                <div className={styles.buttonContainer} data-tutorial="tab-buttons">
                     {tabConfig.map(({ tab, icon, label, disabled }) => (
-                        <div key={tab} className={styles.tabWrapper}>
+                        <div key={tab} className={styles.tabWrapper} data-tutorial={`tab-${tab}`}>
                             <Button
                                 variant="primary"
                                 disabled={disabled}
@@ -79,7 +79,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
 
             <div className={styles.navRight}>
                 {displayTabs && phase === 'start' && !dayEnded && (
-                    <Button variant="primary" onClick={requestAdvanceRound}>
+                    <Button variant="primary" onClick={requestAdvanceRound} data-tutorial="advance-btn">
                         {allActionsDone ? '>>' : '>'}
                     </Button>
                 )}

@@ -90,6 +90,8 @@ export type GameState = {
         meetCounts: Record<Power, number>;
         nextRound: () => void;
         expireTimer: () => void;
+        pauseTimer: () => void;
+        resumeTimer: () => void;
         advanceRoundRequested: boolean;
         requestAdvanceRound: () => void;
         clearAdvanceRoundRequest: () => void;
@@ -157,5 +159,10 @@ export type GameState = {
         actUponDeal: (hasAccepted: boolean) => void;
         lastDealOutcome: string | null;
         lastDealAccepted: boolean | null;
-    }
+    };
+    tutorial: {
+        active: boolean;
+        activate: () => void;
+        deactivate: () => void;
+    };
 };

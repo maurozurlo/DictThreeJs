@@ -1,0 +1,49 @@
+{
+  "cta": "Entendido",
+  "skip": "Saltar Tutorial",
+  "step1": {
+    "body": "Eres un dictador. Tu trabajo es sobrevivir 10 días en el poder. Mantén a tus facciones leales y tu tesorería solvente.",
+    "subnote": "Esta guía rápida te mostrará lo esencial."
+  },
+  "step2": {
+    "body": "Estas son tus condiciones de derrota. Cualquier facción que llegue al límite, o la tesorería en cero, termina tu reinado.",
+    "subnote": "Las relaciones van de -10 a +10. La tesorería debe mantenerse por encima de cero."
+  },
+  "step3": {
+    "body": "Los puntos significan asuntos pendientes. Realiza una acción en Reunión, Leyes y Tratos antes de que se acabe el tiempo.",
+    "subnote": "No tienes que hacerlos en orden."
+  },
+  "step4a": {
+    "body": "Empieza aquí. Abre la pestaña Reunión para elegir una facción con la que tratar hoy."
+  },
+  "step4b": {
+    "body": "Estas son tus facciones. Haz clic en un personaje para elegir con quién reunirte hoy.",
+    "subnote": "Ejército, Empresarios o Pueblo — elige uno."
+  },
+  "step5": {
+    "body": "Estas son tus opciones. El Diálogo es gratis. El Soborno cuesta dinero. Expropiar y Eliminar tienen consecuencias.",
+    "subnote": "Elige uno para resolver tu acción de Reunión del día."
+  },
+  "step6": {
+    "body": "Tu tesorería es tu salvavidas. Si llega a cero, pierdes — al instante. Ajusta impuestos y gastos en la pestaña Presupuesto.",
+    "subnote": "Revísala cada pocos días. Los costos se acumulan."
+  },
+  "step7": {
+    "body": "La Tienda tiene objetos que pueden inclinar la balanza a tu favor. No todos los días los necesitarás, pero algunos sí.",
+    "subnote": "Los objetos cuestan dinero. Gasta sabiamente."
+  },
+  "step8": {
+    "body": "La Calle muestra tu país tal como es — no como lo proclamas. Observa cómo cambia a medida que tus decisiones surten efecto.",
+    "subnote": "Aquí no hay acciones. Solo mira."
+  },
+  "step9": {
+    "body": "Los eventos diarios aparecen en la pestaña Registro. Revísala para noticias que puedan afectar a tus facciones."
+  },
+  "step10": {
+    "body": "Cuando las tres acciones estén hechas, esto termina el día antes. Los puntos en las pestañas significan que aún no terminaste.",
+    "subnote": "Saltar con puntos pendientes te cuesta una penalización de relaciones."
+  },
+  "toast": "Estás al mando. Buena suerte.",
+  "start_playing": "¡Jugar!",
+  "back_to_menu": "Menú Principal"
+}

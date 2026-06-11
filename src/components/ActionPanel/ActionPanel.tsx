@@ -24,7 +24,7 @@ const ActionPanel = () => {
     const hourAngle = ((totalMinutes / 60 + 9) % 12) / 12 * 360 - 90
 
     return (
-        <div className={styles.actionPanel}>
+        <div className={styles.actionPanel} data-tutorial="action-panel">
             <div className={styles.genStats}>
                 <div className={styles.clock}>
                     <Icon type='clock' className={styles.bigClock}>
@@ -68,7 +68,7 @@ const ActionPanel = () => {
                 </div>
             </div>
 
-            <div className={styles.actions}>
+            <div className={styles.actions} data-tutorial="action-buttons">
                 <div className={styles.activeTab}>
                     {activeTab === Tabs.Meet ? <Meet /> : null}
                     {activeTab === Tabs.Laws ? <Laws /> : null}

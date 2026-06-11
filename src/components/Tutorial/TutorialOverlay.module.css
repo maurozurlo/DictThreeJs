@@ -1,0 +1,120 @@
+.root {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    pointer-events: none;
+}
+
+/* Full-screen dark scrim used when there is no spotlight target (step 1) */
+.scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.70);
+}
+
+/*
+ * Spotlight: sits at the target element's rect.
+ * box-shadow spreads outward to cover the rest of the viewport.
+ * Clicks pass through (pointer-events: none) so the spotlighted element
+ * remains interactive.
+ */
+.spotlight {
+    position: fixed;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.72);
+    transition: top 220ms ease, left 220ms ease, width 220ms ease, height 220ms ease;
+    z-index: 0;
+}
+
+/* Tooltip card */
+.tooltip {
+    z-index: 1;
+    pointer-events: auto;
+    background: var(--hud-panel-bg);
+    border: 2px solid var(--accent-color);
+    padding: 1.25rem 1.5rem;
+    max-width: 360px;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.body {
+    font-family: 'PressStart2P', sans-serif;
+    font-size: 0.6rem;
+    line-height: 1.9;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.subnote {
+    font-family: 'PressStart2P', sans-serif;
+    font-size: 0.5rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    opacity: 0.65;
+    margin: 0;
+}
+
+.waiting {
+    font-family: 'PressStart2P', sans-serif;
+    font-size: 0.6rem;
+    color: var(--accent-color);
+    animation: blink 800ms step-end infinite;
+    align-self: center;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+.skipLink {
+    all: unset;
+    cursor: pointer;
+    font-family: 'PressStart2P', sans-serif;
+    font-size: 0.45rem;
+    color: var(--text-color);
+    opacity: 0.4;
+    align-self: flex-end;
+
+    &:hover { opacity: 0.7; }
+}
+
+/* Finale card (shown after last step) */
+.finaleWrapper {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: rgba(0, 0, 0, 0.80);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    animation: fadeIn 300ms ease forwards;
+}
+
+.finaleCard {
+    background: var(--hud-panel-bg);
+    border: 2px solid var(--accent-color);
+    padding: 2rem 2.5rem;
+    max-width: 400px;
+    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center;
+    text-align: center;
+}
+
+.finaleButtons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

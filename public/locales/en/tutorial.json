@@ -1,0 +1,49 @@
+{
+  "cta": "Got it",
+  "skip": "Skip Tutorial",
+  "step1": {
+    "body": "You are a dictator. Your job is to survive 10 days in power. Keep your factions loyal and your treasury solvent.",
+    "subnote": "This quick guide will show you the essentials."
+  },
+  "step2": {
+    "body": "These are your loss conditions. Any faction hitting the floor, or treasury at zero, ends your reign.",
+    "subnote": "Relations run -10 to +10. Treasury must stay above zero."
+  },
+  "step3": {
+    "body": "Dots mean unfinished business. Take an action in Meet, Laws, and Deals before time runs out.",
+    "subnote": "You don't have to do them in order."
+  },
+  "step4a": {
+    "body": "Start here. Open the Meet tab to choose a faction to deal with today."
+  },
+  "step4b": {
+    "body": "These are your factions. Click a character to choose who to meet with today.",
+    "subnote": "Military, Business, or People — pick one."
+  },
+  "step5": {
+    "body": "These are your options. Dialogue is free. Bribe costs money. Expropriate and Eliminate have consequences.",
+    "subnote": "Pick one to resolve your Meet action for today."
+  },
+  "step6": {
+    "body": "Your treasury is your lifeline. If it hits zero, you lose — instantly. Adjust taxes and spending in the Budget tab.",
+    "subnote": "Check it every few days. Costs add up."
+  },
+  "step7": {
+    "body": "The Shop has items that can shift the balance in your favor. Not every round needs it, but some will.",
+    "subnote": "Items cost money. Spend wisely."
+  },
+  "step8": {
+    "body": "The Street shows your country as it is — not as you claim it to be. Watch it change as your decisions take effect.",
+    "subnote": "No actions here. Just look."
+  },
+  "step9": {
+    "body": "Daily events appear in the Log tab. Check it for news that may affect your factions."
+  },
+  "step10": {
+    "body": "When all three actions are done, this ends the day early. Dots on tabs mean you're not done yet.",
+    "subnote": "Skipping with pending dots costs you a relations penalty."
+  },
+  "toast": "You're in charge. Good luck.",
+  "start_playing": "Start Playing",
+  "back_to_menu": "Main Menu"
+}

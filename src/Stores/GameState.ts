@@ -578,6 +578,17 @@ export const INITIAL_STATE = ({ set, get }: {
             }
             // Brief overlay is now visible — its Continue button calls nextRound()
         },
+        pauseTimer: () => {
+            if (get().gameManagement.timerPausedAt !== null) return
+            set((s) => ({ gameManagement: { ...s.gameManagement, timerPausedAt: Date.now() } }))
+        },
+        resumeTimer: () => {
+            const { timerStartedAt, timerPausedAt } = get().gameManagement
+            if (timerPausedAt === null) return
+            const now = Date.now()
+            const newStartedAt = timerStartedAt !== null ? timerStartedAt + (now - timerPausedAt) : null
+            set((s) => ({ gameManagement: { ...s.gameManagement, timerStartedAt: newStartedAt, timerPausedAt: null } }))
+        },
         advanceRoundRequested: false,
         requestAdvanceRound: () => set((s) => ({
             gameManagement: { ...s.gameManagement, advanceRoundRequested: true },
@@ -991,6 +1002,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 }
             })
         },
+    },
+    tutorial: {
+        active: false,
+        activate: () => set((s) => ({ tutorial: { ...s.tutorial, active: true } })),
+        deactivate: () => set((s) => ({ tutorial: { ...s.tutorial, active: false } })),
     },
     log: [],
     dailyEvent: {

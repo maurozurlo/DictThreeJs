@@ -13,6 +13,7 @@ import FadeOverlay from "./components/FadeOverlay/FadeOverlay";
 import { useFadeTransition } from "./Hooks/useFadeTransition";
 import RoundAdvanceController from "./components/RoundAdvanceController/RoundAdvanceController";
 import DayEnded from "./components/DayEnded/DayEnded";
+import TutorialOverlay from "./components/Tutorial/TutorialOverlay";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -35,6 +36,7 @@ export default function App() {
         <ActionPanel />
         <RoundAdvanceController />
         <DayEnded />
+        <TutorialOverlay />
         {tab === Tabs.Laws ? <DictatorHands /> : null}
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
 
@@ -42,7 +44,9 @@ export default function App() {
           <EndScreen />
         )}
       </Suspense>
-      <Scene />
+      <div data-tutorial="scene" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <Scene />
+      </div>
     </>
   );
 }

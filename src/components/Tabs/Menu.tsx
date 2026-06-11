@@ -17,6 +17,7 @@ const Menu = ({ isActive }: TabProps) => {
     const saveGame = useGameStore((s) => s.gameManagement.saveGame);
     const loadGame = useGameStore((s) => s.gameManagement.loadGame);
     const phase = useGameStore((s) => s.gameManagement.phase);
+    const activateTutorial = useGameStore((s) => s.tutorial.activate);
     const { t, i18n } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showSettings, setShowSettings] = useState(false);
@@ -61,6 +62,7 @@ const Menu = ({ isActive }: TabProps) => {
                     )}
                     <Button variant='primary' onClick={handleLoadClick}>{t('mainMenu.loadGame')}</Button>
                     <Button variant='primary' onClick={() => setShowHelp(true)}>{t('mainMenu.help')}</Button>
+                    <Button variant='primary' onClick={() => { if (phase !== 'start') setGamePhase('start'); activateTutorial(); setActiveTab(Tabs.Log) }}>{t('mainMenu.tutorial')}</Button>
                     <Button variant='primary' onClick={() => setShowSettings(s => !s)}>
                         {t('mainMenu.settings')}
                     </Button>
