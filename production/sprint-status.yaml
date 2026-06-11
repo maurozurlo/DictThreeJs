@@ -9,77 +9,17 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 1
-goal: "Implement Street View feature and close 3 architecture gaps from CONCERNS review"
-start: "2026-06-10"
-end: "2026-06-24"
-generated: "2026-06-10"
-updated: "2026-06-10"
+sprint: 2
+goal: "Lasting effects decision layer: recurring law/deal effects, repeal, coup mechanic, DayEnded breakdown, visual consequence scaffolding"
+start: "2026-06-11"
+end: "2026-06-25"
+generated: "2026-06-11"
+updated: "2026-06-11"
 
 stories:
-  - id: "1-1"
-    name: "ADR: RNG & Determinism Strategy"
-    file: "production/stories/1-1-adr-rng.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-10"
-
-  - id: "1-2"
-    name: "ADR: Event Scheduling System"
-    file: "production/stories/1-2-adr-events.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-10"
-
-  - id: "1-3"
-    name: "ADR: Round Timer & Game Loop"
-    file: "production/stories/1-3-adr-timer.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-10"
-
-  - id: "1-4"
-    name: "Camera: fade-to-black transition (~200ms)"
-    file: "production/stories/1-4-camera-fade.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-10"
-
-  - id: "1-5"
-    name: "Street View: layout config + types"
-    file: "production/stories/1-5-street-layout-config.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-10"
-
-  - id: "1-6"
-    name: "Street View: static scene (placeholder cubes)"
-    file: "production/stories/1-6-street-static-scene.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-10"
-
-  - id: "1-7"
-    name: "Log.tsx: commit in-progress changes"
-    file: "production/stories/1-7-log-tsx-commit.md"
+  - id: "2-1"
+    name: "Types & data model: recurring effect fields"
+    file: "production/stories/2-1-recurring-types.md"
     priority: must-have
     status: ready-for-dev
     owner: ""
@@ -87,20 +27,111 @@ stories:
     blocker: ""
     completed: ""
 
-  - id: "1-8"
-    name: "Street View: state→visual mapping (4 variables)"
-    file: "production/stories/1-8-street-state-mapping.md"
+  - id: "2-2"
+    name: "calculateRoundFinancials: recurring effect summation"
+    file: "production/stories/2-2-financials-recurring.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  - id: "2-3"
+    name: "Store wiring: activate/reset/save recurring effects"
+    file: "production/stories/2-3-store-recurring.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+
+  - id: "2-4"
+    name: "Content: 9 lasting-effect laws/deals + i18n"
+    file: "production/stories/2-4-recurring-content.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+
+  - id: "2-5"
+    name: "DayEnded breakdown: recurring + one-time rows"
+    file: "production/stories/2-5-dayended-breakdown.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  - id: "2-6"
+    name: "Budget forecast includes recurring effects"
+    file: "production/stories/2-6-forecast-fix.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  - id: "2-7"
+    name: "Coup mechanic: thresholds, warnings, narratives"
+    file: "production/stories/2-7-coup.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.5
+    blocker: ""
+    completed: ""
+
+  - id: "2-8"
+    name: "Repeal UI: Active Legislation in Log"
+    file: "production/stories/2-8-repeal-ui.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+
+  - id: "2-9"
+    name: "Visual consequence registry (scaffolding)"
+    file: "production/stories/2-9-visual-registry.md"
     priority: should-have
     status: backlog
     owner: ""
-    estimate_days: 1.0
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  - id: "2-10"
+    name: "Balance pass: playthrough with lasting effects"
+    file: "production/stories/2-10-balance-pass.md"
+    priority: nice-to-have
+    status: backlog
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  # ── Carryover from sprint 1 ──────────────────────────────────────
+  - id: "1-7"
+    name: "Log.tsx: commit in-progress changes"
+    file: "production/stories/1-7-log-tsx-commit.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.25
     blocker: ""
     completed: ""
 
   - id: "1-9"
     name: "Street View: basic waypoint movement (A→B→A)"
     file: "production/stories/1-9-street-waypoint-movement.md"
-    priority: should-have
+    priority: nice-to-have
     status: backlog
     owner: ""
     estimate_days: 1.0
@@ -110,7 +141,7 @@ stories:
   - id: "1-10"
     name: "UX Review: hud.md"
     file: "production/stories/1-10-ux-review-hud.md"
-    priority: should-have
+    priority: nice-to-have
     status: backlog
     owner: ""
     estimate_days: 0.5
@@ -120,7 +151,7 @@ stories:
   - id: "1-11"
     name: "ADR: Street Scene Architecture"
     file: "production/stories/1-11-adr-street-scene.md"
-    priority: should-have
+    priority: nice-to-have
     status: backlog
     owner: ""
     estimate_days: 0.5

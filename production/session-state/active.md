@@ -1,5 +1,21 @@
 # Session State
 
+<!-- STATUS -->
+Epic: Lasting Effects (Sprint 2)
+Feature: Sprint planning
+Task: Create story files for 2-1..2-10
+<!-- /STATUS -->
+
+## Session Extract — Sprint 2 planning 2026-06-11
+- PRD written: design/gdd/lasting-effects-prd.md (lasting effects, repeal, coup, DayEnded breakdown, visual registry + future-sprint specs for budget tiers & economy advisor)
+- Sprint plan: production/sprints/sprint-2.md (10 stories + 6 carryover; 1-8 superseded by 2-9)
+- sprint-status.yaml updated to sprint 2
+- Owner decisions logged in PRD Decision Log: no stack cap (pool weighting max 3 income laws/run + −2 opposing relation), tiered repeal (15/25/40, −2/−2/−3), coup at relation ≥+8 AND charisma ≤−3 with 50% grace roll, fires at start of nextRound
+- Agents consulted: game-designer (ab259bb027bb3331a), economy-designer (a4ff41d24e3227d6a)
+- Critical correctness item: Budget tab forecast must include recurring effects (story 2-6)
+- Story files production/stories/2-*.md NOT yet created — next step
+- Next: create story files, then /dev-story production/stories/2-1-recurring-types.md
+
 ## Session Extract — /architecture-review 2026-06-10
 - Verdict: CONCERNS
 - Requirements: 20 total — 13 covered, 4 partial, 3 gaps

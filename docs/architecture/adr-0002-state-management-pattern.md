@@ -1,10 +1,13 @@
 # ADR-0002: State Management Pattern — Single Zustand Store + Handler Functions
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-06-10
+
+## Accepted
+2026-06-11
 
 ## Engine Compatibility
 
