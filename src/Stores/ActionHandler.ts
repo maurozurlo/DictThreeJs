@@ -108,6 +108,24 @@ function handleDialogue(
     power: Power,
     state: GameState
 ): Omit<ActionResult, "treasuryUpdate"> {
+    // Education too low — population can't hold a productive conversation
+    const education = state.budget.expenditures.education
+    if (education <= GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN + 1) {
+        return {
+            resultText: { key: "dialogue_fail", params: { power } },
+            actionTaken: true,
+            charismaDelta: -1,
+            newRelations: {
+                ...state.relations.current,
+                [power]: handleRelations({
+                    power,
+                    amount: -1,
+                    current: state.relations.current[power],
+                }),
+            },
+        }
+    }
+
     const baseSuccessRate = GAMESTATE.MEET.ACTIONS.DIALOGUE.BASE_SUCCESS_RATE[power];
     const charisma = state.gameManagement.charisma.current;
     // High charisma expands the success zone; low charisma shrinks it

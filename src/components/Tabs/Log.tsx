@@ -9,6 +9,8 @@ import Button from '../Button/Button'
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
 import { getGameDate } from '../../Utils/GameDate'
+import { useMemo } from 'react'
+import { dumbifyText, educationToDumbScore } from '../../Utils/String'
 
 
 const Log = ({ isActive }: TabProps) => {
@@ -22,6 +24,11 @@ const Log = ({ isActive }: TabProps) => {
     const round = useGameStore((s) => s.gameManagement.round)
     const dailyEventKey = useGameStore((s) => s.dailyEvent.current?.key)
     const dailyEventHeadline = dailyEventKey ? dailyEventT(dailyEventKey) : undefined
+    const education = useGameStore((s) => s.budget.expenditures.education)
+    const challengeText = useMemo(
+        () => miniChallenge.current ? dumbifyText(miniT(`${miniChallenge.current.id}.text`), educationToDumbScore(education)) : '',
+        [miniChallenge.current?.id, education]
+    )
 
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>
@@ -32,7 +39,7 @@ const Log = ({ isActive }: TabProps) => {
                         <Typography variant='h2' className={eventStyles.eventTitle}>
                             🎲 {t('log.mini_challenge_title')}
                         </Typography>
-                        <Typography variant='body'>{miniT(`${miniChallenge.current.id}.text`)}</Typography>
+                        <Typography variant='body'>{challengeText}</Typography>
 
                         {!miniChallenge.decided ? (
                             <div className={eventStyles.challengeButtons}>

@@ -5,11 +5,13 @@ import styles from './Laws.module.css'
 import clsx from 'clsx'
 import { useGameStore } from '../../Stores/GameState';
 import { getRandomNumberInRange } from '../../Utils/Math';
+import { dumbifyText, educationToDumbScore } from '../../Utils/String';
 
 const DictatorHands = () => {
     const { t } = useTranslation('laws');
     const currentLaw = useGameStore(s => s.law.current)
     const lastLawOutcome = useGameStore(s => s.law.lastLawOutcome)
+    const education = useGameStore(s => s.budget.expenditures.education)
 
     const topWidths = useMemo(
         () => Array.from({ length: 6 }, () => Math.random() * 30 + 10),
@@ -22,6 +24,10 @@ const DictatorHands = () => {
     const stampRotation = useMemo(
         () => getRandomNumberInRange(-10, 35),
         [lastLawOutcome]
+    );
+    const lawLabel = useMemo(
+        () => currentLaw ? dumbifyText(t(`laws.labels.${currentLaw.id}`), educationToDumbScore(education)) : '',
+        [currentLaw?.id, education]
     );
 
     return currentLaw ? (
@@ -44,7 +50,7 @@ const DictatorHands = () => {
                         {topWidths.map((w, i) => (
                             <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
                         ))}
-                        <Typography variant='body' color='dark'>{t(`laws.labels.${currentLaw.id}`)}</Typography>
+                        <Typography variant='body' color='dark'>{lawLabel}</Typography>
                         {bottomWidths.map((w, i) => (
                             <div key={i} className={styles.contentLine} style={{ width: `${w}%` }}></div>
                         ))}
