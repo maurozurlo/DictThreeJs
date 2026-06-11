@@ -41,11 +41,11 @@ stories:
     name: "Store wiring: activate/reset/save recurring effects"
     file: "production/stories/2-3-store-recurring.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-11"
 
   - id: "2-4"
     name: "Content: 9 lasting-effect laws/deals + i18n"

@@ -32,7 +32,17 @@ Task: Ready for /dev-story 2-1-recurring-types
 - Tests: 104/104 pass; build succeeds
 - Committed: bc67789 (2-2), 65879fb (2-1)
 - Blockers: None
-- Next: /dev-story production/stories/2-3-store-recurring.md (store wiring — depends on 2-2 DONE)
+
+## Session Extract — /dev-story 2-3 + coverage 2026-06-11
+- Coverage pass: 100% on all Stores files (was 76.9%) — applyBudgetEffects, charisma backlash branches, education dialogue-fail, income modifiers (commit c49e7e4)
+- Story 2-3: production/stories/2-3-store-recurring.md — store wiring COMPLETE (commit 1f4560c)
+- New file: src/Stores/RecurringHandler.ts (pure withRecurringEffect helper, dedup by sourceId)
+- EffectHandler.handleDecision activates on accept (laws + deals); Deal type gains optional power field
+- nextRound: 5 branches write lastRoundRecurring* + reset repealTakenThisRound via shared recurringGmFields
+- expireTimer passes effects for DayEnded display; loadGame whitelists 4 new fields (old saves default)
+- Tests: 138/138 pass (12 new integration tests against real store); build green
+- User guideline saved: small files — React components ≤400 lines hard limit, logic ≤1200, prefer helper extraction in touched code, no drive-by refactors
+- Stories 2-1, 2-2, 2-3 all DONE. Next: 2-4 (content+i18n), 2-7 (coup), 2-9 (registry) — all unlocked; 2-5/2-6/2-8 unlocked too (depend on 2-3)
 
 ## Session Extract — /architecture-review 2026-06-10
 - Verdict: CONCERNS

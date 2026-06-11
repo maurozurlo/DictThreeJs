@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 2-3
 - **Sprint**: 2
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Integration
 - **Layer**: Core
 - **TR-ID**: TR-lasting-003
