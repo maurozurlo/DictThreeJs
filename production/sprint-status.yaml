@@ -31,17 +31,17 @@ stories:
     name: "calculateRoundFinancials: recurring effect summation"
     file: "production/stories/2-2-financials-recurring.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-11"
 
   - id: "2-3"
     name: "Store wiring: activate/reset/save recurring effects"
     file: "production/stories/2-3-store-recurring.md"
     priority: must-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 1.0
     blocker: ""

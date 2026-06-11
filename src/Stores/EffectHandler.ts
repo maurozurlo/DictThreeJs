@@ -6,6 +6,7 @@ import { Clamp, getRandomFromList, rollChance } from "../Utils/Math";
 import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
 import type { Expenditures, Taxes } from "../types/Budget";
+import { withRecurringEffect } from "./RecurringHandler";
 
 export type BudgetEffectResult = {
     newRelations: GameState["relations"]["current"];
@@ -142,6 +143,16 @@ export function handleDecision({
         GAMESTATE.CHARISMA.MAX
     );
 
+    // Activate the item's recurring effect on acceptance (deduped by sourceId)
+    const newActiveRecurringEffects = hasAccepted
+        ? withRecurringEffect({
+            effects: state.gameManagement.activeRecurringEffects,
+            item,
+            sourceType: type,
+            round: state.gameManagement.round,
+        })
+        : state.gameManagement.activeRecurringEffects;
+
     // Shared state update
     const baseUpdate = {
         budget: { ...state.budget, treasury: newTreasury, expenditures: newExpenditures, taxes: newTaxes },
@@ -149,6 +160,7 @@ export function handleDecision({
         gameManagement: {
             ...state.gameManagement,
             charisma: { ...state.gameManagement.charisma, current: newCharisma },
+            activeRecurringEffects: newActiveRecurringEffects,
         },
     };
 

@@ -544,7 +544,7 @@ export const INITIAL_STATE = ({ set, get }: {
         },
         expireTimer: () => {
             const state = get();
-            const financials = calculateRoundFinancials(state.budget);
+            const financials = calculateRoundFinancials(state.budget, state.gameManagement.activeRecurringEffects);
 
             // Apply relation/charisma penalty only when meet action was skipped
             if (!state.meet.actionTaken.taken) {
@@ -572,6 +572,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         dayEnded: true,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        lastRoundRecurringIncome: financials.recurringIncome,
+                        lastRoundRecurringExpenses: financials.recurringExpenses,
                     },
                 }));
             } else {
@@ -581,6 +583,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         dayEnded: true,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        lastRoundRecurringIncome: financials.recurringIncome,
+                        lastRoundRecurringExpenses: financials.recurringExpenses,
                     },
                 }));
             }
@@ -607,9 +611,16 @@ export const INITIAL_STATE = ({ set, get }: {
         nextRound: () => {
             const state = get();
 
-            // --- 1. Financial resolution ---
-            const financials = calculateRoundFinancials(state.budget);
+            // --- 1. Financial resolution (includes active recurring effects) ---
+            const financials = calculateRoundFinancials(state.budget, state.gameManagement.activeRecurringEffects);
             let newTreasury = state.budget.treasury + financials.netChange;
+
+            // Shared gameManagement fields written by every end-of-round branch below
+            const recurringGmFields = {
+                lastRoundRecurringIncome: financials.recurringIncome,
+                lastRoundRecurringExpenses: financials.recurringExpenses,
+                repealTakenThisRound: false,
+            };
 
             // --- 2. Budget → relation effects ---
             const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current);
@@ -710,6 +721,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -733,6 +745,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -756,6 +769,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         round: newRound,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -813,6 +827,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         timerStartedAt: Date.now(),
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
+                        ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -860,6 +875,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     timerStartedAt: Date.now(),
                     lastRoundIncome: financials.totalIncome,
                     lastRoundExpenses: financials.expenses,
+                    ...recurringGmFields,
                     currentRoundExtraIncome: 0,
                     currentRoundExtraExpenses: 0,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -896,6 +912,11 @@ export const INITIAL_STATE = ({ set, get }: {
                     dayEnded: (gm.dayEnded as boolean) ?? false,
                     lastRoundIncome: (gm.lastRoundIncome as number) ?? 0,
                     lastRoundExpenses: (gm.lastRoundExpenses as number) ?? 0,
+                    // Recurring effect fields — default to empty/0 for saves predating sprint 2
+                    lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,
+                    lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
+                    activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
+                    repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
                     timerStartedAt: Date.now(),
                     timerPausedAt: null,
                     charisma: {

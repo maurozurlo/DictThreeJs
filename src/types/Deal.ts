@@ -11,6 +11,8 @@ export interface Deal {
     acceptEffect: DealEffect;
     rejectEffect: DealEffect;
     riskText?: string;
+    /** Proposing faction. REQUIRED on deals with a recurringEffect (repeal penalty target). */
+    power?: Power;
     /** Optional recurring effect — present only on lasting-effect deals. */
     recurringEffect?: RecurringEffect;
 }
