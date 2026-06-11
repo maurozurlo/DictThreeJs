@@ -110,7 +110,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     ROUNDS: {
         START: 1,
         MAX: 10,
-        TIME_LENGTH_MS: 5 * 60 * 1000
+        TIME_LENGTH_MS: 2 * 60 * 1000
     },
     TABS: {
         START_TAB: Tabs.Menu

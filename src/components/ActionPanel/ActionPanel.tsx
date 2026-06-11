@@ -20,7 +20,10 @@ const ActionPanel = () => {
     const relations = useGameStore((s) => s.relations.current);
     const money = useGameStore((s) => s.budget.treasury);
     const charisma = useGameStore(s => s.gameManagement.charisma.current)
-    const { displayTime } = useRoundTimer()
+    const { displayTime, progress } = useRoundTimer()
+    const totalMinutes = progress * 480;
+    const minuteAngle = (totalMinutes % 60) / 60 * 360 - 90;
+    const hourAngle   = ((totalMinutes / 60 + 9) % 12) / 12 * 360 - 90;
     const phase = useGameStore(s => s.gameManagement.phase)
     const dayEnded = useGameStore(s => s.gameManagement.dayEnded)
     const lastRoundIncome = useGameStore(s => s.gameManagement.lastRoundIncome)
@@ -67,8 +70,10 @@ const ActionPanel = () => {
             <div className={styles.actionPanel}>
                 <div className={styles.genStats}>
                     <div className={styles.clock}>
-                        <Icon type='clock' className={styles.bigClock}><div className={styles.hours} />
-                            <div className={styles.minutes} /></Icon>
+                        <Icon type='clock' className={styles.bigClock}>
+                            <div className={styles.hours}   style={{ transform: `rotate(${hourAngle}deg)` }} />
+                            <div className={styles.minutes} style={{ transform: `rotate(${minuteAngle}deg)` }} />
+                        </Icon>
 
                         <Typography variant={'caption'} className={styles.time}>{displayTime}</Typography>
                     </div>

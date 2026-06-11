@@ -536,7 +536,9 @@ export const INITIAL_STATE = ({ set, get }: {
         },
         expireTimer: () => {
             const state = get();
-            // Only penalise if the player didn't take a Meet action this round
+            const financials = calculateRoundFinancials(state.budget);
+
+            // Apply relation/charisma penalty only when meet action was skipped
             if (!state.meet.actionTaken.taken) {
                 const round = state.gameManagement.round;
                 const penalty = Math.min(round, 3);
@@ -559,10 +561,22 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
+                        dayEnded: true,
+                        lastRoundIncome: financials.totalIncome,
+                        lastRoundExpenses: financials.expenses,
+                    },
+                }));
+            } else {
+                set((s) => ({
+                    gameManagement: {
+                        ...s.gameManagement,
+                        dayEnded: true,
+                        lastRoundIncome: financials.totalIncome,
+                        lastRoundExpenses: financials.expenses,
                     },
                 }));
             }
-            get().gameManagement.nextRound();
+            // Brief overlay is now visible — its Continue button calls nextRound()
         },
         nextRound: () => {
             const state = get();

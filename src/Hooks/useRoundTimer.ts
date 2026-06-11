@@ -12,7 +12,7 @@ function progressToDisplayTime(progress: number): string {
     return `${displayHour}:${minutes.toString().padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
 }
 
-export function useRoundTimer(): { displayTime: string } {
+export function useRoundTimer(): { displayTime: string; progress: number } {
     const phase = useGameStore((s) => s.gameManagement.phase);
     const dayEnded = useGameStore((s) => s.gameManagement.dayEnded);
     const timerStartedAt = useGameStore((s) => s.gameManagement.timerStartedAt);
@@ -20,6 +20,7 @@ export function useRoundTimer(): { displayTime: string } {
     const expireTimer = useGameStore((s) => s.gameManagement.expireTimer);
 
     const [displayTime, setDisplayTime] = useState('9:00 AM');
+    const [progress, setProgress] = useState(0);
     const expiredRef = useRef(false);
 
     useEffect(() => {
@@ -30,10 +31,11 @@ export function useRoundTimer(): { displayTime: string } {
 
         const tick = () => {
             const elapsed = Date.now() - timerStartedAt;
-            const progress = elapsed / GAMESTATE.ROUNDS.TIME_LENGTH_MS;
-            setDisplayTime(progressToDisplayTime(progress));
+            const p = elapsed / GAMESTATE.ROUNDS.TIME_LENGTH_MS;
+            setDisplayTime(progressToDisplayTime(p));
+            setProgress(Math.min(p, 1));
 
-            if (progress >= 1 && !expiredRef.current) {
+            if (p >= 1 && !expiredRef.current) {
                 expiredRef.current = true;
                 expireTimer();
             }
@@ -44,5 +46,5 @@ export function useRoundTimer(): { displayTime: string } {
         return () => clearInterval(id);
     }, [phase, dayEnded, timerStartedAt, timerPausedAt, expireTimer]);
 
-    return { displayTime };
+    return { displayTime, progress };
 }
