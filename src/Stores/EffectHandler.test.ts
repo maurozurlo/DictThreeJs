@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleDecision, handleRelations } from './EffectHandler';
+import { applyBudgetEffects, handleDecision, handleRelations } from './EffectHandler';
 import type { GameState } from '../types/GameState';
 import type { Deal } from '../types/Deal';
 import type { Law } from '../types/Law';
@@ -18,6 +18,101 @@ vi.mock('../Utils/Math', async (importOriginal) => {
 vi.mock('../Constants/Power', () => ({
     Power: ['military', 'business', 'people']
 }));
+
+// Mock i18n — applyBudgetEffects emits translated log messages; return the key
+vi.mock('../i18n', () => ({
+    default: { t: (key: string) => key }
+}));
+
+describe('applyBudgetEffects', () => {
+    /** Factory: budget with all expenditures neutral (no threshold effects). */
+    const makeBudget = (overrides: Partial<Record<'health' | 'infrastructure' | 'security' | 'education', number>> = {}): GameState['budget'] => ({
+        treasury: 500,
+        expenditures: { health: 5, infrastructure: 5, security: 5, education: 5, ...overrides },
+        taxes: { peopleTaxes: 20, businessTaxes: 30 },
+    } as unknown as GameState['budget']);
+
+    const neutralRelations = { military: 0, business: 0, people: 0 };
+
+    it('neutral budget produces no relation changes and no messages', () => {
+        const result = applyBudgetEffects(makeBudget(), neutralRelations);
+
+        expect(result.newRelations).toEqual(neutralRelations);
+        expect(result.logMessages).toHaveLength(0);
+    });
+
+    it('low security angers the military by 2', () => {
+        const result = applyBudgetEffects(makeBudget({ security: 2 }), neutralRelations);
+
+        expect(result.newRelations.military).toBe(-2);
+        expect(result.logMessages).toContain('log.budget_military_low');
+    });
+
+    it('high security pleases the military by 1', () => {
+        const result = applyBudgetEffects(makeBudget({ security: 8 }), neutralRelations);
+
+        expect(result.newRelations.military).toBe(1);
+        expect(result.logMessages).toContain('log.budget_military_high');
+    });
+
+    it('low health angers the people by 2', () => {
+        const result = applyBudgetEffects(makeBudget({ health: 2 }), neutralRelations);
+
+        expect(result.newRelations.people).toBe(-2);
+        expect(result.logMessages).toContain('log.budget_health_low');
+    });
+
+    it('high health pleases the people by 1', () => {
+        const result = applyBudgetEffects(makeBudget({ health: 8 }), neutralRelations);
+
+        expect(result.newRelations.people).toBe(1);
+        expect(result.logMessages).toContain('log.budget_health_high');
+    });
+
+    it('low infrastructure angers business and people by 1 each', () => {
+        const result = applyBudgetEffects(makeBudget({ infrastructure: 2 }), neutralRelations);
+
+        expect(result.newRelations.business).toBe(-1);
+        expect(result.newRelations.people).toBe(-1);
+        expect(result.logMessages).toContain('log.budget_infra_low');
+    });
+
+    it('high infrastructure pleases business and people by 1 each', () => {
+        const result = applyBudgetEffects(makeBudget({ infrastructure: 8 }), neutralRelations);
+
+        expect(result.newRelations.business).toBe(1);
+        expect(result.newRelations.people).toBe(1);
+        expect(result.logMessages).toContain('log.budget_infra_high');
+    });
+
+    it('clamps relation changes at the minimum bound', () => {
+        const result = applyBudgetEffects(
+            makeBudget({ security: 2 }),
+            { military: -9, business: 0, people: 0 }
+        );
+
+        expect(result.newRelations.military).toBe(-10);
+    });
+
+    it('multiple thresholds stack (low security + low health + low infrastructure)', () => {
+        const result = applyBudgetEffects(
+            makeBudget({ security: 2, health: 2, infrastructure: 2 }),
+            neutralRelations
+        );
+
+        expect(result.newRelations.military).toBe(-2);
+        expect(result.newRelations.people).toBe(-3); // health −2, infra −1
+        expect(result.newRelations.business).toBe(-1);
+        expect(result.logMessages).toHaveLength(3);
+    });
+
+    it('does not mutate the input relations object', () => {
+        const input = { military: 0, business: 0, people: 0 };
+        applyBudgetEffects(makeBudget({ security: 2 }), input);
+
+        expect(input.military).toBe(0);
+    });
+});
 
 describe('handleRelations', () => {
     it('should add amount to current value and clamp within bounds', () => {
@@ -310,6 +405,92 @@ describe('handleDecision', () => {
             }));
 
             vi.restoreAllMocks();
+        });
+    });
+
+    describe('Law budget effects (expenditures and taxes)', () => {
+        it('applies expenditure deltas from a law, clamped to bounds', () => {
+            const law: Law = {
+                id: 3,
+                power: 'people',
+                acceptEffect: { education: 2, health: -5 },
+                rejectEffect: {}
+            };
+
+            handleDecision({
+                type: 'law',
+                item: law,
+                hasAccepted: true,
+                get: mockGet,
+                set: mockSet
+            });
+
+            const calledWith = (mockSet as any).mock.calls[0][0];
+            expect(calledWith.budget.expenditures.education).toBe(3); // 1 + 2
+            expect(calledWith.budget.expenditures.health).toBe(1);    // 1 - 5 clamped to MIN 1
+        });
+
+        it('applies tax deltas from a law, clamped to bounds', () => {
+            const law: Law = {
+                id: 4,
+                power: 'business',
+                acceptEffect: { peopleTaxes: 10, businessTaxes: 100 },
+                rejectEffect: {}
+            };
+
+            handleDecision({
+                type: 'law',
+                item: law,
+                hasAccepted: true,
+                get: mockGet,
+                set: mockSet
+            });
+
+            const calledWith = (mockSet as any).mock.calls[0][0];
+            expect(calledWith.budget.taxes.peopleTaxes).toBe(30);    // 20 + 10
+            expect(calledWith.budget.taxes.businessTaxes).toBe(50);  // 30 + 100 clamped to MAX 50
+        });
+    });
+
+    describe('Charisma scoring on law decisions', () => {
+        it('awards +1 charisma for rejecting when reject outcome is better', () => {
+            const law: Law = {
+                id: 5,
+                power: 'military',
+                acceptEffect: { military: -2 },
+                rejectEffect: { military: 1 }
+            };
+
+            handleDecision({
+                type: 'law',
+                item: law,
+                hasAccepted: false,
+                get: mockGet,
+                set: mockSet
+            });
+
+            const calledWith = (mockSet as any).mock.calls[0][0];
+            expect(calledWith.gameManagement.charisma.current).toBe(1);
+        });
+
+        it('awards no charisma for rejecting when accept outcome was better', () => {
+            const law: Law = {
+                id: 6,
+                power: 'military',
+                acceptEffect: { military: 2 },
+                rejectEffect: { military: -1 }
+            };
+
+            handleDecision({
+                type: 'law',
+                item: law,
+                hasAccepted: false,
+                get: mockGet,
+                set: mockSet
+            });
+
+            const calledWith = (mockSet as any).mock.calls[0][0];
+            expect(calledWith.gameManagement.charisma.current).toBe(0);
         });
     });
 

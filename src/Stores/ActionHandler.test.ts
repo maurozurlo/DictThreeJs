@@ -178,6 +178,34 @@ describe('handleActionOutcome', () => {
 
             vi.restoreAllMocks();
         });
+
+        it('should raise backlash chance to 45% at low charisma', () => {
+            // Roll 0.4: below the low-charisma threshold (0.45) but above the base (0.3).
+            // Backlash fires ONLY because charisma <= -5 raised the chance.
+            vi.spyOn(Math, 'random')
+                .mockReturnValueOnce(0.4) // Backlash triggers only at 0.45 threshold
+                .mockReturnValueOnce(0);  // Select first other power
+            mockState.gameManagement.charisma.current = -5;
+
+            const result = handleActionOutcome('military', 'eliminate', mockState);
+
+            expect(result.resultText.key).toBe('eliminate_backlash');
+
+            vi.restoreAllMocks();
+        });
+
+        it('should lower backlash chance to 15% at high charisma', () => {
+            // Roll 0.2: above the high-charisma threshold (0.15) but below the base (0.3).
+            // Backlash is avoided ONLY because charisma >= 5 lowered the chance.
+            vi.spyOn(Math, 'random').mockReturnValue(0.2);
+            mockState.gameManagement.charisma.current = 5;
+
+            const result = handleActionOutcome('military', 'eliminate', mockState);
+
+            expect(result.resultText.key).toBe('eliminate_success');
+
+            vi.restoreAllMocks();
+        });
     });
 
     describe('expropriate action', () => {
@@ -217,6 +245,21 @@ describe('handleActionOutcome', () => {
     });
 
     describe('dialogue action', () => {
+        it('should always fail when education budget is at or below 2', () => {
+            mockState.budget.expenditures.education = 2;
+            mockState.relations.current.people = 3;
+
+            const result = handleActionOutcome('people', 'dialogue', mockState);
+
+            expect(result.actionTaken).toBe(true);
+            expect(result.charismaDelta).toBe(-1);
+            expect(result.newRelations.people).toBe(2); // -1 relation
+            expect(result.resultText).toStrictEqual({
+                key: 'dialogue_fail',
+                params: { power: 'people' },
+            });
+        });
+
         it('should handle terrible dialogue outcome (fails based on baseSuccessRate)', () => {
             vi.spyOn(Math, 'random').mockReturnValue(0.01); // For people (0.8), fail < 0.02
 

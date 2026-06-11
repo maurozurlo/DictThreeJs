@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { handleBudgetChange } from './BudgetHandler';
+import { calculateRoundFinancials, handleBudgetChange } from './BudgetHandler';
 import { GAMESTATE } from '../Constants/GameState';
 import type { GameState } from '../types/GameState';
 
@@ -168,5 +168,54 @@ describe('handleBudgetChange', () => {
 
             expect(mockBudget).toEqual(originalBudget);
         });
+    });
+});
+
+describe('calculateRoundFinancials — income modifiers', () => {
+    /** Factory: neutral budget (no modifier thresholds hit) with overridable expenditures. */
+    const makeBudget = (overrides: Partial<Record<'health' | 'infrastructure' | 'security' | 'education', number>> = {}): GameState['budget'] => ({
+        treasury: 500,
+        expenditures: { health: 5, infrastructure: 5, security: 5, education: 5, ...overrides },
+        taxes: { peopleTaxes: 20, businessTaxes: 30 },
+    } as unknown as GameState['budget']);
+
+    // With PEOPLE_BASE 200 / BUSINESS_BASE 180 and taxes 20/30:
+    // peopleIncome = floor(200 * 0.20) = 40, businessIncome = floor(180 * 0.30) = 54
+    const baseline = () => calculateRoundFinancials(makeBudget());
+
+    it('neutral budget applies no business income modifiers', () => {
+        const result = baseline();
+
+        expect(result.peopleIncome).toBe(40);
+        expect(result.businessIncome).toBe(54);
+        expect(result.totalIncome).toBe(94);
+        expect(result.expenses).toBe(200); // (5+5+5+5) × 10
+        expect(result.netChange).toBe(-106);
+    });
+
+    it('low infrastructure (<3) reduces business income by 30%', () => {
+        const result = calculateRoundFinancials(makeBudget({ infrastructure: 2 }));
+
+        expect(result.businessIncome).toBe(Math.floor(baseline().businessIncome * 0.7)); // 37
+        expect(result.peopleIncome).toBe(baseline().peopleIncome); // unaffected
+    });
+
+    it('high infrastructure (>7) boosts business income by 10%', () => {
+        const result = calculateRoundFinancials(makeBudget({ infrastructure: 8 }));
+
+        expect(result.businessIncome).toBe(Math.floor(baseline().businessIncome * 1.1)); // 59
+    });
+
+    it('low education (<3) reduces business income by 15%', () => {
+        const result = calculateRoundFinancials(makeBudget({ education: 2 }));
+
+        expect(result.businessIncome).toBe(Math.floor(baseline().businessIncome * 0.85)); // 45
+    });
+
+    it('low infrastructure and low education modifiers compound', () => {
+        const result = calculateRoundFinancials(makeBudget({ infrastructure: 2, education: 2 }));
+
+        const afterInfra = Math.floor(baseline().businessIncome * 0.7); // 37
+        expect(result.businessIncome).toBe(Math.floor(afterInfra * 0.85)); // 31
     });
 });
