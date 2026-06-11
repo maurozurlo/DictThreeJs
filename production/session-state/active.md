@@ -16,7 +16,23 @@ Task: Ready for /dev-story 2-1-recurring-types
 - Story files production/stories/2-1 through 2-10 CREATED 2026-06-11
 - ADR-0002 advanced from Proposed → Accepted 2026-06-11
 - TR-lasting-001..010 appended to docs/architecture/tr-registry.yaml
-- Next: /dev-story production/stories/2-1-recurring-types.md
+- Next: /dev-story production/stories/2-2-financials-recurring.md
+
+## Session Extract — /dev-story 2026-06-11
+- Story: production/stories/2-1-recurring-types.md — Types & data model: recurring effect fields
+- Files changed: src/types/Law.ts (RecurringEffect type), src/types/Deal.ts (recurringEffect field), src/types/GameState.ts (ActiveRecurringEffect interface + 4 gameManagement fields), src/Stores/GameState.ts (initial state + setPhase reset), src/Stores/GameState.recurring.test.ts (new, 12 tests), src/Stores/ActionHandler.test.ts (fix pre-existing mock gap)
+- Test written: src/Stores/GameState.recurring.test.ts — 12 tests, all pass
+- Bonus fix: ActionHandler.test.ts mocks missing budget.expenditures.education — 5 pre-existing failures now resolved
+- All 97 tests pass (was 85 + 5 failing + 12 new)
+- Blockers: None
+
+## Session Extract — /dev-story 2-2 2026-06-11
+- Story: production/stories/2-2-financials-recurring.md — calculateRoundFinancials recurring summation
+- Files changed: src/Stores/BudgetHandler.ts (optional activeRecurringEffects param, recurringIncome/recurringExpenses in RoundFinancials, sumRecurringEffects helper), src/Stores/BudgetHandler.recurring.test.ts (new, 7 tests)
+- Tests: 104/104 pass; build succeeds
+- Committed: bc67789 (2-2), 65879fb (2-1)
+- Blockers: None
+- Next: /dev-story production/stories/2-3-store-recurring.md (store wiring — depends on 2-2 DONE)
 
 ## Session Extract — /architecture-review 2026-06-10
 - Verdict: CONCERNS
@@ -40,8 +56,7 @@ Task: Ready for /dev-story 2-1-recurring-types
 - ADR-0003 updated: status Proposed→Accepted, lerp constraint replaced with fade-to-black spec
 - TR-scene-001 revised in tr-registry.yaml
 - Tests: 85/85 pass
-- Status: In Review — needs manual visual verification
-- Next: run the app, switch tabs, confirm ~300ms blink over 3D canvas with navbar always visible. Then /story-done production/stories/1-4-camera-fade.md
+- Status: Complete — visually verified by user 2026-06-11 (evidence: production/qa/evidence/1-4-camera-fade-evidence.md)
 
 ## Session Extract — /ux-design hud 2026-06-10
 - Task: HUD Design spec for Dictator Simulator

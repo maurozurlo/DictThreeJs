@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.59% </span>
+                <span class="strong">92.5% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>35/37</span>
+                <span class='fraction'>37/40</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">78.57% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>10/12</span>
+                <span class='fraction'>11/14</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.05% </span>
+                <span class="strong">94.59% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>33/34</span>
+                <span class='fraction'>35/37</span>
             </div>
         
             
@@ -236,7 +236,27 @@
 <a name='L171'></a><a href='#L171'>171</a>
 <a name='L172'></a><a href='#L172'>172</a>
 <a name='L173'></a><a href='#L173'>173</a>
-<a name='L174'></a><a href='#L174'>174</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -345,6 +365,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -354,7 +392,7 @@
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -369,8 +407,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -413,6 +451,7 @@
 import type { GameState } from "../types/GameState";
 import type { MeetActionType, Power } from "../types/Power";
 import { handleRelations } from "./EffectHandler";
+import { getRandomFromList, rollChance, rollFloat } from "../Utils/Math";
 &nbsp;
 type ActionResult = {
     resultText: { key: string; params?: Record&lt;string, string | number&gt; };
@@ -462,7 +501,7 @@ function handleEliminate(
     <span class="missing-if-branch" title="if path not taken" >I</span>if (charisma &gt;= 5) <span class="cstat-no" title="statement not covered" >backlashChance = <span class="missing-if-branch" title="if path not taken" >I</span>0.15;</span>
     else if (charisma &lt;= -5) <span class="cstat-no" title="statement not covered" >backlashChance = 0.45;</span>
 &nbsp;
-    const hasBacklash = Math.random() &lt; backlashChance;
+    const hasBacklash = rollChance(backlashChance);
 &nbsp;
     if (!hasBacklash) {
         return {
@@ -477,7 +516,7 @@ function handleEliminate(
     }
 &nbsp;
     const otherPowers = Object.keys(newRelations).filter((p) =&gt; p !== power) as Power[];
-    const angryPower = otherPowers[Math.floor(Math.random() * otherPowers.length)];
+    const angryPower = getRandomFromList(otherPowers);
 &nbsp;
     return {
         resultText: { key: "eliminate_backlash", params: { power, angryPower } },
@@ -518,13 +557,31 @@ function handleDialogue(
     power: Power,
     state: GameState
 ): Omit&lt;ActionResult, "treasuryUpdate"&gt; {
+    // Education too low — population can't hold a productive conversation
+    const education = state.budget.expenditures.education
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (education &lt;= GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN + 1) {
+<span class="cstat-no" title="statement not covered" >        return {</span>
+            resultText: { key: "dialogue_fail", params: { power } },
+            actionTaken: true,
+            charismaDelta: -1,
+            newRelations: {
+                ...state.relations.current,
+                [power]: handleRelations({
+                    power,
+                    amount: -1,
+                    current: state.relations.current[power],
+                }),
+            },
+        }
+    }
+&nbsp;
     const baseSuccessRate = GAMESTATE.MEET.ACTIONS.DIALOGUE.BASE_SUCCESS_RATE[power];
     const charisma = state.gameManagement.charisma.current;
     // High charisma expands the success zone; low charisma shrinks it
     const charismaBonus = Math.max(-0.25, Math.min(0.25, charisma * 0.03));
     const failThreshold = 0.1 * (1 - baseSuccessRate);
     const successThreshold = Math.max(failThreshold + 0.01, Math.min(0.95, failThreshold + baseSuccessRate * 0.7 + charismaBonus));
-    const roll = Math.random();
+    const roll = rollFloat();
 &nbsp;
     if (roll &lt; failThreshold) {
         return {
@@ -589,7 +646,7 @@ export function handleActionOutcome(
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-10T19:06:46.300Z
+                at 2026-06-11T18:19:59.210Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
