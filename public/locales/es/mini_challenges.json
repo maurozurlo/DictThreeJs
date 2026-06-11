@@ -1,30 +1,30 @@
 {
   "propaganda_campaign": {
-    "text":   "",
-    "accept": "",
-    "reject": ""
+    "text":   "Los medios estatales proponen una campaña de propaganda de $45M para mejorar tu imagen. ¿La autorizas?",
+    "accept": "La campaña inunda las ondas. Los ciudadanos se cansan, pero tu imagen queda pulida.",
+    "reject": "Rechazas la campaña. Los medios buscan historias en otro lado."
   },
   "silence_journalist": {
-    "text":   "",
-    "accept": "",
-    "reject": "",
-    "risk":   ""
+    "text":   "Un periodista de investigación está a punto de publicar un reportaje comprometedor. ¿Lo silencias?",
+    "accept": "La historia nunca se publica. Tus secretos están a salvo, aunque los rumores circulan en las sombras.",
+    "reject": "Dejas que la prensa siga su curso. Algunas historias es mejor enfrentarlas de frente.",
+    "risk":   "¡El reportaje se publica, desencadenando una ola de indignación pública!"
   },
   "protest_response": {
-    "text":   "",
-    "accept": "",
-    "reject": ""
+    "text":   "Estallaron protestas en la capital. ¿Despliegas fuerzas de seguridad para dispersarlas?",
+    "accept": "Las calles quedan despejadas. Se restaura el orden, pero las cicatrices perduran en la memoria colectiva.",
+    "reject": "Muestras moderación. Las protestas se disuelven eventualmente por sí solas."
   },
   "remove_rival": {
-    "text":   "",
-    "accept": "",
-    "reject": "",
-    "risk":   ""
+    "text":   "Un operativo en las sombras ofrece eliminar permanentemente a un rival político por $80M. ¿Lo autorizas?",
+    "accept": "El rival desaparece en silencio. Los generales asienten con aprobación.",
+    "reject": "Rechazas la propuesta. Algunos problemas es mejor dejarlos al tiempo.",
+    "risk":   "¡La operación se rastrea hasta ti! Le sigue una condena internacional."
   },
   "buy_loyalty": {
-    "text":   "",
-    "accept": "",
-    "reject": "",
-    "risk":   ""
+    "text":   "Un alto oficial planea desertar a la oposición. ¿Compras su lealtad por $50M?",
+    "accept": "Aseguras su lealtad. Se convierte en uno de tus comandantes más devotos.",
+    "reject": "Lo dejas ir. Quizás no cause problemas.",
+    "risk":   "¡El desertor filtra tus estrategias militares a tus enemigos!"
   }
 }

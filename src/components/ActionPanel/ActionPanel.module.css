@@ -8,7 +8,7 @@
     border-image-slice: 24 fill;
     border-image-width: 24px;
     border-image-repeat: stretch;
-    z-index: 2;
+    z-index: 75; /* above fade overlay (50), below navbar (100) */
     image-rendering: pixelated;
 
 

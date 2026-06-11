@@ -16,6 +16,15 @@
 - Verified: `npx vitest run --coverage` → 5 passed, 85 tests, 72.8% coverage
 - Note: test convention is colocated src/*.test.ts, not tests/unit|integration (src/CLAUDE.md doc is stale)
 
+## Session Extract — /dev-story 1-4 2026-06-10
+- Story: production/stories/1-4-camera-fade.md — Camera fade-to-black transition
+- Files changed: src/Hooks/useFadeTransition.ts (new), src/components/FadeOverlay/FadeOverlay.tsx (new), src/components/FadeOverlay/FadeOverlay.module.css (new), src/3d/CameraController.tsx (lerp removed), src/components/Navbar/Navbar.tsx (transitionTo prop), src/App.tsx (FadeOverlay + useFadeTransition), src/components/Navbar/Navbar.module.css (z-index: 100)
+- ADR-0003 updated: status Proposed→Accepted, lerp constraint replaced with fade-to-black spec
+- TR-scene-001 revised in tr-registry.yaml
+- Tests: 85/85 pass
+- Status: In Review — needs manual visual verification
+- Next: run the app, switch tabs, confirm ~300ms blink over 3D canvas with navbar always visible. Then /story-done production/stories/1-4-camera-fade.md
+
 ## Session Extract — /ux-design hud 2026-06-10
 - Task: HUD Design spec for Dictator Simulator
 - Current section: COMPLETE — all sections written, In Review

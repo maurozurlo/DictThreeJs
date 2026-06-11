@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 1-4
 - **Sprint**: 1
-- **Status**: In Progress
+- **Status**: In Review
 - **Type**: UI
 - **Layer**: Feature
 - **TR-ID**: TR-scene-001

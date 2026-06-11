@@ -51,7 +51,7 @@ stories:
     name: "Camera: fade-to-black transition (~200ms)"
     file: "production/stories/1-4-camera-fade.md"
     priority: must-have
-    status: in-progress
+    status: review
     owner: ""
     estimate_days: 0.5
     blocker: ""

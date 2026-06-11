@@ -15,6 +15,7 @@
     }
 
     &.TabMenu {
+        z-index: 76;
         height: calc(100vh - var(--navbar-height));
         bottom: 0;
         background-color: var(--hud-panel-bg);

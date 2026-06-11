@@ -7,8 +7,12 @@ import { Tabs } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next';
 import { GAMESTATE } from '../../Constants/GameState'
 
-const Navbar = () => {
-    const setCurrentTab = useGameStore((s) => s.tabs.setActiveTab);
+interface NavbarProps {
+    /** Triggers a fade-to-black transition before switching to the given tab. */
+    transitionTo: (tab: Tabs) => void;
+}
+
+const Navbar = ({ transitionTo }: NavbarProps) => {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
     const displayTabs = activeTab !== Tabs.Menu;
     const round = useGameStore(s => s.gameManagement.round)
@@ -39,13 +43,14 @@ const Navbar = () => {
         ...(secretAvailable ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
     ];
 
+    const canGoHome = phase !== 'idle' && activeTab !== Tabs.Menu;
 
     return (
         <header className={styles.navbar}>
             <div className={styles.navbarContent}>
                 <div
-                    className={clsx(styles.gameTitle, { [styles.gameTitleClickable]: phase !== 'idle' && activeTab !== Tabs.Menu })}
-                    onClick={() => phase !== 'idle' && activeTab !== Tabs.Menu && setCurrentTab(Tabs.Menu)}
+                    className={clsx(styles.gameTitle, { [styles.gameTitleClickable]: canGoHome })}
+                    onClick={() => canGoHome && transitionTo(Tabs.Menu)}
                 >
                     {t('gameTitle')}
                 </div>
@@ -58,7 +63,7 @@ const Navbar = () => {
                             <Button
                                 variant="primary"
                                 disabled={disabled}
-                                onClick={() => setCurrentTab(tab)}
+                                onClick={() => transitionTo(tab)}
                             >
                                 <Icon type={icon} />
                                 {label}

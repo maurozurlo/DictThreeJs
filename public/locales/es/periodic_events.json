@@ -1,29 +1,29 @@
 {
   "international_summit": {
-    "title": "",
-    "text": "",
+    "title": "Cumbre Internacional",
+    "text": "Los líderes mundiales observan tu desempeño. Elige tu enfoque:",
     "options": {
-      "host_lavish":    { "text": "", "result": "" },
-      "modest_meeting": { "text": "", "result": "" },
-      "skip":           { "text": "", "result": "" }
+      "host_lavish":    { "text": "Organizar una cumbre fastuosa ($100M)",      "result": "La cumbre fue impresionante pero costosa. Se ganó prestigio internacional." },
+      "modest_meeting": { "text": "Reunión diplomática modesta ($30M)",         "result": "Un enfoque diplomático razonable. Costos moderados, ganancias moderadas." },
+      "skip":           { "text": "Saltarse la cumbre (Gratis)",                 "result": "Evitaste la cumbre. Ahorraste dinero pero dañaste las relaciones internacionales." }
     }
   },
   "economic_crisis": {
-    "title": "",
-    "text": "",
+    "title": "Crisis Económica",
+    "text": "Una crisis financiera golpea la nación. ¿Cómo respondes?",
     "options": {
-      "stimulus":    { "text": "", "result": "" },
-      "bailouts":    { "text": "", "result": "" },
-      "free_market": { "text": "", "result": "" }
+      "stimulus":    { "text": "Paquete masivo de estímulo ($150M)",            "result": "¡El estímulo funcionó! La economía se estabilizó y se restauró la confianza pública." },
+      "bailouts":    { "text": "Rescates empresariales selectivos ($80M)",      "result": "Las empresas se recuperaron, pero el pueblo se sintió abandonado durante la crisis." },
+      "free_market": { "text": "Dejar que el mercado decida (Gratis)",          "result": "La crisis se profundizó. Solo el ejército apreció tu postura 'dura'." }
     }
   },
   "natural_disaster": {
-    "title": "",
-    "text": "",
+    "title": "Desastre Natural",
+    "text": "Un gran terremoto sacude la capital. Se necesita respuesta de emergencia:",
     "options": {
-      "full_response": { "text": "", "result": "" },
-      "basic_relief":  { "text": "", "result": "" },
-      "minimal":       { "text": "", "result": "" }
+      "full_response": { "text": "Respuesta de emergencia completa ($120M)",   "result": "La respuesta rápida salvó vidas. El pueblo agradece tu liderazgo." },
+      "basic_relief":  { "text": "Ayuda básica ($50M)",                         "result": "Respuesta adecuada. La situación se manejó sin grandes problemas." },
+      "minimal":       { "text": "Intervención mínima ($10M)",                  "result": "La mala respuesta causó sufrimiento. Solo las empresas se beneficiaron del gasto reducido." }
     }
   }
 }

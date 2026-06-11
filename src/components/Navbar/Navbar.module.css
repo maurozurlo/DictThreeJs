@@ -10,7 +10,7 @@
     border-image-slice: 24 fill;
     border-image-width: 24px;
     border-image-repeat: stretch;
-    z-index: 2;
+    z-index: 100; /* above the fade overlay (z-index: 50) */
     image-rendering: pixelated;
 
 

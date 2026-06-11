@@ -9,6 +9,8 @@ import { Suspense } from "react";
 import DictatorHands from "./Features/Laws/DictatorHands";
 import { Tabs } from "./types/Tabs";
 import EndScreen from "./components/EndScreen/EndScreen";
+import FadeOverlay from "./components/FadeOverlay/FadeOverlay";
+import { useFadeTransition } from "./Hooks/useFadeTransition";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -16,16 +18,18 @@ export default function App() {
   const tab = useGameStore(s => s.tabs.activeTab)
   const phase = useGameStore(s => s.gameManagement.phase)
 
+  const { fading, transitionTo } = useFadeTransition();
+
   return (
     <>
       <Suspense fallback="Loading...">
         <div className={clsx("debug-banner", { 'hidden': !debugEnabled })}>DEBUG MODE</div>
-        <Navbar />
+        <Navbar transitionTo={transitionTo} />
+        <FadeOverlay visible={fading} />
         <TabManager />
         <ActionPanel />
         {tab === Tabs.Laws ? <DictatorHands /> : null}
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
-
 
         {(phase === 'lose' || phase === 'victory' || phase === 'special_ending') && (
           <EndScreen />
@@ -33,7 +37,5 @@ export default function App() {
       </Suspense>
       <Scene />
     </>
-
-
   );
 }
