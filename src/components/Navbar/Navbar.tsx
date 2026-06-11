@@ -5,7 +5,6 @@ import { Icon, type IconType } from '../Icon/Icon'
 import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next';
-import { GAMESTATE } from '../../Constants/GameState'
 
 interface NavbarProps {
     /** Triggers a fade-to-black transition before switching to the given tab. */
@@ -15,14 +14,15 @@ interface NavbarProps {
 const Navbar = ({ transitionTo }: NavbarProps) => {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
     const displayTabs = activeTab !== Tabs.Menu;
-    const round = useGameStore(s => s.gameManagement.round)
     const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
     const secretAvailable = useGameStore(s => s.specialEnding.available)
     const debugEnabled = useGameStore(s => s.debug.enabled)
     const phase = useGameStore(s => s.gameManagement.phase)
+    const dayEnded = useGameStore(s => s.gameManagement.dayEnded)
     const lawDecided = useGameStore(s => s.law.lawDecided)
     const dealDecided = useGameStore(s => s.deals.dealDecided)
     const meetTaken = useGameStore(s => s.meet.actionTaken.taken)
+    const requestAdvanceRound = useGameStore(s => s.gameManagement.requestAdvanceRound)
     const miniChallengePending = useGameStore(s => s.miniChallenge.current !== null && !s.miniChallenge.decided)
     const { t } = useTranslation();
 
@@ -45,6 +45,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
         ...((secretAvailable || debugEnabled) ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
     ];
 
+    const allActionsDone = meetTaken && lawDecided && dealDecided
     const canGoHome = phase !== 'idle' && activeTab !== Tabs.Menu;
 
     return (
@@ -76,8 +77,12 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
                 </div>
             )}
 
-            <div className={styles.gameInfo}>
-                {displayTabs && <div>{t('nav.rounds')}: {round}/{GAMESTATE.ROUNDS.MAX}</div>}
+            <div className={styles.navRight}>
+                {displayTabs && phase === 'start' && !dayEnded && (
+                    <Button variant="primary" onClick={requestAdvanceRound}>
+                        {allActionsDone ? '>' : '>>'}
+                    </Button>
+                )}
             </div>
         </header>
     );

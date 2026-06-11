@@ -90,6 +90,9 @@ export type GameState = {
         meetCounts: Record<Power, number>;
         nextRound: () => void;
         expireTimer: () => void;
+        advanceRoundRequested: boolean;
+        requestAdvanceRound: () => void;
+        clearAdvanceRoundRequest: () => void;
         saveGame: () => void;
         loadGame: (data: Record<string, unknown>) => void;
     };

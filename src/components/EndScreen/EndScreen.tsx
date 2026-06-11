@@ -6,6 +6,7 @@ import Typography from '../Typography/Typography'
 import styles from './EndScreen.module.css'
 import { useTranslation } from 'react-i18next'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
+import { Modal, ModalCard } from '../Modal/Modal'
 
 type Tier = {
     tier: string
@@ -97,8 +98,8 @@ const EndScreen = () => {
     const totalNet = stats.totalIncomeEarned + stats.totalExtrasEarned - stats.totalExpensesSpent - stats.totalExtrasSpent
 
     return (
-        <div className={styles.overlay}>
-            <div className={styles.card}>
+        <Modal align="start" backgroundAlpha={0.92}>
+            <ModalCard maxWidth="720px" padding="2.5rem" className={styles.card}>
                 {/* Header */}
                 <div className={styles.header}>
                     <Typography variant="h2" className={styles.outcome}>
@@ -162,8 +163,8 @@ const EndScreen = () => {
                 </div>
 
                 <Button onClick={() => setPhase('start')}>{t('endscreen.play_again')}</Button>
-            </div>
-        </div>
+            </ModalCard>
+        </Modal>
     )
 }
 

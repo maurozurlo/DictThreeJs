@@ -26,10 +26,10 @@
     justify-content: center;
 }
 
-.gameInfo {
-    color: var(--text-color);
-    font-size: 1rem;
-    text-align: right;
+.navRight {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .gameTitle {

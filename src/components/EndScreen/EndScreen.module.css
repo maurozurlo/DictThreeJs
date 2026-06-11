@@ -1,24 +1,4 @@
-.overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999;
-    background: rgba(0, 0, 0, 0.92);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    overflow-y: auto;
-    padding: 2rem 1rem;
-    backdrop-filter: blur(4px);
-}
-
 .card {
-    background: var(--hud-panel-bg);
-    border: 2px solid var(--accent-color);
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 720px;
-    display: flex;
-    flex-direction: column;
     gap: 1.5rem;
     margin: auto;
 

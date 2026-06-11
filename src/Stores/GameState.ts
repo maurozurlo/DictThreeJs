@@ -578,6 +578,13 @@ export const INITIAL_STATE = ({ set, get }: {
             }
             // Brief overlay is now visible — its Continue button calls nextRound()
         },
+        advanceRoundRequested: false,
+        requestAdvanceRound: () => set((s) => ({
+            gameManagement: { ...s.gameManagement, advanceRoundRequested: true },
+        })),
+        clearAdvanceRoundRequest: () => set((s) => ({
+            gameManagement: { ...s.gameManagement, advanceRoundRequested: false },
+        })),
         nextRound: () => {
             const state = get();
 

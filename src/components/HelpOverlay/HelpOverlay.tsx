@@ -1,5 +1,6 @@
 import styles from './HelpOverlay.module.css'
 import Button from '../Button/Button'
+import { Modal, ModalCard } from '../Modal/Modal'
 
 interface HelpOverlayProps {
     onClose: () => void
@@ -25,8 +26,8 @@ function Entry({ label, desc }: { label: string; desc: string }) {
 
 const HelpOverlay = ({ onClose }: HelpOverlayProps) => {
     return (
-        <div className={styles.overlay}>
-            <div className={styles.card}>
+        <Modal align="stretch" backgroundAlpha={0.95}>
+            <ModalCard maxWidth="1400px" padding="1.5rem 2rem" className={styles.card}>
                 <div className={styles.header}>
                     <div className={styles.title}>HOW TO PLAY</div>
                     <Button onClick={onClose}>✕</Button>
@@ -157,8 +158,8 @@ const HelpOverlay = ({ onClose }: HelpOverlayProps) => {
                 <div className={styles.footer}>
                     <Button onClick={onClose}>Got it</Button>
                 </div>
-            </div>
-        </div>
+            </ModalCard>
+        </Modal>
     )
 }
 

@@ -11,6 +11,7 @@ import { Tabs } from "./types/Tabs";
 import EndScreen from "./components/EndScreen/EndScreen";
 import FadeOverlay from "./components/FadeOverlay/FadeOverlay";
 import { useFadeTransition } from "./Hooks/useFadeTransition";
+import RoundAdvanceController from "./components/RoundAdvanceController/RoundAdvanceController";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -31,6 +32,7 @@ export default function App() {
         <FadeOverlay visible={fading} />
         <TabManager />
         <ActionPanel />
+        <RoundAdvanceController />
         {tab === Tabs.Laws ? <DictatorHands /> : null}
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
 
