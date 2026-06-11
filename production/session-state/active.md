@@ -2,8 +2,8 @@
 
 <!-- STATUS -->
 Epic: Lasting Effects (Sprint 2)
-Feature: Sprint planning
-Task: Create story files for 2-1..2-10
+Feature: Sprint 2 stories
+Task: Ready for /dev-story 2-1-recurring-types
 <!-- /STATUS -->
 
 ## Session Extract — Sprint 2 planning 2026-06-11
@@ -13,8 +13,10 @@ Task: Create story files for 2-1..2-10
 - Owner decisions logged in PRD Decision Log: no stack cap (pool weighting max 3 income laws/run + −2 opposing relation), tiered repeal (15/25/40, −2/−2/−3), coup at relation ≥+8 AND charisma ≤−3 with 50% grace roll, fires at start of nextRound
 - Agents consulted: game-designer (ab259bb027bb3331a), economy-designer (a4ff41d24e3227d6a)
 - Critical correctness item: Budget tab forecast must include recurring effects (story 2-6)
-- Story files production/stories/2-*.md NOT yet created — next step
-- Next: create story files, then /dev-story production/stories/2-1-recurring-types.md
+- Story files production/stories/2-1 through 2-10 CREATED 2026-06-11
+- ADR-0002 advanced from Proposed → Accepted 2026-06-11
+- TR-lasting-001..010 appended to docs/architecture/tr-registry.yaml
+- Next: /dev-story production/stories/2-1-recurring-types.md
 
 ## Session Extract — /architecture-review 2026-06-10
 - Verdict: CONCERNS

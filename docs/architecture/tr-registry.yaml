@@ -192,3 +192,84 @@ requirements:
     created: 2026-06-10
     revised: ""
     status: active
+
+  # --- Lasting Effects (Sprint 2) ---
+  - id: TR-lasting-001
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "recurringEffect optional field on Law/Deal types; activeRecurringEffects array, repealTakenThisRound, lastRoundRecurringIncome/Expenses in gameManagement store slice"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-002
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "calculateRoundFinancials accepts activeRecurringEffects and returns recurringIncome/recurringExpenses; net includes both terms"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-003
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "actUponLaw/actUponDeal activate recurring effects; nextRound resolves and stores sums; setPhase('start') resets; save/load round-trips the array"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-004
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "9 lasting-effect law/deal entries (L-A through L-F, D-A through D-C) with correct tier amounts, opposing-relation penalty on income laws, pool weighting (max 3 income laws/run), EN+ES i18n"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-005
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "DayEnded modal shows Legislation Income and Legislation Costs rows (hidden when 0); net matches actual treasury change"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-006
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Budget tab net/round and rounds-left forecast includes activeRecurringEffects (correctness requirement — not cosmetic)"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-007
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Coup mechanic: yellow/red warnings at defined thresholds, grace roll, coup fires at nextRound start with faction-specific EndCause and EndScreen narrative; special ending unaffected"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-008
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Active Legislation section in Log tab with repeal() action; tiered costs (15/25/40 treasury + −2/−2/−3 relation); 1/round enforcement; disabled when broke"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-009
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Visual consequence registry: VisualConsequenceEntry types, getActiveVisualConsequences() pure evaluator with AND logic and exclusive replacement, 5 starter entries"
+    created: 2026-06-11
+    revised: ""
+    status: active
+
+  - id: TR-lasting-010
+    system: lasting
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Balance verification: 2+ documented playthroughs confirm recurring effects do not trivialize treasury, coup is reachable but avoidable, forecast is accurate"
+    created: 2026-06-11
+    revised: ""
+    status: active
