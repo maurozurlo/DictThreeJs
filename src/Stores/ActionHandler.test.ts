@@ -22,6 +22,11 @@ vi.mock('../Constants/GameState', () => ({
             MIN: -10,
             MAX: 10
         },
+        BUDGET: {
+            BOUNDS: {
+                EXPENDITURE: { MIN: 1 }
+            }
+        },
         MEET: {
             ACTIONS: {
                 BRIBE: {
@@ -55,7 +60,10 @@ describe('handleActionOutcome', () => {
 
     beforeEach(() => {
         mockState = {
-            budget: { treasury: 200 },
+            budget: {
+                treasury: 200,
+                expenditures: { health: 5, infrastructure: 5, security: 5, education: 5 },
+            },
             relations: {
                 current: {
                     military: 0,

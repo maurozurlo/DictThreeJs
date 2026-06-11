@@ -21,7 +21,7 @@ stories:
     name: "Types & data model: recurring effect fields"
     file: "production/stories/2-1-recurring-types.md"
     priority: must-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 0.5
     blocker: ""
@@ -122,11 +122,11 @@ stories:
     name: "Log.tsx: commit in-progress changes"
     file: "production/stories/1-7-log-tsx-commit.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-11"
 
   - id: "1-9"
     name: "Street View: basic waypoint movement (A→B→A)"

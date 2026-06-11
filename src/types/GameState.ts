@@ -17,6 +17,27 @@ export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout'
 
 export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | null;
 
+/**
+ * A law or deal whose recurring effect is currently active.
+ * Entries are pushed on accept and removed only via repeal.
+ * Plain-object shape ensures JSON save/load round-trips cleanly.
+ */
+export interface ActiveRecurringEffect {
+    /** Unique stable key matching the source law/deal id — used for dedup and repeal lookup. */
+    sourceId: string;
+    sourceType: 'law' | 'deal' | 'opportunity';
+    /** Faction that proposed this law/deal — used to apply the repeal relation penalty. */
+    sourceFaction: Power;
+    /** i18n key shown in DayEnded and Active Legislation list. */
+    label: string;
+    /** Added to treasury each round. 0 when n/a. */
+    incomeBonus: number;
+    /** Subtracted from treasury each round. 0 when n/a. */
+    expenseBonus: number;
+    /** Round the effect was activated — display-only in iteration 1. */
+    roundActivated: number;
+}
+
 export type RelationSnapshot = {
     round: number;
     military: number;
@@ -79,10 +100,18 @@ export type GameState = {
         dayEnded: boolean;
         lastRoundIncome: number;
         lastRoundExpenses: number;
+        /** Recurring income total for the round just ended — written by nextRound(). */
+        lastRoundRecurringIncome: number;
+        /** Recurring expense total for the round just ended — written by nextRound(). */
+        lastRoundRecurringExpenses: number;
         currentRoundExtraIncome: number;
         currentRoundExtraExpenses: number;
         timerStartedAt: number | null;
         timerPausedAt: number | null;
+        /** All currently active recurring effects from accepted laws and deals. */
+        activeRecurringEffects: ActiveRecurringEffect[];
+        /** True after a repeal is used this round; reset to false in nextRound(). */
+        repealTakenThisRound: boolean;
         charisma: {
             current: number,
             adjustCharisma: (amount: number) => void;
