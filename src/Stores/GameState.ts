@@ -19,6 +19,7 @@ import { getRandomDailyEvent } from "./DailyEventHandler";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
 import { getGameDate } from "../Utils/GameDate";
+import { filterLawPool } from "./RecurringHandler";
 import { exportSave } from "../Utils/SaveLoad";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
@@ -173,16 +174,20 @@ export const INITIAL_STATE = ({ set, get }: {
             set((state) => {
                 const updatedLaws = new Set(state.law.interactedWithLaws);
                 const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
+                    const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
                     if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
-                        return getRandomUniqueItemForPower(LAWS, usedLaws, 'people') ?? getRandomUniqueItem(LAWS, usedLaws);
+                        return getRandomUniqueItemForPower(lawPool, usedLaws, 'people') ?? getRandomUniqueItem(lawPool, usedLaws);
                     }
                     if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
-                        return getRandomUniqueItemForPower(LAWS, usedLaws, 'business') ?? getRandomUniqueItem(LAWS, usedLaws);
+                        return getRandomUniqueItemForPower(lawPool, usedLaws, 'business') ?? getRandomUniqueItem(lawPool, usedLaws);
                     }
-                    return getRandomUniqueItem(LAWS, usedLaws);
+                    return getRandomUniqueItem(lawPool, usedLaws);
                 };
                 const nextLaw = pickNextLaw(updatedLaws);
-                if (!nextLaw) return {};
+                if (!nextLaw) {
+                    console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
+                    return {};
+                }
                 updatedLaws.add(nextLaw);
                 return { law: { ...state.law, current: nextLaw, interactedWithLaws: updatedLaws, lawDecided: false, lastLawOutcome: null } };
             });
@@ -710,13 +715,14 @@ export const INITIAL_STATE = ({ set, get }: {
 
             // --- 7. Biased law selection (Plan G) ---
             const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
+                const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
                 if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
-                    return getRandomUniqueItemForPower(LAWS, usedLaws, 'people') ?? getRandomUniqueItem(LAWS, usedLaws);
+                    return getRandomUniqueItemForPower(lawPool, usedLaws, 'people') ?? getRandomUniqueItem(lawPool, usedLaws);
                 }
                 if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
-                    return getRandomUniqueItemForPower(LAWS, usedLaws, 'business') ?? getRandomUniqueItem(LAWS, usedLaws);
+                    return getRandomUniqueItemForPower(lawPool, usedLaws, 'business') ?? getRandomUniqueItem(lawPool, usedLaws);
                 }
-                return getRandomUniqueItem(LAWS, usedLaws);
+                return getRandomUniqueItem(lawPool, usedLaws);
             };
 
             // --- 8. Check game-over / victory ---
@@ -823,6 +829,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 if (randomDeal) updatedDeals.add(randomDeal);
                 const updatedLaws = new Set(state.law.interactedWithLaws);
                 const randomLaw = pickNextLaw(updatedLaws);
+                if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
                 if (randomLaw) updatedLaws.add(randomLaw);
 
                 set((s) => ({
@@ -871,6 +878,7 @@ export const INITIAL_STATE = ({ set, get }: {
             if (randomDeal) updatedDeals.add(randomDeal);
             const updatedLaws = new Set(state.law.interactedWithLaws);
             const randomLaw = pickNextLaw(updatedLaws);
+            if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
             if (randomLaw) updatedLaws.add(randomLaw);
 
             set((s) => ({

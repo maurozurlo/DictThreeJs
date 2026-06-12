@@ -44,7 +44,21 @@
             "35": "Subsidize cultural and sports programs",
             "36": "Provide childcare support",
             "37": "Expand pension schemes",
-            "38": "Implement renewable energy projects"
+            "38": "Implement renewable energy projects",
+            "39": "Legalize gambling nationwide",
+            "40": "Launch a free housing program",
+            "41": "Sign a military contractor deal",
+            "42": "Establish a state media monopoly",
+            "43": "Reform export tariffs",
+            "44": "Launch a public works program"
+        },
+        "recurring": {
+            "gambling_income": "Casino Revenue",
+            "housing_cost": "Housing Maintenance",
+            "contractor_cost": "Contractor Fees",
+            "media_income": "State Media Revenue",
+            "tariff_income": "Tariff Revenue",
+            "public_works_cost": "Public Works Upkeep"
         }
     },
     "acted_upon_law": "You've already acted upon this law.",

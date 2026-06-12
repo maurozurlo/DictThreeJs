@@ -2,6 +2,7 @@ import type { ActiveRecurringEffect } from "../types/GameState";
 import type { Law } from "../types/Law";
 import type { Deal } from "../types/Deal";
 import type { Power } from "../types/Power";
+import { RECURRING } from "../Constants/Costs";
 
 /**
  * Returns a new effects array with the item's recurring effect activated.
@@ -44,4 +45,21 @@ export function withRecurringEffect({
             roundActivated: round,
         },
     ];
+}
+
+/**
+ * Pool weighting (PRD Feature 1, no-cap mitigation 2): once `maxIncomeLaws`
+ * lasting-income laws are active, further lasting-income laws are excluded
+ * from the candidate pool. Runs at pool-generation time, not render time.
+ *
+ * Pure function: returns the input array unchanged while under the cap.
+ */
+export function filterLawPool(
+    laws: Law[],
+    effects: ActiveRecurringEffect[],
+    maxIncomeLaws: number = RECURRING.MAX_INCOME_LAWS_PER_RUN,
+): Law[] {
+    const activeIncomeLaws = effects.filter(e => e.sourceType === 'law' && e.incomeBonus > 0).length;
+    if (activeIncomeLaws < maxIncomeLaws) return laws;
+    return laws.filter(law => (law.recurringEffect?.incomeBonus ?? 0) <= 0);
 }

@@ -1,0 +1,41 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 120;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 6px 10px;
+    max-width: 380px;
+}
+
+.header {
+    color: #f1c40f;
+    margin-bottom: 2px;
+}
+
+.row {
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.source {
+    color: #888;
+}
+
+.income { color: #27ae60; }
+.expense { color: #e74c3c; }
+
+.meta {
+    color: #888;
+}
+
+.totals {
+    margin-top: 2px;
+    border-top: 1px solid #444;
+}

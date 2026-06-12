@@ -14,6 +14,7 @@ import { useFadeTransition } from "./Hooks/useFadeTransition";
 import RoundAdvanceController from "./components/RoundAdvanceController/RoundAdvanceController";
 import DayEnded from "./components/DayEnded/DayEnded";
 import TutorialOverlay from "./components/Tutorial/TutorialOverlay";
+import DebugRecurringOverlay from "./components/Debug/DebugRecurringOverlay";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -30,6 +31,7 @@ export default function App() {
         <div className={clsx("debug-banner", { 'hidden': !debugEnabled })}>
           DEBUG MODE &nbsp;|&nbsp; FOV: {debugFov} &nbsp;|&nbsp; scroll to adjust · I to save pos
         </div>
+        {debugEnabled && <DebugRecurringOverlay />}
         <Navbar transitionTo={transitionTo} />
         <FadeOverlay visible={fading} />
         <TabManager />

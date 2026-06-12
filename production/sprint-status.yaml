@@ -14,7 +14,7 @@ goal: "Lasting effects decision layer: recurring law/deal effects, repeal, coup 
 start: "2026-06-11"
 end: "2026-06-25"
 generated: "2026-06-11"
-updated: "2026-06-11"
+updated: "2026-06-12"
 
 stories:
   - id: "2-1"
@@ -51,7 +51,7 @@ stories:
     name: "Content: 9 lasting-effect laws/deals + i18n"
     file: "production/stories/2-4-recurring-content.md"
     priority: must-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 1.0
     blocker: ""

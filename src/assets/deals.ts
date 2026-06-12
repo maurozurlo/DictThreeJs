@@ -1,4 +1,5 @@
 import type { Deal } from "../types/Deal";
+import { RECURRING } from "../Constants/Costs";
 
 export const DEALS: Deal[] = [
     {
@@ -125,5 +126,43 @@ export const DEALS: Deal[] = [
         acceptEffect: { people: 1, business: 1, risk: 0.3 },
         rejectEffect: { people: -2, business: -1 },
         riskText: 'deals.15.riskText'
+    },
+
+    // --- Lasting-effect deals (TR-lasting-004, PRD Feature 1 content) ---
+    // power is required on recurring deals — repeal targets the proposing faction.
+    {
+        // D-A: Foreign Investment Contract
+        // treasury: 40 — deliberately between COSTS.MEDIUM (20) and COSTS.LARGE (50); no matching tier constant.
+        id: 16,
+        text: 'deals.16.text',
+        acceptText: 'deals.16.acceptText',
+        rejectText: 'deals.16.rejectText',
+        acceptEffect: { treasury: 40, business: 1 },
+        rejectEffect: { business: -1 },
+        power: 'business',
+        recurringEffect: { incomeBonus: RECURRING.MEDIUM, label: 'deals.recurring.investment_income' }
+    },
+    {
+        // D-B: Arms Supplier Contract
+        // treasury: -30 — deliberately between COSTS.MEDIUM (20) and COSTS.LARGE (50); no matching tier constant.
+        id: 17,
+        text: 'deals.17.text',
+        acceptText: 'deals.17.acceptText',
+        rejectText: 'deals.17.rejectText',
+        acceptEffect: { military: 2, treasury: -30 },
+        rejectEffect: { military: -1 },
+        power: 'military',
+        recurringEffect: { expenseBonus: RECURRING.MEDIUM, label: 'deals.recurring.arms_cost' }
+    },
+    {
+        // D-C: Humanitarian Aid
+        id: 18,
+        text: 'deals.18.text',
+        acceptText: 'deals.18.acceptText',
+        rejectText: 'deals.18.rejectText',
+        acceptEffect: { people: 2, business: -1 },
+        rejectEffect: { people: -2 },
+        power: 'people',
+        recurringEffect: { expenseBonus: RECURRING.SMALL, label: 'deals.recurring.aid_cost' }
     }
 ];

@@ -83,6 +83,26 @@
             "acceptText": "The streets fill with celebration. Citizens and business cheer the spectacle.",
             "rejectText": "You politely declined. Better to avoid owing favours.",
             "riskText": "The festival becomes a flashpoint — organisers are using it to rally opposition!"
+        },
+        "16": {
+            "text": "A foreign consortium offers a long-term investment contract: $40M upfront plus dividends every round. Sign it?",
+            "acceptText": "The contract is signed. Foreign capital flows in — and the dividends will keep coming.",
+            "rejectText": "You declined. The consortium takes its capital elsewhere."
+        },
+        "17": {
+            "text": "An arms supplier offers a standing contract: modern equipment for $30M plus ongoing maintenance fees. Accept?",
+            "acceptText": "The generals are delighted with their new hardware — but the maintenance bills arrive every round.",
+            "rejectText": "You refused. The generals grumble about ageing equipment."
+        },
+        "18": {
+            "text": "An international NGO proposes a humanitarian aid program your government would co-fund each round. Support it?",
+            "acceptText": "The program launches. The people love it; business resents the recurring cost.",
+            "rejectText": "You turned the NGO away. The people will remember."
+        },
+        "recurring": {
+            "investment_income": "Investment Dividends",
+            "arms_cost": "Arms Maintenance",
+            "aid_cost": "Humanitarian Aid"
         }
     }
 }

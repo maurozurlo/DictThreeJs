@@ -9,3 +9,12 @@ export const GAINS = {
     MEDIUM: 2,
     LARGE: 3
 };
+
+/** Per-round recurring effect tiers (lasting-effects PRD Feature 1, TR-lasting-004). */
+export const RECURRING = {
+    SMALL: 8,
+    MEDIUM: 15,
+    LARGE: 25,
+    /** Pool weighting: max lasting-income laws offered per run (no-cap mitigation 2). */
+    MAX_INCOME_LAWS_PER_RUN: 3
+};

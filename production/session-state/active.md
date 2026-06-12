@@ -3,8 +3,21 @@
 <!-- STATUS -->
 Epic: Lasting Effects (Sprint 2)
 Feature: Sprint 2 stories
-Task: Ready for /dev-story 2-1-recurring-types
+Task: 2-4 implemented — needs code review + smoke check
 <!-- /STATUS -->
+
+## Session Extract — /dev-story 2-4 2026-06-12
+- Story: production/stories/2-4-recurring-content.md — Content: 9 recurring-effect laws/deals + i18n EN/ES
+- Files changed: src/Constants/Costs.ts (RECURRING tiers + MAX_INCOME_LAWS_PER_RUN), src/assets/laws.ts (laws 39–44), src/assets/deals.ts (deals 16–18 with power), src/Stores/RecurringHandler.ts (filterLawPool pure helper), src/Stores/GameState.ts (lawPool wired into both pickNextLaw closures), public/locales/{en,es}/laws.json (labels 39–44 + laws.recurring.*), public/locales/{en,es}/deals.json (16–18 + deals.recurring.*)
+- Tests written: src/Stores/RecurringHandler.filterLawPool.test.ts (7), src/assets/recurringContent.test.ts (13 — PRD tier/penalty/i18n validation)
+- Tests: 158/158 pass; build green
+- Note: pool cap counts ACTIVE income law effects (per story implementation notes); repealed laws free a slot — revisit in 2-8 if "ever accepted" semantics wanted
+- Blockers: None
+- Next: /code-review then /story-done production/stories/2-4-recurring-content.md + smoke check evidence (production/qa/smoke-2026-06-XX.md)
+
+## Session Extract — Tab polish 2026-06-12
+- Committed d4e0496: Budget side-menu restyle (i18n budget.in/out keys, .netStatus/.positive/.negative classes), dumbify spread to Laws/Log/Meet, inline styles → Tabs.module.css
+
 
 ## Session Extract — Sprint 2 planning 2026-06-11
 - PRD written: design/gdd/lasting-effects-prd.md (lasting effects, repeal, coup, DayEnded breakdown, visual registry + future-sprint specs for budget tiers & economy advisor)

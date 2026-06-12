@@ -44,7 +44,21 @@
             "35": "Subvencionar programas culturales y deportivos",
             "36": "Proveer apoyo para el cuidado infantil",
             "37": "Ampliar los planes de pensiones",
-            "38": "Implementar proyectos de energía renovable"
+            "38": "Implementar proyectos de energía renovable",
+            "39": "Legalizar el juego en todo el país",
+            "40": "Lanzar un programa de vivienda gratuita",
+            "41": "Firmar un contrato con contratistas militares",
+            "42": "Establecer un monopolio estatal de medios",
+            "43": "Reformar los aranceles de exportación",
+            "44": "Lanzar un programa de obras públicas"
+        },
+        "recurring": {
+            "gambling_income": "Ingresos de casinos",
+            "housing_cost": "Mantenimiento de viviendas",
+            "contractor_cost": "Honorarios de contratistas",
+            "media_income": "Ingresos de medios estatales",
+            "tariff_income": "Ingresos arancelarios",
+            "public_works_cost": "Mantenimiento de obras públicas"
         }
     },
     "acted_upon_law": "Ya has tomado una decisión sobre esta ley.",

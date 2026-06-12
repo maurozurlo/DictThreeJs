@@ -83,6 +83,26 @@
             "acceptText": "Las calles se llenan de celebración. Ciudadanos y empresarios aplauden el espectáculo.",
             "rejectText": "Rechazaste educadamente. Es mejor no deber favores.",
             "riskText": "¡El festival se convierte en un detonante — los organizadores lo usan para movilizar a la oposición!"
+        },
+        "16": {
+            "text": "Un consorcio extranjero ofrece un contrato de inversión a largo plazo: $40M por adelantado más dividendos cada ronda. ¿Firmarlo?",
+            "acceptText": "El contrato está firmado. El capital extranjero fluye — y los dividendos seguirán llegando.",
+            "rejectText": "Rechazaste la oferta. El consorcio lleva su capital a otra parte."
+        },
+        "17": {
+            "text": "Un proveedor de armas ofrece un contrato permanente: equipamiento moderno por $30M más cuotas de mantenimiento continuas. ¿Aceptar?",
+            "acceptText": "Los generales están encantados con su nuevo arsenal — pero las facturas de mantenimiento llegan cada ronda.",
+            "rejectText": "Te negaste. Los generales se quejan del equipamiento anticuado."
+        },
+        "18": {
+            "text": "Una ONG internacional propone un programa de ayuda humanitaria que tu gobierno cofinanciaría cada ronda. ¿Apoyarlo?",
+            "acceptText": "El programa se pone en marcha. El pueblo lo adora; las empresas resienten el coste recurrente.",
+            "rejectText": "Rechazaste a la ONG. El pueblo lo recordará."
+        },
+        "recurring": {
+            "investment_income": "Dividendos de inversión",
+            "arms_cost": "Mantenimiento de armas",
+            "aid_cost": "Ayuda humanitaria"
         }
     }
 }
