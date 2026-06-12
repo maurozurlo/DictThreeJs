@@ -27,8 +27,16 @@
             "business_elite": "Empresas (Élite)",
             "total": "Total"
         },
+        "coup_narrative": {
+            "military": "En la madrugada, vehículos blindados rodearon el palacio. Al amanecer, el rostro del General estaba en todas las pantallas.",
+            "business": "Una votación de emergencia del directorio. Cuentas congeladas. Una conferencia de prensa. El Ministro de Finanzas leyó el comunicado con manos firmes.",
+            "people": "La plaza se llenó a medianoche. Por la mañana, las fuerzas de seguridad se habían unido a la multitud. Vinieron por tus llaves."
+        },
         "tiers": {
             "lose_early":     { "name": "Breve experimento en autoritarismo",          "flavour": "Un intento valiente. Trágicamente breve." },
+            "lose_military_coup": { "name": "Superado en rango y en armas",            "flavour": "Les diste tanques. Ellos te dieron la salida." },
+            "lose_business_coup": { "name": "Activo liquidado",                        "flavour": "Resulta que el pasivo siempre fuiste tú." },
+            "lose_people_coup":   { "name": "La elección del pueblo (por la fuerza)",  "flavour": "Los hiciste fuertes. Ellos te hicieron desaparecer." },
             "lose_military":  { "name": "Retirado a punta de pistola",                "flavour": "Los generales tuvieron una reunión. No te invitaron." },
             "lose_business":  { "name": "Adquisición hostil, edición personal",       "flavour": "El capitalismo te atrapó antes de que pudieras atraparlo." },
             "lose_people":    { "name": "Removido democráticamente (definitivamente)", "flavour": "El pueblo habló. En voz alta. Con antorchas." },

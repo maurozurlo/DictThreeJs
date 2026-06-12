@@ -1,6 +1,19 @@
 import type { Power } from "../types/Power";
 import { Tabs } from "../types/Tabs";
 
+export interface Coup {
+    /** Faction relation value that arms the coup trigger (relation ≥ this). */
+    RELATION_THRESHOLD: number;
+    /** Player charisma value that enables armed factions to strike (charisma ≤ this). */
+    CHARISMA_THRESHOLD: number;
+    /** Faction relation threshold for the softer yellow warning (relation ≥ this). */
+    WARN_RELATION: number;
+    /** Player charisma threshold for the yellow warning (charisma ≤ this). */
+    WARN_CHARISMA: number;
+    /** Probability of surviving the first armed trigger (50% grace roll). */
+    GRACE_CHANCE: number;
+}
+
 export interface GAME_STATE_CONSTANTS {
     ROUNDS: Rounds;
     TABS: TabsConfig;
@@ -10,6 +23,7 @@ export interface GAME_STATE_CONSTANTS {
     CHARISMA: Charisma;
     RELATIONS: Relations;
     BUDGET_EFFECTS: BudgetEffects;
+    COUP: Coup;
 }
 
 export interface Budget {
@@ -188,5 +202,12 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         },
         MIN: -10,
         MAX: 10
-    }
+    },
+    COUP: {
+        RELATION_THRESHOLD: 8,
+        CHARISMA_THRESHOLD: -3,
+        WARN_RELATION: 6,
+        WARN_CHARISMA: 0,
+        GRACE_CHANCE: 0.5,
+    },
 }

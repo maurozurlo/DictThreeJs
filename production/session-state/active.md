@@ -1,10 +1,56 @@
 # Session State
 
+## Session Extract — /dev-story 2-7 2026-06-12
+- Story: production/stories/2-7-coup.md — Coup mechanic: thresholds, grace roll, warnings, narratives
+- Files changed: src/Stores/CoupHandler.ts (new — pure checkCoup + CoupResult), src/Stores/CoupHandler.test.ts (new, 9 tests), src/Constants/GameState.ts (COUP block + Coup interface), src/types/GameState.ts (EndCause +3 coup values; coupArmedLastRound/coupWarningFaction fields), src/Stores/GameState.ts (coup check at step 0 of nextRound, warning log lines, state carry, setPhase reset, loadGame whitelist), src/components/DayEnded/DayEnded.tsx+css (red coup warning row), src/components/EndScreen/EndScreen.tsx (3 coup tier cases), src/components/Tabs/Meet.tsx (warning badge on selected faction), public/locales/{en,es}/{menu,endscreen}.json (coup keys + tiers + narratives)
+- Test written: src/Stores/CoupHandler.test.ts — 9 tests; 172/172 pass; tsc clean
+- Note: story AC-1 spec said relation+7/charisma−3 → 'safe', but that satisfies yellow-warning thresholds (≥+6, ≤0); test asserts AC-1 intent (no coup/grace) and yellow-warning instead
+- Balance review: economy-designer (a40b72c33296a83e7) — SOUND WITH CONCERNS; concerns are 2-10 measurement items (eliminate charisma cost unconfirmed, military +3 deal can skip yellow round, charisma recovery thin)
+- Blockers: None
+- Next: /code-review src/Stores/CoupHandler.ts src/Stores/GameState.ts production/stories/2-7-coup.md then /story-done production/stories/2-7-coup.md
+
+## Session Extract — /story-done 2-6 2026-06-12
+- Verdict: COMPLETE
+- Story: production/stories/2-6-forecast-fix.md — Budget Forecast Fix (recurring effects)
+- Tech debt logged: None
+- Next recommended: 2-7 Coup mechanic (1.5d, ready-for-dev)
+
+## Session Extract — /dev-story 2-6 2026-06-12
+- Story: production/stories/2-6-forecast-fix.md — Budget forecast fix: recurring effects in rounds-left
+- Files changed: src/components/Tabs/Budget.tsx (add activeRecurringEffects selector, pass to calculateRoundFinancials), src/components/Tabs/Budget.forecast.test.ts (new, 5 tests)
+- Test written: src/components/Tabs/Budget.forecast.test.ts — 5 tests; 163/163 pass
+- Blockers: None
+- Note: "In:" / "Out:" subtotals in Budget sideMenu still show base income/expenses only (recurring not broken out per-row); net and roundsLeft are correct. Adding per-law rows is explicitly out of scope (story 2-9).
+- Next: /code-review src/components/Tabs/Budget.tsx src/components/Tabs/Budget.forecast.test.ts then /story-done production/stories/2-6-forecast-fix.md
+
+## Session Extract — /story-done 2026-06-12
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/2-5-dayended-breakdown.md — DayEnded Breakdown (Recurring + One-Time Rows)
+- Tech debt logged: None
+- Next recommended: 2-6 Budget forecast includes recurring effects (0.5d, ready-for-dev) OR 2-7 Coup mechanic (1.5d, ready-for-dev)
+
 <!-- STATUS -->
 Epic: Lasting Effects (Sprint 2)
 Feature: Sprint 2 stories
-Task: 2-4 implemented — needs code review + smoke check
+Task: 2-7 coup mechanic — implemented, pending code review + story-done
 <!-- /STATUS -->
+
+## Session Extract — /dev-story 2-5 2026-06-12
+- Story: production/stories/2-5-dayended-breakdown.md — DayEnded breakdown: recurring + one-time rows
+- Files changed: src/components/DayEnded/DayEnded.tsx (2 selectors, 2 conditional rows, PRD row order, net includes recurring), public/locales/{en,es}/menu.json (actionPanel.recurring_income/recurring_expenses)
+- Test written: None — UI story; evidence skeleton at production/qa/evidence/2-5-dayended-breakdown-evidence.md
+- Note: row order changed — Bonus income moved below Legislation rows per PRD Feature 3 order
+- Blockers: None
+- Next: manual walkthrough (AC-1..AC-5) → /story-done production/stories/2-5-dayended-breakdown.md
+
+## Session Extract — /story-done 2-4 2026-06-12
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/2-4-recurring-content.md — 9 recurring laws/deals + i18n
+- Code review: APPROVED WITH SUGGESTIONS — all applied (resolveKey cast, magic-number comments, empty-pool console.warn in 3 GameState sites)
+- Smoke: production/qa/smoke-2026-06-12.md PASS WITH NOTES (law + ES verified in-game; deal/pool-cap via automated tests)
+- Bonus: DebugRecurringOverlay (src/components/Debug/) — debug-mode panel, z-index 120, shows active effects/totals/income-cap/law-offer tag; wired in App.tsx
+- Tech debt logged: None (advisories in story Completion Notes)
+- Next recommended: 2-5 DayEnded breakdown (0.5d, deps done) — user noticed missing DayEnded rows during playtest
 
 ## Session Extract — /dev-story 2-4 2026-06-12
 - Story: production/stories/2-4-recurring-content.md — Content: 9 recurring-effect laws/deals + i18n EN/ES

@@ -14,7 +14,7 @@ goal: "Lasting effects decision layer: recurring law/deal effects, repeal, coup 
 start: "2026-06-11"
 end: "2026-06-25"
 generated: "2026-06-11"
-updated: "2026-06-12"
+updated: "2026-06-12"  # 2-5 done
 
 stories:
   - id: "2-1"
@@ -61,21 +61,21 @@ stories:
     name: "DayEnded breakdown: recurring + one-time rows"
     file: "production/stories/2-5-dayended-breakdown.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-12"
 
   - id: "2-6"
     name: "Budget forecast includes recurring effects"
     file: "production/stories/2-6-forecast-fix.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-12"
 
   - id: "2-7"
     name: "Coup mechanic: thresholds, warnings, narratives"

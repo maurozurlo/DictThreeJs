@@ -13,13 +13,17 @@ const DayEnded = () => {
     const round             = useGameStore(s => s.gameManagement.round)
     const lastRoundIncome   = useGameStore(s => s.gameManagement.lastRoundIncome)
     const lastRoundExpenses = useGameStore(s => s.gameManagement.lastRoundExpenses)
+    const recurringIncome   = useGameStore(s => s.gameManagement.lastRoundRecurringIncome)
+    const recurringExpenses = useGameStore(s => s.gameManagement.lastRoundRecurringExpenses)
     const extraIncome       = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
     const extraExpenses     = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
+    const coupArmed         = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const nextRound         = useGameStore(s => s.gameManagement.nextRound)
 
     if (!dayEnded || phase !== 'start') return null
 
-    const net = lastRoundIncome + extraIncome - lastRoundExpenses - extraExpenses
+    const net = lastRoundIncome + recurringIncome + extraIncome
+        - lastRoundExpenses - recurringExpenses - extraExpenses
 
     return (
         <Modal>
@@ -29,16 +33,28 @@ const DayEnded = () => {
                     <span>{t('actionPanel.tax_income')}</span>
                     <span className={styles.positive}>+{MoneyNumberFormatter(lastRoundIncome)}</span>
                 </div>
+                <div className={styles.statRow}>
+                    <span>{t('actionPanel.budget_expenses')}</span>
+                    <span className={styles.negative}>-{MoneyNumberFormatter(lastRoundExpenses)}</span>
+                </div>
+                {recurringIncome > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.recurring_income')}</span>
+                        <span className={styles.positive}>+{MoneyNumberFormatter(recurringIncome)}</span>
+                    </div>
+                )}
+                {recurringExpenses > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.recurring_expenses')}</span>
+                        <span className={styles.negative}>-{MoneyNumberFormatter(recurringExpenses)}</span>
+                    </div>
+                )}
                 {extraIncome > 0 && (
                     <div className={styles.statRow}>
                         <span>{t('actionPanel.bonus_income')}</span>
                         <span className={styles.positive}>+{MoneyNumberFormatter(extraIncome)}</span>
                     </div>
                 )}
-                <div className={styles.statRow}>
-                    <span>{t('actionPanel.budget_expenses')}</span>
-                    <span className={styles.negative}>-{MoneyNumberFormatter(lastRoundExpenses)}</span>
-                </div>
                 {extraExpenses > 0 && (
                     <div className={styles.statRow}>
                         <span>{t('actionPanel.extra_expenses')}</span>
@@ -51,6 +67,11 @@ const DayEnded = () => {
                         {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
                     </span>
                 </div>
+                {coupArmed && (
+                    <div className={styles.coupWarning}>
+                        {t('actionPanel.coup_warning')}
+                    </div>
+                )}
                 <Button onClick={nextRound}>
                     {t('actionPanel.continue_day', { day: round + 1 })}
                 </Button>

@@ -65,6 +65,15 @@ export function calculateRoundFinancials(
     return { peopleIncome, businessIncome, totalIncome, expenses, recurringIncome, recurringExpenses, netChange };
 }
 
+/**
+ * Derives rounds-until-bankruptcy from current treasury and the net per-round change.
+ * Returns null when net is non-negative (infinite runway).
+ * Mirrors the Budget tab's rounds-left display logic.
+ */
+export function computeRoundsLeft(treasury: number, net: number): number | null {
+    return net < 0 ? Math.floor(treasury / Math.abs(net)) : null;
+}
+
 export type BudgetChangeResult = {
     taxes: GameState["budget"]["taxes"],
     expenditures: GameState["budget"]["expenditures"]

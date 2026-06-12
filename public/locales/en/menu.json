@@ -23,8 +23,11 @@
     "tax_income": "Tax income:",
     "bonus_income": "Bonus income:",
     "budget_expenses": "Budget expenses:",
+    "recurring_income": "Legislation income:",
+    "recurring_expenses": "Legislation costs:",
     "extra_expenses": "Extra expenses:",
     "net": "Net:",
+    "coup_warning": "⚠ Coup imminent! A faction is moving against you.",
     "continue_day": "Continue to Day {{day}} →"
   },
   "log": {
@@ -52,7 +55,9 @@
     "mini_challenge_title": "Opportunity",
     "newspaper_name": "The Daily Obedience",
     "mini_challenge_accept": "Accept",
-    "mini_challenge_reject": "Reject"
+    "mini_challenge_reject": "Reject",
+    "coup_yellow_warning": "Whispers in the corridors... {{faction}} grows bold while your charisma wanes",
+    "coup_red_warning": "⚠ {{faction}} is plotting against you! Raise your charisma or lower their power — NOW"
   },
   "mainMenu": {
     "newGame": "New Game",
@@ -87,7 +92,9 @@
     "bribe": "Bribe",
     "eliminate": "Eliminate",
     "expropiate": "Expropiate",
-    "dialogue": "Dialogue"
+    "dialogue": "Dialogue",
+    "coup_badge_yellow": "⚠ This faction is growing dangerously influential",
+    "coup_badge_red": "☠ This faction is plotting a coup!"
   },
   "power": {
     "military": "Military",

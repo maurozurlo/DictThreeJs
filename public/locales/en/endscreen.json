@@ -27,8 +27,16 @@
             "business_elite": "Business (Elite)",
             "total": "Total"
         },
+        "coup_narrative": {
+            "military": "In the early hours, armored vehicles surrounded the palace. By dawn, the General's face was on every screen.",
+            "business": "An emergency board vote. Frozen accounts. A press conference. The Minister of Finance read the statement with steady hands.",
+            "people": "The square filled at midnight. By morning, the security forces had joined the crowd. They came for your keys."
+        },
         "tiers": {
             "lose_early":     { "name": "Brief Experiment in Authoritarianism", "flavour": "A bold attempt. Tragically brief." },
+            "lose_military_coup": { "name": "Outranked and Outgunned",          "flavour": "You gave them tanks. They gave you an exit." },
+            "lose_business_coup": { "name": "Liquidated Asset",                 "flavour": "Turns out you were the liability all along." },
+            "lose_people_coup":   { "name": "The People's Choice (Forcibly)",   "flavour": "You made them strong. They made you gone." },
             "lose_military":  { "name": "Retired at Gunpoint",                  "flavour": "The generals had a meeting. You weren't invited." },
             "lose_business":  { "name": "Hostile Takeover, Personal Edition",   "flavour": "Capitalism got you before you could get capitalism." },
             "lose_people":    { "name": "Democratically Removed (Permanently)", "flavour": "The people have spoken. Loudly. With torches." },

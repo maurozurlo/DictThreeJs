@@ -15,7 +15,7 @@ export type RoundLogEntry = {
 
 export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue';
 
-export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | null;
+export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | 'military_coup' | 'business_coup' | 'people_coup' | null;
 
 /**
  * A law or deal whose recurring effect is currently active.
@@ -112,6 +112,11 @@ export type GameState = {
         activeRecurringEffects: ActiveRecurringEffect[];
         /** True after a repeal is used this round; reset to false in nextRound(). */
         repealTakenThisRound: boolean;
+        /** True when the START of this round yielded a 'grace' coup result (armed but survived).
+         *  A second consecutive armed trigger skips the grace roll and fires immediately. */
+        coupArmedLastRound: boolean;
+        /** Faction whose relation threshold triggered a coup warning this round; null when safe. */
+        coupWarningFaction: Power | null;
         charisma: {
             current: number,
             adjustCharisma: (amount: number) => void;

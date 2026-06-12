@@ -23,8 +23,11 @@
         "tax_income": "Ingresos fiscales:",
         "bonus_income": "Ingresos extra:",
         "budget_expenses": "Gastos del presupuesto:",
+        "recurring_income": "Ingresos legislativos:",
+        "recurring_expenses": "Costos legislativos:",
         "extra_expenses": "Gastos extra:",
         "net": "Neto:",
+        "coup_warning": "⚠ ¡Golpe de estado inminente! Una facción se mueve en tu contra.",
         "continue_day": "Continuar al día {{day}} →"
     },
     "log": {
@@ -52,7 +55,9 @@
         "mini_challenge_title": "Oportunidad",
         "newspaper_name": "La Obediencia Diaria",
         "mini_challenge_accept": "Aceptar",
-        "mini_challenge_reject": "Rechazar"
+        "mini_challenge_reject": "Rechazar",
+        "coup_yellow_warning": "Susurros en los pasillos... {{faction}} se envalentona mientras tu carisma decae",
+        "coup_red_warning": "⚠ ¡{{faction}} conspira contra ti! Sube tu carisma o reduce su poder — ¡YA!"
     },
     "mainMenu": {
         "newGame": "Nueva partida",
@@ -87,7 +92,9 @@
         "bribe": "Sobornar",
         "eliminate": "Eliminar",
         "expropiate": "Expropiar",
-        "dialogue": "Dialogar"
+        "dialogue": "Dialogar",
+        "coup_badge_yellow": "⚠ Esta facción está ganando demasiada influencia",
+        "coup_badge_red": "☠ ¡Esta facción está tramando un golpe de estado!"
     },
     "power": {
         "military": "Militares",

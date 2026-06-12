@@ -7,16 +7,16 @@ import { BudgetRow } from '../BudgetRow/BudgetRow'
 import { EXPENDITURES, TAXES, MoneyNumberFormatter } from '../../Constants/Budget'
 import { useGameStore } from '../../Stores/GameState'
 import TabLayout from './TabLayout'
-import { calculateRoundFinancials } from '../../Stores/BudgetHandler'
+import { calculateRoundFinancials, computeRoundsLeft } from '../../Stores/BudgetHandler'
 
 
 const Budget = ({ isActive }: TabProps) => {
     const { t } = useTranslation();
     const budget = useGameStore(s => s.budget)
-    const treasury = useGameStore(s => s.budget.treasury)
-    const financials = calculateRoundFinancials(budget)
+    const activeRecurringEffects = useGameStore(s => s.gameManagement.activeRecurringEffects)
+    const financials = calculateRoundFinancials(budget, activeRecurringEffects)
     const net = financials.netChange
-    const roundsLeft = net < 0 ? Math.floor(treasury / Math.abs(net)) : null
+    const roundsLeft = computeRoundsLeft(budget.treasury, net)
 
     return (
         <TabLayout

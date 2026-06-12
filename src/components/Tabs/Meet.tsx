@@ -17,6 +17,8 @@ const Meet = () => {
     const actionTaken = useGameStore((s) => s.meet.actionTaken)
     const actionOutcomeText = useGameStore((s) => s.meet.actionOutcomeText)
     const education = useGameStore((s) => s.budget.expenditures.education)
+    const coupWarningFaction = useGameStore((s) => s.gameManagement.coupWarningFaction)
+    const coupArmed = useGameStore((s) => s.gameManagement.coupArmedLastRound)
 
     const outcomeText = useMemo(() => {
         if (!actionOutcomeText) return null;
@@ -67,6 +69,12 @@ const Meet = () => {
             <Typography variant="caption" className={styles.title}>
                 {t('meet.selected')}: {t(`power.${selectedPower}`)}
             </Typography>
+
+            {coupWarningFaction === selectedPower && (
+                <Typography variant="caption" className={coupArmed ? styles.negative : styles.roundsWarning}>
+                    {t(coupArmed ? 'meet.coup_badge_red' : 'meet.coup_badge_yellow')}
+                </Typography>
+            )}
 
             <div className={styles.actionsContainer}>
                 <Button onClick={() => takeAction(selectedPower, 'bribe')}>

@@ -4,7 +4,7 @@ import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
-import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
+import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
@@ -20,6 +20,7 @@ import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
 import { getGameDate } from "../Utils/GameDate";
 import { filterLawPool } from "./RecurringHandler";
+import { checkCoup } from "./CoupHandler";
 import { exportSave } from "../Utils/SaveLoad";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
@@ -444,6 +445,8 @@ export const INITIAL_STATE = ({ set, get }: {
         timerPausedAt: null,
         activeRecurringEffects: [],
         repealTakenThisRound: false,
+        coupArmedLastRound: false,
+        coupWarningFaction: null,
         meetCounts: { military: 0, business: 0, people: 0 },
         setPhase: (phase) => {
             if (phase === 'start') {
@@ -483,6 +486,8 @@ export const INITIAL_STATE = ({ set, get }: {
                             lastRoundRecurringExpenses: 0,
                             activeRecurringEffects: [],
                             repealTakenThisRound: false,
+                            coupArmedLastRound: false,
+                            coupWarningFaction: null,
                             timerStartedAt: Date.now(),
                             timerPausedAt: null,
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
@@ -633,6 +638,36 @@ export const INITIAL_STATE = ({ set, get }: {
         nextRound: () => {
             const state = get();
 
+            // --- 0. Coup check (fires before financial resolution — ADR-0006 ordering) ---
+            const coupResult = checkCoup(
+                state.relations.current,
+                state.gameManagement.charisma.current,
+                rollFloat(),
+                state.gameManagement.coupArmedLastRound ?? false
+            );
+
+            if (coupResult.outcome === 'coup') {
+                set((s) => ({
+                    gameManagement: {
+                        ...s.gameManagement,
+                        dayEnded: false,
+                        endReason: i18n.t(`endscreen.coup_narrative.${coupResult.faction}`, { ns: 'endscreen' }),
+                        endCause: coupResult.cause,
+                        phase: 'lose',
+                        coupArmedLastRound: false,
+                        coupWarningFaction: null,
+                    },
+                }));
+                return;
+            }
+
+            // Coup warning state to carry into this round's final state
+            const newCoupArmedLastRound = coupResult.outcome === 'grace';
+            const newCoupWarningFaction: Power | null =
+                coupResult.outcome === 'grace' || coupResult.outcome === 'yellow-warning'
+                    ? coupResult.faction
+                    : null;
+
             // --- 1. Financial resolution (includes active recurring effects) ---
             const financials = calculateRoundFinancials(state.budget, state.gameManagement.activeRecurringEffects);
             let newTreasury = state.budget.treasury + financials.netChange;
@@ -692,6 +727,13 @@ export const INITIAL_STATE = ({ set, get }: {
             logLines.push(...logMessages, ...taxMessages, ...eventMessages);
             if (newCharisma > state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_up'));
             else if (newCharisma < state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_down'));
+            // Coup warning log lines (appended after financial summary)
+            if (coupResult.outcome === 'yellow-warning') {
+                logLines.push(i18n.t('log.coup_yellow_warning', { faction: i18n.t(`power.${coupResult.faction}`) }));
+            }
+            if (coupResult.outcome === 'grace') {
+                logLines.push(i18n.t('log.coup_red_warning', { faction: i18n.t(`power.${coupResult.faction}`) }));
+            }
             const newLog = [...state.log, { date: getGameDate(state.gameManagement.round), lines: logLines }];
 
             // --- 6. Increment round, draw next daily event ---
@@ -854,6 +896,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        coupArmedLastRound: newCoupArmedLastRound,
+                        coupWarningFaction: newCoupWarningFaction,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
@@ -903,6 +947,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...recurringGmFields,
                     currentRoundExtraIncome: 0,
                     currentRoundExtraExpenses: 0,
+                    coupArmedLastRound: newCoupArmedLastRound,
+                    coupWarningFaction: newCoupWarningFaction,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
@@ -942,6 +988,9 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
                     activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
                     repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
+                    // Coup fields — default to safe state for saves predating story 2-7
+                    coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,
+                    coupWarningFaction: (gm.coupWarningFaction as Power | null) ?? null,
                     timerStartedAt: Date.now(),
                     timerPausedAt: null,
                     charisma: {

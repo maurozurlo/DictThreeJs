@@ -26,11 +26,14 @@ function calcTier(
     if (phase === 'lose') {
         if (round <= 4) return { tier: 'F', nameKey: 'endscreen.tiers.lose_early.name',     flavourKey: 'endscreen.tiers.lose_early.flavour',     color: '#e74c3c' }
         switch (endCause) {
-            case 'military':   return { tier: 'D', nameKey: 'endscreen.tiers.lose_military.name',  flavourKey: 'endscreen.tiers.lose_military.flavour',  color: '#c0392b' }
-            case 'business':   return { tier: 'D', nameKey: 'endscreen.tiers.lose_business.name',  flavourKey: 'endscreen.tiers.lose_business.flavour',  color: '#c0392b' }
-            case 'people':     return { tier: 'D', nameKey: 'endscreen.tiers.lose_people.name',    flavourKey: 'endscreen.tiers.lose_people.flavour',    color: '#c0392b' }
-            case 'bankruptcy': return { tier: 'D', nameKey: 'endscreen.tiers.lose_bankruptcy.name',flavourKey: 'endscreen.tiers.lose_bankruptcy.flavour',color: '#c0392b' }
-            default:           return { tier: 'D', nameKey: 'endscreen.tiers.lose_default.name',   flavourKey: 'endscreen.tiers.lose_default.flavour',   color: '#c0392b' }
+            case 'military':      return { tier: 'D', nameKey: 'endscreen.tiers.lose_military.name',      flavourKey: 'endscreen.tiers.lose_military.flavour',      color: '#c0392b' }
+            case 'business':      return { tier: 'D', nameKey: 'endscreen.tiers.lose_business.name',      flavourKey: 'endscreen.tiers.lose_business.flavour',      color: '#c0392b' }
+            case 'people':        return { tier: 'D', nameKey: 'endscreen.tiers.lose_people.name',        flavourKey: 'endscreen.tiers.lose_people.flavour',        color: '#c0392b' }
+            case 'bankruptcy':    return { tier: 'D', nameKey: 'endscreen.tiers.lose_bankruptcy.name',    flavourKey: 'endscreen.tiers.lose_bankruptcy.flavour',    color: '#c0392b' }
+            case 'military_coup': return { tier: 'D', nameKey: 'endscreen.tiers.lose_military_coup.name', flavourKey: 'endscreen.tiers.lose_military_coup.flavour', color: '#c0392b' }
+            case 'business_coup': return { tier: 'D', nameKey: 'endscreen.tiers.lose_business_coup.name', flavourKey: 'endscreen.tiers.lose_business_coup.flavour', color: '#c0392b' }
+            case 'people_coup':   return { tier: 'D', nameKey: 'endscreen.tiers.lose_people_coup.name',   flavourKey: 'endscreen.tiers.lose_people_coup.flavour',   color: '#c0392b' }
+            default:              return { tier: 'D', nameKey: 'endscreen.tiers.lose_default.name',       flavourKey: 'endscreen.tiers.lose_default.flavour',       color: '#c0392b' }
         }
     }
 

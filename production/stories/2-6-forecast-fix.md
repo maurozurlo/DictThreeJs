@@ -3,14 +3,15 @@
 ## Header
 - **Story ID**: 2-6
 - **Sprint**: 2
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Logic
 - **Layer**: Feature
 - **TR-ID**: TR-lasting-006
 - **Governing ADR**: docs/architecture/adr-0002-state-management-pattern.md
 - **Manifest Version**: N/A (control manifest not yet created)
 - **Estimate**: 0.5 days
-- **Last Updated**: 2026-06-11
+- **Last Updated**: 2026-06-12
+- **Completed**: 2026-06-12
 
 ## Summary
 
@@ -116,3 +117,10 @@ Test file: `src/components/Tabs/Budget.forecast.test.ts`
 
 - Depends on: Story 2-3 must be DONE (`activeRecurringEffects` in store; `calculateRoundFinancials` updated)
 - Unlocks: Story 2-10 (balance pass validates forecast accuracy)
+
+## Completion Notes
+**Completed**: 2026-06-12
+**Criteria**: 6/6 passing (all covered)
+**Deviations**: OUT OF SCOPE (valid) — `BudgetHandler.ts` touched to add `computeRoundsLeft` pure helper, extracted from what would have been an inline formula per code-review suggestion. Budget calculation logic is already there; no structural change.
+**Test Evidence**: Logic — `src/components/Tabs/Budget.forecast.test.ts` (5 tests, all pass)
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS, all applied (computeRoundsLeft extracted to BudgetHandler, redundant treasury selector removed).
