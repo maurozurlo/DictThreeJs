@@ -51,11 +51,11 @@ stories:
     name: "Content: 9 lasting-effect laws/deals + i18n"
     file: "production/stories/2-4-recurring-content.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-12"
 
   - id: "2-5"
     name: "DayEnded breakdown: recurring + one-time rows"
