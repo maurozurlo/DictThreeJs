@@ -1,11 +1,18 @@
 # Session State
 
+## Session Extract — Charisma action tuning 2026-06-12
+- Owner decision after economy-designer review (a02bb3f5ac062c463): expropriate charisma −1→−2 (same price as eliminate; treasury-positive aggression), dialogue success 0→+1 (charisma recovery loop), dialogue roll-fail stays 0 (agent's tuning — 2-7% band, not player-controlled; owner agreed own −1 proposal "would be unfair"), education-gated fail stays −1, bribe stays 0, eliminate stays −2
+- Range decision: charisma stays −10..+10 (agent: thresholds well-placed; +5..+10 is unhooked dead space — future idea only)
+- Files: src/Stores/ActionHandler.ts (2 deltas + comments), src/Stores/ActionHandler.test.ts (4 charismaDelta assertions added)
+- Tests: 172/172 pass
+- Relates to 2-10 balance pass: coup math now — 2 expropriates reach −4 (armed from round 3); single expropriate drops to −2 → expropriation incompatible with special-ending route (intended sharpening)
+
 ## Session Extract — /dev-story 2-7 2026-06-12
 - Story: production/stories/2-7-coup.md — Coup mechanic: thresholds, grace roll, warnings, narratives
 - Files changed: src/Stores/CoupHandler.ts (new — pure checkCoup + CoupResult), src/Stores/CoupHandler.test.ts (new, 9 tests), src/Constants/GameState.ts (COUP block + Coup interface), src/types/GameState.ts (EndCause +3 coup values; coupArmedLastRound/coupWarningFaction fields), src/Stores/GameState.ts (coup check at step 0 of nextRound, warning log lines, state carry, setPhase reset, loadGame whitelist), src/components/DayEnded/DayEnded.tsx+css (red coup warning row), src/components/EndScreen/EndScreen.tsx (3 coup tier cases), src/components/Tabs/Meet.tsx (warning badge on selected faction), public/locales/{en,es}/{menu,endscreen}.json (coup keys + tiers + narratives)
 - Test written: src/Stores/CoupHandler.test.ts — 9 tests; 172/172 pass; tsc clean
 - Note: story AC-1 spec said relation+7/charisma−3 → 'safe', but that satisfies yellow-warning thresholds (≥+6, ≤0); test asserts AC-1 intent (no coup/grace) and yellow-warning instead
-- Balance review: economy-designer (a40b72c33296a83e7) — SOUND WITH CONCERNS; concerns are 2-10 measurement items (eliminate charisma cost unconfirmed, military +3 deal can skip yellow round, charisma recovery thin)
+- Balance review: economy-designer (a40b72c33296a83e7) — SOUND WITH CONCERNS; concern #1 (double-eliminate skips yellow warning) INVALIDATED by owner: only one meet action per round (Meet.tsx actionTaken lock); eliminate = −2 charisma (ActionHandler.ts), so worst single-round drop is −2 meet + −2 tax corrosion, and tax corrosion requires pre-existing high-tax state. Remaining 2-10 items: military +3 deal can shortcut relation warning round; charisma recovery thin (+1/round)
 - Blockers: None
 - Next: /code-review src/Stores/CoupHandler.ts src/Stores/GameState.ts production/stories/2-7-coup.md then /story-done production/stories/2-7-coup.md
 
@@ -137,3 +144,29 @@ Task: 2-7 coup mechanic — implemented, pending code review + story-done
 - Input: Keyboard/Mouse only, Web browser
 - Key observation: Meet + Laws tabs render inside ActionPanel (not center tab area)
 - Key observation: No player journey, accessibility requirements, or art bible exist yet
+
+## Session Extract — /story-done 2026-06-12
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/2-7-coup.md — Coup Mechanic (Thresholds, Grace Roll, Warnings, Narratives)
+- Code review: APPROVED WITH SUGGESTIONS — all 3 suggestions applied (type-safe COUP_CAUSE_MAP, terminal-branch cleanup, DayEnded timing comment)
+- Tests: 172/172 pass
+- Tech debt logged: None (advisory deviation documented inline in story)
+- Uncommitted work: ActionHandler.ts + ActionHandler.test.ts (charisma tuning), CoupHandler.ts + CoupHandler.test.ts, GameState.ts + types/GameState.ts + Constants/GameState.ts, DayEnded.tsx + DayEnded.module.css, Meet.tsx, EndScreen.tsx, locales (menu EN/ES + endscreen EN/ES), 2-7-coup.md
+- Next recommended: production/stories/2-8-repeal-ui.md — Repeal UI (Active Legislation in Log)
+
+## Session Extract — /dev-story 2026-06-12
+- Story: production/stories/2-9-visual-registry.md — Visual Consequence Registry (scaffolding)
+- Files changed: src/assets/visualConsequences.ts (new — types, 5 starter entries, pure evaluator), src/assets/visualConsequences.test.ts (new — 13 tests)
+- Key decision: real sourceIds used (law-39 = L-A Gambling, law-40 = L-B Housing) per RecurringHandler `${sourceType}-${id}` format — NOT the PRD's law-A/law-B placeholders
+- Key decision: two-pass exclusion (match all, then filter excluded IDs) — PRD's single-pass pseudocode fails AC-4 because dilapidated-buildings precedes public-housing-blocks in array order
+- Tests: 185/185 pass, tsc clean
+- Blockers: None
+- Next: /code-review src/assets/visualConsequences.ts then /story-done production/stories/2-9-visual-registry.md
+
+## Session Extract — /story-done 2026-06-12 (2-9)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/2-9-visual-registry.md — Visual Consequence Registry (scaffolding)
+- Code review: APPROVED WITH SUGGESTIONS — WARN_RELATION constant reference applied
+- Tests: 185/185 pass, tsc clean
+- Tech debt logged: None
+- Next recommended: production/stories/2-8-repeal-ui.md — Repeal UI (last must-have in sprint 2)

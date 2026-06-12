@@ -14,7 +14,7 @@ goal: "Lasting effects decision layer: recurring law/deal effects, repeal, coup 
 start: "2026-06-11"
 end: "2026-06-25"
 generated: "2026-06-11"
-updated: "2026-06-12"  # 2-5 done
+updated: "2026-06-12"  # 2-7 done, 2-9 done
 
 stories:
   - id: "2-1"
@@ -81,11 +81,11 @@ stories:
     name: "Coup mechanic: thresholds, warnings, narratives"
     file: "production/stories/2-7-coup.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-12"
 
   - id: "2-8"
     name: "Repeal UI: Active Legislation in Log"
@@ -101,11 +101,11 @@ stories:
     name: "Visual consequence registry (scaffolding)"
     file: "production/stories/2-9-visual-registry.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-12"
 
   - id: "2-10"
     name: "Balance pass: playthrough with lasting effects"

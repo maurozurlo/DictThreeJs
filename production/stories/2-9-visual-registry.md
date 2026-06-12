@@ -3,14 +3,14 @@
 ## Header
 - **Story ID**: 2-9
 - **Sprint**: 2
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Logic
 - **Layer**: Feature
 - **TR-ID**: TR-lasting-009
 - **Governing ADR**: docs/architecture/adr-0002-state-management-pattern.md
 - **Manifest Version**: N/A (control manifest not yet created)
 - **Estimate**: 0.5 days
-- **Last Updated**: 2026-06-11
+- **Last Updated**: 2026-06-12
 
 ## Summary
 
@@ -192,9 +192,17 @@ Test file: `src/assets/visualConsequences.test.ts`
 **Story Type**: Logic
 **Required evidence**: `src/assets/visualConsequences.test.ts` — 5 test cases above, all passing.
 
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — 13/13 tests (2026-06-12)
 
 ## Dependencies
 
 - Depends on: Story 2-1 must be DONE (`ActiveRecurringEffect` type, `activeRecurringEffects` in store shape)
 - Unlocks: Nothing in sprint 2 — enables 3D team in a future sprint
+
+## Completion Notes
+
+**Completed**: 2026-06-12
+**Criteria**: 8/8 passing
+**Deviations**: ADVISORY — (1) real sourceIds `law-39`/`law-40` used per the story's own instruction, replacing PRD placeholders; (2) two-pass exclusion replaces the PRD's single-pass pseudocode, which fails AC-4 due to registry array ordering; (3) faction-coup-crown threshold references `GAMESTATE.COUP.WARN_RELATION` instead of literal 6.
+**Test Evidence**: Logic — `src/assets/visualConsequences.test.ts` (13/13 tests passing)
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS (suggestion applied before close)
