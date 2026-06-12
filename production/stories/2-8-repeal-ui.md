@@ -3,14 +3,14 @@
 ## Header
 - **Story ID**: 2-8
 - **Sprint**: 2
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: UI
 - **Layer**: Feature
 - **TR-ID**: TR-lasting-008
 - **Governing ADR**: docs/architecture/adr-0002-state-management-pattern.md
 - **Manifest Version**: N/A (control manifest not yet created)
 - **Estimate**: 1.0 day
-- **Last Updated**: 2026-06-11
+- **Last Updated**: 2026-06-12
 
 ## Summary
 
@@ -181,9 +181,17 @@ Logic test for `repeal()` action: `src/Stores/repeal.test.ts`
 - `production/qa/evidence/2-8-repeal-ui-evidence.md` — manual walkthrough for AC-1 through AC-5
 - `src/Stores/repeal.test.ts` — repeal() logic unit test (1 test, edge case)
 
-**Status**: [ ] Not yet created
+**Status**: [x] Logic test passing — 14/14 (2026-06-12); manual walkthrough doc created, user sign-off PENDING
 
 ## Dependencies
 
 - Depends on: Story 2-3 must be DONE (store has `activeRecurringEffects`, `repealTakenThisRound`); Story 2-4 must be DONE (real law entries needed for end-to-end test)
 - Unlocks: Story 2-10 (balance pass tests repeal cost vs income gain)
+
+## Completion Notes
+
+**Completed**: 2026-06-12 (implemented autonomously via ui-programmer agent while owner away)
+**Criteria**: 10/10 implemented; AC-1..AC-5 manual walkthrough DEFERRED to user sign-off (evidence doc at `production/qa/evidence/2-8-repeal-ui-evidence.md` with pending checkbox list)
+**Deviations**: ADVISORY — bankruptcy check folded into the same atomic `set()` as the repeal mutation (story sketch implied a follow-up check; single set is ADR-0002-cleaner and prevents a mid-update zero-treasury render without the lose phase).
+**Test Evidence**: Logic — `src/Stores/repeal.test.ts` (14/14 passing); UI — walkthrough doc pending user sign-off
+**Code Review**: Complete — APPROVED after fixes (agent's test fixtures mislabeled tier Medium at incomeBonus 25 = Large, corrected; agent's drive-by emoji removals in Log.tsx reverted; bankruptcy set() made atomic)

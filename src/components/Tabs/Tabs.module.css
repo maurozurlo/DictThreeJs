@@ -180,3 +180,72 @@
         min-width: 380px;
     }
 }
+
+/* --- Active Legislation (Repeal UI) --- */
+
+.activeLegislation {
+    margin-bottom: 1rem;
+
+    h3 {
+        color: var(--accent-color);
+        margin-bottom: .5rem;
+    }
+}
+
+.repealCard {
+    display: flex;
+    flex-direction: column;
+    gap: .375rem;
+    padding: .75rem 1rem;
+    margin-bottom: .5rem;
+    border-left: 3px solid var(--accent-color);
+    background-color: rgba(255,255,255,.04);
+}
+
+.repealCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .5rem;
+}
+
+.repealCardLabel {
+    font-weight: 600;
+    flex: 1;
+}
+
+.repealCardMeta {
+    font-size: .8rem;
+    opacity: .65;
+}
+
+.repealCardEffect {
+    font-size: .9rem;
+}
+
+.repealCardEffect.income {
+    color: #27ae60;
+}
+
+.repealCardEffect.expense {
+    color: #e74c3c;
+}
+
+.repealConfirmPanel {
+    margin-top: .5rem;
+    padding: .5rem .75rem;
+    background-color: rgba(255,255,255,.06);
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.repealConfirmCost {
+    font-size: .875rem;
+    opacity: .85;
+}
+
+.repealConfirmButtons {
+    display: flex;
+    gap: .5rem;
+}

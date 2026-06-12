@@ -14,7 +14,7 @@ goal: "Lasting effects decision layer: recurring law/deal effects, repeal, coup 
 start: "2026-06-11"
 end: "2026-06-25"
 generated: "2026-06-11"
-updated: "2026-06-12"  # 2-7 done, 2-9 done
+updated: "2026-06-12"  # 2-7, 2-8, 2-9 done
 
 stories:
   - id: "2-1"
@@ -91,11 +91,11 @@ stories:
     name: "Repeal UI: Active Legislation in Log"
     file: "production/stories/2-8-repeal-ui.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
-    blocker: ""
-    completed: ""
+    blocker: "Manual walkthrough sign-off pending (evidence doc created)"
+    completed: "2026-06-12"
 
   - id: "2-9"
     name: "Visual consequence registry (scaffolding)"

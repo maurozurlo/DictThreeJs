@@ -131,6 +131,11 @@ export type GameState = {
         clearAdvanceRoundRequest: () => void;
         saveGame: () => void;
         loadGame: (data: Record<string, unknown>) => void;
+        /** Repeal an active recurring law by its sourceId.
+         *  Guards: repealTakenThisRound, entry exists, treasury >= tier cost.
+         *  On success: deducts treasury, applies relation penalty, removes entry,
+         *  sets repealTakenThisRound = true, then runs a bankruptcy check. */
+        repeal: (sourceId: string) => void;
     };
     stats: GameStats;
     specialEnding: {

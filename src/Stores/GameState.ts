@@ -19,7 +19,7 @@ import { getRandomDailyEvent } from "./DailyEventHandler";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
 import { getGameDate } from "../Utils/GameDate";
-import { filterLawPool } from "./RecurringHandler";
+import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { exportSave } from "../Utils/SaveLoad";
 import { SECRET_ROOMS } from "../assets/secretRooms";
@@ -961,6 +961,44 @@ export const INITIAL_STATE = ({ set, get }: {
                 ...(specialEndingFaction ? {
                     specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
                 } : {}),
+            }));
+        },
+        repeal: (sourceId: string) => {
+            const state = get();
+            const gm = state.gameManagement;
+            if (gm.repealTakenThisRound) return;
+            const entry = gm.activeRecurringEffects.find(e => e.sourceId === sourceId);
+            if (!entry) return;
+            const tier = getRepealTier(entry);
+            const cost = GAMESTATE.REPEAL_COST[tier].treasury;
+            if (state.budget.treasury < cost) return;
+            const relationPenalty = GAMESTATE.REPEAL_COST[tier].relation;
+            const newRelation = handleRelations({
+                power: entry.sourceFaction,
+                amount: relationPenalty,
+                current: state.relations.current[entry.sourceFaction],
+            });
+            // Bankruptcy check folded into the same set() — single atomic
+            // multi-slice update per ADR-0002 (no mid-update render of a
+            // zero-treasury state without the lose phase).
+            const newTreasury = state.budget.treasury - cost;
+            const bankrupt = newTreasury <= 0;
+            set((s) => ({
+                budget: { ...s.budget, treasury: newTreasury },
+                relations: {
+                    ...s.relations,
+                    current: { ...s.relations.current, [entry.sourceFaction]: newRelation },
+                },
+                gameManagement: {
+                    ...s.gameManagement,
+                    activeRecurringEffects: s.gameManagement.activeRecurringEffects.filter(e => e.sourceId !== sourceId),
+                    repealTakenThisRound: true,
+                    ...(bankrupt ? {
+                        phase: 'lose' as const,
+                        endCause: 'bankruptcy' as EndCause,
+                        endReason: "Economic collapse! Your treasury has run out of funds.",
+                    } : {}),
+                },
             }));
         },
         saveGame: () => {

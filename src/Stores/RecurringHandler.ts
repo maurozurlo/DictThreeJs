@@ -4,6 +4,9 @@ import type { Deal } from "../types/Deal";
 import type { Power } from "../types/Power";
 import { RECURRING } from "../Constants/Costs";
 
+/** Repeal tier discriminant — drives treasury and relation cost lookup. */
+export type RepealTier = 'Small' | 'Medium' | 'Large';
+
 /**
  * Returns a new effects array with the item's recurring effect activated.
  *
@@ -45,6 +48,23 @@ export function withRecurringEffect({
             roundActivated: round,
         },
     ];
+}
+
+/**
+ * Derives the repeal cost tier for a recurring effect entry.
+ *
+ * Tier is driven by the larger of the two bonus fields:
+ *   - ≤ 8  → Small  (15 treasury / −2 relation)
+ *   - ≤ 15 → Medium (25 treasury / −2 relation)
+ *   - > 15 → Large  (40 treasury / −3 relation)
+ *
+ * Pure function: does not access the store.
+ */
+export function getRepealTier(entry: ActiveRecurringEffect): RepealTier {
+    const amount = Math.max(entry.incomeBonus, entry.expenseBonus);
+    if (amount <= 8) return 'Small';
+    if (amount <= 15) return 'Medium';
+    return 'Large';
 }
 
 /**

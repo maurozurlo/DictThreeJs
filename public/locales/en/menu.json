@@ -57,7 +57,17 @@
     "mini_challenge_accept": "Accept",
     "mini_challenge_reject": "Reject",
     "coup_yellow_warning": "Whispers in the corridors... {{faction}} grows bold while your charisma wanes",
-    "coup_red_warning": "⚠ {{faction}} is plotting against you! Raise your charisma or lower their power — NOW"
+    "coup_red_warning": "⚠ {{faction}} is plotting against you! Raise your charisma or lower their power — NOW",
+    "active_legislation": "Active Legislation",
+    "repeal": "Repeal",
+    "repeal_confirm": "Confirm Repeal",
+    "repeal_cancel": "Cancel",
+    "repeal_cost": "Cost: {{treasury}} treasury + {{relation}} {{faction}} relation",
+    "repeal_effect_income": "+{{amount}}m/round",
+    "repeal_effect_expense": "-{{amount}}m/round",
+    "repeal_activated_round": "Active since round {{round}}",
+    "repeal_disabled_already": "Already repealed a law this round",
+    "repeal_disabled_funds": "Insufficient funds to repeal"
   },
   "mainMenu": {
     "newGame": "New Game",

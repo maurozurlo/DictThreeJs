@@ -170,3 +170,15 @@ Task: 2-7 coup mechanic — implemented, pending code review + story-done
 - Tests: 185/185 pass, tsc clean
 - Tech debt logged: None
 - Next recommended: production/stories/2-8-repeal-ui.md — Repeal UI (last must-have in sprint 2)
+
+## Session Extract — /dev-story + /story-done 2026-06-12 (2-8, autonomous)
+- Verdict: COMPLETE WITH NOTES (manual walkthrough sign-off pending — user away)
+- Story: production/stories/2-8-repeal-ui.md — Repeal UI (Active Legislation in Log)
+- Implemented by: ui-programmer agent (a87998ffe321a38fa); orchestrator fixed 3 review findings:
+  (1) test fixtures seeded incomeBonus 25 as "Medium" but 25 > 15 = Large — corrected to 15
+  (2) agent drive-by removed emoji prefixes (🎲✓✗⚡) in Log.tsx — reverted
+  (3) bankruptcy check was a second set() — folded into the atomic repeal set() per ADR-0002
+- Files: GameState.ts (repeal action), RecurringHandler.ts (getRepealTier), Constants/GameState.ts (REPEAL_COST), types/GameState.ts, Log.tsx (RepealCard), Tabs.module.css, locales EN/ES, repeal.test.ts (14 tests)
+- Tests: 199/199 pass, tsc clean
+- Evidence: production/qa/evidence/2-8-repeal-ui-evidence.md — user must run walkthrough + sign off
+- Next: 2-10 balance analysis (provisional, simulation-based)

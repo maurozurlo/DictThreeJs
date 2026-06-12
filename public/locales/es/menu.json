@@ -57,7 +57,17 @@
         "mini_challenge_accept": "Aceptar",
         "mini_challenge_reject": "Rechazar",
         "coup_yellow_warning": "Susurros en los pasillos... {{faction}} se envalentona mientras tu carisma decae",
-        "coup_red_warning": "⚠ ¡{{faction}} conspira contra ti! Sube tu carisma o reduce su poder — ¡YA!"
+        "coup_red_warning": "⚠ ¡{{faction}} conspira contra ti! Sube tu carisma o reduce su poder — ¡YA!",
+        "active_legislation": "Legislación Activa",
+        "repeal": "Derogar",
+        "repeal_confirm": "Confirmar derogación",
+        "repeal_cancel": "Cancelar",
+        "repeal_cost": "Costo: {{treasury}} tesoro + {{relation}} relación con {{faction}}",
+        "repeal_effect_income": "+{{amount}}m/ronda",
+        "repeal_effect_expense": "-{{amount}}m/ronda",
+        "repeal_activated_round": "Activa desde la ronda {{round}}",
+        "repeal_disabled_already": "Ya se derogó una ley esta ronda",
+        "repeal_disabled_funds": "Fondos insuficientes para derogar"
     },
     "mainMenu": {
         "newGame": "Nueva partida",

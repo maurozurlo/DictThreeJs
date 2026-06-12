@@ -14,6 +14,21 @@ export interface Coup {
     GRACE_CHANCE: number;
 }
 
+/** Cost entry for repealing an active recurring law at a given tier. */
+export interface RepealCostEntry {
+    /** Treasury deducted on repeal. */
+    treasury: number;
+    /** Relation penalty applied to the law's source faction (always negative). */
+    relation: number;
+}
+
+/** Tiered repeal costs indexed by tier name. */
+export interface RepealCost {
+    Small: RepealCostEntry;
+    Medium: RepealCostEntry;
+    Large: RepealCostEntry;
+}
+
 export interface GAME_STATE_CONSTANTS {
     ROUNDS: Rounds;
     TABS: TabsConfig;
@@ -24,6 +39,7 @@ export interface GAME_STATE_CONSTANTS {
     RELATIONS: Relations;
     BUDGET_EFFECTS: BudgetEffects;
     COUP: Coup;
+    REPEAL_COST: RepealCost;
 }
 
 export interface Budget {
@@ -209,5 +225,10 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         WARN_RELATION: 6,
         WARN_CHARISMA: 0,
         GRACE_CHANCE: 0.5,
+    },
+    REPEAL_COST: {
+        Small:  { treasury: 15, relation: -2 },
+        Medium: { treasury: 25, relation: -2 },
+        Large:  { treasury: 40, relation: -3 },
     },
 }
