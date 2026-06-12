@@ -4,6 +4,8 @@ import { Icon } from '../Icon/Icon'
 import styles from './Tabs.module.css'
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
+import { useMemo } from 'react'
+import { dumbifyText, educationToDumbScore } from '../../Utils/String'
 
 const Laws = () => {
     const { t: commonT } = useTranslation()
@@ -11,15 +13,20 @@ const Laws = () => {
     const currentLaw = useGameStore(s => s.law.current);
     const lawDecided = useGameStore(s => s.law.lawDecided)
     const actUponLaw = useGameStore(s => s.law.actUponLaw)
+    const education = useGameStore(s => s.budget.expenditures.education)
+
+    const powerName = currentLaw ? commonT(`power.${currentLaw.power}`) : ''
+    const lawHeader = useMemo(() => 
+        dumbifyText(t('proposal_by', { power: powerName }), educationToDumbScore(education)),
+        [powerName, education, t]
+    )
 
     return (
         currentLaw === null ? null :
             lawDecided ? (
                 <Typography variant='caption' className={styles.title}>{t('acted_upon_law')}</Typography>
             ) : <>
-                <Typography variant='caption' className={styles.title}>
-                    {t('proposal_by', { power: commonT(`power.${currentLaw.power}`) })}
-                </Typography>
+                <Typography variant='caption' className={styles.title}>{lawHeader}</Typography>
                 <div className={styles.actionsContainer}>
                     <Button onClick={() => actUponLaw(true)} disabled={lawDecided}>
                         <Icon type='approve' /> {t('laws.approve')}

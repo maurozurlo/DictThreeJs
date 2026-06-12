@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import styles from './Tabs.module.css'
 import type { TabProps } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next'
@@ -21,14 +22,12 @@ const Budget = ({ isActive }: TabProps) => {
         <TabLayout
             headerTitle={t('tabs.budget')}
             sideMenu={<>
-                <Typography variant="h3">{t('budget.totalTax')}: +{MoneyNumberFormatter(financials.totalIncome)}</Typography>
-                |
-                <Typography variant="h3">{t('budget.totalExpenses')}: -{MoneyNumberFormatter(financials.expenses)}</Typography>
-                |
-                <span style={{ fontFamily: 'inherit', fontSize: 'inherit', color: net >= 0 ? '#27ae60' : '#e74c3c' }}>
+                <Typography variant="caption" className={styles.positive}>{t('budget.in')}: +{MoneyNumberFormatter(financials.totalIncome)}</Typography>
+                <Typography variant="caption" className={styles.negative}>{t('budget.out')}: -{MoneyNumberFormatter(financials.expenses)}</Typography>
+                <div className={clsx(styles.netStatus, net >= 0 ? styles.positive : styles.negative)}>
                     {t('budget.net')}: {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
-                    {roundsLeft !== null && ` · ${t('budget.rounds_left', { rounds: roundsLeft })}`}
-                </span>
+                </div>
+                {roundsLeft !== null && <Typography variant="caption" className={styles.roundsWarning}>⚠️ {t('budget.rounds_left', { rounds: roundsLeft })}</Typography>}
             </>}
             isActive={isActive}>
             <div className={styles.columns}>

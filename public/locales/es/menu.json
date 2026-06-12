@@ -74,6 +74,8 @@
         "education": "Educación",
         "totalExpenses": "Gastos",
         "totalTax": "Ingresos",
+        "in": "Entra",
+        "out": "Sale",
         "net": "Neto",
         "peopleTax": "Población",
         "businessTax": "Empresas",

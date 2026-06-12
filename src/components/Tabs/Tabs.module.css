@@ -101,6 +101,24 @@
     display: block;
 }
 
+.positive { color: #27ae60; }
+.negative { color: #e74c3c; }
+
+.netStatus {
+    padding: 4px 8px;
+    border-radius: 4px;
+
+    &.positive { background-color: rgba(39, 174, 96, 0.1); }
+    &.negative { background-color: rgba(231, 76, 60, 0.1); }
+}
+
+.roundsWarning { color: #f1c40f; }
+
+.outcomeQuote {
+    font-style: italic;
+    margin-top: 1rem;
+}
+
 .settingsPanel {
     width: 100%;
     display: flex;

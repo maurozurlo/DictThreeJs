@@ -74,6 +74,8 @@
     "education": "Education",
     "totalExpenses": "Expenses",
     "totalTax": "Income",
+    "in": "In",
+    "out": "Out",
     "net": "Net",
     "peopleTax": "People Tax",
     "businessTax": "Business Tax",

@@ -6,6 +6,8 @@ import { useGameStore } from '../../Stores/GameState'
 import { useTranslation } from 'react-i18next'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { GAMESTATE } from '../../Constants/GameState'
+import { useMemo } from 'react'
+import { dumbifyText, educationToDumbScore } from '../../Utils/String'
 
 const Meet = () => {
     const { t } = useTranslation()
@@ -14,8 +16,9 @@ const Meet = () => {
     const takeAction = useGameStore((s) => s.meet.takeAction)
     const actionTaken = useGameStore((s) => s.meet.actionTaken)
     const actionOutcomeText = useGameStore((s) => s.meet.actionOutcomeText)
+    const education = useGameStore((s) => s.budget.expenditures.education)
 
-    const getOutcomeText = () => {
+    const outcomeText = useMemo(() => {
         if (!actionOutcomeText) return null;
         const extraParams = { power: '', angryPower: '' }
         if ('params' in actionOutcomeText) {
@@ -26,20 +29,22 @@ const Meet = () => {
                 extraParams.angryPower = t(`power.${actionOutcomeText.params.angryPower}`);
             }
         }
-        return meetT(actionOutcomeText.key, { ...actionOutcomeText.params, ...extraParams });
-    }
+        const translated = meetT(actionOutcomeText.key, { ...actionOutcomeText.params, ...extraParams });
+        return dumbifyText(translated, educationToDumbScore(education));
+    }, [actionOutcomeText, education, t, meetT]);
 
     // --- Show result after action ---
     if (actionTaken.taken && actionTaken.power) {
         return (
             <>
                 <Typography variant="caption" className={styles.title}>
-                    {t(`meet.${actionTaken.type}`)}: {t(`power.${actionTaken.power}`)}
+                    {t(`meet.${actionTaken.type}`)} ➔ {t(`power.${actionTaken.power}`)}
                 </Typography>
-                <Typography variant="body">
-
-                    {getOutcomeText()}
-                </Typography>
+                {outcomeText && (
+                    <Typography variant="body" className={styles.outcomeQuote}>
+                        "{outcomeText}"
+                    </Typography>
+                )}
             </>
         )
     }

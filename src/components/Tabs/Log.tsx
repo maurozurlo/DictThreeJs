@@ -23,12 +23,17 @@ const Log = ({ isActive }: TabProps) => {
     const logEntries = useGameStore((s) => s.log)
     const round = useGameStore((s) => s.gameManagement.round)
     const dailyEventKey = useGameStore((s) => s.dailyEvent.current?.key)
-    const dailyEventHeadline = dailyEventKey ? dailyEventT(dailyEventKey) : undefined
     const education = useGameStore((s) => s.budget.expenditures.education)
+    
     const challengeText = useMemo(
         () => miniChallenge.current ? dumbifyText(miniT(`${miniChallenge.current.id}.text`), educationToDumbScore(education)) : '',
         [miniChallenge.current?.id, education]
     )
+
+    const dailyEventHeadline = useMemo(() => {
+        if (!dailyEventKey) return undefined;
+        return dumbifyText(dailyEventT(dailyEventKey), educationToDumbScore(education));
+    }, [dailyEventKey, education, dailyEventT]);
 
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>
