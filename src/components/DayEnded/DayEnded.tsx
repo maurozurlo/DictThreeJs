@@ -17,6 +17,9 @@ const DayEnded = () => {
     const recurringExpenses = useGameStore(s => s.gameManagement.lastRoundRecurringExpenses)
     const extraIncome       = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
     const extraExpenses     = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
+    // coupArmedLastRound is written at the START of the current round by nextRound().
+    // When true here, the player survived a grace roll this round.
+    // Clicking Continue calls nextRound() with graceTaken=true → certain coup.
     const coupArmed         = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const nextRound         = useGameStore(s => s.gameManagement.nextRound)
 

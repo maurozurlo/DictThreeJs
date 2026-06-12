@@ -214,6 +214,7 @@ describe('handleActionOutcome', () => {
 
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(120);
+            expect(result.charismaDelta).toBe(-2); // priced same as eliminate
             expect(result.newRelations.business).toBe(-3);
             expect(result.resultText).toStrictEqual({
                 key: "expropriate_success",
@@ -267,6 +268,7 @@ describe('handleActionOutcome', () => {
 
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(0);
+            expect(result.charismaDelta).toBe(0); // roll-fail is free — random, not player-controlled
             expect(result.newRelations.people).toBe(-1);
             expect(result.resultText).toStrictEqual({
                 key: "dialogue_fail",
@@ -286,6 +288,7 @@ describe('handleActionOutcome', () => {
 
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(0);
+            expect(result.charismaDelta).toBe(1); // dialogue success is the charisma recovery loop
             expect(result.newRelations.military).toBe(1);
             expect(result.resultText).toStrictEqual({
                 key: "dialogue_success",
@@ -305,6 +308,7 @@ describe('handleActionOutcome', () => {
 
             expect(result.actionTaken).toBe(true);
             expect(result.treasuryUpdate).toBe(0);
+            expect(result.charismaDelta).toBe(0);
             expect(result.newRelations.business).toBe(0);
             expect(result.resultText).toStrictEqual({
                 key: "dialogue_neutral",

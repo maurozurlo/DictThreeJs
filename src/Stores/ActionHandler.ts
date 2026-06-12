@@ -92,7 +92,9 @@ function handleExpropriate(power: Power, state: GameState): ActionResult {
         resultText: { key: "expropriate_success", params: { power, gain } },
         treasuryUpdate: gain,
         actionTaken: true,
-        charismaDelta: -1,
+        // -2 matches eliminate: expropriation is treasury-positive aggression,
+        // priced at the same charisma cost (balance review 2026-06-12)
+        charismaDelta: -2,
         newRelations: {
             ...state.relations.current,
             [power]: handleRelations({
@@ -154,7 +156,10 @@ function handleDialogue(
         return {
             resultText: { key: "dialogue_success", params: { power } },
             actionTaken: true,
-            charismaDelta: 0,
+            // +1 on success only — dialogue is the charisma recovery loop.
+            // Roll-fail stays 0 (2-7% band, not player-controlled); the
+            // education-gated auto-fail above keeps -1 (player-controlled).
+            charismaDelta: 1,
             newRelations: {
                 ...state.relations.current,
                 [power]: handleRelations({

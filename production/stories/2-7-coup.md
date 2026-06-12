@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 2-7
 - **Sprint**: 2
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Logic
 - **Layer**: Feature
 - **TR-ID**: TR-lasting-007
@@ -11,7 +11,7 @@
 - **Secondary ADRs**: docs/architecture/adr-0006-round-timer-game-loop.md, docs/architecture/adr-0002-state-management-pattern.md
 - **Manifest Version**: N/A (control manifest not yet created)
 - **Estimate**: 1.5 days
-- **Last Updated**: 2026-06-11
+- **Last Updated**: 2026-06-12
 
 ## Summary
 
@@ -179,9 +179,17 @@ Test file: `src/Stores/CoupHandler.test.ts`
 **Story Type**: Logic
 **Required evidence**: `src/Stores/CoupHandler.test.ts` with all 7 test cases above passing.
 
-**Status**: [ ] Not yet created
+**Status**: [x] Passing — 9/9 tests (2026-06-12)
 
 ## Dependencies
 
 - Depends on: None — the coup mechanic is independent of the recurring effects feature
 - Unlocks: Story 2-9 (visual registry uses coup relation threshold for the coup-crown badge)
+
+## Completion Notes
+
+**Completed**: 2026-06-12  
+**Criteria**: 12/12 passing  
+**Deviations**: ADVISORY — story's `Implementation Notes` type spec listed a `'red-warning'` CoupResult variant that was dropped in favour of `'grace'` carrying both meanings; ACs correctly specified `outcome === 'grace'`; no GDD requirement references `'red-warning'`.  
+**Test Evidence**: Logic — `src/Stores/CoupHandler.test.ts` (9/9 tests passing)  
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS (type-safe cause map, terminal-branch cleanup, DayEnded timing comment — all applied before close)

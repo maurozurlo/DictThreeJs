@@ -789,6 +789,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        coupArmedLastRound: false,
+                        coupWarningFaction: null,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
@@ -813,6 +815,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        coupArmedLastRound: false,
+                        coupWarningFaction: null,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));
@@ -837,6 +841,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        coupArmedLastRound: false,
+                        coupWarningFaction: null,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     }
                 }));

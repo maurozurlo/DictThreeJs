@@ -24,6 +24,13 @@ function pickCoupFaction(factions: Power[], relations: Record<Power, number>): P
     return priority.find(p => atMax.includes(p)) ?? atMax[0];
 }
 
+/** Maps each power to its corresponding EndCause for type-safe coup cause derivation. */
+const COUP_CAUSE_MAP: Record<Power, EndCause> = {
+    military: 'military_coup',
+    business: 'business_coup',
+    people:   'people_coup',
+};
+
 /**
  * Pure coup threshold evaluation (TR-lasting-007).
  *
@@ -53,7 +60,7 @@ export function checkCoup(
     const armedFactions = powers.filter(p => relations[p] >= COUP.RELATION_THRESHOLD);
     if (armedFactions.length > 0 && charisma <= COUP.CHARISMA_THRESHOLD) {
         const faction = pickCoupFaction(armedFactions, relations);
-        const cause = `${faction}_coup` as EndCause;
+        const cause = COUP_CAUSE_MAP[faction];
         if (graceTaken || graceRoll >= COUP.GRACE_CHANCE) {
             return { outcome: 'coup', faction, cause };
         }
