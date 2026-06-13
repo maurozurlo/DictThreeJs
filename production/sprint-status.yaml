@@ -31,11 +31,11 @@ stories:
     name: "Sync stage.txt to Production"
     file: "production/stories/1-12-stage-sync.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "4-1"
     name: "ADR housekeeping — promote ADR-0001/0007 to Accepted; create control-manifest.md"
