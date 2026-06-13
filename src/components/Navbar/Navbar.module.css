@@ -61,3 +61,50 @@
         text-decoration: underline;
     }
 }
+
+.advanceWrapper {
+    position: relative;
+}
+
+.advanceRing {
+    position: absolute;
+    inset: -4px;
+    overflow: hidden;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+
+    -webkit-mask-image: conic-gradient(#000 0 25%, #0000 0 50%, #000 0 75%, #0000 0);
+    mask-image: conic-gradient(#000 0 25%, #0000 0 50%, #000 0 75%, #0000 0);
+    -webkit-mask-size: 6px 6px;
+    mask-size: 6px 6px;
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
+    image-rendering: pixelated;
+}
+
+.advanceRing::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%) rotate(0deg);
+    background: conic-gradient(rgba(0,0,0,0), #ffd700, rgba(0,0,0,0) 25%);
+    animation: advanceSpin 3s linear infinite;
+}
+
+.glowing .advanceRing {
+    opacity: 1;
+}
+
+.advanceButton {
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes advanceSpin {
+    100% { transform: translate(-50%, -50%) rotate(1turn); }
+}

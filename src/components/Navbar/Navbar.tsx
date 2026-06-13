@@ -79,9 +79,12 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
 
             <div className={styles.navRight}>
                 {displayTabs && phase === 'start' && !dayEnded && (
-                    <Button variant="primary" onClick={requestAdvanceRound} data-tutorial="advance-btn">
-                        {allActionsDone ? '>>' : '>'}
-                    </Button>
+                    <div className={clsx(styles.advanceWrapper, { [styles.glowing]: allActionsDone })}>
+                        <div className={styles.advanceRing} />
+                        <Button variant="primary" className={styles.advanceButton} onClick={requestAdvanceRound} data-tutorial="advance-btn">
+                            {allActionsDone ? '>>' : '>'}
+                        </Button>
+                    </div>
                 )}
             </div>
         </header>

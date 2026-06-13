@@ -237,4 +237,5 @@ Task: Implemented — pending story-done
 - /retrospective: written to production/retrospectives/retro-sprint-3-2026-06-13.md. Key finding: sprint capacity 1.5-2× over-planned; 0 playtests documented; AC4 partial on 3-3 traced to unclear scope on panel positioning.
 - /gate-check (Production → Polish): FAIL — blockers: 0 playtest sessions (requires ≥3), no performance budgets configured, story 3-6 open (QA condition), 3-5 design call unresolved, stage.txt stale.
 - /sprint-plan new: Sprint 4 written — production/sprints/sprint-4.md, production/sprint-status.yaml. Goal: close all gate blockers. Must-haves: 3-6, 1-12, 4-1 (ADR housekeeping), 4-2 (perf budgets), 4-3 (playtests), 4-4 (difficulty levels), 4-5 (grace period).
-- Next: /qa-plan sprint (before last story implemented) → implement sprint 4 must-haves → /gate-check to re-gate for Polish
+- Next: implement sprint 4 must-haves → /gate-check to re-gate for Polish
+<!-- QA-PLAN: 2026-06-13 | System: sprint-4 | Plan written: production/qa/qa-plan-sprint-4-2026-06-13.md -->
