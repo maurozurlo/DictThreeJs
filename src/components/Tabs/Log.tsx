@@ -29,6 +29,7 @@ interface RepealCardProps {
 const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCardProps) => {
     const { t } = useTranslation()
     const { t: lawsT } = useTranslation('laws')
+    const { t: dealsT } = useTranslation('deals')
     const [confirming, setConfirming] = useState(false)
 
     const tier = getRepealTier(entry)
@@ -47,8 +48,10 @@ const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCar
         ? t('log.repeal_effect_income', { amount: entry.incomeBonus })
         : t('log.repeal_effect_expense', { amount: entry.expenseBonus })
 
-    // Translate the label key — labels are in the 'laws' namespace
-    const lawLabel = lawsT(entry.label)
+    // Labels follow '<namespace>.<key>' — e.g. 'laws.recurring.foo' or 'deals.recurring.foo'
+    const labelDot = entry.label.indexOf('.')
+    const labelKey = entry.label.slice(labelDot + 1)
+    const lawLabel = entry.label.startsWith('deals.') ? dealsT(labelKey) : lawsT(labelKey)
 
     const handleRepealClick = () => {
         if (isDisabled) return
