@@ -51,11 +51,11 @@ stories:
     name: "Configure performance budgets in technical-preferences.md"
     file: "production/stories/4-2-performance-budgets.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "4-3"
     name: "Playtest ≥3 sessions + /playtest-report"
