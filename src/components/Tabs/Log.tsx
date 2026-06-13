@@ -48,10 +48,7 @@ const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCar
         ? t('log.repeal_effect_income', { amount: entry.incomeBonus })
         : t('log.repeal_effect_expense', { amount: entry.expenseBonus })
 
-    // Labels follow '<namespace>.<key>' — e.g. 'laws.recurring.foo' or 'deals.recurring.foo'
-    const labelDot = entry.label.indexOf('.')
-    const labelKey = entry.label.slice(labelDot + 1)
-    const lawLabel = entry.label.startsWith('deals.') ? dealsT(labelKey) : lawsT(labelKey)
+    const lawLabel = entry.label.startsWith('deals.') ? dealsT(entry.label) : lawsT(entry.label)
 
     const handleRepealClick = () => {
         if (isDisabled) return
