@@ -9,125 +9,65 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 2
-goal: "Lasting effects decision layer: recurring law/deal effects, repeal, coup mechanic, DayEnded breakdown, visual consequence scaffolding"
-start: "2026-06-11"
-end: "2026-06-25"
-generated: "2026-06-11"
-updated: "2026-06-12"  # 2-7, 2-8, 2-9 done
+sprint: 3
+goal: "Close the ending loop: meta-progression Records panel, secret room rework into a real alternate win condition, and stats screen enhancements"
+start: "2026-06-13"
+end: "2026-06-27"
+generated: "2026-06-12"
+updated: "2026-06-12"  # 3-2 in-progress
 
 stories:
-  - id: "2-1"
-    name: "Types & data model: recurring effect fields"
-    file: "production/stories/2-1-recurring-types.md"
+  - id: "3-1"
+    name: "Meta-progression data layer"
+    file: "production/stories/3-1-meta-progression.md"
     priority: must-have
     status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-11"
+    completed: "2026-06-12"
 
-  - id: "2-2"
-    name: "calculateRoundFinancials: recurring effect summation"
-    file: "production/stories/2-2-financials-recurring.md"
+  - id: "3-2"
+    name: "Records panel on Menu tab"
+    file: "production/stories/3-2-records-panel.md"
     priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-11"
-
-  - id: "2-3"
-    name: "Store wiring: activate/reset/save recurring effects"
-    file: "production/stories/2-3-store-recurring.md"
-    priority: must-have
-    status: done
+    status: in-progress
     owner: ""
     estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-11"
-
-  - id: "2-4"
-    name: "Content: 9 lasting-effect laws/deals + i18n"
-    file: "production/stories/2-4-recurring-content.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-12"
-
-  - id: "2-5"
-    name: "DayEnded breakdown: recurring + one-time rows"
-    file: "production/stories/2-5-dayended-breakdown.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-12"
-
-  - id: "2-6"
-    name: "Budget forecast includes recurring effects"
-    file: "production/stories/2-6-forecast-fix.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-12"
-
-  - id: "2-7"
-    name: "Coup mechanic: thresholds, warnings, narratives"
-    file: "production/stories/2-7-coup.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.5
-    blocker: ""
-    completed: "2026-06-12"
-
-  - id: "2-8"
-    name: "Repeal UI: Active Legislation in Log"
-    file: "production/stories/2-8-repeal-ui.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: "Manual walkthrough sign-off pending (evidence doc created)"
-    completed: "2026-06-12"
-
-  - id: "2-9"
-    name: "Visual consequence registry (scaffolding)"
-    file: "production/stories/2-9-visual-registry.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-12"
-
-  - id: "2-10"
-    name: "Balance pass: playthrough with lasting effects"
-    file: "production/stories/2-10-balance-pass.md"
-    priority: nice-to-have
-    status: backlog
-    owner: ""
-    estimate_days: 0.5
     blocker: ""
     completed: ""
 
-  # ── Carryover from sprint 1 ──────────────────────────────────────
-  - id: "1-7"
-    name: "Log.tsx: commit in-progress changes"
-    file: "production/stories/1-7-log-tsx-commit.md"
+  - id: "3-3"
+    name: "Secret room rework"
+    file: "production/stories/3-3-secret-room-rework.md"
     priority: must-have
-    status: done
+    status: ready-for-dev
     owner: ""
-    estimate_days: 0.25
+    estimate_days: 2.0
     blocker: ""
-    completed: "2026-06-11"
+    completed: ""
 
+  - id: "3-4"
+    name: "Stats screen enhancements"
+    file: "production/stories/3-4-stats-enhancements.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.75
+    blocker: ""
+    completed: ""
+
+  - id: "3-5"
+    name: "F6 Budget Tier Consequences"
+    file: "production/stories/3-5-budget-tier-consequences.md"
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 2.5
+    blocker: ""
+    completed: ""
+
+  # ── Carry-overs from sprint 1 ────────────────────────────────────
   - id: "1-9"
     name: "Street View: basic waypoint movement (A→B→A)"
     file: "production/stories/1-9-street-waypoint-movement.md"
@@ -165,15 +105,5 @@ stories:
     status: backlog
     owner: ""
     estimate_days: 0.25
-    blocker: ""
-    completed: ""
-
-  - id: "1-13"
-    name: "End-game stats screen: design only"
-    file: "production/stories/1-13-end-game-stats-design.md"
-    priority: nice-to-have
-    status: backlog
-    owner: ""
-    estimate_days: 0.5
     blocker: ""
     completed: ""

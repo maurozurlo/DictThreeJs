@@ -37,9 +37,9 @@
 - Next recommended: 2-6 Budget forecast includes recurring effects (0.5d, ready-for-dev) OR 2-7 Coup mechanic (1.5d, ready-for-dev)
 
 <!-- STATUS -->
-Epic: Lasting Effects (Sprint 2)
-Feature: Sprint 2 stories
-Task: 2-7 coup mechanic — implemented, pending code review + story-done
+Epic: Meta-Progression (Sprint 3)
+Feature: 3-1 Meta-Progression Data Layer
+Task: Implemented — pending story-done
 <!-- /STATUS -->
 
 ## Session Extract — /dev-story 2-5 2026-06-12
@@ -182,3 +182,25 @@ Task: 2-7 coup mechanic — implemented, pending code review + story-done
 - Tests: 199/199 pass, tsc clean
 - Evidence: production/qa/evidence/2-8-repeal-ui-evidence.md — user must run walkthrough + sign off
 - Next: 2-10 balance analysis (provisional, simulation-based)
+<!-- QA-PLAN: 2026-06-12 | System: sprint-3 | Plan written: production/qa/qa-plan-sprint-3-2026-06-12.md -->
+
+## Session Extract — /dev-story 2026-06-12 (3-1)
+- Story: production/stories/3-1-meta-progression.md — Meta-Progression Data Layer
+- Files created: src/types/MetaProgress.ts, src/Utils/MetaProgress.ts, tests/integration/meta/meta-progression.test.ts
+- Files modified: src/Utils/SaveLoad.ts (buildSavePayload + meta merge on import), docs/architecture/tr-registry.yaml (TR-meta-001 added)
+- Tests: 225/225 pass (new tests: 10 cases in TC-1 through TC-10, plus 15 tier-ordering combinations in TC-5)
+- Blockers: None
+- Next: /code-review then /story-done 3-1, then /dev-story 3-2
+
+## Session Extract — /story-done 2026-06-12
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/3-1-meta-progression.md — Meta-Progression Data Layer
+- Tech debt logged: None
+- Next recommended: Story 3-2 (Records panel on Menu tab) — production/stories/3-2-records-panel.md
+
+## Session Extract — /dev-story 2026-06-12 (3-2)
+- Story: production/stories/3-2-records-panel.md — Records Panel on Menu Tab
+- Files changed: src/components/Tabs/Menu.tsx (Records panel + loadMeta wiring), src/components/Tabs/Tabs.module.css (7 new classes), public/locales/en/menu.json (records.* keys), public/locales/es/menu.json (records.* keys ES)
+- Test written: None — UI story; manual walkthrough evidence required at production/qa/evidence/3-2-records-panel-evidence.md
+- Blockers: None
+- Next: Manual walkthrough + evidence doc, then /story-done production/stories/3-2-records-panel.md

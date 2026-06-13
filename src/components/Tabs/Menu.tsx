@@ -5,10 +5,20 @@ import Typography from '../Typography/Typography'
 import Button from '../Button/Button'
 import { useGameStore } from '../../Stores/GameState'
 import { useTranslation } from 'react-i18next'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { importSave } from '../../Utils/SaveLoad'
+import { loadMeta } from '../../Utils/MetaProgress'
+import type { MetaProgress, EndingId } from '../../types/MetaProgress'
 import { Tabs } from '../../types/Tabs'
 import HelpOverlay from '../HelpOverlay/HelpOverlay'
+
+const ENDING_IDS: EndingId[] = [
+    'military', 'business', 'people', 'bankruptcy',
+    'military_coup', 'business_coup', 'people_coup', 'victory',
+    'secret_room_0_good', 'secret_room_0_bad',
+    'secret_room_1_good', 'secret_room_1_bad',
+    'secret_room_2_good', 'secret_room_2_bad',
+];
 
 
 const Menu = ({ isActive }: TabProps) => {
@@ -22,6 +32,11 @@ const Menu = ({ isActive }: TabProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
+    const [meta, setMeta] = useState<MetaProgress>(loadMeta);
+
+    useEffect(() => {
+        if (isActive) setMeta(loadMeta());
+    }, [isActive]);
 
     const isInGame = phase === 'start';
 
@@ -48,6 +63,29 @@ const Menu = ({ isActive }: TabProps) => {
                 </Typography>
                 <hr />
 
+                <div className={styles.recordsPanel}>
+                    <div className={styles.recordsTier}>
+                        <span className={styles.recordsLabel}>{t('records.bestTier')}</span>
+                        <span className={styles.recordsTierBadge}>
+                            {meta.highestTier ?? t('records.noTier')}
+                        </span>
+                    </div>
+                    <span className={styles.recordsLabel}>{t('records.endings')}</span>
+                    <div className={styles.recordsEndingsGrid}>
+                        {ENDING_IDS.map((id) => {
+                            const unlocked = meta.endingsUnlocked.includes(id);
+                            return (
+                                <div
+                                    key={id}
+                                    className={clsx(styles.recordsSlot, { [styles.recordsSlotLocked]: !unlocked })}
+                                >
+                                    {unlocked ? t(`records.ending_${id}`) : t('records.locked')}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className={styles.menuButtons}>
                     {isInGame && (
                         <Button variant='primary' onClick={() => setActiveTab(Tabs.Log)}>
@@ -69,18 +107,18 @@ const Menu = ({ isActive }: TabProps) => {
 
                     {showSettings && (
                         <div className={styles.settingsPanel}>
-                            <div className={styles.settingsRow}>
-                                <label htmlFor="lang-select">{t('mainMenu.language')}</label>
-                                <select
-                                    id="lang-select"
-                                    className={styles.settingsSelect}
-                                    value={i18n.language.startsWith('es') ? 'es' : 'en'}
-                                    onChange={e => i18n.changeLanguage(e.target.value)}
-                                >
-                                    <option value="en">English</option>
-                                    <option value="es">Español</option>
-                                </select>
-                            </div>
+                            <label htmlFor="lang-select" className={styles.recordsLabel}>
+                                {t('mainMenu.language')}
+                            </label>
+                            <select
+                                id="lang-select"
+                                className={styles.settingsSelect}
+                                value={i18n.language.startsWith('es') ? 'es' : 'en'}
+                                onChange={e => i18n.changeLanguage(e.target.value)}
+                            >
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                            </select>
                         </div>
                     )}
 

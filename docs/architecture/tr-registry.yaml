@@ -273,3 +273,13 @@ requirements:
     created: 2026-06-11
     revised: ""
     status: active
+
+  # --- Meta-Progression (Sprint 3) ---
+  - id: TR-meta-001
+    system: meta
+    gdd: design/gdd/game-concept.md
+    requirement: "Cross-session MetaProgress record: highestTier (S/A/B/C/D/F, best-of merge) and endingsUnlocked (union merge) persisted in localStorage; included as meta field in .dict save export and merged on import"
+    created: 2026-06-12
+    revised: ""
+    adr: docs/architecture/adr-0002-state-management-pattern.md
+    status: active

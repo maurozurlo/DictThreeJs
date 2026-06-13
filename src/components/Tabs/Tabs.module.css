@@ -143,6 +143,14 @@
     }
 }
 
+.recordsLabel {
+    color: var(--accent-color);
+    font-size: .8rem;
+    opacity: .7;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
 .settingsSelect {
     background-color: brown;
     color: white;
@@ -248,4 +256,48 @@
 .repealConfirmButtons {
     display: flex;
     gap: .5rem;
+}
+
+/* --- Records Panel --- */
+
+.recordsPanel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.recordsTier {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding-bottom: .25rem;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+.recordsTierBadge {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 2rem;
+    text-align: right;
+}
+
+.recordsEndingsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .25rem;
+}
+
+.recordsSlot {
+    background-color: var(--hud-panel-bg);
+    padding: .35rem .5rem;
+    font-size: .8rem;
+    border-left: 2px solid var(--accent-color);
+}
+
+.recordsSlotLocked {
+    opacity: .35;
+    border-left-color: transparent;
 }

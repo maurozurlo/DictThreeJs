@@ -118,5 +118,26 @@
   "currency": {
     "symbol": "$",
     "unit": "m"
+  },
+  "records": {
+    "title": "Records",
+    "bestTier": "Best Tier",
+    "noTier": "—",
+    "endings": "Endings",
+    "locked": "?",
+    "ending_military": "Overthrown by Military",
+    "ending_business": "Overthrown by Elite",
+    "ending_people": "Overthrown by People",
+    "ending_bankruptcy": "Ran out of money",
+    "ending_military_coup": "Coup — Military",
+    "ending_business_coup": "Coup — Elite",
+    "ending_people_coup": "Coup — People",
+    "ending_victory": "Survived 10 Rounds",
+    "ending_secret_room_0_good": "The Observatory — Good",
+    "ending_secret_room_0_bad": "The Observatory — Bad",
+    "ending_secret_room_1_good": "The Vault — Good",
+    "ending_secret_room_1_bad": "The Vault — Bad",
+    "ending_secret_room_2_good": "The Greenhouse — Good",
+    "ending_secret_room_2_bad": "The Greenhouse — Bad"
   }
 }

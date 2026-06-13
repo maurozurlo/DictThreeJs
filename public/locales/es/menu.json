@@ -118,5 +118,26 @@
     "currency": {
         "symbol": "$",
         "unit": "m"
+    },
+    "records": {
+        "title": "Registros",
+        "bestTier": "Mejor rango",
+        "noTier": "—",
+        "endings": "Finales",
+        "locked": "?",
+        "ending_military": "Derrocado por los militares",
+        "ending_business": "Derrocado por la élite",
+        "ending_people": "Derrocado por el pueblo",
+        "ending_bankruptcy": "Se quedó sin dinero",
+        "ending_military_coup": "Golpe — Militares",
+        "ending_business_coup": "Golpe — Élite",
+        "ending_people_coup": "Golpe — Pueblo",
+        "ending_victory": "Sobrevivió 10 rondas",
+        "ending_secret_room_0_good": "El Observatorio — Bien",
+        "ending_secret_room_0_bad": "El Observatorio — Mal",
+        "ending_secret_room_1_good": "La Bóveda — Bien",
+        "ending_secret_room_1_bad": "La Bóveda — Mal",
+        "ending_secret_room_2_good": "El Invernadero — Bien",
+        "ending_secret_room_2_bad": "El Invernadero — Mal"
     }
 }
