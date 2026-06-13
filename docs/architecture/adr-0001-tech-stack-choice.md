@@ -1,10 +1,13 @@
 # ADR-0001: Tech Stack Choice — React + Three.js + Zustand + TypeScript + Vite
 
 ## Status
-Proposed
+Accepted
 
 ## Date
 2026-06-10
+
+## Accepted
+2026-06-13
 
 ## Engine Compatibility
 

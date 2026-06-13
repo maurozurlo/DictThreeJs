@@ -41,11 +41,11 @@ stories:
     name: "ADR housekeeping — promote ADR-0001/0007 to Accepted; create control-manifest.md"
     file: "production/stories/4-1-adr-housekeeping.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "4-2"
     name: "Configure performance budgets in technical-preferences.md"

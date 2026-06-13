@@ -2,7 +2,11 @@
 
 ## Status
 
-Proposed
+Proposed — Intentionally deferred to Sprint 5 planning.
+The problem and requirements are fully documented. The decision (which approach among
+Options A/B/C) will be made before Sprint 6 begins, when Tier 2 weird deals are scoped.
+Stories referencing Tier 2 weird deals are blocked on this ADR reaching Accepted.
+No current sprint stories depend on this ADR.
 
 ## Date
 
