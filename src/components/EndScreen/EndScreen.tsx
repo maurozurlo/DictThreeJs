@@ -105,7 +105,7 @@ const EndScreen = () => {
 
     const endingId: EndingId =
         phase === 'special_ending'
-            ? (`secret_room_${secretRoomIndex}_${specialEndingOutcome}` as EndingId)
+            ? (`secret_room_${secretRoomIndex}_${specialEndingOutcome ?? 'bad'}` as EndingId)
             : phase === 'victory'
             ? 'victory'
             : (endCause ?? 'military') as EndingId

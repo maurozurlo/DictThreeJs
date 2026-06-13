@@ -14,7 +14,7 @@ goal: "Close the ending loop: meta-progression Records panel, secret room rework
 start: "2026-06-13"
 end: "2026-06-27"
 generated: "2026-06-12"
-updated: "2026-06-12"  # 3-4 in-progress
+updated: "2026-06-13"  # 3-4 done
 
 stories:
   - id: "3-1"
@@ -51,11 +51,11 @@ stories:
     name: "Stats screen enhancements"
     file: "production/stories/3-4-stats-enhancements.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 0.75
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "3-5"
     name: "F6 Budget Tier Consequences"

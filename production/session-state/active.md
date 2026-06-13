@@ -205,6 +205,13 @@ Task: Implemented — pending story-done
 - Blockers: None
 - Next: Manual walkthrough + evidence doc, then /story-done production/stories/3-2-records-panel.md
 
+## Session Extract — /story-done 2026-06-13 (3-4)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/3-4-stats-enhancements.md — Stats Screen Enhancements
+- Code review: APPROVED WITH SUGGESTIONS — null guard on specialEndingOutcome (EndScreen.tsx:108), missing initial-value test for totalRecurringExpensesSpent — both applied; 239/239 pass
+- Tech debt logged: None
+- Next recommended: Story 3-2 (Records panel walkthrough + /story-done) or Story 3-3 (Secret Room Rework — /dev-story)
+
 ## Session Extract — /dev-story 2026-06-12 (3-4)
 - Story: production/stories/3-4-stats-enhancements.md — Stats Screen Enhancements
 - Files changed: src/types/GameState.ts (4 fields added to GameStats), src/Stores/GameState.ts (initial state, reset, buildStatsUpdate, repeal, loadGame), src/components/EndScreen/EndScreen.tsx (recordGameEnd wiring + 4 new stat rows), public/locales/en/endscreen.json (5 keys), public/locales/es/endscreen.json (5 keys)

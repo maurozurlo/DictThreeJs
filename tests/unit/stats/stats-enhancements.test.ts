@@ -84,6 +84,10 @@ describe('GameStats — initial values after new game', () => {
         expect(useGameStore.getState().stats.totalRecurringIncomeEarned).toBe(0);
     });
 
+    it('totalRecurringExpensesSpent starts at 0', () => {
+        expect(useGameStore.getState().stats.totalRecurringExpensesSpent).toBe(0);
+    });
+
     it('repealCount starts at 0', () => {
         expect(useGameStore.getState().stats.repealCount).toBe(0);
     });

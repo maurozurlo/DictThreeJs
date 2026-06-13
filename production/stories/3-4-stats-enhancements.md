@@ -3,14 +3,14 @@
 ## Header
 - **Story ID**: 3-4
 - **Sprint**: 3
-- **Status**: In Progress
+- **Status**: Complete
 - **Type**: Logic + UI
 - **Layer**: Feature
 - **TR-ID**: TR-meta-001 (partial — `recordGameEnd` wiring deferred from 3-1)
 - **Governing ADR**: docs/architecture/adr-0002-state-management-pattern.md
 - **Manifest Version**: N/A (control manifest not yet created)
 - **Estimate**: 0.75 days
-- **Last Updated**: 2026-06-12
+- **Last Updated**: 2026-06-13
 
 ## Summary
 
@@ -238,3 +238,10 @@ GRACE_CHANCE = 0.5 — so `Math.random` returning 0.3 forces 'grace').
 ## Dependencies
 
 - Story 3-1 (Meta-Progression Data Layer) — **Complete** — provides `recordGameEnd()`, `TierRank`, `EndingId`
+
+## Completion Notes
+**Completed**: 2026-06-13
+**Criteria**: 13/13 passing (UI rows verified via code review; manual EndScreen walkthrough deferred — advisory)
+**Deviations**: None
+**Test Evidence**: Logic — `tests/unit/stats/stats-enhancements.test.ts` (239/239 pass); UI evidence doc advisory — not created
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS (null guard on `specialEndingOutcome`, missing initial-value test for `totalRecurringExpensesSpent` — both applied)
