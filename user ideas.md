@@ -2,11 +2,8 @@
 
 Raw captures — transfer to a GDD or sprint backlog before acting on.
 
-there's a propsed effect for the >> button in dithered-border-css.html
-it should be a yellow glow to tell the player they can advance the round
+Low BUG:
+Reunión con Élite: meet.expropriate
 
-BUG:
-
-
-recurring.contractor_cost appears as is (no i8n real text)
-recurring.investment_income appears as key
+HIGH PRIO BUG:
+Text says: You expropriated assets from Military. Treasury +$80M, relation -3. in first round, even if it only decreases by -1. It shouldn't be baked into the text string.

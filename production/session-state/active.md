@@ -239,3 +239,10 @@ Task: Implemented — pending story-done
 - /sprint-plan new: Sprint 4 written — production/sprints/sprint-4.md, production/sprint-status.yaml. Goal: close all gate blockers. Must-haves: 3-6, 1-12, 4-1 (ADR housekeeping), 4-2 (perf budgets), 4-3 (playtests), 4-4 (difficulty levels), 4-5 (grace period).
 - Next: implement sprint 4 must-haves → /gate-check to re-gate for Polish
 <!-- QA-PLAN: 2026-06-13 | System: sprint-4 | Plan written: production/qa/qa-plan-sprint-4-2026-06-13.md -->
+
+## Session Extract — /dev-story 2026-06-13 (3-6)
+- Story: production/stories/3-6-secret-room-action-panel-layout.md — Secret Room Action Panel Layout
+- Files changed: src/components/ActionPanel/SecretPanel.tsx (created), src/components/ActionPanel/ActionPanel.tsx (import + activeTab render), src/components/Tabs/Secret.tsx (cleared — now returns null)
+- Test written: None — UI story, manual walkthrough required
+- Blockers: None
+- Next: /code-review src/components/ActionPanel/SecretPanel.tsx src/components/ActionPanel/ActionPanel.tsx src/components/Tabs/Secret.tsx then /story-done production/stories/3-6-secret-room-action-panel-layout.md
