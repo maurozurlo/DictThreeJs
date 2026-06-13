@@ -7,6 +7,7 @@ import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { withRecurringEffect } from "./RecurringHandler";
+import { applyGraceDampening } from "../Utils/GracePeriod";
 
 export type BudgetEffectResult = {
     newRelations: GameState["relations"]["current"];
@@ -80,6 +81,7 @@ export function handleDecision({
 
     // Apply relation changes
     const newRelations = { ...state.relations.current };
+    const round = state.gameManagement.round;
     Power.forEach((key) => {
         const delta = effect[key];
         if (typeof delta === "number") {
@@ -87,6 +89,7 @@ export function handleDecision({
                 power: key,
                 amount: delta,
                 current: newRelations[key],
+                round,
             });
         }
     });
@@ -125,6 +128,7 @@ export function handleDecision({
             power: angryPower,
             amount: -2,
             current: newRelations[angryPower],
+            round,
         });
     }
 
@@ -205,13 +209,16 @@ export function handleRelations({
     power,
     amount,
     current,
+    round = 3,
 }: {
     power: keyof GameState["relations"]["current"];
     amount: number;
-    current: number
+    current: number;
+    round?: number;
 }) {
+    const dampened = applyGraceDampening(amount, round);
     const newValue = Clamp(
-        current + amount,
+        current + dampened,
         GAMESTATE.RELATIONS.MIN,
         GAMESTATE.RELATIONS.MAX
     );

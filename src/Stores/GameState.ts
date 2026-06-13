@@ -242,6 +242,21 @@ export const INITIAL_STATE = ({ set, get }: {
                 },
             }));
         },
+        swapDeal: () => {
+            set((state) => {
+                const updatedDeals = new Set(state.deals.interactedWithDeals);
+                const dealPool = updatedDeals.size >= DEALS.length
+                    ? new Set<typeof DEALS[number]>()
+                    : updatedDeals;
+                const nextDeal = getRandomUniqueItem(DEALS, dealPool);
+                if (!nextDeal) {
+                    console.warn('⚠️ Deal pool empty — all deals have been shown.');
+                    return {};
+                }
+                updatedDeals.add(nextDeal);
+                return { deals: { ...state.deals, current: nextDeal, interactedWithDeals: updatedDeals, dealDecided: false, lastDealOutcome: null, lastDealAccepted: null } };
+            });
+        },
     },
     periodicEvent: {
         current: null,
@@ -997,6 +1012,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 power: entry.sourceFaction,
                 amount: relationPenalty,
                 current: state.relations.current[entry.sourceFaction],
+                round: state.gameManagement.round,
             });
             // Bankruptcy check folded into the same set() — single atomic
             // multi-slice update per ADR-0002 (no mid-update render of a
@@ -1207,6 +1223,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     power,
                     amount,
                     current: state.relations.current[power as keyof typeof state.relations.current],
+                    round: state.gameManagement.round,
                 });
                 return {
                     relations: {

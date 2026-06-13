@@ -36,6 +36,7 @@ function handleBribe(power: Power, state: GameState): ActionResult {
                 power,
                 amount: 3,
                 current: state.relations.current[power],
+                round: state.gameManagement.round,
             }),
         },
     };
@@ -80,6 +81,7 @@ function handleEliminate(
                 power: angryPower,
                 amount: -2,
                 current: state.relations.current[angryPower],
+                round: state.gameManagement.round,
             }),
         },
     };
@@ -101,6 +103,7 @@ function handleExpropriate(power: Power, state: GameState): ActionResult {
                 power,
                 amount: -3,
                 current: state.relations.current[power],
+                round: state.gameManagement.round,
             }),
         },
     };
@@ -112,6 +115,7 @@ function handleDialogue(
 ): Omit<ActionResult, "treasuryUpdate"> {
     // Education too low — population can't hold a productive conversation
     const education = state.budget.expenditures.education
+    const round = state.gameManagement.round;
     if (education <= GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN + 1) {
         return {
             resultText: { key: "dialogue_fail", params: { power } },
@@ -123,6 +127,7 @@ function handleDialogue(
                     power,
                     amount: -1,
                     current: state.relations.current[power],
+                    round,
                 }),
             },
         }
@@ -147,6 +152,7 @@ function handleDialogue(
                     power,
                     amount: -1,
                     current: state.relations.current[power],
+                    round,
                 }),
             },
         };
@@ -166,6 +172,7 @@ function handleDialogue(
                     power,
                     amount: 1,
                     current: state.relations.current[power],
+                    round,
                 }),
             },
         };

@@ -10,6 +10,7 @@ import { useGameStore } from '../Stores/GameState';
  * - 9/3: +/- Military Relations
  * - 4/6: +/- Charisma
  * - O: Swap current Law
+ * - P: Swap current Deal
  * - H: Show help alert
  */
 export const useDebugControls = () => {
@@ -18,6 +19,7 @@ export const useDebugControls = () => {
     const adjustRelations = useGameStore((s) => s.relations.adjustRelations);
     const adjustCharisma = useGameStore((s) => s.gameManagement.charisma.adjustCharisma);
     const swapLaw = useGameStore((s) => s.law.swapLaw);
+    const swapDeal = useGameStore((s) => s.deals.swapDeal);
 
     useEffect(() => {
         if (!debugEnabled) return;
@@ -63,9 +65,13 @@ export const useDebugControls = () => {
                 case 'O':
                     swapLaw();
                     break;
+                case 'p':
+                case 'P':
+                    swapDeal();
+                    break;
                 case 'h':
                 case 'H':
-                    const helpText = "Debug Keybindings:\nM: +$10m | L: -$10m\n7/1: +/- People\n8/2: +/- Business\n9/3: +/- Military\n4/6: +/- Charisma\nO: Swap Law";
+                    const helpText = "Debug Keybindings:\nM: +$10m | L: -$10m\n7/1: +/- People\n8/2: +/- Business\n9/3: +/- Military\n4/6: +/- Charisma\nO: Swap Law\nP: Swap Deal";
                     console.info(helpText);
                     alert(helpText);
                     break;
@@ -74,5 +80,5 @@ export const useDebugControls = () => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [debugEnabled, adjustTreasury, adjustRelations, adjustCharisma, swapLaw]);
+    }, [debugEnabled, adjustTreasury, adjustRelations, adjustCharisma, swapLaw, swapDeal]);
 };

@@ -55,6 +55,7 @@ function seedStore({
             ...s.gameManagement,
             activeRecurringEffects: effects,
             repealTakenThisRound,
+            round: 3, // bypass grace dampening — repeal tests cover repeal mechanics, not early-game grace period
         },
     }));
 }

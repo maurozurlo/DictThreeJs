@@ -208,6 +208,7 @@ export type GameState = {
         dealDecided: boolean,
         interactedWithDeals: Set<Deal>,
         actUponDeal: (hasAccepted: boolean) => void;
+        swapDeal: () => void;
         lastDealOutcome: string[] | null;
         lastDealAccepted: boolean | null;
     };

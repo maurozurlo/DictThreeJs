@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../Stores/GameState';
-import { GAMESTATE } from '../Constants/GameState';
+import { getRoundTimerMs } from '../Utils/GracePeriod';
 
 function progressToDisplayTime(progress: number): string {
     // Map 0→1 linearly to 9:00 AM → 5:00 PM (480 minutes)
@@ -15,6 +15,7 @@ function progressToDisplayTime(progress: number): string {
 export function useRoundTimer(): { displayTime: string; progress: number } {
     const phase = useGameStore((s) => s.gameManagement.phase);
     const dayEnded = useGameStore((s) => s.gameManagement.dayEnded);
+    const round = useGameStore((s) => s.gameManagement.round);
     const timerStartedAt = useGameStore((s) => s.gameManagement.timerStartedAt);
     const timerPausedAt = useGameStore((s) => s.gameManagement.timerPausedAt);
     const expireTimer = useGameStore((s) => s.gameManagement.expireTimer);
@@ -31,7 +32,7 @@ export function useRoundTimer(): { displayTime: string; progress: number } {
 
         const tick = () => {
             const elapsed = Date.now() - timerStartedAt;
-            const p = elapsed / GAMESTATE.ROUNDS.TIME_LENGTH_MS;
+            const p = elapsed / getRoundTimerMs(round);
             setDisplayTime(progressToDisplayTime(p));
             setProgress(Math.min(p, 1));
 
@@ -44,7 +45,7 @@ export function useRoundTimer(): { displayTime: string; progress: number } {
         tick();
         const id = setInterval(tick, 1000);
         return () => clearInterval(id);
-    }, [phase, dayEnded, timerStartedAt, timerPausedAt, expireTimer]);
+    }, [phase, dayEnded, round, timerStartedAt, timerPausedAt, expireTimer]);
 
     return { displayTime, progress };
 }
