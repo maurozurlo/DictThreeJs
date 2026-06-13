@@ -72,4 +72,7 @@ field (string, unused until sprint 5). i18n keys in `laws` namespace.
 // NEW IDEA, levels
 another idea is that we could have a small Easy > Medium > Hard mode that starts the game with varying treasury. Easy 1000, Medium 500 (current) Hard 150 (deficit)
 
-// weird recurring deals
+// weird recurring deals based on real life stuff
+dog-sized cows, will bring recurring money
+supercomputer out of game consoles, will bring recurring costs )based off ps2 iraqui supercomputer)
+something about relationships with neighboring country (switzerland lybia thing)
