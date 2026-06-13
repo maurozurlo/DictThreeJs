@@ -31,17 +31,17 @@ stories:
     name: "Records panel on Menu tab"
     file: "production/stories/3-2-records-panel.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "3-3"
     name: "Secret room rework"
     file: "production/stories/3-3-secret-room-rework.md"
     priority: must-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 2.0
     blocker: ""

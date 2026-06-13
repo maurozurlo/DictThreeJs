@@ -128,7 +128,14 @@ export const INITIAL_STATE = ({ set, get }: {
                 newCameraFov = 59;
                 newCameraRotation = [-0.256, 0.024];
             } else if (tab === Tabs.Secret) {
-                newSecretRoomIndex = (get().tabs.secretRoomIndex + 1) % SECRET_ROOMS.length;
+                const s = get();
+                // When a special ending is active, show the triggering faction's room;
+                // otherwise cycle through rooms for exploration.
+                if (s.specialEnding.available && s.specialEnding.faction) {
+                    newSecretRoomIndex = GAMESTATE.FACTION_ROOM_INDEX[s.specialEnding.faction];
+                } else {
+                    newSecretRoomIndex = (s.tabs.secretRoomIndex + 1) % SECRET_ROOMS.length;
+                }
                 const room = SECRET_ROOMS[newSecretRoomIndex];
                 newCameraPos = new Vector3(...room.pos);
                 newCameraFov = room.fov;
@@ -394,25 +401,10 @@ export const INITIAL_STATE = ({ set, get }: {
             const charisma = state.gameManagement.charisma.current;
             const goodChance = 0.5 + (charisma / 10) * 0.25;
             const isGood = rollChance(goodChance);
-            const faction = state.specialEnding.faction;
-            const narratives: Record<string, { good: string; bad: string }> = {
-                military: {
-                    good: "You press the button. A blinding flash illuminates the horizon. Hours later, the reports come in — the entire population has perished. Your enemies, your allies, everyone. You sit alone on a throne of ash. Emperor of the Wasteland.",
-                    bad: "You press the button. The missiles fly — but not toward your own people. The neighboring country is annihilated. The military erupts in celebration. You drink with them through the night. You never see the blade that finds your throat."
-                },
-                business: {
-                    good: "You seize the accounts and vanish. The jet is waiting, the beach house keys already in your pocket. You spend your final years in luxury, untouchable and forgotten. It was a good run.",
-                    bad: "You reach for the accounts. At the airport, uniformed men step forward. The money is counterfeit — a trap laid by the very people you trusted. You are taken to a cell. The official report says suicide."
-                },
-                people: {
-                    good: "You sit in the garden and, for the first time, let your guard down. Something has changed. You call for free elections. The people flood the streets. You watch from a window, surprised to feel relief. You live quietly for decades, tending your garden, until you die peacefully at ninety-four.",
-                    bad: "You close your eyes in the garden, finally at ease. The jasmine is beautiful. You never hear him coming. An anarchist steps from between the flowers. Your last thought is the smell of jasmine."
-                }
-            };
-            const endReason = isGood ? narratives[faction].good : narratives[faction].bad;
+            // Outcome narrative is rendered via i18n key `secret.{faction}.outcome_{good|bad}`
             set((s) => ({
                 specialEnding: { ...s.specialEnding, used: true, outcome: isGood ? 'good' : 'bad' },
-                gameManagement: { ...s.gameManagement, phase: 'special_ending', endReason },
+                gameManagement: { ...s.gameManagement, phase: 'special_ending', endReason: null },
             }));
         }
     },
@@ -865,17 +857,20 @@ export const INITIAL_STATE = ({ set, get }: {
                 newRelations[faction] = state.relations.current[faction];
             });
 
-            // --- 8.5. Unlock special ending at round 9 if any faction is at max ---
-            const factionsAtMax = (Object.keys(newRelations) as Power[]).filter(
-                p => newRelations[p] >= GAMESTATE.RELATIONS.MAX
+            // --- 8.5. Unlock special ending at round 9 if any faction meets threshold ---
+            const factionsAtThreshold = (Object.keys(newRelations) as Power[]).filter(
+                p => newRelations[p] >= GAMESTATE.SPECIAL_ENDING_THRESHOLD
             );
             let specialEndingFaction: Power | null = null;
-            if (newRound === 9 && factionsAtMax.length > 0 && !state.specialEnding.used) {
+            if (newRound === 9 && factionsAtThreshold.length > 0 && !state.specialEnding.used) {
                 const counts = state.gameManagement.meetCounts;
-                specialEndingFaction = factionsAtMax.reduce((best, p) =>
+                specialEndingFaction = factionsAtThreshold.reduce((best, p) =>
                     counts[p] >= counts[best] ? p : best
                 );
             }
+            const specialRoomIndex = specialEndingFaction !== null
+                ? GAMESTATE.FACTION_ROOM_INDEX[specialEndingFaction]
+                : undefined;
 
             // --- 9. Check for periodic event ---
             const periodicEvent = PERIODIC_EVENTS.find(e => e.round === newRound) ?? null;
@@ -902,7 +897,11 @@ export const INITIAL_STATE = ({ set, get }: {
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                     law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                     deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
-                    tabs: { ...s.tabs, activeTab: Tabs.Log },
+                    tabs: {
+                        ...s.tabs,
+                        activeTab: Tabs.Log,
+                        ...(specialRoomIndex !== undefined ? { secretRoomIndex: specialRoomIndex } : {}),
+                    },
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -919,7 +918,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
-                        specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
+                        specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction },
                     } : {}),
                 }));
                 return;
@@ -953,7 +952,6 @@ export const INITIAL_STATE = ({ set, get }: {
                 meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
                 law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                 deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
-                tabs: { ...s.tabs, activeTab: Tabs.Log, tabsLocked: false },
                 gameManagement: {
                     ...s.gameManagement,
                     dayEnded: false,
@@ -969,8 +967,14 @@ export const INITIAL_STATE = ({ set, get }: {
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
+                tabs: {
+                    ...s.tabs,
+                    activeTab: Tabs.Log,
+                    tabsLocked: false,
+                    ...(specialRoomIndex !== undefined ? { secretRoomIndex: specialRoomIndex } : {}),
+                },
                 ...(specialEndingFaction ? {
-                    specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction }
+                    specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction },
                 } : {}),
             }));
         },

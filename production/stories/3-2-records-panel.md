@@ -3,14 +3,14 @@
 ## Header
 - **Story ID**: 3-2
 - **Sprint**: 3
-- **Status**: In Progress
+- **Status**: Complete
 - **Type**: UI
 - **Layer**: Feature
 - **TR-ID**: TR-meta-001
 - **Governing ADR**: docs/architecture/adr-0002-state-management-pattern.md
 - **Manifest Version**: N/A (control manifest not yet created)
 - **Estimate**: 1.0 days
-- **Last Updated**: 2026-06-12
+- **Last Updated**: 2026-06-13
 
 ## Summary
 
@@ -158,3 +158,11 @@ public/locales/es/menu.json              — add records.* keys (Spanish)
 ## Dependencies
 
 - Story 3-1 (Meta-Progression Data Layer) — **Complete** — provides `loadMeta()`, `MetaProgress` type, `EndingId` type
+
+## Completion Notes
+**Completed**: 2026-06-13
+**Criteria**: 9/9 passing — all auto-verified (ENDING_IDS count, i18n keys EN+ES, loadMeta wiring) + manual confirmation from user
+**Deviations**: None
+**Test Evidence**: UI — manual walkthrough confirmed by user; evidence doc not created (advisory)
+**Code Review**: Already reviewed
+**Post-close fix**: `.recordsSlot` text color bug fixed (black text on brown bg) — switched to repeal-card style (`rgba(255,255,255,.04)` panel + explicit `color: var(--text-color)` on slots)

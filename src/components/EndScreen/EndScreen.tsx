@@ -86,6 +86,7 @@ function factionPeakLow(history: GameStats['relationsHistory'], key: Power) {
 const EndScreen = () => {
     const { t } = useTranslation('endscreen')
     const { t: menuT } = useTranslation('menu')
+    const { t: secretT } = useTranslation('secret')
     const phase = useGameStore(s => s.gameManagement.phase)
     const round = useGameStore(s => s.gameManagement.round)
     const endReason = useGameStore(s => s.gameManagement.endReason)
@@ -98,6 +99,7 @@ const EndScreen = () => {
     const setPhase = useGameStore(s => s.gameManagement.setPhase)
     const secretRoomIndex = useGameStore(s => s.tabs.secretRoomIndex)
     const specialEndingOutcome = useGameStore(s => s.specialEnding.outcome)
+    const specialEndingFaction = useGameStore(s => s.specialEnding.faction)
 
     const tier = calcTier(phase, endCause, round, relations, charisma, treasury)
     const isWin = phase === 'victory' || phase === 'special_ending'
@@ -124,7 +126,10 @@ const EndScreen = () => {
                     <Typography variant="h2" className={styles.outcome}>
                         {isWin ? t('endscreen.outcome.victory') : t('endscreen.outcome.game_over')}
                     </Typography>
-                    {endReason && (
+                    {phase === 'special_ending' && specialEndingFaction && specialEndingOutcome && (
+                        <p className={styles.endReason}>{secretT(`${specialEndingFaction}.outcome_${specialEndingOutcome}`)}</p>
+                    )}
+                    {phase !== 'special_ending' && endReason && (
                         <p className={styles.endReason}>{endReason}</p>
                     )}
                 </div>

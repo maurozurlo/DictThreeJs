@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Pixel-Dithered Border</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  body{
+    margin:0;
+  }
+  .center-box{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background-color:#1D1E22;
+  }
+
+  /* ---- the box ---- */
+  .pixel-border-box{
+    position:relative;
+    width:400px;
+    height:240px;
+    border-radius:8px;
+  }
+
+  /* layer that holds the spinning gradient + the pixel mask.
+     the mask is on THIS element (which never rotates), so the
+     pixel grid stays fixed while the gradient spins underneath. */
+  .pixel-border-box .ring{
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    overflow:hidden;
+
+    /* === the dither: a fixed checkerboard punched out of the layer === */
+    /* change "8px 8px" -> smaller = finer dither, bigger = chunkier */
+    -webkit-mask-image:
+      conic-gradient(#000 0 25%, #0000 0 50%, #000 0 75%, #0000 0);
+            mask-image:
+      conic-gradient(#000 0 25%, #0000 0 50%, #000 0 75%, #0000 0);
+    -webkit-mask-size:8px 8px;
+            mask-size:8px 8px;
+    -webkit-mask-repeat:repeat;
+            mask-repeat:repeat;
+    image-rendering:pixelated;
+  }
+
+  /* the rotating conic gradient — same idea as your original */
+  .pixel-border-box .ring::before{
+    content:'';
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:720px;          /* must cover the box diagonal when spinning */
+    height:720px;
+    transform:translate(-50%,-50%) rotate(0deg);
+    background:conic-gradient(rgba(0,0,0,0), #1976ed, rgba(0,0,0,0) 25%);
+    animation:spin 4s linear infinite;   /* change speed here */
+  }
+
+  @keyframes spin{
+    100%{ transform:translate(-50%,-50%) rotate(1turn); }
+  }
+
+  /* inner panel sits ON TOP of the ring (not masked), forming the hole */
+  .pixel-border-box .content{
+    position:absolute;
+    inset:16px;                 /* = border thickness */
+    z-index:2;
+    border-radius:5px;
+    background:#292a2e;
+    box-shadow:inset 0 0 0 3px #14161a;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:18px;
+    color:#cfe3ff;
+    font-family:"Press Start 2P", monospace;
+    text-align:center;
+  }
+  .content .title{
+    font-size:20px;
+    color:#6fb3ff;
+    text-shadow:3px 3px 0 #0b2147;
+  }
+  .content .sub{ font-size:9px; color:#8aa0c0; line-height:1.6; }
+  .content .press{
+    font-size:11px; color:#bfe0ff;
+    animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+</style>
+</head>
+<body>
+  <div class="center-box">
+    <div class="pixel-border-box">
+      <div class="ring"></div>
+      <div class="content">
+        <div class="title">PATUS</div>
+        <div class="sub">A PIXEL ADVENTURE</div>
+        <div class="press">▶ PRESS START</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

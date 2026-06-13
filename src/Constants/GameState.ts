@@ -40,6 +40,10 @@ export interface GAME_STATE_CONSTANTS {
     BUDGET_EFFECTS: BudgetEffects;
     COUP: Coup;
     REPEAL_COST: RepealCost;
+    /** Relation score at or above which a faction qualifies for the special ending at round 9. */
+    SPECIAL_ENDING_THRESHOLD: number;
+    /** Maps each faction to its deterministic 3D secret room index (0-based). */
+    FACTION_ROOM_INDEX: PowerKeys;
 }
 
 export interface Budget {
@@ -231,4 +235,6 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         Medium: { treasury: 25, relation: -2 },
         Large:  { treasury: 40, relation: -3 },
     },
+    SPECIAL_ENDING_THRESHOLD: 5,
+    FACTION_ROOM_INDEX: { military: 0, business: 1, people: 2 },
 }
