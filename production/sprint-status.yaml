@@ -21,11 +21,11 @@ stories:
     name: "Secret Room action panel layout"
     file: "production/stories/3-6-secret-room-action-panel-layout.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "1-12"
     name: "Sync stage.txt to Production"

@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 3-6
 - **Sprint**: 3
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: UI
 - **Layer**: Feature
 - **TR-ID**: TR-rng-001
@@ -24,9 +24,9 @@ Identified during story 3-3 close-out (AC4 partial pass).
 
 ## Acceptance Criteria
 
-- [ ] Secret room card (title, description, action button) renders inside the action panel area — same layout region used by Meet, Law, and Deal panels
-- [ ] Panel is only shown when the Secret tab is active and `specialEnding.available = true`
-- [ ] No visual regression on Budget, Shop, Meet, Law, or Deal panels
+- [x] Secret room card (title, description, action button) renders inside the action panel area — same layout region used by Meet, Law, and Deal panels
+- [x] Panel is only shown when the Secret tab is active and `specialEnding.available = true`
+- [x] No visual regression on Budget, Shop, Meet, Law, or Deal panels
 
 ## Out of Scope
 
@@ -62,4 +62,8 @@ src/components/Tabs/Tabs.module.css (if layout class needed)         — optiona
 - Story 3-3 (Secret Room Rework) — Complete ✓
 
 ## Completion Notes
-<!-- Filled in by /story-done -->
+- Completed: 2026-06-13
+- SecretPanel.tsx created in ActionPanel/ — mirrors Meet.tsx pattern
+- Secret.tsx in Tabs/ cleared to return null; content moved to ActionPanel
+- ActionPanel.tsx adds `{activeTab === Tabs.Secret ? <SecretPanel /> : null}`
+- 252/252 tests passing
