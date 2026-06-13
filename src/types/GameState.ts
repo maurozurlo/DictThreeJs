@@ -7,6 +7,7 @@ import type { Law } from "./Law";
 import type { PeriodicEvent } from "./PeriodicEvent";
 import type { MiniChallenge } from "./MiniChallenge";
 import type { DailyEvent } from "./DailyEvent";
+import type { Difficulty } from "../Constants/GameState";
 
 export type RoundLogEntry = {
     date: string;
@@ -101,7 +102,8 @@ export type GameState = {
     };
     gameManagement: {
         phase: GamePhase;
-        setPhase: (phase: GamePhase) => void;
+        difficulty: Difficulty;
+        setPhase: (phase: GamePhase, difficulty?: Difficulty) => void;
         round: number,
         endReason: string | null;
         endCause: EndCause;

@@ -80,6 +80,15 @@
         "continue": "Continuar",
         "language": "Idioma"
     },
+    "difficulty": {
+        "title": "Elige la dificultad",
+        "easy": "Fácil",
+        "medium": "Normal",
+        "hard": "Difícil",
+        "easy_desc": "$1000M de tesoro inicial",
+        "medium_desc": "$500M de tesoro inicial",
+        "hard_desc": "$150M de tesoro inicial"
+    },
     "budget": {
         "taxes": "Impuestos",
         "expenditures": "Gastos",

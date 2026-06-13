@@ -11,6 +11,7 @@ import { loadMeta } from '../../Utils/MetaProgress'
 import type { MetaProgress, EndingId } from '../../types/MetaProgress'
 import { Tabs } from '../../types/Tabs'
 import HelpOverlay from '../HelpOverlay/HelpOverlay'
+import type { Difficulty } from '../../Constants/GameState'
 
 const ENDING_IDS: EndingId[] = [
     'military', 'business', 'people', 'bankruptcy',
@@ -32,6 +33,7 @@ const Menu = ({ isActive }: TabProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [showHelp, setShowHelp] = useState(false);
+    const [showDifficultyPicker, setShowDifficultyPicker] = useState(false);
     const [meta, setMeta] = useState<MetaProgress>(loadMeta);
 
     useEffect(() => {
@@ -73,9 +75,30 @@ const Menu = ({ isActive }: TabProps) => {
                                     {t('mainMenu.continue')}
                                 </Button>
                             )}
-                            <Button variant='primary' onClick={() => setGamePhase('start')}>
-                                {t('mainMenu.newGame')}
-                            </Button>
+                            {!showDifficultyPicker ? (
+                                <Button variant='primary' onClick={() => setShowDifficultyPicker(true)}>
+                                    {t('mainMenu.newGame')}
+                                </Button>
+                            ) : (
+                                <div className={styles.difficultyPicker}>
+                                    <Typography variant='body'>{t('difficulty.title')}</Typography>
+                                    {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
+                                        <Button
+                                            key={d}
+                                            variant='primary'
+                                            onClick={() => {
+                                                setShowDifficultyPicker(false);
+                                                setGamePhase('start', d);
+                                            }}
+                                        >
+                                            {t(`difficulty.${d}`)} — {t(`difficulty.${d}_desc`)}
+                                        </Button>
+                                    ))}
+                                    <Button variant='primary' onClick={() => setShowDifficultyPicker(false)}>
+                                        {t('actionPanel.cancel')}
+                                    </Button>
+                                </div>
+                            )}
                             {isInGame && (
                                 <Button variant='primary' onClick={saveGame}>{t('mainMenu.saveGame')}</Button>
                             )}

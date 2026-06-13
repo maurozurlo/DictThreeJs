@@ -71,11 +71,11 @@ stories:
     name: "Difficulty levels — pre-game treasury selection"
     file: "production/stories/4-4-difficulty-levels.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   - id: "4-5"
     name: "Early-game grace period — dampened early relation deltas + extended timer"

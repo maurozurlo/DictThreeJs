@@ -3,7 +3,8 @@ import { create } from "zustand";
 import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
-import { GAMESTATE } from "../Constants/GameState";
+import { GAMESTATE, DIFFICULTY_TREASURY } from "../Constants/GameState";
+import type { Difficulty } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
@@ -428,6 +429,7 @@ export const INITIAL_STATE = ({ set, get }: {
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
         phase: 'idle',
+        difficulty: 'medium' as Difficulty,
         endReason: null,
         endCause: null,
         dayEnded: false,
@@ -444,8 +446,10 @@ export const INITIAL_STATE = ({ set, get }: {
         coupArmedLastRound: false,
         coupWarningFaction: null,
         meetCounts: { military: 0, business: 0, people: 0 },
-        setPhase: (phase) => {
+        setPhase: (phase, difficulty) => {
             if (phase === 'start') {
+                const chosenDifficulty: Difficulty = difficulty ?? 'medium';
+                const startingTreasury = DIFFICULTY_TREASURY[chosenDifficulty];
                 return set((state) => {
                     const freshLaws = new Set<typeof LAWS[number]>();
                     const freshDeals = new Set<typeof DEALS[number]>();
@@ -465,8 +469,8 @@ export const INITIAL_STATE = ({ set, get }: {
                             dealsAccepted: 0, dealsRejected: 0,
                             totalIncomeEarned: 0, totalExpensesSpent: 0,
                             totalExtrasEarned: 0, totalExtrasSpent: 0,
-                            peakTreasury: GAMESTATE.BUDGET.TREASURY,
-                            lowestTreasury: GAMESTATE.BUDGET.TREASURY,
+                            peakTreasury: startingTreasury,
+                            lowestTreasury: startingTreasury,
                             relationsHistory: [],
                             coupGraceFired: false,
                             totalRecurringIncomeEarned: 0,
@@ -476,6 +480,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         gameManagement: {
                             ...state.gameManagement,
                             phase,
+                            difficulty: chosenDifficulty,
                             round: GAMESTATE.ROUNDS.START,
                             dayEnded: false,
                             endReason: null,
@@ -511,7 +516,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         },
                         budget: {
                             ...state.budget,
-                            treasury: GAMESTATE.BUDGET.TREASURY,
+                            treasury: startingTreasury,
                             expenditures: { ...GAMESTATE.BUDGET.EXPENDITURES },
                             taxes: { ...GAMESTATE.BUDGET.TAXES },
                         },
@@ -1043,6 +1048,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.gameManagement,
                     round: (gm.round as number) ?? s.gameManagement.round,
                     phase: (gm.phase as GameState['gameManagement']['phase']) ?? s.gameManagement.phase,
+                    difficulty: (gm.difficulty as Difficulty) ?? 'medium',
                     endReason: (gm.endReason as string | null) ?? null,
                     dayEnded: (gm.dayEnded as boolean) ?? false,
                     lastRoundIncome: (gm.lastRoundIncome as number) ?? 0,

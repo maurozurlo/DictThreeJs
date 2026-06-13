@@ -238,3 +238,12 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     SPECIAL_ENDING_THRESHOLD: 5,
     FACTION_ROOM_INDEX: { military: 0, business: 1, people: 2 },
 }
+
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+/** Starting treasury for each difficulty level. */
+export const DIFFICULTY_TREASURY: Record<Difficulty, number> = {
+    easy: 1000,
+    medium: 500,
+    hard: 150,
+} as const;

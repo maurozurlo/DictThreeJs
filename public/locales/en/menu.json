@@ -80,6 +80,15 @@
     "continue": "Continue",
     "language": "Language"
   },
+  "difficulty": {
+    "title": "Choose Difficulty",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "easy_desc": "$1000M starting treasury",
+    "medium_desc": "$500M starting treasury",
+    "hard_desc": "$150M starting treasury"
+  },
   "budget": {
     "taxes": "Taxes",
     "expenditures": "Expenditures",
