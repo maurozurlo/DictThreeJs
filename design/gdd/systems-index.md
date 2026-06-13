@@ -1,0 +1,12 @@
+# GDD Systems Index
+
+All game design documents in `design/gdd/`. Update this index when adding a new GDD.
+
+| File | System | Status | Target Sprint |
+|------|--------|--------|---------------|
+| [game-concept.md](game-concept.md) | Core game concept and pillars | Approved | — |
+| [lasting-effects-prd.md](lasting-effects-prd.md) | Lasting effects, repeal, coup, DayEnded breakdown | Approved | Sprint 2 (complete) |
+| [early-game-grace-period.md](early-game-grace-period.md) | Early-round relation dampening + extended timer | Approved | Sprint 4 |
+| [difficulty-levels.md](difficulty-levels.md) | Easy / Medium / Hard starting treasury selection | Approved | Sprint 4 |
+| [weird-laws.md](weird-laws.md) | Absurd law pool — 10% trigger, faction `???`, no reject penalty | Approved | Sprint 5 |
+| [weird-deals.md](weird-deals.md) | Absurd deal pool — Tier 1 (Sprint 5) + Tier 2 delayed effects (Sprint 6, ADR-0007) | WIP | Sprint 5 / 6 |
