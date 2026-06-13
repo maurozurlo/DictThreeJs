@@ -428,6 +428,10 @@ export const INITIAL_STATE = ({ set, get }: {
         peakTreasury: GAMESTATE.BUDGET.TREASURY,
         lowestTreasury: GAMESTATE.BUDGET.TREASURY,
         relationsHistory: [],
+        coupGraceFired: false,
+        totalRecurringIncomeEarned: 0,
+        totalRecurringExpensesSpent: 0,
+        repealCount: 0,
     },
     gameManagement: {
         round: GAMESTATE.ROUNDS.START,
@@ -472,6 +476,10 @@ export const INITIAL_STATE = ({ set, get }: {
                             peakTreasury: GAMESTATE.BUDGET.TREASURY,
                             lowestTreasury: GAMESTATE.BUDGET.TREASURY,
                             relationsHistory: [],
+                            coupGraceFired: false,
+                            totalRecurringIncomeEarned: 0,
+                            totalRecurringExpensesSpent: 0,
+                            repealCount: 0,
                         },
                         gameManagement: {
                             ...state.gameManagement,
@@ -752,6 +760,9 @@ export const INITIAL_STATE = ({ set, get }: {
                     business: newRelations.business,
                     people: newRelations.people,
                 }],
+                coupGraceFired: s.stats.coupGraceFired || coupResult.outcome === 'grace',
+                totalRecurringIncomeEarned: s.stats.totalRecurringIncomeEarned + financials.recurringIncome,
+                totalRecurringExpensesSpent: s.stats.totalRecurringExpensesSpent + financials.recurringExpenses,
             });
             const nextDailyEvent = getRandomDailyEvent();
 
@@ -989,6 +1000,10 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.relations,
                     current: { ...s.relations.current, [entry.sourceFaction]: newRelation },
                 },
+                stats: {
+                    ...s.stats,
+                    repealCount: s.stats.repealCount + 1,
+                },
                 gameManagement: {
                     ...s.gameManagement,
                     activeRecurringEffects: s.gameManagement.activeRecurringEffects.filter(e => e.sourceId !== sourceId),
@@ -1011,6 +1026,7 @@ export const INITIAL_STATE = ({ set, get }: {
             const savedLaw = data.law as Record<string, unknown> ?? {};
             const savedDeals = data.deals as Record<string, unknown> ?? {};
             const savedMeet = data.meet as Record<string, unknown> ?? {};
+            const savedStats = data.stats as Record<string, unknown> ?? {};
 
             // Restore current law/deal by id so undecided rounds resume correctly
             const savedLawId = (savedLaw.current as Record<string, unknown> | null)?.id;
@@ -1082,6 +1098,14 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.shop,
                     statueCount: ((data.shop as Record<string, unknown>)?.statueCount as number) ?? 0,
                     frozenFactions: new Set((data.shop as Record<string, unknown>)?.frozenFactions as Power[] ?? []),
+                },
+                stats: {
+                    ...s.stats,
+                    // Safe defaults for fields added in story 3-4 (saves predating this story lack them)
+                    coupGraceFired: (savedStats.coupGraceFired as boolean) ?? false,
+                    totalRecurringIncomeEarned: (savedStats.totalRecurringIncomeEarned as number) ?? 0,
+                    totalRecurringExpensesSpent: (savedStats.totalRecurringExpensesSpent as number) ?? 0,
+                    repealCount: (savedStats.repealCount as number) ?? 0,
                 },
             }));
         }

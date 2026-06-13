@@ -204,3 +204,10 @@ Task: Implemented — pending story-done
 - Test written: None — UI story; manual walkthrough evidence required at production/qa/evidence/3-2-records-panel-evidence.md
 - Blockers: None
 - Next: Manual walkthrough + evidence doc, then /story-done production/stories/3-2-records-panel.md
+
+## Session Extract — /dev-story 2026-06-12 (3-4)
+- Story: production/stories/3-4-stats-enhancements.md — Stats Screen Enhancements
+- Files changed: src/types/GameState.ts (4 fields added to GameStats), src/Stores/GameState.ts (initial state, reset, buildStatsUpdate, repeal, loadGame), src/components/EndScreen/EndScreen.tsx (recordGameEnd wiring + 4 new stat rows), public/locales/en/endscreen.json (5 keys), public/locales/es/endscreen.json (5 keys)
+- Test written: tests/unit/stats/stats-enhancements.test.ts (10 tests — all pass; 238 total suite pass)
+- Blockers: None
+- Next: /code-review then /story-done production/stories/3-4-stats-enhancements.md

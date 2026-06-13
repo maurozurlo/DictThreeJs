@@ -25,7 +25,12 @@
             "deals_accepted": "Tratos aceptados",
             "deals_rejected": "Tratos rechazados",
             "business_elite": "Empresas (Élite)",
-            "total": "Total"
+            "total": "Total",
+            "recurring_income": "Ingresos recurrentes",
+            "recurring_expenses": "Gastos recurrentes",
+            "repeals": "Leyes derogadas",
+            "coup_grace": "Por los pelos con el golpe",
+            "coup_grace_value": "Sobrevivido"
         },
         "coup_narrative": {
             "military": "En la madrugada, vehículos blindados rodearon el palacio. Al amanecer, el rostro del General estaba en todas las pantallas.",

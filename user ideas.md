@@ -68,3 +68,8 @@ field (string, unused until sprint 5). i18n keys in `laws` namespace.
 // negative relation deltas dampened ×0.25 in round 1, ×0.50 in round 2, normal from round 3
 // positive deltas always full strength. timer 180s/150s/120s. starting relations unchanged at 0.
 // implemented via applyGraceDampening() helper at handleRelations() call site.
+
+// NEW IDEA, levels
+another idea is that we could have a small Easy > Medium > Hard mode that starts the game with varying treasury. Easy 1000, Medium 500 (current) Hard 150 (deficit)
+
+// weird recurring deals

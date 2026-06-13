@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useGameStore } from '../../Stores/GameState'
 import type { EndCause, GameStats } from '../../types/GameState'
 import type { Power } from '../../types/Power'
@@ -7,6 +8,8 @@ import styles from './EndScreen.module.css'
 import { useTranslation } from 'react-i18next'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { Modal, ModalCard } from '../Modal/Modal'
+import { recordGameEnd } from '../../Utils/MetaProgress'
+import type { EndingId, TierRank } from '../../types/MetaProgress'
 
 type Tier = {
     tier: string
@@ -93,10 +96,23 @@ const EndScreen = () => {
     const treasury = useGameStore(s => s.budget.treasury)
     const stats = useGameStore(s => s.stats)
     const setPhase = useGameStore(s => s.gameManagement.setPhase)
+    const secretRoomIndex = useGameStore(s => s.tabs.secretRoomIndex)
+    const specialEndingOutcome = useGameStore(s => s.specialEnding.outcome)
 
     const tier = calcTier(phase, endCause, round, relations, charisma, treasury)
     const isWin = phase === 'victory' || phase === 'special_ending'
     const roundsPlayed = round - 1
+
+    const endingId: EndingId =
+        phase === 'special_ending'
+            ? (`secret_room_${secretRoomIndex}_${specialEndingOutcome}` as EndingId)
+            : phase === 'victory'
+            ? 'victory'
+            : (endCause ?? 'military') as EndingId
+
+    useEffect(() => {
+        recordGameEnd(tier.tier as TierRank, endingId)
+    }, []) // intentionally runs once on mount; tier and endingId are stable when EndScreen renders
 
     const totalNet = stats.totalIncomeEarned + stats.totalExtrasEarned - stats.totalExpensesSpent - stats.totalExtrasSpent
 
@@ -146,6 +162,8 @@ const EndScreen = () => {
                         <StatRow label={t('endscreen.stats.total_earned')} value={MoneyNumberFormatter(stats.totalIncomeEarned + stats.totalExtrasEarned)} />
                         <StatRow label={t('endscreen.stats.total_spent')} value={MoneyNumberFormatter(stats.totalExpensesSpent + stats.totalExtrasSpent)} />
                         <StatRow label={t('endscreen.stats.net')} value={`${totalNet >= 0 ? '+' : '-'}${MoneyNumberFormatter(Math.abs(totalNet))}`} positive={totalNet >= 0} />
+                        <StatRow label={t('endscreen.stats.recurring_income')} value={MoneyNumberFormatter(stats.totalRecurringIncomeEarned)} />
+                        <StatRow label={t('endscreen.stats.recurring_expenses')} value={MoneyNumberFormatter(stats.totalRecurringExpensesSpent)} />
                     </Section>
 
                     {/* Decisions */}
@@ -154,6 +172,10 @@ const EndScreen = () => {
                         <StatRow label={t('endscreen.stats.laws_rejected')} value={String(stats.lawsRejected)} />
                         <StatRow label={t('endscreen.stats.deals_accepted')} value={String(stats.dealsAccepted)} positive={true} />
                         <StatRow label={t('endscreen.stats.deals_rejected')} value={String(stats.dealsRejected)} />
+                        <StatRow label={t('endscreen.stats.repeals')} value={String(stats.repealCount)} />
+                        {stats.coupGraceFired && (
+                            <StatRow label={t('endscreen.stats.coup_grace')} value={t('endscreen.stats.coup_grace_value')} positive={true} />
+                        )}
                     </Section>
 
                     {/* Meetings */}

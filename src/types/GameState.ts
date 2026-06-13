@@ -57,6 +57,14 @@ export type GameStats = {
     peakTreasury: number;
     lowestTreasury: number;
     relationsHistory: RelationSnapshot[];
+    /** True from the first round a grace coup roll fires; stays true for the rest of the run. */
+    coupGraceFired: boolean;
+    /** Cumulative recurring income from active laws/deals summed across all rounds. */
+    totalRecurringIncomeEarned: number;
+    /** Cumulative recurring expenses from active laws/deals summed across all rounds. */
+    totalRecurringExpensesSpent: number;
+    /** Number of successful repeals the player has performed this run. */
+    repealCount: number;
 };
 
 export type CameraState = {

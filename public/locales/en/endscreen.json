@@ -25,7 +25,12 @@
             "deals_accepted": "Deals accepted",
             "deals_rejected": "Deals rejected",
             "business_elite": "Business (Elite)",
-            "total": "Total"
+            "total": "Total",
+            "recurring_income": "Recurring income",
+            "recurring_expenses": "Recurring expenses",
+            "repeals": "Laws repealed",
+            "coup_grace": "Close call with a coup",
+            "coup_grace_value": "Survived"
         },
         "coup_narrative": {
             "military": "In the early hours, armored vehicles surrounded the palace. By dawn, the General's face was on every screen.",
