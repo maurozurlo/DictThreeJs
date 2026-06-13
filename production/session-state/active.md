@@ -218,3 +218,15 @@ Task: Implemented — pending story-done
 - Test written: tests/unit/stats/stats-enhancements.test.ts (10 tests — all pass; 238 total suite pass)
 - Blockers: None
 - Next: /code-review then /story-done production/stories/3-4-stats-enhancements.md
+
+## Session Extract — /story-done 2026-06-13 (3-3)
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/3-3-secret-room-rework.md — Secret Room Rework
+- Key fix: dailyEvent null-out in seedRound8 resolved non-deterministic test failures (random daily event could reduce target faction below threshold)
+- AC4 partial: SecretRoom action panel content appears in main screen area instead of action panel region; follow-up story 3-6 created
+- Code review: APPROVED WITH SUGGESTIONS — both applied (dailyEvent isolation in threshold test + AC3 text aligned to tested values)
+- Tech debt logged: None
+- Follow-up created: production/stories/3-6-secret-room-action-panel-layout.md
+- Next recommended: Sprint 3 Must Haves are all done — run sprint close-out sequence, or pull 3-6 (UI bug) or 3-5 (Budget Tier Consequences)
+
+<!-- QA RUN: 2026-06-13 | Sprint: sprint-3 | Verdict: APPROVED WITH CONDITIONS | Report: production/qa/qa-signoff-sprint3-2026-06-13.md -->

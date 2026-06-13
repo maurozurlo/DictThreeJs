@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 3-3
 - **Sprint**: 3
-- **Status**: In Progress
+- **Status**: Complete
 - **Type**: Logic + UI
 - **Layer**: Feature
 - **TR-ID**: TR-rng-001
@@ -11,6 +11,7 @@
 - **Manifest Version**: N/A
 - **Estimate**: 2.0 days
 - **Last Updated**: 2026-06-13
+- **Completed**: 2026-06-13
 
 ## Summary
 
@@ -123,4 +124,8 @@ tests/unit/secret/secret-room-rework.test.ts  — unit tests for threshold and r
 - None (no dependency on other sprint 3 stories)
 
 ## Completion Notes
-<!-- Filled in by /story-done -->
+**Completed**: 2026-06-13
+**Criteria**: 7/8 passing (AC4 partial — content visible, positioning is a separate scope item)
+**Deviations**: ADVISORY — SecretRoom action panel content renders in main screen area rather than a dedicated panel position. Pre-existing layout concern, not caused by 3-3 changes. Follow-up story created.
+**Test Evidence**: Logic: `tests/unit/secret/secret-room-rework.test.ts` — 13/13 pass
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS (both suggestions applied before close)

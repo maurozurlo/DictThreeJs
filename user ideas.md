@@ -9,3 +9,4 @@ BUG:
 
 
 recurring.contractor_cost appears as is (no i8n real text)
+recurring.investment_income appears as key
