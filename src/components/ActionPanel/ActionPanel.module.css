@@ -8,7 +8,8 @@
     border-image-slice: 24 fill;
     border-image-width: 24px;
     border-image-repeat: stretch;
-    z-index: 75; /* above fade overlay (50), below navbar (100) */
+    z-index: 75;
+    /* above fade overlay (50), below navbar (100) */
     image-rendering: pixelated;
 
 
@@ -61,16 +62,16 @@
 
     }
 
-    .budget{
+    .budget {
         display: flex;
         flex-direction: column;
 
-    span{
-    padding-top: .5rem;
-    padding-bottom: .25rem;
-    padding-inline: 1rem;
-        border-top: 1px solid var(--hud-panel-bg);
-    }
+        span {
+            padding-top: .5rem;
+            padding-bottom: .25rem;
+            padding-inline: 1rem;
+            border-top: 1px solid var(--hud-panel-bg);
+        }
     }
 }
 
@@ -138,3 +139,10 @@
     padding: 1rem;
 }
 
+.secretTitle {
+    font-size: 1rem;
+}
+
+.secretText {
+    font-size: .8rem;
+}

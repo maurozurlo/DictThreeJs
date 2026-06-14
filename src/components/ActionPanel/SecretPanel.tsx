@@ -2,6 +2,7 @@ import { useGameStore } from '../../Stores/GameState'
 import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import { useTranslation } from 'react-i18next'
+import styles from './ActionPanel.module.css'
 
 /** Renders the secret ending card inside the ActionPanel's activeTab area. */
 const SecretPanel = () => {
@@ -15,12 +16,16 @@ const SecretPanel = () => {
 
     return (
         <>
-            <Typography variant="h2">{t(`${faction}.title`)}</Typography>
-            <Typography variant="body">{t(`${faction}.description`)}</Typography>
+            <Typography variant="h2" className={styles.secretTitle}>
+                {t(`${faction}.title`)}
+            </Typography>
+            <Typography variant="body" className={styles.secretText}>{t(`${faction}.description`)}</Typography>
             {!used ? (
                 <Button onClick={use}>{t(`${faction}.button`)}</Button>
             ) : (
-                <Typography variant="body">{t('done')}</Typography>
+                <Typography variant="body" className={styles.secretText}>
+                    {t('done')}
+                </Typography>
             )}
         </>
     )

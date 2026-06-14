@@ -61,11 +61,11 @@ stories:
     name: "Playtest ≥3 sessions + /playtest-report"
     file: "production/stories/4-3-playtest-sessions.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.75
-    blocker: "Depends on 3-6 being done first"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-13"
 
   - id: "4-4"
     name: "Difficulty levels — pre-game treasury selection"
@@ -81,11 +81,11 @@ stories:
     name: "Early-game grace period — dampened early relation deltas + extended timer"
     file: "production/stories/4-5-early-game-grace-period.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-13"
 
   # ── Should Have ────────────────────────────────────────────────────────
   - id: "4-6"
