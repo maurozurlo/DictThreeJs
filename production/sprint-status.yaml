@@ -104,11 +104,11 @@ stories:
     name: "Economy Advisor — State & Shop Integration"
     file: "production/stories/5-10-advisor-state-shop.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-14"
 
   - id: "5-11"
     name: "Economy Advisor — Dialogue Content"
