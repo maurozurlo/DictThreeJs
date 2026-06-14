@@ -13,5 +13,5 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.positive { color: #27ae60; }
-.negative { color: #e74c3c; }
+.positive { color: var(--income-green); }
+.negative { color: var(--expense-red); }

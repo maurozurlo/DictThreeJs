@@ -107,11 +107,11 @@
 }
 
 .positive {
-    color: #27ae60;
+    color: var(--income-green);
 }
 
 .negative {
-    color: #e74c3c;
+    color: var(--expense-red);
 }
 
 /* Faction breakdown */

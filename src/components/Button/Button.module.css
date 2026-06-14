@@ -1,5 +1,5 @@
 .button {
-    background-color: brown;
+    background-color: var(--button-bg);
     color: white;
     border: none;
     text-align: center;

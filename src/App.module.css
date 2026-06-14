@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     z-index: 999;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--scrim-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,11 +10,11 @@
 }
 
 .loseOverlay {
-    background: rgba(80, 0, 0, 0.88);
+    background: var(--lose-overlay-bg);
 }
 
 .victoryOverlay {
-    background: rgba(0, 60, 20, 0.88);
+    background: var(--victory-overlay-bg);
 }
 
 .overlayCard {
@@ -56,11 +56,11 @@
 }
 
 .positive {
-    color: #27ae60;
+    color: var(--income-green);
 }
 
 .negative {
-    color: #e74c3c;
+    color: var(--expense-red);
 }
 
 .finalRelations {

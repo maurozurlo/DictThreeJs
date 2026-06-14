@@ -8,16 +8,16 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.positive { color: #27ae60; }
-.negative { color: #e74c3c; }
+.positive { color: var(--income-green); }
+.negative { color: var(--expense-red); }
 
 .coupWarning {
-    color: #e74c3c;
+    color: var(--expense-red);
     font-family: 'PressStart2P', sans-serif;
     font-size: 0.7rem;
     padding: 0.5rem;
     margin-top: 0.5rem;
-    border: 1px solid #e74c3c;
-    background-color: rgba(231, 76, 60, 0.12);
+    border: 1px solid var(--expense-red);
+    background-color: rgba(231, 76, 60, 0.12); /* --expense-red at 12% */
     text-align: center;
 }

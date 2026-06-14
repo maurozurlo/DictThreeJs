@@ -41,6 +41,25 @@ body,
   /* HUD / Action panel colors */
   --hud-border-dark: #401d09;
   --hud-panel-bg: #2b1807;
+
+  /* Card */
+  --card-bg: #401d09;
+  --card-border: #5e2d0b;
+
+  /* Interactive elements */
+  --button-bg: brown;
+  --select-option-bg: #3a0000;
+
+  /* Semantic feedback colors */
+  --income-green: #27ae60;
+  --expense-red: #e74c3c;
+  --warning-yellow: #f1c40f;
+  --gold: #ffd700;
+
+  /* Overlay backgrounds */
+  --lose-overlay-bg: rgba(80, 0, 0, 0.88);
+  --victory-overlay-bg: rgba(0, 60, 20, 0.88);
+  --scrim-bg: rgba(0, 0, 0, 0.85);
 }
 
 button {

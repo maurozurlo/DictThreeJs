@@ -109,11 +109,11 @@
 }
 
 .positive {
-    color: #27ae60;
+    color: var(--income-green);
 }
 
 .negative {
-    color: #e74c3c;
+    color: var(--expense-red);
 }
 
 .netStatus {
@@ -121,16 +121,16 @@
     border-radius: 4px;
 
     &.positive {
-        background-color: rgba(39, 174, 96, 0.1);
+        background-color: rgba(39, 174, 96, 0.1); /* --income-green at 10% */
     }
 
     &.negative {
-        background-color: rgba(231, 76, 60, 0.1);
+        background-color: rgba(231, 76, 60, 0.1); /* --expense-red at 10% */
     }
 }
 
 .roundsWarning {
-    color: #f1c40f;
+    color: var(--warning-yellow);
 }
 
 .outcomeQuote {
@@ -171,8 +171,8 @@
 }
 
 .settingsSelect {
-    background-color: brown;
-    color: white;
+    background-color: var(--button-bg);
+    color: var(--text-color);
     border: none;
     font-size: 1rem;
     height: 44px;
@@ -190,7 +190,7 @@
     }
 
     option {
-        background-color: #3a0000;
+        background-color: var(--select-option-bg);
     }
 }
 
@@ -251,11 +251,11 @@
 }
 
 .repealCardEffect.income {
-    color: #27ae60;
+    color: var(--income-green);
 }
 
 .repealCardEffect.expense {
-    color: #e74c3c;
+    color: var(--expense-red);
 }
 
 .repealConfirmPanel {
