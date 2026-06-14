@@ -33,6 +33,24 @@ export function useHoverGlow(
                 });
             }
         });
+
+        // Reset materials to their captured originals when the component unmounts.
+        // useLoader caches the FBX object, so without this cleanup the glow emissive
+        // stays baked into the material and the model appears selected on remount.
+        return () => {
+            object.traverse((child: any) => {
+                if (child.isMesh) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach((mat: any) => {
+                        const original = originalEmissives.current.get(mat);
+                        if (original) {
+                            mat.emissive = original.clone();
+                            mat.emissiveIntensity = 1;
+                        }
+                    });
+                }
+            });
+        };
     }, [object]);
 
     useEffect(() => {
