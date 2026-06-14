@@ -16,6 +16,19 @@
             "name": "Media Blackout",
             "description": "Freezes all Business relation changes at end of this round."
         },
+        "advisor_current": "Current advisor: {{level}}",
+        "advisor_1": {
+            "name": "Junior Analyst",
+            "description": "Replaces your nephew. Gives advice on laws, deals, and budget — mostly right."
+        },
+        "advisor_2": {
+            "name": "Senior Analyst",
+            "description": "Experienced economist. Advice is reliable, with appropriate caveats."
+        },
+        "advisor_3": {
+            "name": "Chief Economic Advisor",
+            "description": "Top of the field. Advice is specific, accurate, and slightly insufferable."
+        },
         "statue": {
             "name": "Giant Statue",
             "description": "Permanently increases your Charisma by +1. A monument to your glory appears in the city.",

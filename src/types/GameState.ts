@@ -14,7 +14,8 @@ export type RoundLogEntry = {
     lines: string[];
 };
 
-export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue';
+export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue' | 'advisor_1' | 'advisor_2' | 'advisor_3';
+export type AdvisorLevel = 0 | 1 | 2 | 3;
 
 export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | 'military_coup' | 'business_coup' | 'people_coup' | null;
 
@@ -206,6 +207,7 @@ export type GameState = {
     shop: {
         frozenFactions: Set<Power>;
         statueCount: number;
+        advisorLevel: AdvisorLevel;
         buy: (item: ShopItemId) => void;
     };
     deals: {

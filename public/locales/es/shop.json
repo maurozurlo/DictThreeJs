@@ -16,6 +16,19 @@
             "name": "Apagón mediático",
             "description": "Congela todos los cambios de relación con las empresas al final de esta ronda."
         },
+        "advisor_current": "Asesor actual: {{level}}",
+        "advisor_1": {
+            "name": "Analista Junior",
+            "description": "Reemplaza a tu sobrino. Da consejos sobre leyes, tratos y presupuesto — mayormente correcto."
+        },
+        "advisor_2": {
+            "name": "Analista Senior",
+            "description": "Economista experimentado. El consejo es confiable, con las advertencias pertinentes."
+        },
+        "advisor_3": {
+            "name": "Asesor Económico Jefe",
+            "description": "Lo mejor del campo. El consejo es específico, preciso y ligeramente insufrible."
+        },
         "statue": {
             "name": "Estatua Gigante",
             "description": "Aumenta tu Carisma permanentemente en +1. Un monumento a tu gloria aparece en la ciudad.",

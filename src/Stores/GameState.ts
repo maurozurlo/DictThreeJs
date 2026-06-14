@@ -448,6 +448,7 @@ export const INITIAL_STATE = ({ set, get }: {
     shop: {
         frozenFactions: new Set<Power>(),
         statueCount: 0,
+        advisorLevel: 0 as 0 | 1 | 2 | 3,
         buy: (item: ShopItemId) => {
             const state = get();
             const FREEZE_COST = 80;
@@ -457,7 +458,18 @@ export const INITIAL_STATE = ({ set, get }: {
                 media_shielding: 'military',
                 media_blackout: 'business',
             };
-            if (item === 'statue') {
+            if (item === 'advisor_1' || item === 'advisor_2' || item === 'advisor_3') {
+                const ADVISOR_COSTS: Record<typeof item, number> = { advisor_1: 100, advisor_2: 150, advisor_3: 200 };
+                const ADVISOR_LEVELS: Record<typeof item, 1 | 2 | 3> = { advisor_1: 1, advisor_2: 2, advisor_3: 3 };
+                const targetLevel = ADVISOR_LEVELS[item];
+                if (state.shop.advisorLevel >= targetLevel) return;
+                const cost = ADVISOR_COSTS[item];
+                if (state.budget.treasury < cost) return;
+                set((s) => ({
+                    budget: { ...s.budget, treasury: s.budget.treasury - cost },
+                    shop: { ...s.shop, advisorLevel: targetLevel },
+                }));
+            } else if (item === 'statue') {
                 const { statueCount } = state.shop;
                 if (statueCount >= 3) return;
                 const cost = STATUE_COSTS[statueCount];
@@ -605,6 +617,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             ...state.shop,
                             frozenFactions: new Set<Power>(),
                             statueCount: 0,
+                            advisorLevel: 0 as 0 | 1 | 2 | 3,
                         },
                         relations: {
                             ...state.relations,
@@ -1242,6 +1255,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.shop,
                     statueCount: ((data.shop as Record<string, unknown>)?.statueCount as number) ?? 0,
                     frozenFactions: new Set((data.shop as Record<string, unknown>)?.frozenFactions as Power[] ?? []),
+                    advisorLevel: ((data.shop as Record<string, unknown>)?.advisorLevel as 0 | 1 | 2 | 3) ?? 0,
                 },
                 stats: {
                     ...s.stats,

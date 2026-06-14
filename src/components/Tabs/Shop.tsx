@@ -10,6 +10,12 @@ import { useTranslation } from 'react-i18next'
 
 const STATUE_COSTS = [100, 150, 200];
 
+const ADVISOR_ITEMS = [
+    { id: 'advisor_1' as const, targetLevel: 1 as const, cost: 100 },
+    { id: 'advisor_2' as const, targetLevel: 2 as const, cost: 150 },
+    { id: 'advisor_3' as const, targetLevel: 3 as const, cost: 200 },
+];
+
 type FreezeItem = {
     id: ShopItemId;
     faction: Power;
@@ -27,6 +33,7 @@ const Shop = ({ isActive }: TabProps) => {
     const treasury = useGameStore(s => s.budget.treasury);
     const frozenFactions = useGameStore(s => s.shop.frozenFactions);
     const statueCount = useGameStore(s => s.shop.statueCount);
+    const advisorLevel = useGameStore(s => s.shop.advisorLevel);
     const buy = useGameStore(s => s.shop.buy);
     const phase = useGameStore(s => s.gameManagement.phase);
     const dayEnded = useGameStore(s => s.gameManagement.dayEnded);
@@ -56,6 +63,24 @@ const Shop = ({ isActive }: TabProps) => {
                     </Card>
                 );
             })}
+
+            {ADVISOR_ITEMS.filter(item => advisorLevel < item.targetLevel).map(item => (
+                <Card key={item.id}>
+                    <Typography variant="h2">{t(`shop.${item.id}.name`)}</Typography>
+                    <Typography variant="body">{t(`shop.${item.id}.description`)}</Typography>
+                    <Button
+                        disabled={!canBuy || treasury < item.cost}
+                        onClick={() => buy(item.id)}
+                    >
+                        {t('shop.buy', { amount: item.cost })}
+                    </Button>
+                </Card>
+            ))}
+            {advisorLevel > 0 && (
+                <Card>
+                    <Typography variant="body">{t('shop.advisor_current', { level: t(`shop.advisor_${advisorLevel}.name`) })}</Typography>
+                </Card>
+            )}
 
             <Card>
                 <Typography variant="h2">{t('shop.statue.name')}</Typography>
