@@ -121,11 +121,13 @@
     border-radius: 4px;
 
     &.positive {
-        background-color: rgba(39, 174, 96, 0.1); /* --income-green at 10% */
+        background-color: rgba(39, 174, 96, 0.1);
+        /* --income-green at 10% */
     }
 
     &.negative {
-        background-color: rgba(231, 76, 60, 0.1); /* --expense-red at 10% */
+        background-color: rgba(231, 76, 60, 0.1);
+        /* --expense-red at 10% */
     }
 }
 
@@ -345,8 +347,9 @@
     flex-shrink: 0;
 
     img {
-        width: 64px;
-        height: 64px;
+        width: 120px;
+        /*height: 64px;*/
+        outline: 3px solid var(--expense-red);
         image-rendering: pixelated;
     }
 }

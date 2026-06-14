@@ -64,7 +64,7 @@ const Shop = ({ isActive }: TabProps) => {
                 );
             })}
 
-            {ADVISOR_ITEMS.filter(item => advisorLevel < item.targetLevel).map(item => (
+            {ADVISOR_ITEMS.filter(item => item.targetLevel === advisorLevel + 1).map(item => (
                 <Card key={item.id}>
                     <Typography variant="h2">{t(`shop.${item.id}.name`)}</Typography>
                     <Typography variant="body">{t(`shop.${item.id}.description`)}</Typography>

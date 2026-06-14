@@ -53,6 +53,10 @@ export const BudgetRow = ({ id, label, isTax = false, projectedValue }: BudgetRo
                     </Button> : null
                 }
             </div>
+
+            <div className={styles.advisorComment}>
+                {/* Placeholder for advisor button with (i) based on this budget item */}
+            </div>
         </div>
     )
 }
