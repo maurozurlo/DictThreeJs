@@ -7,10 +7,10 @@ import { getRandomFromList } from './Math';
 import { GAMESTATE } from '../Constants/GameState';
 
 export const ADVISOR_NAMES: Record<AdvisorLevel, string> = {
-    0: 'Your Nephew (Economics Dropout)',
-    1: 'Junior Analyst',
-    2: 'Senior Analyst',
-    3: 'Chief Economic Advisor',
+    0: 'Kiki',
+    1: 'Edward',
+    2: 'Ricky',
+    3: 'Alfonso',
 };
 
 /** Returns an i18n key from the advisor namespace, or 'No advice available.' if no match found. */

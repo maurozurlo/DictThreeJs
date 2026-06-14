@@ -4,6 +4,7 @@
         "active_this_round": "Active this round",
         "cost": "Cost: ${{amount}}M",
         "buy": "Buy — ${{amount}}M",
+        "advisor_your": "Your advisor",
         "media_coverage": {
             "name": "Specialized Media Coverage",
             "description": "Freezes all People relation changes at end of this round."
@@ -16,18 +17,21 @@
             "name": "Media Blackout",
             "description": "Freezes all Business relation changes at end of this round."
         },
-        "advisor_current": "Current advisor: {{level}}",
+        "advisor_0": {
+            "name": "Kiki",
+            "description": "Your cousin. Dropped out of the Economics program due to legal troubles. Wakes up at 4 pm."
+        },
         "advisor_1": {
-            "name": "Junior Analyst",
-            "description": "Replaces your nephew. Gives advice on laws, deals, and budget — mostly right."
+            "name": "Edward",
+            "description": "A certified economist. Slightly right, slightly wrong. Considers bell pepper 'spicy'."
         },
         "advisor_2": {
-            "name": "Senior Analyst",
-            "description": "Experienced economist. Advice is reliable, with appropriate caveats."
+            "name": "Ricky",
+            "description": "Good economist, talks loud and talks a lot. Knows almost everything about economics and has unmatched charisma. Terrified of the passage of time."
         },
         "advisor_3": {
-            "name": "Chief Economic Advisor",
-            "description": "Top of the field. Advice is specific, accurate, and slightly insufferable."
+            "name": "Alfonso",
+            "description": "The crème de la crème. Expert in everything involving real, unreal, and unimaginable numbers. Can prevent a crisis with a pin. No one has ever seen him smile."
         },
         "statue": {
             "name": "Giant Statue",

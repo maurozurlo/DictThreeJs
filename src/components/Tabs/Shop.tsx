@@ -76,11 +76,11 @@ const Shop = ({ isActive }: TabProps) => {
                     </Button>
                 </Card>
             ))}
-            {advisorLevel > 0 && (
-                <Card>
-                    <Typography variant="body">{t('shop.advisor_current', { level: t(`shop.advisor_${advisorLevel}.name`) })}</Typography>
-                </Card>
-            )}
+            <Card>
+                <Typography variant="caption">{t('shop.advisor_your')}</Typography>
+                <Typography variant="h2">{t(`shop.advisor_${advisorLevel}.name`)}</Typography>
+                <Typography variant="body">{t(`shop.advisor_${advisorLevel}.description`)}</Typography>
+            </Card>
 
             <Card>
                 <Typography variant="h2">{t('shop.statue.name')}</Typography>

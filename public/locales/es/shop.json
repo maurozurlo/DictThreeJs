@@ -4,6 +4,7 @@
         "active_this_round": "Activo esta ronda",
         "cost": "Costo: ${{amount}}M",
         "buy": "Comprar — ${{amount}}M",
+        "advisor_your": "Tu asesor",
         "media_coverage": {
             "name": "Cobertura mediática especializada",
             "description": "Congela todos los cambios de relación con el pueblo al final de esta ronda."
@@ -16,18 +17,21 @@
             "name": "Apagón mediático",
             "description": "Congela todos los cambios de relación con las empresas al final de esta ronda."
         },
-        "advisor_current": "Asesor actual: {{level}}",
+        "advisor_0": {
+            "name": "Kiki",
+            "description": "Tu primo. Dejó la carrera de Economía por problemas legales. Se despierta a las 4 pm."
+        },
         "advisor_1": {
-            "name": "Analista Junior",
-            "description": "Reemplaza a tu sobrino. Da consejos sobre leyes, tratos y presupuesto — mayormente correcto."
+            "name": "Edward",
+            "description": "Un economista recibido. Ligeramente correcto, ligeramente incorrecto. El morrón le parece 'picante'."
         },
         "advisor_2": {
-            "name": "Analista Senior",
-            "description": "Economista experimentado. El consejo es confiable, con las advertencias pertinentes."
+            "name": "Ricky",
+            "description": "Buen economista, habla fuerte y habla mucho. Sabe casi todo de economía y tiene un carisma inigualable. Le tiene miedo al paso del tiempo."
         },
         "advisor_3": {
-            "name": "Asesor Económico Jefe",
-            "description": "Lo mejor del campo. El consejo es específico, preciso y ligeramente insufrible."
+            "name": "Alfonso",
+            "description": "La crème de la crème. Experto en todo lo que tenga que ver con números reales, irreales e inimaginables. Puede prevenir una crisis con un alfiler. Nunca nadie lo vio sonreír."
         },
         "statue": {
             "name": "Estatua Gigante",
