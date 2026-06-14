@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
 import { useMemo } from 'react'
 import { dumbifyText } from '../../Utils/String'
+import { GAMESTATE } from '../../Constants/GameState'
 
 const Laws = () => {
     const { t: commonT } = useTranslation()
@@ -14,6 +15,8 @@ const Laws = () => {
     const lawDecided = useGameStore(s => s.law.lawDecided)
     const actUponLaw = useGameStore(s => s.law.actUponLaw)
     const dumbScore = useGameStore(s => s.gameManagement.dumbScore)
+    const infrastructure = useGameStore(s => s.budget.expenditures.infrastructure)
+    const infraLocked = infrastructure < GAMESTATE.BUDGET_EFFECTS.INFRASTRUCTURE.LOW
 
     const powerName = currentLaw
         ? (currentLaw.type === 'weird' ? '???' : commonT(`power.${currentLaw.power}`))
@@ -22,6 +25,10 @@ const Laws = () => {
         dumbifyText(t('proposal_by', { power: powerName }), dumbScore),
         [powerName, dumbScore, t]
     )
+
+    if (infraLocked) {
+        return <Typography variant='caption' className={styles.title}>{t('laws.infra_locked')}</Typography>
+    }
 
     return (
         currentLaw === null ? null :

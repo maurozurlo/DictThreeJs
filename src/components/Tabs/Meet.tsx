@@ -18,6 +18,7 @@ const Meet = () => {
     const actionTaken = useGameStore((s) => s.meet.actionTaken)
     const actionOutcomeText = useGameStore((s) => s.meet.actionOutcomeText)
     const dumbScore = useGameStore((s) => s.gameManagement.dumbScore)
+    const treasury = useGameStore((s) => s.budget.treasury)
     const coupWarningFaction = useGameStore((s) => s.gameManagement.coupWarningFaction)
     const coupArmed = useGameStore((s) => s.gameManagement.coupArmedLastRound)
     const repStatuses = useGameStore((s) => s.gameManagement.representativeStatuses)
@@ -88,7 +89,7 @@ const Meet = () => {
             )}
 
             <div className={styles.actionsContainer}>
-                <Button onClick={() => takeAction(selectedPower, 'bribe')}>
+                <Button disabled={treasury < bribeCost} onClick={() => takeAction(selectedPower, 'bribe')}>
                     <Icon type="bribe" /> {t('meet.bribe')} (-{MoneyNumberFormatter(bribeCost)})
                 </Button>
 

@@ -5,6 +5,7 @@
         "reject": "Reject Law",
         "approved": "Approved",
         "rejected": "Rejected",
+        "infra_locked": "Infrastructure too low to legislate. Raise it above 3 in the Budget tab.",
         "labels": {
             "0": "Increase military spending by 50%",
             "1": "Implement martial law in troubled regions",

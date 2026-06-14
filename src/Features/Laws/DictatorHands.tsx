@@ -26,8 +26,13 @@ const DictatorHands = () => {
         [lastLawOutcome]
     );
     const lawLabel = useMemo(
-        () => currentLaw ? dumbifyText(t(`laws.labels.${currentLaw.id}`), dumbScore) : '',
-        [currentLaw?.id, dumbScore]
+        () => currentLaw ? dumbifyText(
+            currentLaw.type === 'weird'
+                ? t(`laws.labels.${currentLaw.id}.label`)
+                : t(`laws.labels.${currentLaw.id}`),
+            dumbScore
+        ) : '',
+        [currentLaw?.id, currentLaw?.type, dumbScore]
     );
 
     return currentLaw ? (

@@ -3,7 +3,6 @@ import clsx from 'clsx'
 import Button from '../Button/Button'
 import { Icon, type IconType } from '../Icon/Icon'
 import { useGameStore } from '../../Stores/GameState'
-import { GAMESTATE } from '../../Constants/GameState'
 import { Tabs } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next';
 
@@ -16,8 +15,6 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
     const displayTabs = activeTab !== Tabs.Menu;
     const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
-    const infrastructure = useGameStore(s => s.budget.expenditures.infrastructure)
-    const infraLocked = infrastructure < GAMESTATE.BUDGET_EFFECTS.INFRASTRUCTURE.LOW
     const secretAvailable = useGameStore(s => s.specialEnding.available)
     const debugEnabled = useGameStore(s => s.debug.enabled)
     const phase = useGameStore(s => s.gameManagement.phase)
@@ -42,7 +39,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
     const tabConfig: { tab: Tabs, icon: IconType, label: string, disabled?: boolean }[] = [
         { tab: Tabs.Log, icon: 'news', label: t('tabs.log') },
         { tab: Tabs.Meet, icon: 'meet', label: t('tabs.meet'), disabled: tabsLocked },
-        { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws'), disabled: tabsLocked || infraLocked },
+        { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws'), disabled: tabsLocked },
         { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals'), disabled: tabsLocked },
         { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: tabsLocked },
         { tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
