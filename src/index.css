@@ -42,6 +42,9 @@ body,
   --hud-border-dark: #401d09;
   --hud-panel-bg: #2b1807;
 
+  /* Tab content sits over the 3D scene — transparent by design (HUD zone 3/4) */
+  --tab-bg: transparent;
+
   /* Card */
   --card-bg: #401d09;
   --card-border: #5e2d0b;

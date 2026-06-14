@@ -29,6 +29,10 @@ All colors below are the authoritative token set. Hardcoded hex values in compon
 
 ### CSS Custom Properties (defined in `src/index.css`)
 
+All authoritative colors are tokenized as of 2026-06-14. Components reference these tokens, not raw hex.
+
+**Text & accent**
+
 | Token | Value | Usage |
 |-------|-------|-------|
 | `--text-color` | `#ffffff` | Primary text, headings, UI labels |
@@ -37,38 +41,48 @@ All colors below are the authoritative token set. Hardcoded hex values in compon
 | `--accent-muted` | `#d1d37f` | h2/h3 headings, span elements, secondary accent |
 | `--text-color-dark` | `#000000` | Text on light backgrounds (rare) |
 | `--text-body-dark` | `#3f3f3f` | Body text on light backgrounds (rare) |
+
+**HUD / panels**
+
+| Token | Value | Usage |
+|-------|-------|-------|
 | `--hud-border-dark` | `#401d09` | HUD panel dividers, faction relation box borders |
 | `--hud-panel-bg` | `#2b1807` | All HUD panel backgrounds (navbar, action panel, modals, tabs) |
+| `--card-bg` | `#401d09` | Content card background |
+| `--card-border` | `#5e2d0b` | Content card border |
 
-### Semantic One-Off Colors (not tokenized — convert to tokens in future)
+**Interactive elements**
 
-| Name | Value | Usage | Location |
-|------|-------|-------|----------|
-| income-green | `#27ae60` | Positive money delta, income values | Tabs.module.css, EndScreen.module.css, DayEnded.module.css |
-| expense-red | `#e74c3c` | Negative money delta, expense values | Same files |
-| warning-yellow | `#f1c40f` | Rounds remaining warning | Tabs.module.css |
-| gold | `#ffd700` | Advance-ring spin gradient, advance hint text | Navbar.module.css |
-| card-bg | `#401d09` | Content card background | Card.module.css |
-| card-border | `#5e2d0b` | Content card border | Card.module.css |
-| button-brown | `brown` (CSS named) | Button and select background base | Button.module.css, Tabs.module.css |
-| option-bg | `#3a0000` | `<select>` option dropdown background | Tabs.module.css |
-| lose-overlay | `rgba(80, 0, 0, 0.88)` | End-screen overlay on defeat | App.module.css |
-| victory-overlay | `rgba(0, 60, 20, 0.88)` | End-screen overlay on victory | App.module.css |
-| scrim | `rgba(0, 0, 0, 0.85)` | Generic modal scrim | App.module.css |
-| tooltip-bg | `#111` | Hover tooltip background | Navbar.module.css |
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--button-bg` | `brown` (CSS named) | Button and select background base |
+| `--select-option-bg` | `#3a0000` | `<select>` option dropdown background |
 
-### Proposed Future Tokens (migration targets)
+**Semantic feedback**
 
-```css
---income-green: #27ae60;
---expense-red: #e74c3c;
---warning-yellow: #f1c40f;
---gold: #ffd700;
---card-bg: #401d09;
---card-border: #5e2d0b;
---button-brown: #8b2500;   /* approximate — CSS "brown" = #a52a2a */
---scrim: rgba(0, 0, 0, 0.85);
-```
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--income-green` | `#27ae60` | Positive money delta, income values |
+| `--expense-red` | `#e74c3c` | Negative money delta, expense values, coup warning |
+| `--warning-yellow` | `#f1c40f` | Rounds remaining warning |
+| `--gold` | `#ffd700` | Advance-ring spin gradient, advance hint text |
+
+**Overlays**
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--lose-overlay-bg` | `rgba(80, 0, 0, 0.88)` | End-screen overlay on defeat |
+| `--victory-overlay-bg` | `rgba(0, 60, 20, 0.88)` | End-screen overlay on victory |
+| `--scrim-bg` | `rgba(0, 0, 0, 0.85)` | Generic modal scrim |
+
+### Residual hardcoded values (acceptable — not color identity)
+
+These remain inline by design and do not need tokenizing:
+- **Alpha-channel tints** — e.g. `rgba(255,255,255,.04)` ghost overlays, `rgba(39,174,96,0.1)` / `rgba(231,76,60,0.1)` (income/expense at 10% — commented in source). These are opacity variants of existing tokens; CSS custom properties don't compose with alpha cleanly without `color-mix()`.
+- **Shape-math colors** — the conic-gradient mask in `Navbar.module.css` (`#000`/`#0000`) defines a pixel mask shape, not a visual color.
+- **Tooltip chrome** — `#111` bg / `#555` border in `Navbar.module.css` (one-off dev-tooltip styling).
+- **Newspaper palette** (`Newspaper.css`) — intentionally separate newsprint palette (#f0eddb, #616054, etc.), not part of the HUD identity.
+- **Debug overlay** (`DebugRecurringOverlay.module.css`) — dev-only, not shipped UI.
 
 ---
 
@@ -198,7 +212,10 @@ Spacing follows a loose 0.25rem base unit. These values appear consistently acro
 
 ## Open Questions (Sprint 5+)
 
-- **Color tokenization**: ~8 hardcoded hex values in components should become CSS custom properties. Track in a dedicated story.
 - **8-BIT WONDER and Bitmgothic**: Both fonts are loaded but unused. Decide use case or remove from bundle.
 - **Dark-mode variant**: `--text-color-dark` and `--text-body-dark` exist but light-background UI is rare. Audit whether these are genuinely needed or dead tokens.
-- **`--tab-bg`**: Referenced in `Tabs.module.css` but not defined in `index.css`. Currently falls back to inherited value. Define or remove.
+
+### Resolved (2026-06-14)
+
+- ~~**Color tokenization**~~: Done. All HUD-identity hex values are now CSS custom properties (see Section 2). Residual inline values are alpha tints / shape-math / non-shipped UI.
+- ~~**`--tab-bg`**~~: Defined as `transparent` in `index.css` — tab content is intentionally transparent over the 3D scene (HUD zone 3/4).

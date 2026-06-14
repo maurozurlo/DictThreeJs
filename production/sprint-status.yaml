@@ -14,7 +14,7 @@ goal: "Close all Production → Polish gate blockers: ship secret room layout fi
 start: "2026-06-14"
 end: "2026-06-21"
 generated: "2026-06-13"
-updated: "2026-06-13"
+updated: "2026-06-14"
 
 stories:
   - id: "3-6"
@@ -92,30 +92,30 @@ stories:
     name: "Art bible — reverse-document visual identity from code"
     file: "production/stories/4-6-art-bible.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-14"
 
   - id: "4-7"
     name: "Difficulty curve + emotional arc doc"
     file: "production/stories/4-7-difficulty-curve.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
-    blocker: "Depends on 4-3 playtest data"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-14"
 
   - id: "3-5"
     name: "Budget Tier Consequences"
     file: "production/stories/3-5-budget-tier-consequences.md"
     priority: should-have
-    status: blocked
+    status: descoped
     owner: ""
     estimate_days: 2.5
-    blocker: "Design call required: core mechanic or enhancement? Story file must be created."
+    blocker: "Design call made 2026-06-14: classified as enhancement, not core mechanic. Deferred to Polish phase."
     completed: ""
 
   # ── Nice to Have (carry-over — schedule or cut decision required) ─────
@@ -126,35 +126,35 @@ stories:
     status: backlog
     owner: ""
     estimate_days: 0.5
-    blocker: "Depends on 4-6 (art bible)"
+    blocker: "Deferred to backlog 2026-06-14 — revisit before Release (accessibility retrofit cost grows during Polish per AD/PR note)."
     completed: ""
 
   - id: "1-9"
     name: "Street View: basic waypoint movement (A→B→A)"
     file: "production/stories/1-9-street-waypoint-movement.md"
     priority: nice-to-have
-    status: backlog
+    status: icebox
     owner: ""
     estimate_days: 1.0
-    blocker: "Carry x3 — schedule or cut to icebox"
+    blocker: "Moved to icebox 2026-06-14 — bundled into future 'visual update' sprint with Street View feature."
     completed: ""
 
   - id: "1-10"
     name: "UX Review: hud.md"
     file: "production/stories/1-10-ux-review-hud.md"
     priority: nice-to-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
-    blocker: "Carry x3 — schedule or cut to icebox"
-    completed: ""
+    blocker: ""
+    completed: "2026-06-14"
 
   - id: "1-11"
     name: "ADR: Street Scene Architecture"
     file: "production/stories/1-11-adr-street-scene.md"
     priority: nice-to-have
-    status: backlog
+    status: icebox
     owner: ""
     estimate_days: 0.5
-    blocker: "Carry x3 — schedule or cut to icebox"
+    blocker: "Moved to icebox 2026-06-14 — bundled into future 'visual update' sprint with Street View feature."
     completed: ""
