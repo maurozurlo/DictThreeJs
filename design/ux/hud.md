@@ -169,9 +169,9 @@ Any proposed addition to Zone 1 or Zone 2 that would exceed these caps requires 
 - Zone: Zone 1 — right end of tab bar, same visual level as tab buttons
 - Category: Contextual — visible only during phase = 'start', before `dayEnded`
 - Rationale: Belongs with navigation, not with the status panel. ActionPanel stays focused on status-only information.
-- Two visual states — color-coded:
-  - **All actions complete** → label "Next Round" — primary/positive color (green or accent), inviting
-  - **Actions pending** → label "Skip" — warning color (orange or muted), communicates risk
+- Two visual states:
+  - **All actions complete** (`allActionsDone = true`): label `>>` — glowing amber ring animation, "All done!" hint below
+  - **Actions pending**: label `>` — no ring, no hint; advancing in this state skips the unresolved action (penalty applies)
 - **Confirmation overlay (Skip state):** Full-screen overlay covering all zones including the 3D scene. Contains: warning message explaining the penalty, projected financials for the round, Confirm and Cancel buttons. Full-screen treatment communicates the gravity of advancing without completing actions.
 - **Confirmation overlay (Next Round state):** Full-screen overlay shows projected financials only — no warning treatment. Player confirms before the round resolves.
 
@@ -316,7 +316,7 @@ Accessibility tier: Not formally defined for this project (see Open Questions).
 1. **Round counter display** — Currently always visible in Navbar. Design intent is contextual (round start/end only). Deferred; needs a decision before the next UI sprint.
 2. **Accessibility tier** — No formal tier defined. Recommend WCAG-AA as a baseline. Run a contrast audit against current theme colors.
 3. **Minimum viewport** — 1024px proposed. Validate against actual usage (browser analytics) before enforcing.
-4. **Next Round / Skip button relocation** — Currently in ActionPanel (Zone 2). Spec moves it to Zone 1 Navbar. This is an implementation change that needs a dev story.
-5. **Street View tab** — Tab is specified as always visible. Street View content is planned but not yet implemented. Decide whether to show the tab as disabled/placeholder until content ships, or hide it until the feature is complete.
+4. ~~**Next Round / Skip button relocation**~~ — **CLOSED (Sprint 4)**: Advance button is in Zone 1 (Navbar). Actual label states are `>` / `>>`, not "Skip" / "Next Round" — spec updated to match implementation.
+5. ~~**Street View tab**~~ — **CLOSED**: Street View feature is deferred to the visual update sprint. The Street tab will remain hidden until Street View content ships. No placeholder tab shown.
 6. **Secret tab announcement dialog** — New pattern not yet in the codebase. Needs to be added to the interaction pattern library before implementation.
 7. **Player journey map** — Not yet created. Designing this spec without it means player arrival context for some states is assumed. Consider running `/ux-design` for the player journey after this spec is reviewed.
