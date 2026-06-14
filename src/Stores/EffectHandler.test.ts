@@ -41,11 +41,11 @@ describe('applyBudgetEffects', () => {
         expect(result.logMessages).toHaveLength(0);
     });
 
-    it('low security angers the military by 2', () => {
+    it('low security has no effect on military relations', () => {
         const result = applyBudgetEffects(makeBudget({ security: 2 }), neutralRelations);
 
-        expect(result.newRelations.military).toBe(-2);
-        expect(result.logMessages).toContain('log.budget_military_low');
+        expect(result.newRelations.military).toBe(0);
+        expect(result.logMessages).not.toContain('log.budget_military_low');
     });
 
     it('high security pleases the military by 1', () => {
@@ -55,11 +55,11 @@ describe('applyBudgetEffects', () => {
         expect(result.logMessages).toContain('log.budget_military_high');
     });
 
-    it('low health angers the people by 2', () => {
+    it('low health has no effect on people relations', () => {
         const result = applyBudgetEffects(makeBudget({ health: 2 }), neutralRelations);
 
-        expect(result.newRelations.people).toBe(-2);
-        expect(result.logMessages).toContain('log.budget_health_low');
+        expect(result.newRelations.people).toBe(0);
+        expect(result.logMessages).not.toContain('log.budget_health_low');
     });
 
     it('high health pleases the people by 1', () => {
@@ -69,12 +69,12 @@ describe('applyBudgetEffects', () => {
         expect(result.logMessages).toContain('log.budget_health_high');
     });
 
-    it('low infrastructure angers business and people by 1 each', () => {
+    it('low infrastructure has no effect on business or people relations', () => {
         const result = applyBudgetEffects(makeBudget({ infrastructure: 2 }), neutralRelations);
 
-        expect(result.newRelations.business).toBe(-1);
-        expect(result.newRelations.people).toBe(-1);
-        expect(result.logMessages).toContain('log.budget_infra_low');
+        expect(result.newRelations.business).toBe(0);
+        expect(result.newRelations.people).toBe(0);
+        expect(result.logMessages).not.toContain('log.budget_infra_low');
     });
 
     it('high infrastructure pleases business and people by 1 each', () => {
@@ -85,25 +85,23 @@ describe('applyBudgetEffects', () => {
         expect(result.logMessages).toContain('log.budget_infra_high');
     });
 
-    it('clamps relation changes at the minimum bound', () => {
+    it('low budget leaves relations unchanged even at near-minimum', () => {
         const result = applyBudgetEffects(
             makeBudget({ security: 2 }),
             { military: -9, business: 0, people: 0 }
         );
 
-        expect(result.newRelations.military).toBe(-10);
+        expect(result.newRelations.military).toBe(-9);
     });
 
-    it('multiple thresholds stack (low security + low health + low infrastructure)', () => {
+    it('multiple low thresholds produce no relation changes or log messages', () => {
         const result = applyBudgetEffects(
             makeBudget({ security: 2, health: 2, infrastructure: 2 }),
             neutralRelations
         );
 
-        expect(result.newRelations.military).toBe(-2);
-        expect(result.newRelations.people).toBe(-3); // health −2, infra −1
-        expect(result.newRelations.business).toBe(-1);
-        expect(result.logMessages).toHaveLength(3);
+        expect(result.newRelations).toEqual(neutralRelations);
+        expect(result.logMessages).toHaveLength(0);
     });
 
     it('does not mutate the input relations object', () => {
