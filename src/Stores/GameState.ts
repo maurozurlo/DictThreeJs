@@ -829,7 +829,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
-                        endReason: `The ${overthrown} has overthrown your government! Relations dropped to -10.`,
+                        endReason: `The ${overthrown} ${overthrown === 'people' ? 'have' : 'has'} overthrown your government! Relations dropped to -10.`,
                         endCause: overthrown as EndCause,
                         phase: 'lose',
                         round: newRound,
