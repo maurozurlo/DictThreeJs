@@ -15,7 +15,9 @@ const Laws = () => {
     const actUponLaw = useGameStore(s => s.law.actUponLaw)
     const education = useGameStore(s => s.budget.expenditures.education)
 
-    const powerName = currentLaw ? commonT(`power.${currentLaw.power}`) : ''
+    const powerName = currentLaw
+        ? (currentLaw.type === 'weird' ? '???' : commonT(`power.${currentLaw.power}`))
+        : ''
     const lawHeader = useMemo(() => 
         dumbifyText(t('proposal_by', { power: powerName }), educationToDumbScore(education)),
         [powerName, education, t]

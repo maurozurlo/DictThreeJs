@@ -59,6 +59,92 @@
             "media_income": "Ingresos de medios estatales",
             "tariff_income": "Ingresos arancelarios",
             "public_works_cost": "Mantenimiento de obras públicas"
+        },
+        "weird": {
+            "1001": {
+                "label": "Ley de Cementerios 24/7",
+                "description": "El Ministerio de Servicios Eternos propone abrir los cementerios a toda hora.",
+                "accept": "Los cementerios nunca cierran. Por alguna razón, esto beneficia la economía.",
+                "reject": "Decides no regular a los muertos."
+            },
+            "1002": {
+                "label": "Sombreros para Palomas Obligatorios",
+                "description": "La Oficina de Moda Aviar exige que todas las palomas lleven sombreros reglamentarios.",
+                "accept": "Se encargan sombreros diminutos. Las palomas parecen indiferentes.",
+                "reject": "Las palomas siguen sin sombrero."
+            },
+            "1003": {
+                "label": "Iniciativa Sol Nocturno",
+                "description": "Se propone un segundo sol para aumentar la productividad empresarial de noche.",
+                "accept": "Sale un segundo sol. Los negocios florecen. El sueño, no.",
+                "reject": "Vetas la estrella adicional."
+            },
+            "1004": {
+                "label": "Programa de Funerales Invertidos",
+                "description": "Los ciudadanos asisten a funerales anticipados como gratitud por seguir vivos.",
+                "accept": "A la gente le parece conmovedor. La moral mejora.",
+                "reject": "Evitas este ritual incómodo a los vivos."
+            },
+            "1005": {
+                "label": "Ley de Empleo de Esqueletos",
+                "description": "Los esqueletos serán contratados como trabajadores municipales sin sueldo.",
+                "accept": "Los esqueletos se presentan a trabajar. El erario lo agradece.",
+                "reject": "Los esqueletos permanecen desempleados."
+            },
+            "1006": {
+                "label": "Ministerio de Martes Adicionales",
+                "description": "El calendario se reformará para incluir un segundo martes cada semana.",
+                "accept": "La productividad sube. Nadie quiere más los martes.",
+                "reject": "La semana sigue con siete días."
+            },
+            "1007": {
+                "label": "Ley Nacional de Apreciación de las Jirafas",
+                "description": "Las jirafas serán celebradas como símbolo nacional de la perspectiva.",
+                "accept": "Se declara el día de la jirafa. Al pueblo le encanta.",
+                "reject": "Las jirafas no reciben reconocimiento oficial."
+            },
+            "1008": {
+                "label": "Iniciativa de Holgazanería Pública",
+                "description": "El ejército respalda períodos obligatorios de descanso público para conservar energía.",
+                "accept": "Todos paran al mismo tiempo. El ejército lo aprueba.",
+                "reject": "Los ciudadanos pueden seguir caminando."
+            },
+            "1009": {
+                "label": "Ley de Igualdad de Altura de Edificios",
+                "description": "Todos los edificios deben tener exactamente la misma altura por justicia arquitectónica.",
+                "accept": "Las cuadrillas se ponen a nivelar los edificios.",
+                "reject": "Los edificios siguen a sus alturas naturales y desiguales."
+            },
+            "1010": {
+                "label": "Departamento de Dispensadores de Agua",
+                "description": "Se crea un ministerio exclusivamente para gestionar la compra de dispensadores.",
+                "accept": "El departamento se funda. Los dispensadores aparecen por todas partes.",
+                "reject": "La nación se las arregla sin un ministerio de dispensadores."
+            },
+            "1011": {
+                "label": "Viernes de Caminata hacia Atrás Obligatoria",
+                "description": "Cada viernes, todos los ciudadanos deben caminar hacia atrás en su trayecto matutino.",
+                "accept": "Los viernes son más lentos, pero más reflexivos.",
+                "reject": "Caminar hacia adelante sigue siendo la dirección oficial."
+            },
+            "1012": {
+                "label": "Ministerio de Estatuas Excesivas",
+                "description": "Un ministerio llenará todas las plazas con estatuas de arte cuestionable.",
+                "accept": "Las estatuas llegan. Tu índice de aprobación sube misteriosamente.",
+                "reject": "Las plazas se quedan sin estatuas."
+            },
+            "1013": {
+                "label": "Ensayo Nacional de Tráfico por la Izquierda",
+                "description": "Los vehículos cambiarán al carril izquierdo durante seis meses de prueba.",
+                "accept": "El ejército hace cumplir los nuevos carriles. El caos es ordenado.",
+                "reject": "El tráfico sigue circulando por la derecha."
+            },
+            "1014": {
+                "label": "Reconocimiento Legal de Fantasmas",
+                "description": "Un proyecto de ley otorga a los fantasmas plena personalidad jurídica y derecho al voto.",
+                "accept": "Los fantasmas ya son ciudadanos. A todos les parece bien.",
+                "reject": "Los fantasmas permanecen en un limbo legal."
+            }
         }
     },
     "acted_upon_law": "Ya has tomado una decisión sobre esta ley.",

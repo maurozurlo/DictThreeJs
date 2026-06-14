@@ -26,7 +26,7 @@ export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | 'mili
 export interface ActiveRecurringEffect {
     /** Unique stable key matching the source law/deal id — used for dedup and repeal lookup. */
     sourceId: string;
-    sourceType: 'law' | 'deal' | 'opportunity';
+    sourceType: 'law' | 'deal' | 'opportunity' | 'weird-law';
     /** Faction that proposed this law/deal — used to apply the repeal relation penalty. */
     sourceFaction: Power;
     /** i18n key shown in DayEnded and Active Legislation list. */

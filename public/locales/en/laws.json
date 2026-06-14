@@ -59,6 +59,92 @@
             "media_income": "State Media Revenue",
             "tariff_income": "Tariff Revenue",
             "public_works_cost": "Public Works Upkeep"
+        },
+        "weird": {
+            "1001": {
+                "label": "24/7 Cemeteries Act",
+                "description": "The Ministry of Eternal Services proposes extending cemetery operating hours around the clock.",
+                "accept": "The cemeteries never close. Somehow, this is good for the economy.",
+                "reject": "You decline to regulate the dead."
+            },
+            "1002": {
+                "label": "Mandatory Pigeon Hats",
+                "description": "The Bureau of Avian Fashion insists all city pigeons wear regulation hats.",
+                "accept": "Tiny hats are commissioned. The pigeons seem indifferent.",
+                "reject": "The pigeons remain hatless."
+            },
+            "1003": {
+                "label": "Night Sun Initiative",
+                "description": "A second sun is proposed to increase business productivity after dark.",
+                "accept": "A second sun rises. Business booms. Sleep suffers.",
+                "reject": "You veto the additional star."
+            },
+            "1004": {
+                "label": "Reverse Funeral Program",
+                "description": "Citizens attend funerals in advance, as a form of gratitude for still being alive.",
+                "accept": "The people find it oddly moving. Morale improves.",
+                "reject": "You spare the living this awkward ritual."
+            },
+            "1005": {
+                "label": "Skeleton Employment Act",
+                "description": "Skeletons are to be hired as unpaid municipal workers. No benefits required.",
+                "accept": "Skeletons report for duty. The treasury is grateful.",
+                "reject": "The skeletons remain unemployed."
+            },
+            "1006": {
+                "label": "Ministry of Additional Tuesdays",
+                "description": "The calendar is to be reformed to include a second Tuesday each week.",
+                "accept": "Productivity is up. Nobody likes Tuesdays more.",
+                "reject": "The week remains at seven days."
+            },
+            "1007": {
+                "label": "National Giraffe Appreciation Act",
+                "description": "Giraffes are to be celebrated as a national symbol of perspective.",
+                "accept": "Giraffe appreciation day is declared. The people love it.",
+                "reject": "The giraffes receive no official recognition."
+            },
+            "1008": {
+                "label": "Public Idling Initiative",
+                "description": "The military endorses mandatory public rest periods to conserve national energy.",
+                "accept": "Everyone stops moving simultaneously. The military approves.",
+                "reject": "Citizens are free to continue walking."
+            },
+            "1009": {
+                "label": "Building Height Equality Act",
+                "description": "All buildings must be exactly the same height for reasons of architectural fairness.",
+                "accept": "Construction crews get to work evening things out.",
+                "reject": "Buildings remain at their natural, unequal heights."
+            },
+            "1010": {
+                "label": "Department of Water Coolers",
+                "description": "A new ministry is created solely to manage the procurement of water coolers.",
+                "accept": "The department is founded. Water coolers appear everywhere.",
+                "reject": "The nation manages without a water cooler ministry."
+            },
+            "1011": {
+                "label": "Mandatory Backwards Walking Friday",
+                "description": "Every Friday, all citizens must walk backwards for their morning commute.",
+                "accept": "Fridays are now significantly slower but more thoughtful.",
+                "reject": "Forwards walking remains the official direction."
+            },
+            "1012": {
+                "label": "Ministry of Excessive Statues",
+                "description": "A ministry is established to fill every plaza with statues of questionable artistry.",
+                "accept": "The statues arrive. Your approval rating mysteriously rises.",
+                "reject": "The plazas remain statue-free."
+            },
+            "1013": {
+                "label": "National Left-Handed Traffic Trial",
+                "description": "Vehicles are to switch to the left lane for a six-month trial period.",
+                "accept": "The military enforces the new lanes. Chaos is orderly.",
+                "reject": "Traffic continues on the right."
+            },
+            "1014": {
+                "label": "Legal Recognition of Ghosts",
+                "description": "A bill to grant ghosts full legal personhood and voting rights.",
+                "accept": "Ghosts are citizens now. Everyone seems fine with this.",
+                "reject": "Ghosts remain in a legal grey area."
+            }
         }
     },
     "acted_upon_law": "You've already acted upon this law.",

@@ -15,9 +15,13 @@ export type RecurringEffect = {
 
 export type Law = {
     id: number;
+    /** 'weird' marks absurd flavour laws proposed by ??? (no faction penalty on reject). */
+    type?: 'normal' | 'weird';
     power: Power;
     acceptEffect: LawEffect;
     rejectEffect: LawEffect;
     /** Optional recurring effect — present only on lasting-effect laws. */
     recurringEffect?: RecurringEffect;
+    /** Direct charisma delta on accept — used by weird laws that grant charisma. */
+    charismaEffect?: number;
 }

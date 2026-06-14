@@ -9,6 +9,7 @@ import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } 
 import { DEALS } from "../assets/deals";
 import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
+import { WEIRD_LAWS } from "../assets/weirdLaws";
 import { handleDecision, handleRelations, applyBudgetEffects } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
 import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
@@ -205,6 +206,77 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const current = state.law.current;
             if (!current) return;
+
+            // Weird law path — one-time effects, no faction penalty on reject, slot tracking
+            if (current.type === 'weird') {
+                if (hasAccepted) {
+                    const effect = current.acceptEffect;
+                    const newTreasury = state.budget.treasury + (effect.treasury ?? 0);
+                    const newRelations = { ...state.relations.current };
+                    const round = state.gameManagement.round;
+                    PowerList.forEach((key) => {
+                        const delta = effect[key];
+                        if (typeof delta === 'number') {
+                            newRelations[key] = handleRelations({
+                                power: key,
+                                amount: delta,
+                                current: newRelations[key],
+                                round,
+                            });
+                        }
+                    });
+                    const charismaDelta = current.charismaEffect ?? 0;
+                    const newCharisma = Clamp(
+                        state.gameManagement.charisma.current + charismaDelta,
+                        GAMESTATE.CHARISMA.MIN,
+                        GAMESTATE.CHARISMA.MAX
+                    );
+                    const weirdEntry = {
+                        sourceId: `weird-law-${current.id}`,
+                        sourceType: 'weird-law' as const,
+                        sourceFaction: 'people' as const,
+                        label: `laws.labels.${current.id}`,
+                        incomeBonus: 0,
+                        expenseBonus: 0,
+                        roundActivated: round,
+                    };
+                    set((s) => ({
+                        budget: { ...s.budget, treasury: newTreasury },
+                        relations: { ...s.relations, current: newRelations },
+                        gameManagement: {
+                            ...s.gameManagement,
+                            charisma: { ...s.gameManagement.charisma, current: newCharisma },
+                            activeRecurringEffects: [...s.gameManagement.activeRecurringEffects, weirdEntry],
+                        },
+                        law: {
+                            ...s.law,
+                            lastLawOutcome: true,
+                            lawDecided: true,
+                            interactedWithLaws: new Set(s.law.interactedWithLaws).add(current),
+                        },
+                        stats: {
+                            ...s.stats,
+                            lawsPassed: s.stats.lawsPassed + 1,
+                        },
+                    }));
+                } else {
+                    set((s) => ({
+                        law: {
+                            ...s.law,
+                            lastLawOutcome: false,
+                            lawDecided: true,
+                            interactedWithLaws: new Set(s.law.interactedWithLaws).add(current),
+                        },
+                        stats: {
+                            ...s.stats,
+                            lawsRejected: s.stats.lawsRejected + 1,
+                        },
+                    }));
+                }
+                return;
+            }
+
+            // Normal law path
             handleDecision({ type: "law", item: current, hasAccepted, get, set });
             set((s) => ({
                 stats: {
@@ -766,8 +838,15 @@ export const INITIAL_STATE = ({ set, get }: {
             });
             const nextDailyEvent = getRandomDailyEvent();
 
-            // --- 7. Biased law selection (Plan G) ---
-            const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
+            // --- 7. Biased law selection (Plan G) + weird law trigger (Story 5-2) ---
+            const hasActiveWeirdLaw = state.gameManagement.activeRecurringEffects.some(
+                e => e.sourceType === 'weird-law'
+            );
+            const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>): typeof LAWS[number] | null => {
+                // 10% chance of a weird law when the slot is empty
+                if (!hasActiveWeirdLaw && rollChance(0.10)) {
+                    return getRandomFromList(WEIRD_LAWS);
+                }
                 const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
                 if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
                     return getRandomUniqueItemForPower(lawPool, usedLaws, 'people') ?? getRandomUniqueItem(lawPool, usedLaws);
@@ -995,13 +1074,17 @@ export const INITIAL_STATE = ({ set, get }: {
             const tier = getRepealTier(entry);
             const cost = GAMESTATE.REPEAL_COST[tier].treasury;
             if (state.budget.treasury < cost) return;
-            const relationPenalty = GAMESTATE.REPEAL_COST[tier].relation;
-            const newRelation = handleRelations({
-                power: entry.sourceFaction,
-                amount: relationPenalty,
-                current: state.relations.current[entry.sourceFaction],
-                round: state.gameManagement.round,
-            });
+            // Weird-law entries have no proposing faction — skip the relation penalty.
+            const isWeirdLaw = entry.sourceType === 'weird-law';
+            const relationPenalty = isWeirdLaw ? 0 : GAMESTATE.REPEAL_COST[tier].relation;
+            const newRelation = isWeirdLaw
+                ? state.relations.current[entry.sourceFaction]
+                : handleRelations({
+                    power: entry.sourceFaction,
+                    amount: relationPenalty,
+                    current: state.relations.current[entry.sourceFaction],
+                    round: state.gameManagement.round,
+                });
             // Bankruptcy check folded into the same set() — single atomic
             // multi-slice update per ADR-0002 (no mid-update render of a
             // zero-treasury state without the lose phase).

@@ -15,14 +15,17 @@ export type RoundFinancials = {
     netChange: number;
 };
 
-/** Sums incomeBonus and expenseBonus across all active recurring effects. */
+/** Sums incomeBonus and expenseBonus across all active recurring effects.
+ *  Weird-law entries (sourceType === 'weird-law') are excluded — they have
+ *  one-time effects already applied on accept; they carry no per-round income. */
 export function sumRecurringEffects(effects: ActiveRecurringEffect[]): {
     recurringIncome: number;
     recurringExpenses: number;
 } {
+    const recurring = effects.filter(e => e.sourceType !== 'weird-law');
     return {
-        recurringIncome: effects.reduce((sum, e) => sum + e.incomeBonus, 0),
-        recurringExpenses: effects.reduce((sum, e) => sum + e.expenseBonus, 0),
+        recurringIncome: recurring.reduce((sum, e) => sum + e.incomeBonus, 0),
+        recurringExpenses: recurring.reduce((sum, e) => sum + e.expenseBonus, 0),
     };
 }
 
