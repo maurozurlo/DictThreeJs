@@ -107,6 +107,7 @@
   },
   "meet": {
     "none_selected": "Select a faction to begin the meeting",
+    "sick_notice": "{{factions}} didn't show up today — they're sick.",
     "selected": "Selected",
     "bribe": "Bribe",
     "eliminate": "Eliminate",

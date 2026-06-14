@@ -21,6 +21,7 @@ function CameraControllerFree() {
 
 export function Scene() {
     const debug = useGameStore((s) => s.debug.enabled);
+    const repStatuses = useGameStore((s) => s.gameManagement.representativeStatuses);
     useCameraSwitcher(debug);
 
     return (
@@ -31,9 +32,9 @@ export function Scene() {
             <pointLight position={[-0.769, 0.734, -0.393]} intensity={.3} />
             {debug ? <CameraControllerFree /> : <CameraController />}
             <MainModel />
-            <Elite />
-            <People />
-            <Military />
+            {repStatuses.business === 'active' && <Elite />}
+            {repStatuses.people === 'active' && <People />}
+            {repStatuses.military === 'active' && <Military />}
             <SecretRoom />
             <Statue />
             <StreetView />

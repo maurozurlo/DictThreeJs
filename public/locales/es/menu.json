@@ -107,6 +107,7 @@
     },
     "meet": {
         "none_selected": "Selecciona una facción para comenzar la reunión",
+        "sick_notice": "{{factions}} no se presentó hoy — están enfermos.",
         "selected": "Seleccionado",
         "bribe": "Sobornar",
         "eliminate": "Eliminar",

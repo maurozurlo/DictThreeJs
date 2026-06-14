@@ -134,6 +134,7 @@ export type GameState = {
             adjustCharisma: (amount: number) => void;
         };
         meetCounts: Record<Power, number>;
+        representativeStatuses: Record<Power, 'active' | 'sick' | 'eliminated'>;
         nextRound: () => void;
         expireTimer: () => void;
         pauseTimer: () => void;

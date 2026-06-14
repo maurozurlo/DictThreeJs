@@ -35,29 +35,42 @@ const COUP_CAUSE_MAP: Record<Power, EndCause> = {
  * Pure coup threshold evaluation (TR-lasting-007).
  *
  * Checks two thresholds in priority order:
- *   1. Armed (relation ≥ RELATION_THRESHOLD AND charisma ≤ CHARISMA_THRESHOLD)
+ *   1. Armed (relation ≥ effective threshold AND charisma ≤ CHARISMA_THRESHOLD)
  *   2. Yellow warning (relation ≥ WARN_RELATION AND charisma ≤ WARN_CHARISMA)
  *
  * The graceRoll parameter makes this deterministically testable without
  * mocking Math.random globally (ADR-0004). Pass rollFloat() in production,
  * a fixed value in tests.
  *
- * @param relations  - Snapshot of current faction relations
- * @param charisma   - Player's current charisma value
- * @param graceRoll  - Random float [0, 1); compared against GRACE_CHANCE (0.5)
- * @param graceTaken - Was the armed state active last round? (second trigger = certain coup)
+ * Security spend modifies the armed threshold (Story 3-5):
+ *   HIGH security (≥ BUDGET_EFFECTS.SECURITY.HIGH): threshold +1 (harder to coup)
+ *   LOW  security (< BUDGET_EFFECTS.SECURITY.LOW):  threshold -1 (easier to coup)
+ *
+ * @param relations    - Snapshot of current faction relations
+ * @param charisma     - Player's current charisma value
+ * @param graceRoll    - Random float [0, 1); compared against GRACE_CHANCE (0.5)
+ * @param graceTaken   - Was the armed state active last round? (second trigger = certain coup)
+ * @param securitySpend - Current security expenditure level; omit for no modifier
  */
 export function checkCoup(
     relations: Record<Power, number>,
     charisma: number,
     graceRoll: number,
-    graceTaken: boolean
+    graceTaken: boolean,
+    securitySpend?: number
 ): CoupResult {
-    const { COUP } = GAMESTATE;
+    const { COUP, BUDGET_EFFECTS } = GAMESTATE;
     const powers: Power[] = ['military', 'business', 'people'];
 
-    // --- Armed threshold (relation ≥ +8 AND charisma ≤ −3) ---
-    const armedFactions = powers.filter(p => relations[p] >= COUP.RELATION_THRESHOLD);
+    // Security spend shifts the armed threshold by ±1; omitting the param means no modifier
+    let armedThreshold = COUP.RELATION_THRESHOLD;
+    if (securitySpend !== undefined) {
+        if (securitySpend >= BUDGET_EFFECTS.SECURITY.HIGH) armedThreshold += 1;
+        else if (securitySpend < BUDGET_EFFECTS.SECURITY.LOW) armedThreshold -= 1;
+    }
+
+    // --- Armed threshold (relation ≥ armedThreshold AND charisma ≤ CHARISMA_THRESHOLD) ---
+    const armedFactions = powers.filter(p => relations[p] >= armedThreshold);
     if (armedFactions.length > 0 && charisma <= COUP.CHARISMA_THRESHOLD) {
         const faction = pickCoupFaction(armedFactions, relations);
         const cause = COUP_CAUSE_MAP[faction];

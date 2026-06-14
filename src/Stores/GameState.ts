@@ -537,6 +537,7 @@ export const INITIAL_STATE = ({ set, get }: {
         coupArmedLastRound: false,
         coupWarningFaction: null,
         meetCounts: { military: 0, business: 0, people: 0 },
+        representativeStatuses: { military: 'active', business: 'active', people: 'active' },
         setPhase: (phase, difficulty) => {
             if (phase === 'start') {
                 const chosenDifficulty: Difficulty = difficulty ?? 'medium';
@@ -588,6 +589,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             timerPausedAt: null,
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
                             meetCounts: { military: 0, business: 0, people: 0 },
+                            representativeStatuses: { military: 'active', business: 'active', people: 'active' },
                         },
                         specialEnding: {
                             ...state.specialEnding,
@@ -739,7 +741,8 @@ export const INITIAL_STATE = ({ set, get }: {
                 state.relations.current,
                 state.gameManagement.charisma.current,
                 rollFloat(),
-                state.gameManagement.coupArmedLastRound ?? false
+                state.gameManagement.coupArmedLastRound ?? false,
+                state.budget.expenditures.security
             );
 
             if (coupResult.outcome === 'coup') {
@@ -791,6 +794,25 @@ export const INITIAL_STATE = ({ set, get }: {
                 newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
                 taxMessages.push(i18n.t('log.tax_penalty_business'));
             }
+
+            // --- 4. Representative status for next round ---
+            const prevStatuses = state.gameManagement.representativeStatuses;
+            const newRepStatuses: Record<Power, 'active' | 'sick' | 'eliminated'> = {
+                military: prevStatuses.military === 'eliminated' ? 'eliminated' : 'active',
+                business: prevStatuses.business === 'eliminated' ? 'eliminated' : 'active',
+                people:   prevStatuses.people   === 'eliminated' ? 'eliminated' : 'active',
+            };
+            if (state.budget.expenditures.health < GAMESTATE.BUDGET_EFFECTS.HEALTH.LOW) {
+                (['military', 'business', 'people'] as Power[])
+                    .filter(p => newRepStatuses[p] === 'active')
+                    .forEach(p => { if (rollChance(0.5)) newRepStatuses[p] = 'sick'; });
+            }
+            // Reset selectedPower if their representative will be unavailable next round
+            const newSelectedPower: Power | 'none' =
+                state.meet.selectedPower !== 'none' &&
+                newRepStatuses[state.meet.selectedPower] === 'active'
+                    ? state.meet.selectedPower
+                    : 'none';
 
             // --- 5. Build log entry ---
             const logLines: string[] = [];
@@ -985,12 +1007,13 @@ export const INITIAL_STATE = ({ set, get }: {
                     dailyEvent: { current: nextDailyEvent },
                     periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultKey: null },
                     miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
-                    meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
+                    meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: newSelectedPower },
                     law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                     deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
                     tabs: {
                         ...s.tabs,
                         activeTab: Tabs.Log,
+                        tabsLocked: false,
                         ...(specialRoomIndex !== undefined ? { secretRoomIndex: specialRoomIndex } : {}),
                     },
                     gameManagement: {
@@ -1006,6 +1029,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         coupArmedLastRound: newCoupArmedLastRound,
                         coupWarningFaction: newCoupWarningFaction,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
+                        representativeStatuses: newRepStatuses,
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
@@ -1040,7 +1064,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 dailyEvent: { current: nextDailyEvent },
                 periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultKey: null },
                 miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultKey: null, riskTriggered: false },
-                meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null },
+                meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: newSelectedPower },
                 law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                 deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
                 gameManagement: {
@@ -1056,6 +1080,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     coupArmedLastRound: newCoupArmedLastRound,
                     coupWarningFaction: newCoupWarningFaction,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
+                    representativeStatuses: newRepStatuses,
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
                 tabs: {
@@ -1152,6 +1177,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     // Coup fields — default to safe state for saves predating story 2-7
                     coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,
                     coupWarningFaction: (gm.coupWarningFaction as Power | null) ?? null,
+                    // Representative statuses — default all active for saves predating story 3-5
+                    representativeStatuses: (gm.representativeStatuses as Record<Power, 'active' | 'sick' | 'eliminated'>) ?? { military: 'active', business: 'active', people: 'active' },
                     timerStartedAt: Date.now(),
                     timerPausedAt: null,
                     charisma: {
@@ -1228,6 +1255,9 @@ export const INITIAL_STATE = ({ set, get }: {
                 GAMESTATE.CHARISMA.MIN,
                 GAMESTATE.CHARISMA.MAX
             );
+            const newRepStatuses = action === 'eliminate'
+                ? { ...state.gameManagement.representativeStatuses, [power]: 'eliminated' as const }
+                : state.gameManagement.representativeStatuses;
             return {
                 meet: {
                     ...state.meet,
@@ -1249,6 +1279,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...state.gameManagement.meetCounts,
                         [power]: state.gameManagement.meetCounts[power] + 1,
                     } : state.gameManagement.meetCounts,
+                    representativeStatuses: newRepStatuses,
                 },
             };
         })

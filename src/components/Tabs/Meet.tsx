@@ -8,6 +8,7 @@ import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { GAMESTATE } from '../../Constants/GameState'
 import { useMemo } from 'react'
 import { dumbifyText, educationToDumbScore } from '../../Utils/String'
+import type { Power } from '../../types/Power'
 
 const Meet = () => {
     const { t } = useTranslation()
@@ -19,6 +20,8 @@ const Meet = () => {
     const education = useGameStore((s) => s.budget.expenditures.education)
     const coupWarningFaction = useGameStore((s) => s.gameManagement.coupWarningFaction)
     const coupArmed = useGameStore((s) => s.gameManagement.coupArmedLastRound)
+    const repStatuses = useGameStore((s) => s.gameManagement.representativeStatuses)
+    const sickFactions = (['military', 'business', 'people'] as Power[]).filter(p => repStatuses[p] === 'sick')
 
     const outcomeText = useMemo(() => {
         if (!actionOutcomeText) return null;
@@ -53,10 +56,18 @@ const Meet = () => {
 
     // --- No power selected ---
     if (selectedPower === 'none') {
+        const sickNames = sickFactions.map(p => t(`power.${p}`)).join(', ')
         return (
-            <Typography variant="caption" className={styles.title}>
-                {t('meet.none_selected')}
-            </Typography>
+            <>
+                <Typography variant="caption" className={styles.title}>
+                    {t('meet.none_selected')}
+                </Typography>
+                {sickFactions.length > 0 && (
+                    <Typography variant="caption" className={styles.roundsWarning}>
+                        {t('meet.sick_notice', { factions: sickNames })}
+                    </Typography>
+                )}
+            </>
         )
     }
 
