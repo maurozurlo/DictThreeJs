@@ -15,6 +15,7 @@ import RoundAdvanceController from "./components/RoundAdvanceController/RoundAdv
 import DayEnded from "./components/DayEnded/DayEnded";
 import TutorialOverlay from "./components/Tutorial/TutorialOverlay";
 import DebugRecurringOverlay from "./components/Debug/DebugRecurringOverlay";
+import DebugSelectorOverlay from "./components/Debug/DebugSelectorOverlay";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -32,6 +33,7 @@ export default function App() {
           DEBUG MODE &nbsp;|&nbsp; FOV: {debugFov} &nbsp;|&nbsp; scroll to adjust · I to save pos
         </div>
         {debugEnabled && <DebugRecurringOverlay />}
+        {debugEnabled && <DebugSelectorOverlay />}
         <Navbar transitionTo={transitionTo} />
         <FadeOverlay visible={fading} />
         <TabManager />

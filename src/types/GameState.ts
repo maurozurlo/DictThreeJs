@@ -88,8 +88,10 @@ export type GameState = {
     debug: {
         enabled: boolean;
         fov: number;
+        selectorOpen: boolean;
         setDebugMode: (enabled: boolean) => void;
         setFov: (fov: number) => void;
+        toggleSelector: () => void;
     },
     scene: {
         camera: CameraState;

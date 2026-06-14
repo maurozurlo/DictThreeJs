@@ -1,0 +1,118 @@
+.panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 200;
+    width: 320px;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(10, 10, 10, 0.93);
+    color: #e0e0e0;
+    font-family: monospace;
+    font-size: 11px;
+    border-left: 1px solid #333;
+}
+
+.titleBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background-color: #1a1a1a;
+    color: #f1c40f;
+    font-size: 11px;
+    font-weight: bold;
+    flex-shrink: 0;
+    border-bottom: 1px solid #333;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 2px;
+    line-height: 1;
+}
+.closeBtn:hover { color: #fff; }
+
+.tabs {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 1px solid #333;
+}
+
+.tab,
+.tabActive {
+    flex: 1;
+    padding: 5px 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 10px;
+    color: #888;
+    border-bottom: 2px solid transparent;
+}
+.tab:hover { color: #ccc; }
+.tabActive {
+    color: #f1c40f;
+    border-bottom: 2px solid #f1c40f;
+}
+
+.list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 2px 0;
+}
+
+.row,
+.rowActive {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+    padding: 3px 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 11px;
+    color: #ccc;
+    text-align: left;
+    line-height: 1.4;
+}
+.row:hover { background-color: rgba(255,255,255,0.05); }
+.rowActive {
+    background-color: rgba(241, 196, 15, 0.15);
+    color: #f1c40f;
+}
+
+.id {
+    flex-shrink: 0;
+    width: 38px;
+    color: #888;
+    text-align: right;
+}
+.rowActive .id { color: #f1c40f; }
+
+.faction {
+    flex-shrink: 0;
+    width: 14px;
+    color: #555;
+}
+
+.label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.footer {
+    padding: 4px 10px;
+    border-top: 1px solid #333;
+    color: #555;
+    font-size: 10px;
+    flex-shrink: 0;
+}

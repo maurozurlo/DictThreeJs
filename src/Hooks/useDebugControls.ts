@@ -20,6 +20,7 @@ export const useDebugControls = () => {
     const adjustCharisma = useGameStore((s) => s.gameManagement.charisma.adjustCharisma);
     const swapLaw = useGameStore((s) => s.law.swapLaw);
     const swapDeal = useGameStore((s) => s.deals.swapDeal);
+    const toggleSelector = useGameStore((s) => s.debug.toggleSelector);
 
     useEffect(() => {
         if (!debugEnabled) return;
@@ -29,6 +30,10 @@ export const useDebugControls = () => {
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
             switch (e.key) {
+                case '`':
+                case '~':
+                    toggleSelector();
+                    break;
                 case 'm':
                 case 'M':
                     adjustTreasury(10);
@@ -71,7 +76,7 @@ export const useDebugControls = () => {
                     break;
                 case 'h':
                 case 'H':
-                    const helpText = "Debug Keybindings:\nM: +$10m | L: -$10m\n7/1: +/- People\n8/2: +/- Business\n9/3: +/- Military\n4/6: +/- Charisma\nO: Swap Law\nP: Swap Deal";
+                    const helpText = "Debug Keybindings:\n`: Toggle selector overlay\nM: +$10m | L: -$10m\n7/1: +/- People\n8/2: +/- Business\n9/3: +/- Military\n4/6: +/- Charisma\nO: Swap Law\nP: Swap Deal";
                     console.info(helpText);
                     alert(helpText);
                     break;
@@ -80,5 +85,5 @@ export const useDebugControls = () => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [debugEnabled, adjustTreasury, adjustRelations, adjustCharisma, swapLaw, swapDeal]);
+    }, [debugEnabled, adjustTreasury, adjustRelations, adjustCharisma, swapLaw, swapDeal, toggleSelector]);
 };

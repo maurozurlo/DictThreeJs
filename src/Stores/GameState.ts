@@ -37,11 +37,15 @@ export const INITIAL_STATE = ({ set, get }: {
     debug: {
         enabled: false,
         fov: 34,
+        selectorOpen: false,
         setDebugMode: (enabled: boolean) => set((state) => ({
             debug: { ...state.debug, enabled },
         })),
         setFov: (fov: number) => set((state) => ({
             debug: { ...state.debug, fov },
+        })),
+        toggleSelector: () => set((state) => ({
+            debug: { ...state.debug, selectorOpen: !state.debug.selectorOpen },
         })),
     },
     scene: {
