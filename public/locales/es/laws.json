@@ -6,6 +6,7 @@
         "approved": "Aprobada",
         "rejected": "Rechazada",
         "infra_locked": "Infraestructura demasiado baja para legislar. Súbela a más de 3 en Presupuesto.",
+        "rep_indisposed": "El representante que propuso esta ley está actualmente... indispuesto. Por favor, inténtelo de nuevo la próxima ronda.",
         "labels": {
             "0": "Aumentar el gasto militar en un 50%",
             "1": "Implementar la ley marcial en regiones conflictivas",

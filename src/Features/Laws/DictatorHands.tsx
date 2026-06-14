@@ -11,6 +11,8 @@ const DictatorHands = () => {
     const { t } = useTranslation('laws');
     const currentLaw = useGameStore(s => s.law.current)
     const lastLawOutcome = useGameStore(s => s.law.lastLawOutcome)
+    const lawDecided = useGameStore(s => s.law.lawDecided)
+    const lawVoided = lawDecided && lastLawOutcome === null
     const dumbScore = useGameStore(s => s.gameManagement.dumbScore)
 
     const topWidths = useMemo(
@@ -35,7 +37,7 @@ const DictatorHands = () => {
         [currentLaw?.id, currentLaw?.type, dumbScore]
     );
 
-    return currentLaw ? (
+    return currentLaw && !lawVoided ? (
         <div className={styles.handsStage}>
             <div className={styles.handsLayout}>
                 <img className={styles.hand} src='/assets/dicthand.png' />

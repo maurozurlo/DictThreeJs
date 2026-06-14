@@ -835,7 +835,7 @@ export const INITIAL_STATE = ({ set, get }: {
 
             // --- 5. Build log entry ---
             const logLines: string[] = [];
-            if (state.law.lawDecided && state.law.current) {
+            if (state.law.lawDecided && state.law.current && state.law.lastLawOutcome !== null) {
                 const verbKey = state.law.lastLawOutcome ? 'log.passed_law' : 'log.rejected_law';
                 const lawLabelKey = state.law.current.type === 'weird'
                     ? `laws.labels.${state.law.current.id}.label`
@@ -1293,6 +1293,11 @@ export const INITIAL_STATE = ({ set, get }: {
             const newRepStatuses = action === 'eliminate'
                 ? { ...state.gameManagement.representativeStatuses, [power]: 'eliminated' as const }
                 : state.gameManagement.representativeStatuses;
+            // Void the pending law if the elimated faction proposed it and it hasn't been decided yet
+            const lawVoided = action === 'eliminate'
+                && !state.law.lawDecided
+                && state.law.current?.power === power
+                && state.law.current?.type !== 'weird';
             return {
                 meet: {
                     ...state.meet,
@@ -1316,6 +1321,9 @@ export const INITIAL_STATE = ({ set, get }: {
                     } : state.gameManagement.meetCounts,
                     representativeStatuses: newRepStatuses,
                 },
+                law: lawVoided
+                    ? { ...state.law, lawDecided: true }
+                    : state.law,
             };
         })
     },

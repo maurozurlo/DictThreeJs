@@ -6,6 +6,7 @@
         "approved": "Approved",
         "rejected": "Rejected",
         "infra_locked": "Infrastructure too low to legislate. Raise it above 3 in the Budget tab.",
+        "rep_indisposed": "The representative who proposed this law is currently... indisposed. Please try again next round.",
         "labels": {
             "0": "Increase military spending by 50%",
             "1": "Implement martial law in troubled regions",
