@@ -812,20 +812,22 @@ export const INITIAL_STATE = ({ set, get }: {
             }
 
             // --- 4. Representative status for next round ---
+            // Eliminated reps return next round as a new representative (same as sick — recalculated fresh).
             const prevStatuses = state.gameManagement.representativeStatuses;
             const newRepStatuses: Record<Power, 'active' | 'sick' | 'eliminated'> = {
-                military: prevStatuses.military === 'eliminated' ? 'eliminated' : 'active',
-                business: prevStatuses.business === 'eliminated' ? 'eliminated' : 'active',
-                people:   prevStatuses.people   === 'eliminated' ? 'eliminated' : 'active',
+                military: 'active',
+                business: 'active',
+                people:   'active',
             };
             if (state.budget.expenditures.health < GAMESTATE.BUDGET_EFFECTS.HEALTH.LOW) {
                 (['military', 'business', 'people'] as Power[])
-                    .filter(p => newRepStatuses[p] === 'active')
                     .forEach(p => { if (rollChance(0.5)) newRepStatuses[p] = 'sick'; });
             }
-            // Reset selectedPower if their representative will be unavailable next round
+            // Preserve selection only when the faction was already active and stays active.
+            // If they were eliminated this round and come back, reset to avoid phantom highlight.
             const newSelectedPower: Power | 'none' =
                 state.meet.selectedPower !== 'none' &&
+                prevStatuses[state.meet.selectedPower] === 'active' &&
                 newRepStatuses[state.meet.selectedPower] === 'active'
                     ? state.meet.selectedPower
                     : 'none';

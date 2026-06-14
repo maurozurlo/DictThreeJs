@@ -80,16 +80,18 @@ describe('representativeStatuses — eliminate action', () => {
         expect(representativeStatuses.business).toBe('active');
     });
 
-    it('test_repStatuses_eliminated_faction_stays_eliminated_after_nextRound', () => {
-        // Arrange: eliminate military with normal health
+    it('test_repStatuses_eliminated_faction_returns_active_next_round', () => {
+        // Arrange: eliminate military
         useGameStore.getState().meet.takeAction('military', 'eliminate');
 
-        // Act: advance round (health is at default = no sick logic)
+        // Act: advance round (health at default → no sick roll)
         advanceRound();
 
-        // Assert
+        // Assert: military returns as a new representative — eliminated is not preserved
         const { representativeStatuses } = useGameStore.getState().gameManagement;
-        expect(representativeStatuses.military).toBe('eliminated');
+        expect(representativeStatuses.military).toBe('active');
+        expect(representativeStatuses.business).toBe('active');
+        expect(representativeStatuses.people).toBe('active');
     });
 });
 
@@ -172,8 +174,9 @@ describe('representativeStatuses — sick factions from low health', () => {
         expect(sickCount).toBe(0);
     });
 
-    it('test_repStatuses_eliminated_stays_eliminated_even_at_low_health', async () => {
+    it('test_repStatuses_eliminated_faction_can_return_as_sick_when_health_low', async () => {
         // Arrange: eliminate military, then set health LOW
+        // rollChance=true (from beforeEach) → all active factions become sick
         useGameStore.getState().meet.takeAction('military', 'eliminate');
         useGameStore.setState(s => ({
             budget: {
@@ -185,9 +188,9 @@ describe('representativeStatuses — sick factions from low health', () => {
         // Act
         advanceRound();
 
-        // Assert: military stays eliminated (not re-set to sick)
+        // Assert: military returned as new rep, then rolled sick due to low health
         const { representativeStatuses } = useGameStore.getState().gameManagement;
-        expect(representativeStatuses.military).toBe('eliminated');
+        expect(representativeStatuses.military).toBe('sick');
     });
 });
 
@@ -255,12 +258,12 @@ describe('checkCoup — security spend modifier', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Law proposal filtering — eliminated factions cannot propose laws
+// Law proposal filtering — eliminated reps return next round, sick reps don't propose
 // ---------------------------------------------------------------------------
 
-describe('law proposal filtering — eliminated faction excluded from law pool', () => {
+describe('law proposal filtering — eliminated faction returns and can propose next round', () => {
     beforeEach(() => {
-        // rollChance false → no weird laws (0.10 check), no sick from health (0.5 check)
+        // rollChance false → no weird laws, no sick from health
         vi.spyOn(MathUtils, 'rollChance').mockReturnValue(false);
         startGame();
     });
@@ -269,19 +272,18 @@ describe('law proposal filtering — eliminated faction excluded from law pool',
         vi.restoreAllMocks();
     });
 
-    it('test_law_not_from_eliminated_faction_when_only_one_active', () => {
-        // Arrange: eliminate military and people, leaving only business active
+    it('test_law_can_come_from_any_faction_after_elimination_since_reps_return', () => {
+        // Arrange: eliminate military and people
         useGameStore.getState().meet.takeAction('military', 'eliminate');
         useGameStore.getState().meet.takeAction('people', 'eliminate');
 
-        // Act: advance round (health OK → no sick, rollChance false → no weird law)
+        // Act: advance round — eliminated reps return as new representatives
         advanceRound();
 
-        // Assert: proposed law must be from business (the only active faction)
+        // Assert: law can now come from any faction (all returned as active)
         const proposedLaw = useGameStore.getState().law.current;
-        // Law may be null if pool is exhausted, but if present it must be business
-        if (proposedLaw !== null) {
-            expect(proposedLaw.power).toBe('business');
+        if (proposedLaw !== null && proposedLaw.type !== 'weird') {
+            expect(['military', 'business', 'people']).toContain(proposedLaw.power);
         }
     });
 });
