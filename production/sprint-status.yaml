@@ -9,152 +9,113 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 4
-goal: "Close all Production → Polish gate blockers: ship secret room layout fix, difficulty selection, grace period, and first documented playtests — then re-gate for Polish"
+sprint: 5
+goal: "Establish Polish quality baseline and ship content polish (weird laws, weird deals Tier 1) — making the game feel alive before external playtesting"
 start: "2026-06-14"
 end: "2026-06-21"
-generated: "2026-06-13"
+generated: "2026-06-14"
 updated: "2026-06-14"
 
 stories:
-  - id: "3-6"
-    name: "Secret Room action panel layout"
-    file: "production/stories/3-6-secret-room-action-panel-layout.md"
+  # ── Must Have ───────────────────────────────────────────────────────────
+  - id: "5-1"
+    name: "Performance baseline measurement"
+    file: "production/stories/5-1-performance-baseline.md"
     priority: must-have
     status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-13"
+    completed: "2026-06-14"
 
-  - id: "1-12"
-    name: "Sync stage.txt to Production"
-    file: "production/stories/1-12-stage-sync.md"
+  - id: "5-2"
+    name: "Weird Laws — 14-law pool implementation"
+    file: "production/stories/5-2-weird-laws.md"
     priority: must-have
-    status: done
+    status: ready-for-dev
     owner: ""
-    estimate_days: 0.25
+    estimate_days: 1.0
     blocker: ""
-    completed: "2026-06-13"
+    completed: ""
 
-  - id: "4-1"
-    name: "ADR housekeeping — promote ADR-0001/0007 to Accepted; create control-manifest.md"
-    file: "production/stories/4-1-adr-housekeeping.md"
+  - id: "5-3"
+    name: "Weird Deals Tier 1 — deals 19-22 (existing deal shape)"
+    file: "production/stories/5-3-weird-deals-tier1.md"
     priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-13"
-
-  - id: "4-2"
-    name: "Configure performance budgets in technical-preferences.md"
-    file: "production/stories/4-2-performance-budgets.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.25
-    blocker: ""
-    completed: "2026-06-13"
-
-  - id: "4-3"
-    name: "Playtest ≥3 sessions + /playtest-report"
-    file: "production/stories/4-3-playtest-sessions.md"
-    priority: must-have
-    status: done
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.75
     blocker: ""
-    completed: "2026-06-13"
-
-  - id: "4-4"
-    name: "Difficulty levels — pre-game treasury selection"
-    file: "production/stories/4-4-difficulty-levels.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-13"
-
-  - id: "4-5"
-    name: "Early-game grace period — dampened early relation deltas + extended timer"
-    file: "production/stories/4-5-early-game-grace-period.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-13"
-
-  # ── Should Have ────────────────────────────────────────────────────────
-  - id: "4-6"
-    name: "Art bible — reverse-document visual identity from code"
-    file: "production/stories/4-6-art-bible.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-14"
-
-  - id: "4-7"
-    name: "Difficulty curve + emotional arc doc"
-    file: "production/stories/4-7-difficulty-curve.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-14"
-
-  - id: "3-5"
-    name: "Budget Tier Consequences"
-    file: "production/stories/3-5-budget-tier-consequences.md"
-    priority: should-have
-    status: descoped
-    owner: ""
-    estimate_days: 2.5
-    blocker: "Design call made 2026-06-14: classified as enhancement, not core mechanic. Deferred to Polish phase."
     completed: ""
 
-  # ── Nice to Have (carry-over — schedule or cut decision required) ─────
-  - id: "4-8"
-    name: "Accessibility tier ratification + contrast audit"
-    file: "production/stories/4-8-accessibility-audit.md"
+  - id: "5-4"
+    name: "Timer tuning experiment — evaluate 3-minute timer"
+    file: "production/stories/5-4-timer-tuning.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.25
+    blocker: ""
+    completed: ""
+
+  # ── Should Have ─────────────────────────────────────────────────────────
+  - id: "5-5"
+    name: "Interaction patterns doc"
+    file: "production/stories/5-5-interaction-patterns.md"
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  - id: "5-6"
+    name: "Doc drift cleanup — ADR log + Godot scaffolding"
+    file: "production/stories/5-6-doc-drift.md"
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 0.25
+    blocker: ""
+    completed: ""
+
+  - id: "5-7"
+    name: "Street View deferral decision + tutorial audit"
+    file: "production/stories/5-7-street-view-deferral.md"
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 0.25
+    blocker: ""
+    completed: ""
+
+  - id: "3-5"
+    name: "Budget Tier Consequences (Polish enhancement)"
+    file: "production/stories/3-5-budget-tier-consequences.md"
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 2.0
+    blocker: ""
+    completed: ""
+
+  # ── Nice to Have ────────────────────────────────────────────────────────
+  - id: "5-8"
+    name: "External playtest — non-developer Medium difficulty session"
+    file: "production/stories/5-8-external-playtest.md"
     priority: nice-to-have
     status: backlog
     owner: ""
     estimate_days: 0.5
-    blocker: "Deferred to backlog 2026-06-14 — revisit before Release (accessibility retrofit cost grows during Polish per AD/PR note)."
-    completed: ""
-
-  - id: "1-9"
-    name: "Street View: basic waypoint movement (A→B→A)"
-    file: "production/stories/1-9-street-waypoint-movement.md"
-    priority: nice-to-have
-    status: icebox
-    owner: ""
-    estimate_days: 1.0
-    blocker: "Moved to icebox 2026-06-14 — bundled into future 'visual update' sprint with Street View feature."
-    completed: ""
-
-  - id: "1-10"
-    name: "UX Review: hud.md"
-    file: "production/stories/1-10-ux-review-hud.md"
-    priority: nice-to-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-14"
+    completed: ""
 
-  - id: "1-11"
-    name: "ADR: Street Scene Architecture"
-    file: "production/stories/1-11-adr-street-scene.md"
+  - id: "5-9"
+    name: "Hard difficulty playtest reconciliation"
+    file: "production/stories/5-9-hard-difficulty-reconciliation.md"
     priority: nice-to-have
-    status: icebox
+    status: backlog
     owner: ""
-    estimate_days: 0.5
-    blocker: "Moved to icebox 2026-06-14 — bundled into future 'visual update' sprint with Street View feature."
+    estimate_days: 0.25
+    blocker: ""
     completed: ""
