@@ -32,6 +32,12 @@
             "coup_grace": "Por los pelos con el golpe",
             "coup_grace_value": "Sobrevivido"
         },
+        "end_reason": {
+            "bankruptcy": "¡Colapso económico! Tu tesorería ha quedado sin fondos.",
+            "overthrown_military": "¡Los militares han derrocado tu gobierno! Las relaciones cayeron a -10.",
+            "overthrown_business": "¡Los empresarios han derrocado tu gobierno! Las relaciones cayeron a -10.",
+            "overthrown_people": "¡El pueblo ha derrocado tu gobierno! Las relaciones cayeron a -10."
+        },
         "coup_narrative": {
             "military": "En la madrugada, vehículos blindados rodearon el palacio. Al amanecer, el rostro del General estaba en todas las pantallas.",
             "business": "Una votación de emergencia del directorio. Cuentas congeladas. Una conferencia de prensa. El Ministro de Finanzas leyó el comunicado con manos firmes.",

@@ -86,7 +86,7 @@ const Meet = () => {
                 </Button>
 
                 <Button onClick={() => takeAction(selectedPower, 'expropriate')}>
-                    <Icon type="takeover" /> {t('meet.expropiate')} (+{MoneyNumberFormatter(expropiateGain)})
+                    <Icon type="takeover" /> {t('meet.expropriate')} (+{MoneyNumberFormatter(expropiateGain)})
                 </Button>
 
                 <Button onClick={() => takeAction(selectedPower, 'dialogue')}>

@@ -716,18 +716,6 @@ export const INITIAL_STATE = ({ set, get }: {
                 taxMessages.push(i18n.t('log.tax_penalty_business'));
             }
 
-            // --- 4. Daily event effect (Plan D) ---
-            const currentEvent = state.dailyEvent?.current ?? null;
-            const eventMessages: string[] = [];
-            if (currentEvent) {
-                newRelations[currentEvent.power] = Clamp(
-                    newRelations[currentEvent.power] + currentEvent.mod,
-                    GAMESTATE.RELATIONS.MIN,
-                    GAMESTATE.RELATIONS.MAX
-                );
-                eventMessages.push(i18n.t(currentEvent.key, { ns: 'daily_events' }));
-            }
-
             // --- 5. Build log entry ---
             const logLines: string[] = [];
             if (state.law.lawDecided && state.law.current) {
@@ -744,7 +732,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 }));
             }
             logLines.push(i18n.t('log.financials', { income: financials.totalIncome, expenses: financials.expenses }));
-            logLines.push(...logMessages, ...taxMessages, ...eventMessages);
+            logLines.push(...logMessages, ...taxMessages);
             if (newCharisma > state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_up'));
             else if (newCharisma < state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_down'));
             // Coup warning log lines (appended after financial summary)
@@ -803,7 +791,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
-                        endReason: "Economic collapse! Your treasury has run out of funds.",
+                        endReason: i18n.t('endscreen.end_reason.bankruptcy', { ns: 'endscreen' }),
                         endCause: 'bankruptcy' as EndCause,
                         phase: 'lose',
                         round: newRound,
@@ -829,7 +817,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
-                        endReason: `The ${overthrown} ${overthrown === 'people' ? 'have' : 'has'} overthrown your government! Relations dropped to -10.`,
+                        endReason: i18n.t(`endscreen.end_reason.overthrown_${overthrown}`, { ns: 'endscreen' }),
                         endCause: overthrown as EndCause,
                         phase: 'lose',
                         round: newRound,
@@ -1036,7 +1024,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...(bankrupt ? {
                         phase: 'lose' as const,
                         endCause: 'bankruptcy' as EndCause,
-                        endReason: "Economic collapse! Your treasury has run out of funds.",
+                        endReason: i18n.t('endscreen.end_reason.bankruptcy', { ns: 'endscreen' }),
                     } : {}),
                 },
             }));

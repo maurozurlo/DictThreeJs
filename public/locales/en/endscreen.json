@@ -32,6 +32,12 @@
             "coup_grace": "Close call with a coup",
             "coup_grace_value": "Survived"
         },
+        "end_reason": {
+            "bankruptcy": "Economic collapse! Your treasury has run out of funds.",
+            "overthrown_military": "The military has overthrown your government! Relations dropped to -10.",
+            "overthrown_business": "The business has overthrown your government! Relations dropped to -10.",
+            "overthrown_people": "The people have overthrown your government! Relations dropped to -10."
+        },
         "coup_narrative": {
             "military": "In the early hours, armored vehicles surrounded the palace. By dawn, the General's face was on every screen.",
             "business": "An emergency board vote. Frozen accounts. A press conference. The Minister of Finance read the statement with steady hands.",
