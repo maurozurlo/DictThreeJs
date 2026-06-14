@@ -869,18 +869,26 @@ export const INITIAL_STATE = ({ set, get }: {
                 e => e.sourceType === 'weird-law'
             );
             const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>): typeof LAWS[number] | null => {
-                // 10% chance of a weird law when the slot is empty
+                // 10% chance of a weird law when the slot is empty (weird laws are faction-neutral)
                 if (!hasActiveWeirdLaw && rollChance(0.10)) {
                     return getRandomFromList(WEIRD_LAWS);
                 }
                 const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
+                // Exclude laws from sick or eliminated factions; fall back to full pool if none remain
+                const unavailablePowers = (['military', 'business', 'people'] as Power[])
+                    .filter(p => newRepStatuses[p] !== 'active');
+                const effectiveLawPool = unavailablePowers.length > 0
+                    ? (lawPool.filter(l => !unavailablePowers.includes(l.power)).length > 0
+                        ? lawPool.filter(l => !unavailablePowers.includes(l.power))
+                        : lawPool)
+                    : lawPool;
                 if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
-                    return getRandomUniqueItemForPower(lawPool, usedLaws, 'people') ?? getRandomUniqueItem(lawPool, usedLaws);
+                    return getRandomUniqueItemForPower(effectiveLawPool, usedLaws, 'people') ?? getRandomUniqueItem(effectiveLawPool, usedLaws);
                 }
                 if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
-                    return getRandomUniqueItemForPower(lawPool, usedLaws, 'business') ?? getRandomUniqueItem(lawPool, usedLaws);
+                    return getRandomUniqueItemForPower(effectiveLawPool, usedLaws, 'business') ?? getRandomUniqueItem(effectiveLawPool, usedLaws);
                 }
-                return getRandomUniqueItem(lawPool, usedLaws);
+                return getRandomUniqueItem(effectiveLawPool, usedLaws);
             };
 
             // --- 8. Check game-over / victory ---

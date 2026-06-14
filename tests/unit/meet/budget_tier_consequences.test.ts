@@ -18,6 +18,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useGameStore } from '../../../src/Stores/GameState';
 import { checkCoup } from '../../../src/Stores/CoupHandler';
 import { GAMESTATE } from '../../../src/Constants/GameState';
+import * as MathUtils from '../../../src/Utils/Math';
 
 vi.mock('../../../src/i18n', () => ({
     default: { t: (key: string) => key }
@@ -94,10 +95,7 @@ describe('representativeStatuses — eliminate action', () => {
 
 describe('representativeStatuses — sick factions from low health', () => {
     beforeEach(() => {
-        vi.mock('../../../src/Utils/Math', async (importOriginal) => {
-            const original = await importOriginal<typeof import('../../../src/Utils/Math')>();
-            return { ...original, rollChance: vi.fn(() => true) };
-        });
+        vi.spyOn(MathUtils, 'rollChance').mockReturnValue(true);
         startGame();
     });
 
@@ -253,6 +251,38 @@ describe('checkCoup — security spend modifier', () => {
         // Calling without securitySpend → no modifier → threshold stays at 8 → military at 8 is armed
         const result = checkCoup(baseRelations, lowCharisma, 0.9, false);
         expect(result.outcome === 'coup' || result.outcome === 'grace').toBe(true);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Law proposal filtering — eliminated factions cannot propose laws
+// ---------------------------------------------------------------------------
+
+describe('law proposal filtering — eliminated faction excluded from law pool', () => {
+    beforeEach(() => {
+        // rollChance false → no weird laws (0.10 check), no sick from health (0.5 check)
+        vi.spyOn(MathUtils, 'rollChance').mockReturnValue(false);
+        startGame();
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    it('test_law_not_from_eliminated_faction_when_only_one_active', () => {
+        // Arrange: eliminate military and people, leaving only business active
+        useGameStore.getState().meet.takeAction('military', 'eliminate');
+        useGameStore.getState().meet.takeAction('people', 'eliminate');
+
+        // Act: advance round (health OK → no sick, rollChance false → no weird law)
+        advanceRound();
+
+        // Assert: proposed law must be from business (the only active faction)
+        const proposedLaw = useGameStore.getState().law.current;
+        // Law may be null if pool is exhausted, but if present it must be business
+        if (proposedLaw !== null) {
+            expect(proposedLaw.power).toBe('business');
+        }
     });
 });
 
