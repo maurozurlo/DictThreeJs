@@ -58,9 +58,6 @@
     "mini_challenge_reject": "Reject",
     "coup_yellow_warning": "Whispers in the corridors... {{faction}} grows bold while your charisma wanes",
     "coup_red_warning": "⚠ {{faction}} is plotting against you! Raise your charisma or lower their power — NOW",
-    "hud_coup_warning": "⚠ {{faction}} grows restless",
-    "hud_coup_danger": "🔴 {{faction}} is armed",
-    "hud_advance_ready": "All done!",
     "active_legislation": "Active Legislation",
     "repeal": "Repeal",
     "repeal_confirm": "Confirm Repeal",
@@ -151,5 +148,10 @@
     "ending_secret_room_1_bad": "The Vault — Bad",
     "ending_secret_room_2_good": "The Greenhouse — Good",
     "ending_secret_room_2_bad": "The Greenhouse — Bad"
+  },
+  "hud": {
+    "coup_warning": "⚠ {{faction}} grows restless",
+    "coup_danger": "🔴 {{faction}} is armed",
+    "advance_ready": "All done!"
   }
 }

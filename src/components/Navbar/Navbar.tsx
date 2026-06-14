@@ -83,8 +83,8 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
                 {displayTabs && coupWarningFaction && (
                     <span className={clsx(styles.coupBadge, { [styles.coupBadgeDanger]: coupArmedLastRound })}>
                         {coupArmedLastRound
-                            ? t('hud_coup_danger', { faction: t(`power.${coupWarningFaction}`) })
-                            : t('hud_coup_warning', { faction: t(`power.${coupWarningFaction}`) })}
+                            ? t('hud.coup_danger', { faction: t(`power.${coupWarningFaction}`) })
+                            : t('hud.coup_warning', { faction: t(`power.${coupWarningFaction}`) })}
                     </span>
                 )}
                 {displayTabs && phase === 'start' && !dayEnded && (
@@ -94,7 +94,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
                             {allActionsDone ? '>>' : '>'}
                         </Button>
                         {allActionsDone && (
-                            <span className={styles.advanceHint}>{t('hud_advance_ready')}</span>
+                            <span className={styles.advanceHint}>{t('hud.advance_ready')}</span>
                         )}
                     </div>
                 )}

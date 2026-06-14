@@ -4,6 +4,38 @@ Raw captures — transfer to a GDD or sprint backlog before acting on.
 
 ---
 
+## Bugs / Small fixes (backlog)
+
+### Coup warning — needs advance notice
+The coup currently only appears in the DayEnded dialog. Player has no chance to react. `coupWarningFaction` and `coupArmedLastRound` state already exists but isn't surfaced prominently.
+- Add a visible warning in the log at round end when coup conditions are approaching
+- OR: persistent HUD indicator while `coupWarningFaction` is set
+- Rule: player must have at least one full round to adjust before a coup fires
+
+### Remove daily events (random round-start relation adjustments)
+Random relation deltas at the start of each round reduce player agency without adding decisions. The game has enough complexity from periodic events, budget effects, laws, deals, and meet actions. Candidate for removal.
+
+### Difficulty selection UI
+Three difficulty buttons on New Game use identical styling to all other buttons. Needs visual differentiation — options: smaller buttons, modal/dialog, same-row layout, styled group with separator. See `src/components/Modal/Modal.tsx` (already exists, may be usable).
+
+---
+
+## Feature ideas (backlog)
+
+### Player name input
+Optional text input on the difficulty/new-game screen. Defaults to "The Leader" (EN) / "Él Líder" (ES) if left blank. Referenced later: end-game screen, statue plaques, laws, deals.
+
+### Advance round button tooltip
+Animated tooltip or visual indicator on the `>` button when all required round actions are complete (law + deal decided + meet action taken). Helps first-time players know they can advance.
+
+### Sell back shop items
+Emergency sell-back for purchased items (statues, media coverage) at reduced price. Inspired by the treasury-deficit-from-periodic-events emergent gameplay. Player can liquidate statues when in crisis.
+
+### Treasury deficit from periodic events (keep as feature, do not fix)
+Agreeing to a costly periodic event when treasury is insufficient results in negative balance. Player must recover before advancing. Discovered to be fun emergent gameplay — do not add a blocking guard.
+
+---
+
 ## Visual Sprint (Sprint 5 candidate)
 
 ### Street View Asset System

@@ -58,9 +58,6 @@
         "mini_challenge_reject": "Rechazar",
         "coup_yellow_warning": "Susurros en los pasillos... {{faction}} se envalentona mientras tu carisma decae",
         "coup_red_warning": "⚠ ¡{{faction}} conspira contra ti! Sube tu carisma o reduce su poder — ¡YA!",
-        "hud_coup_warning": "⚠ {{faction}} se inquieta",
-        "hud_coup_danger": "🔴 {{faction}} está armado",
-        "hud_advance_ready": "¡Listo!",
         "active_legislation": "Legislación Activa",
         "repeal": "Derogar",
         "repeal_confirm": "Confirmar derogación",
@@ -151,5 +148,10 @@
         "ending_secret_room_1_bad": "La Bóveda — Mal",
         "ending_secret_room_2_good": "El Invernadero — Bien",
         "ending_secret_room_2_bad": "El Invernadero — Mal"
+    },
+    "hud": {
+        "coup_warning": "⚠ {{faction}} se inquieta",
+        "coup_danger": "🔴 {{faction}} está armado",
+        "advance_ready": "¡Listo!"
     }
 }
