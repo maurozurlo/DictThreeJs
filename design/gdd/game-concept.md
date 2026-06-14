@@ -55,9 +55,9 @@ Round Start → Read Log (what happened last round)
 
 Each round has a **real-time countdown**. Failing to take a Meet action before
 the timer expires punishes the two weakest factions. The player can also
-intentionally skip (accepting the penalty as a trade-off). Timer duration
-should be short enough to create mild pressure without overstaying its welcome —
-current 5-minute default is being evaluated for reduction.
+intentionally skip (accepting the penalty as a trade-off). Timer uses a
+graduated schedule: 3 min round 1 (exploration), 2.5 min round 2, 2 min
+round 3+ (standard pressure). See Tuning Knobs for the rationale.
 
 ---
 
@@ -234,8 +234,7 @@ randomness — this game gives you information and makes you choose anyway.
 
 ## 14. Open Design Questions
 
-1. **Timer duration**: 5 minutes is likely too long. What's the right pressure
-   point? Should the timer accelerate in later rounds?
+1. ~~**Timer duration**: 5 minutes is likely too long.~~ **Resolved 2026-06-14**: Graduated timer adopted (3 min / 2.5 min / 2 min). See Tuning Knobs.
 2. **Education mechanic expansion**: "Too dumb to revolt" mechanic — what's the
    design boundary? Hard threshold? Probability modifier? Waiting for faction
    AI improvements.
@@ -245,3 +244,28 @@ randomness — this game gives you information and makes you choose anyway.
    exists before triggering it, or is it a genuine surprise?
 5. **End-game stats screen**: What stats matter most to show on the victory/loss
    screen?
+
+---
+
+## 15. Tuning Knobs
+
+### Round Timer
+**Implementation**: `src/Utils/GracePeriod.ts → getRoundTimerMs(round)`
+
+| Round | Duration | Rationale |
+|-------|----------|-----------|
+| 1 | 3 min 00 s (180 000 ms) | Exploration round — new players need time to read the UI |
+| 2 | 2 min 30 s (150 000 ms) | Transition — player understands the loop, pressure ramps |
+| 3+ | 2 min 00 s (120 000 ms) | Standard pressure for the rest of the game |
+
+**Decision (2026-06-14, Story 5-4)**: Graduated timer adopted after evaluating the
+original flat 5-minute default. 5 min felt slack — experienced players spent most of
+it idle. 2 min flat felt punishing in round 1 when the UI is new. The graduated
+schedule creates a natural on-ramp without losing tension in later rounds.
+
+**Future signal**: If players consistently skip the Meet action by round 3 (observed
+via playtest notes), consider reducing R3+ to 90 s. If new players still rush on R1,
+extend R1 to 4 min. Avoid going below 60 s — that leaves no time to read the law
+proposal.
+
+**Safe range**: 60 s – 600 s per round.
