@@ -5,8 +5,8 @@ import { LAWS } from '../../assets/laws'
 import { WEIRD_LAWS } from '../../assets/weirdLaws'
 import { DEALS } from '../../assets/deals'
 import { DAILY_EVENTS } from '../../assets/dailyEvents'
-import type { Law } from '../../types/Law'
-import type { Deal } from '../../types/Deal'
+import type { Law, LawEffect } from '../../types/Law'
+import type { Deal, DealEffect } from '../../types/Deal'
 import type { DailyEvent } from '../../types/DailyEvent'
 import styles from './DebugSelectorOverlay.module.css'
 
@@ -14,9 +14,92 @@ type Section = 'laws' | 'deals' | 'events'
 
 const ALL_LAWS = [...LAWS, ...WEIRD_LAWS].sort((a, b) => a.id - b.id)
 
+const sign = (n: number) => n > 0 ? `+${n}` : `${n}`
+
+/** Renders a one-line summary of non-zero fields in an effect object. */
+function effectSummary(effect: LawEffect | DealEffect): string {
+    const parts: string[] = []
+    const e = effect as Record<string, number | undefined>
+    const order = ['treasury', 'military', 'business', 'people', 'security', 'health', 'infrastructure', 'education', 'businessTaxes', 'peopleTaxes', 'risk']
+    for (const key of order) {
+        const val = e[key]
+        if (val !== undefined && val !== 0) {
+            parts.push(`${key.replace('Taxes', 'Tax').replace('infrastructure', 'infra')}:${sign(val)}`)
+        }
+    }
+    return parts.length > 0 ? parts.join('  ') : '—'
+}
+
+type Hovered = { key: string; y: number }
+
+// ---------------------------------------------------------------------------
+// Tooltip
+// ---------------------------------------------------------------------------
+
+type TooltipProps = {
+    law?: Law
+    deal?: Deal
+    event?: DailyEvent
+    y: number
+}
+
+const Tooltip = ({ law, deal, event, y }: TooltipProps) => {
+    const clampedY = Math.min(y, window.innerHeight - 140)
+
+    return (
+        <div className={styles.tooltip} style={{ top: clampedY }}>
+            {law && <>
+                <div className={styles.ttAccept}>✓ ACCEPT</div>
+                <div className={styles.ttLine}>{effectSummary(law.acceptEffect)}</div>
+                {law.recurringEffect && (
+                    <div className={styles.ttRecurring}>
+                        rec: {law.recurringEffect.incomeBonus
+                            ? `+${law.recurringEffect.incomeBonus}/round`
+                            : `-${law.recurringEffect.expenseBonus}/round`}
+                    </div>
+                )}
+                {law.charismaEffect && (
+                    <div className={styles.ttCharisma}>charisma: {sign(law.charismaEffect)}</div>
+                )}
+                <div className={styles.ttReject}>✗ REJECT</div>
+                <div className={styles.ttLine}>{effectSummary(law.rejectEffect)}</div>
+            </>}
+
+            {deal && <>
+                <div className={styles.ttAccept}>✓ ACCEPT</div>
+                <div className={styles.ttLine}>{effectSummary(deal.acceptEffect)}</div>
+                {deal.recurringEffect && (
+                    <div className={styles.ttRecurring}>
+                        rec: {deal.recurringEffect.incomeBonus
+                            ? `+${deal.recurringEffect.incomeBonus}/round`
+                            : `-${deal.recurringEffect.expenseBonus}/round`}
+                    </div>
+                )}
+                {deal.charismaEffect && (
+                    <div className={styles.ttCharisma}>charisma: {sign(deal.charismaEffect)}</div>
+                )}
+                <div className={styles.ttReject}>✗ REJECT</div>
+                <div className={styles.ttLine}>{effectSummary(deal.rejectEffect)}</div>
+                {deal.riskText && <div className={styles.ttRisk}>⚠ risk: {deal.acceptEffect.risk}</div>}
+            </>}
+
+            {event && <>
+                <div className={styles.ttLine}>faction: {event.power}</div>
+                <div className={styles.ttLine}>mod: {sign(event.mod)}</div>
+                <div className={styles.ttLine}>chance: {event.chance}%</div>
+            </>}
+        </div>
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Main overlay
+// ---------------------------------------------------------------------------
+
 const DebugSelectorOverlay = () => {
     const { t } = useTranslation(['laws', 'deals'])
     const [section, setSection] = useState<Section>('laws')
+    const [hovered, setHovered] = useState<Hovered | null>(null)
 
     const selectorOpen = useGameStore(s => s.debug.selectorOpen)
     const toggleSelector = useGameStore(s => s.debug.toggleSelector)
@@ -54,80 +137,101 @@ const DebugSelectorOverlay = () => {
     const dealLabel = (deal: Deal): string =>
         t(`${deal.id}.text`, { ns: 'deals', defaultValue: `deal-${deal.id}` })
 
-    const mod = (n: number) => n > 0 ? `+${n}` : `${n}`
+    const hover = (key: string, e: React.MouseEvent) => {
+        setHovered({ key, y: e.currentTarget.getBoundingClientRect().top })
+    }
+
+    // Resolve tooltip target from hovered key
+    const hoveredLaw = hovered ? ALL_LAWS.find(l => `law-${l.id}` === hovered.key) : undefined
+    const hoveredDeal = hovered ? DEALS.find(d => `deal-${d.id}` === hovered.key) : undefined
+    const hoveredEvent = hovered ? DAILY_EVENTS.find(ev => `ev-${ev.key}` === hovered.key) : undefined
 
     return (
-        <div className={styles.panel}>
-            <div className={styles.titleBar}>
-                <span>DEBUG SELECTOR</span>
-                <button className={styles.closeBtn} onClick={toggleSelector}>✕</button>
-            </div>
+        <>
+            {hovered && (hoveredLaw || hoveredDeal || hoveredEvent) && (
+                <Tooltip
+                    law={hoveredLaw}
+                    deal={hoveredDeal}
+                    event={hoveredEvent}
+                    y={hovered.y}
+                />
+            )}
 
-            <div className={styles.tabs}>
-                <button
-                    className={section === 'laws' ? styles.tabActive : styles.tab}
-                    onClick={() => setSection('laws')}
-                >
-                    LAWS ({ALL_LAWS.length})
-                </button>
-                <button
-                    className={section === 'deals' ? styles.tabActive : styles.tab}
-                    onClick={() => setSection('deals')}
-                >
-                    DEALS ({DEALS.length})
-                </button>
-                <button
-                    className={section === 'events' ? styles.tabActive : styles.tab}
-                    onClick={() => setSection('events')}
-                >
-                    EVENTS ({DAILY_EVENTS.length})
-                </button>
-            </div>
+            <div className={styles.panel} onMouseLeave={() => setHovered(null)}>
+                <div className={styles.titleBar}>
+                    <span>DEBUG SELECTOR</span>
+                    <button className={styles.closeBtn} onClick={toggleSelector}>✕</button>
+                </div>
 
-            <div className={styles.list}>
-                {section === 'laws' && ALL_LAWS.map(law => (
+                <div className={styles.tabs}>
                     <button
-                        key={law.id}
-                        className={currentLaw?.id === law.id ? styles.rowActive : styles.row}
-                        onClick={() => forceLaw(law)}
+                        className={section === 'laws' ? styles.tabActive : styles.tab}
+                        onClick={() => setSection('laws')}
                     >
-                        <span className={styles.id}>
-                            {law.type === 'weird' ? '⚡' : ''}{law.id}
-                        </span>
-                        <span className={styles.faction}>{law.type === 'weird' ? '???' : law.power[0].toUpperCase()}</span>
-                        <span className={styles.label}>{lawLabel(law)}</span>
+                        LAWS ({ALL_LAWS.length})
                     </button>
-                ))}
-
-                {section === 'deals' && DEALS.map(deal => (
                     <button
-                        key={deal.id}
-                        className={currentDeal?.id === deal.id ? styles.rowActive : styles.row}
-                        onClick={() => forceDeal(deal)}
+                        className={section === 'deals' ? styles.tabActive : styles.tab}
+                        onClick={() => setSection('deals')}
                     >
-                        <span className={styles.id}>{deal.id}</span>
-                        <span className={styles.faction}>{deal.power ? deal.power[0].toUpperCase() : '—'}</span>
-                        <span className={styles.label}>{dealLabel(deal)}</span>
+                        DEALS ({DEALS.length})
                     </button>
-                ))}
-
-                {section === 'events' && DAILY_EVENTS.map((event, i) => (
                     <button
-                        key={i}
-                        className={currentEvent?.key === event.key ? styles.rowActive : styles.row}
-                        onClick={() => forceEvent(event)}
+                        className={section === 'events' ? styles.tabActive : styles.tab}
+                        onClick={() => setSection('events')}
                     >
-                        <span className={styles.id}>{mod(event.mod)}</span>
-                        <span className={styles.faction}>{event.power[0].toUpperCase()}</span>
-                        <span className={styles.label}>{event.key.replace('daily_events.', '')}</span>
+                        EVENTS ({DAILY_EVENTS.length})
                     </button>
-                ))}
-            </div>
+                </div>
 
-            <div className={styles.footer}>
-                ` to toggle · click row to force-set current
+                <div className={styles.list}>
+                    {section === 'laws' && ALL_LAWS.map(law => (
+                        <button
+                            key={law.id}
+                            className={currentLaw?.id === law.id ? styles.rowActive : styles.row}
+                            onClick={() => forceLaw(law)}
+                            onMouseEnter={e => hover(`law-${law.id}`, e)}
+                        >
+                            <span className={styles.id}>
+                                {law.type === 'weird' ? '⚡' : ''}{law.id}
+                            </span>
+                            <span className={styles.faction}>{law.type === 'weird' ? '???' : law.power[0].toUpperCase()}</span>
+                            <span className={styles.label}>{lawLabel(law)}</span>
+                        </button>
+                    ))}
+
+                    {section === 'deals' && DEALS.map(deal => (
+                        <button
+                            key={deal.id}
+                            className={currentDeal?.id === deal.id ? styles.rowActive : styles.row}
+                            onClick={() => forceDeal(deal)}
+                            onMouseEnter={e => hover(`deal-${deal.id}`, e)}
+                        >
+                            <span className={styles.id}>{deal.id}</span>
+                            <span className={styles.faction}>{deal.power ? deal.power[0].toUpperCase() : '—'}</span>
+                            <span className={styles.label}>{dealLabel(deal)}</span>
+                        </button>
+                    ))}
+
+                    {section === 'events' && DAILY_EVENTS.map((event, i) => (
+                        <button
+                            key={i}
+                            className={currentEvent?.key === event.key ? styles.rowActive : styles.row}
+                            onClick={() => forceEvent(event)}
+                            onMouseEnter={e => hover(`ev-${event.key}`, e)}
+                        >
+                            <span className={styles.id}>{sign(event.mod)}</span>
+                            <span className={styles.faction}>{event.power[0].toUpperCase()}</span>
+                            <span className={styles.label}>{event.key.replace('daily_events.', '')}</span>
+                        </button>
+                    ))}
+                </div>
+
+                <div className={styles.footer}>
+                    ` to toggle · hover for effects · click to force-set
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 
