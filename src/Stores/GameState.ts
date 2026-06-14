@@ -240,7 +240,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         sourceId: `weird-law-${current.id}`,
                         sourceType: 'weird-law' as const,
                         sourceFaction: 'people' as const,
-                        label: `laws.labels.${current.id}.label`,
+                        label: `laws.weird.${current.id}.label`,
                         incomeBonus: 0,
                         expenseBonus: 0,
                         roundActivated: round,
@@ -838,7 +838,7 @@ export const INITIAL_STATE = ({ set, get }: {
             if (state.law.lawDecided && state.law.current && state.law.lastLawOutcome !== null) {
                 const verbKey = state.law.lastLawOutcome ? 'log.passed_law' : 'log.rejected_law';
                 const lawLabelKey = state.law.current.type === 'weird'
-                    ? `laws.labels.${state.law.current.id}.label`
+                    ? `laws.weird.${state.law.current.id}.label`
                     : `laws.labels.${state.law.current.id}`;
                 logLines.push(i18n.t(verbKey, { label: i18n.t(lawLabelKey, { ns: 'laws' }) }));
             }

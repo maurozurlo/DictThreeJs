@@ -30,11 +30,11 @@ const Laws = () => {
     )
 
     if (infraLocked) {
-        return <Typography variant='caption' className={styles.title}>{t('laws.infra_locked')}</Typography>
+        return <Typography variant='caption' className={styles.title}>{t('infra_locked')}</Typography>
     }
 
     if (lawVoided) {
-        return <Typography variant='caption' className={styles.title}>{t('laws.rep_indisposed')}</Typography>
+        return <Typography variant='caption' className={styles.title}>{t('rep_indisposed')}</Typography>
     }
 
     return (
