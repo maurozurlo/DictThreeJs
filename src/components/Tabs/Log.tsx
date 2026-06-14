@@ -146,7 +146,11 @@ const Log = ({ isActive }: TabProps) => {
                 {/* --- Mini Challenge Section --- */}
                 {miniChallenge.current && (
                     <div className={clsx(eventStyles.eventPanel)}>
-                        <Typography variant='h2' className={eventStyles.eventTitle}>
+                        <Typography variant='h2' className={clsx(eventStyles.eventTitle,
+                            {
+                                [styles.resolved]: miniChallenge.decided
+                            }
+                        )}>
                             🎲 {t('log.mini_challenge_title')}
                         </Typography>
                         <Typography variant='body'>{challengeText}</Typography>
@@ -177,8 +181,8 @@ const Log = ({ isActive }: TabProps) => {
                 )}
                 {/* --- Periodic Event Section --- */}
                 {periodicEvent.current && (
-                    <div className={clsx(eventStyles.eventPanel, { [eventStyles.resolved]: periodicEvent.decided })}>
-                        <Typography variant='h2' className={eventStyles.eventTitle}>
+                    <div className={clsx(eventStyles.eventPanel)}>
+                        <Typography variant='h2' className={clsx(eventStyles.eventTitle, { [eventStyles.resolved]: periodicEvent.decided })}>
                             ⚡ {periodicT(`${periodicEvent.current.id}.title`)}
                         </Typography>
                         <Typography variant='body'>{periodicT(`${periodicEvent.current.id}.text`)}</Typography>

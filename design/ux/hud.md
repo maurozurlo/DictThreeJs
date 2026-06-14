@@ -1,9 +1,10 @@
 # HUD Design
 
-> **Status**: In Review
+> **Status**: Reviewed — Revision 1
 > **Author**: Mauro Zurlo + ux-designer
-> **Last Updated**: 2026-06-10
+> **Last Updated**: 2026-06-14
 > **Template**: HUD Design
+> **Review notes**: Layout corrected from right-side panel to bottom panel; coup warning badge and advance hint documented; open questions #4 and #5 closed.
 
 ---
 
@@ -65,12 +66,13 @@ All information the game must communicate to the player, identified from source 
 - Height: Fixed header
 - Behavior: Hidden when on Menu screen (`displayTabs = false`); always visible during active gameplay
 
-**Zone 2: Status & Action Panel (right, fixed width)**
+**Zone 2: Status & Action Panel (bottom, fixed height)**
 - Component: `ActionPanel`
 - Contains all Must Show status: Timer, Treasury, Relations ×3, Charisma
 - Also contains Contextual: Meet action buttons, Laws action buttons (when those tabs are active)
 - Rationale: Meet and Laws render here — not in the center area — so the 3D scene remains visible when the player is taking actions
-- Height: Full viewport height minus navbar
+- Height: 200px fixed (`--action-panel-height`), full viewport width
+- Internal column layout: `240px [treasury + clock] | 200px [relations + charisma] | 1fr [action buttons]`
 - Behavior: Hidden during Menu screen; visible during all active gameplay states
 
 **Zone 3: Tab Content Area (center)**
@@ -92,21 +94,24 @@ All information the game must communicate to the player, identified from source 
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│   ZONE 1: NAVBAR                                                  │
+│   ZONE 1: NAVBAR (84px, fixed top)                               │
 │   [Title][Log●][Meet●][Laws][Deals●][Budget][Shop][Street][???]  │
-│                                                       [▶ End]    │
-├────────────────────────────────────────┬─────────────────────────┤
-│                                        │  ZONE 2: STATUS         │
-│   ZONE 3: TAB CONTENT                  │  Timer                  │
-│   (Log / Budget / Deals /              │  Treasury               │
-│    Shop / Street / Secret)             │  Mil / Bus / Ppl        │
-│                                        │  Charisma               │
-│   ZONE 4: 3D SCENE (behind)            │  ───────────────        │
-│   Visible when tab area                │  [Meet/Laws UI]         │
-│   is not fully occupied                │                         │
-├────────────────────────────────────────┴─────────────────────────┤
-│   ZONE 5: OVERLAYS (contextual — round end, events, game over)   │
+│                                            [⚠️/🔴]  [> / >>]    │
+│                                                   [All done!]    │
+├──────────────────────────────────────────────────────────────────┤
+│   ZONE 3: TAB CONTENT (fluid — fills between navbar & panel)     │
+│   (Log / Budget / Deals / Shop / Street / Secret)                │
+│                                                                   │
+│   ZONE 4: 3D SCENE (behind, always rendered, full viewport)      │
+│                                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│   ZONE 2: ACTION PANEL (200px, fixed bottom)                     │
+│   [240px: Treasury + Timer] [200px: Relations + Charisma] [1fr:  │
+│    Meet / Laws action buttons or active panel content]            │
 └──────────────────────────────────────────────────────────────────┘
+
+ZONE 5: Overlays render above all zones (z-index 999+):
+  DayEnded modal, EndScreen, TutorialOverlay, FadeOverlay, HelpOverlay
 ```
 
 ### Visual Budget
@@ -142,6 +147,23 @@ Any proposed addition to Zone 1 or Zone 2 that would exceed these caps requires 
 - Disabled state: Visually disabled during periodic events (tabs lock). Secret tab hidden until triggered.
 - Pending dot: Visible on Log, Meet, Laws, Deals when actions are unresolved (phase = 'start')
 - Update: On tab state change
+
+**Coup Warning Badge** *(added Sprint 4)*
+- Zone: Zone 1 — right end, left of the advance button
+- Category: Contextual — visible only when `coupWarningFaction !== null` during active gameplay
+- Display: Single emoji icon with hover tooltip
+  - **Yellow-warning state** (relation ≥ 6, charisma ≤ −2): ⚠️ icon — slow pulse animation
+  - **Armed/danger state** (relation ≥ 8, charisma ≤ −3): 🔴 icon — fast pulse animation
+  - **Hover tooltip**: "{{faction}} grows restless" (yellow) or "{{faction}} is armed" (red)
+- Behavior: Disappears if the threatening faction is eliminated or conditions no longer met
+- Rationale: Gives at least one round of advance warning before a coup fires. DayEnded modal still shows the warning, but the badge provides persistent visibility during the round.
+
+**Advance Hint**
+- Zone: Zone 1 — below the advance button (absolute position)
+- Category: Contextual — visible only when `allActionsDone = true` (Meet + Law + Deal all resolved)
+- Display: Small golden text label ("All done!" / "¡Listo!")
+- Behavior: Pulsing opacity animation to draw attention without being distracting
+- Rationale: Resolves player confusion about when the advance button becomes "primary" vs. "skip"
 
 **Next Round / Skip Button**
 - Zone: Zone 1 — right end of tab bar, same visual level as tab buttons
