@@ -25,9 +25,11 @@ export const BudgetRow = ({ id, label, isTax = false, projectedValue }: BudgetRo
 
     return (
         <div className={styles.budgetRow}>
-            <Typography variant="body">{t(label)}</Typography>
+
+            <Typography variant="body" className={styles.label}>{t(label)}</Typography>
 
             <div className={styles.amountControl}>
+
                 {isTax ?
                     <Button onClick={() => adjust(id, -5)}>
                         <Icon type="minus" /> 5
@@ -52,11 +54,13 @@ export const BudgetRow = ({ id, label, isTax = false, projectedValue }: BudgetRo
                         <Icon type="plus" /> 5
                     </Button> : null
                 }
+
+                <div className={styles.advisorComment}>
+                    {/* Placeholder for advisor button with (i) based on this budget item */}
+                </div>
             </div>
 
-            <div className={styles.advisorComment}>
-                {/* Placeholder for advisor button with (i) based on this budget item */}
-            </div>
+
         </div>
     )
 }

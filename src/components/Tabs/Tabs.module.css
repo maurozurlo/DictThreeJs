@@ -60,21 +60,26 @@
 
 .pageContainer {
     background-color: var(--hud-panel-bg);
-    padding: 0 2rem;
-
-
-
-    padding: 2rem;
     min-width: 100%;
     overflow-y: auto;
 
     &.card {
+        margin: 0rem 3rem;
+        padding: 1.5rem;
+        border: 1px solid var(--accent-muted);
         border-image-source: url("/assets/hudbg.png");
         border-image-slice: 24 fill;
         border-image-width: 24px;
         border-image-repeat: stretch;
         image-rendering: pixelated;
+    }
+
+    &.logPage {
         padding: 2rem 3rem;
+    }
+
+    .logEntry {
+        margin-bottom: 1rem;
     }
 
     h2 {
@@ -82,6 +87,7 @@
     }
 
     .tabsHeader {
+        padding: 2rem 3rem 0rem;
         display: flex;
         justify-content: space-between;
 
@@ -94,6 +100,7 @@
     }
 
     .columns {
+        padding: 0 3rem;
         display: flex;
         gap: 4rem;
 
@@ -330,33 +337,10 @@
 /* --- Advisor Footer (Budget tab) --- */
 
 .footer {
+    padding: 1rem 3rem 0;
     display: flex;
     gap: 1.25rem;
     align-items: flex-start;
     margin-top: 1.5rem;
-    padding-top: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.advisorMugshot {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    min-width: 72px;
-    flex-shrink: 0;
-
-    img {
-        width: 120px;
-        /*height: 64px;*/
-        outline: 3px solid var(--expense-red);
-        image-rendering: pixelated;
-    }
-}
-
-.advisorName {
-    text-align: center;
-    color: var(--accent-color);
-    font-size: 0.5rem;
-    line-height: 1.4;
 }

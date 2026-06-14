@@ -15,4 +15,8 @@
         min-width: 120px;
         text-align: center;
     }
+
+    p.label {
+        text-align: left;
+    }
 }

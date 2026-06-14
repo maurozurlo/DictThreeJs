@@ -142,7 +142,7 @@ const Log = ({ isActive }: TabProps) => {
 
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>
-            <div className={styles.pageContainer}>
+            <div className={clsx(styles.pageContainer, styles.logPage)}>
                 {/* --- Mini Challenge Section --- */}
                 {miniChallenge.current && (
                     <div className={clsx(eventStyles.eventPanel)}>
@@ -230,7 +230,7 @@ const Log = ({ isActive }: TabProps) => {
                 {/* --- Log History --- */}
                 <Typography variant='h2'>{t('tabs.log')}</Typography>
                 {logEntries.slice().reverse().map((entry, i) => (
-                    <Card key={i}>
+                    <Card key={i} className={styles.logEntry}>
                         <Typography variant='h2'>{entry.date}</Typography>
                         {entry.lines.map((msg, j) => (
                             <Typography key={j} variant='body'>{msg}</Typography>

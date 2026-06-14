@@ -10,6 +10,8 @@ import TabLayout from './TabLayout'
 import { calculateRoundFinancials, computeRoundsLeft } from '../../Stores/BudgetHandler'
 import { useMemo } from 'react'
 import { computeBudgetVerdict, computeBudgetTrigger, getAdvisorLine, ADVISOR_NAMES } from '../../Utils/Advisor'
+import AdvisorButton from '../Advisor/AdvisorButton'
+import { AdvisorFooter } from '../Advisor/AdvisorFooter'
 
 
 const Budget = ({ isActive }: TabProps) => {
@@ -58,11 +60,7 @@ const Budget = ({ isActive }: TabProps) => {
                 </div>
             </div>
             <div className={styles.footer}>
-                <div className={styles.advisorMugshot}>
-                    <img src={`/assets/advisor_${advisorLevel}.png`} alt="Advisor" />
-                    <Typography variant="caption" className={styles.advisorName}>{ADVISOR_NAMES[advisorLevel]}</Typography>
-                </div>
-                <Typography variant="caption">{advisorText}</Typography>
+                <AdvisorFooter advisorLevel={advisorLevel} advisorText={advisorText} />
             </div>
         </TabLayout>
     )
