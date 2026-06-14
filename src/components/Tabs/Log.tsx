@@ -132,7 +132,7 @@ const Log = ({ isActive }: TabProps) => {
 
     const challengeText = useMemo(
         () => miniChallenge.current ? dumbifyText(miniT(`${miniChallenge.current.id}.text`), educationToDumbScore(education)) : '',
-        [miniChallenge.current?.id, education]
+        [miniChallenge.current?.id, education, miniT]
     )
 
     const dailyEventHeadline = useMemo(() => {

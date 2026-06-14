@@ -20,7 +20,7 @@ const Deals = ({ isActive }: TabProps) => {
     const education = useGameStore(s => s.budget.expenditures.education)
     const dealText = useMemo(
         () => currentDeal ? dumbifyText(t(currentDeal.text), educationToDumbScore(education)) : '',
-        [currentDeal?.text, education]
+        [currentDeal?.text, education, t]
     )
     return (
         <TabLayout headerTitle={menuT('tabs.deals')} isActive={isActive}>
