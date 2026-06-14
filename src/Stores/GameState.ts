@@ -23,6 +23,7 @@ import { Power as PowerList } from "../Constants/Power";
 import { getGameDate } from "../Utils/GameDate";
 import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
+import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
@@ -538,6 +539,7 @@ export const INITIAL_STATE = ({ set, get }: {
         coupWarningFaction: null,
         meetCounts: { military: 0, business: 0, people: 0 },
         representativeStatuses: { military: 'active', business: 'active', people: 'active' },
+        dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
         setPhase: (phase, difficulty) => {
             if (phase === 'start') {
                 const chosenDifficulty: Difficulty = difficulty ?? 'medium';
@@ -590,6 +592,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
                             meetCounts: { military: 0, business: 0, people: 0 },
                             representativeStatuses: { military: 'active', business: 'active', people: 'active' },
+                            dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
                         },
                         specialEnding: {
                             ...state.specialEnding,
@@ -813,6 +816,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 newRepStatuses[state.meet.selectedPower] === 'active'
                     ? state.meet.selectedPower
                     : 'none';
+            const newDumbScore = educationToDumbScore(state.budget.expenditures.education);
 
             // --- 5. Build log entry ---
             const logLines: string[] = [];
@@ -1038,6 +1042,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         coupWarningFaction: newCoupWarningFaction,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                         representativeStatuses: newRepStatuses,
+                        dumbScore: newDumbScore,
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
@@ -1089,6 +1094,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     coupWarningFaction: newCoupWarningFaction,
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     representativeStatuses: newRepStatuses,
+                    dumbScore: newDumbScore,
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
                 tabs: {
@@ -1187,6 +1193,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     coupWarningFaction: (gm.coupWarningFaction as Power | null) ?? null,
                     // Representative statuses — default all active for saves predating story 3-5
                     representativeStatuses: (gm.representativeStatuses as Record<Power, 'active' | 'sick' | 'eliminated'>) ?? { military: 'active', business: 'active', people: 'active' },
+                    // dumbScore — recompute from saved education for saves predating this feature
+                    dumbScore: typeof gm.dumbScore === 'number' ? gm.dumbScore : educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
                     timerStartedAt: Date.now(),
                     timerPausedAt: null,
                     charisma: {

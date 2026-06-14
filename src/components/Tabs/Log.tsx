@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
 import { getGameDate } from '../../Utils/GameDate'
 import { useMemo, useState } from 'react'
-import { dumbifyText, educationToDumbScore } from '../../Utils/String'
+import { dumbifyText } from '../../Utils/String'
 import type { ActiveRecurringEffect } from '../../types/GameState'
 import { getRepealTier } from '../../Stores/RecurringHandler'
 import { GAMESTATE } from '../../Constants/GameState'
@@ -124,21 +124,21 @@ const Log = ({ isActive }: TabProps) => {
     const logEntries = useGameStore((s) => s.log)
     const round = useGameStore((s) => s.gameManagement.round)
     const dailyEventKey = useGameStore((s) => s.dailyEvent.current?.key)
-    const education = useGameStore((s) => s.budget.expenditures.education)
+    const dumbScore = useGameStore((s) => s.gameManagement.dumbScore)
     const activeRecurringEffects = useGameStore((s) => s.gameManagement.activeRecurringEffects)
     const repealTakenThisRound = useGameStore((s) => s.gameManagement.repealTakenThisRound)
     const treasury = useGameStore((s) => s.budget.treasury)
     const repeal = useGameStore((s) => s.gameManagement.repeal)
 
     const challengeText = useMemo(
-        () => miniChallenge.current ? dumbifyText(miniT(`${miniChallenge.current.id}.text`), educationToDumbScore(education)) : '',
-        [miniChallenge.current?.id, education, miniT]
+        () => miniChallenge.current ? dumbifyText(miniT(`${miniChallenge.current.id}.text`), dumbScore) : '',
+        [miniChallenge.current?.id, dumbScore, miniT]
     )
 
     const dailyEventHeadline = useMemo(() => {
         if (!dailyEventKey) return undefined;
-        return dumbifyText(dailyEventT(dailyEventKey), educationToDumbScore(education));
-    }, [dailyEventKey, education, dailyEventT]);
+        return dumbifyText(dailyEventT(dailyEventKey), dumbScore);
+    }, [dailyEventKey, dumbScore, dailyEventT]);
 
     return (
         <div className={clsx(styles.Tab, { [styles.isActive]: isActive })}>

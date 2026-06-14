@@ -8,7 +8,7 @@ import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import clsx from 'clsx'
 import { useMemo } from 'react'
-import { dumbifyText, educationToDumbScore } from '../../Utils/String'
+import { dumbifyText } from '../../Utils/String'
 
 const Deals = ({ isActive }: TabProps) => {
     const { t: menuT } = useTranslation('menu')
@@ -17,10 +17,10 @@ const Deals = ({ isActive }: TabProps) => {
     const outcome = useGameStore(s => s.deals.lastDealOutcome)
     const dealDecided = useGameStore(s => s.deals.dealDecided)
     const actUponDeal = useGameStore(s => s.deals.actUponDeal)
-    const education = useGameStore(s => s.budget.expenditures.education)
+    const dumbScore = useGameStore(s => s.gameManagement.dumbScore)
     const dealText = useMemo(
-        () => currentDeal ? dumbifyText(t(currentDeal.text), educationToDumbScore(education)) : '',
-        [currentDeal?.text, education, t]
+        () => currentDeal ? dumbifyText(t(currentDeal.text), dumbScore) : '',
+        [currentDeal?.text, dumbScore, t]
     )
     return (
         <TabLayout headerTitle={menuT('tabs.deals')} isActive={isActive}>

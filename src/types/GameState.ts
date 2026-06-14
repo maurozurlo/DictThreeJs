@@ -135,6 +135,8 @@ export type GameState = {
         };
         meetCounts: Record<Power, number>;
         representativeStatuses: Record<Power, 'active' | 'sick' | 'eliminated'>;
+        /** Dumbification score [0–100] frozen at the start of each round from the education budget. */
+        dumbScore: number;
         nextRound: () => void;
         expireTimer: () => void;
         pauseTimer: () => void;

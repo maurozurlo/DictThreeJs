@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { GAMESTATE } from '../../Constants/GameState'
 import { useMemo } from 'react'
-import { dumbifyText, educationToDumbScore } from '../../Utils/String'
+import { dumbifyText } from '../../Utils/String'
 import type { Power } from '../../types/Power'
 
 const Meet = () => {
@@ -17,7 +17,7 @@ const Meet = () => {
     const takeAction = useGameStore((s) => s.meet.takeAction)
     const actionTaken = useGameStore((s) => s.meet.actionTaken)
     const actionOutcomeText = useGameStore((s) => s.meet.actionOutcomeText)
-    const education = useGameStore((s) => s.budget.expenditures.education)
+    const dumbScore = useGameStore((s) => s.gameManagement.dumbScore)
     const coupWarningFaction = useGameStore((s) => s.gameManagement.coupWarningFaction)
     const coupArmed = useGameStore((s) => s.gameManagement.coupArmedLastRound)
     const repStatuses = useGameStore((s) => s.gameManagement.representativeStatuses)
@@ -35,8 +35,8 @@ const Meet = () => {
             }
         }
         const translated = meetT(actionOutcomeText.key, { ...actionOutcomeText.params, ...extraParams });
-        return dumbifyText(translated, educationToDumbScore(education));
-    }, [actionOutcomeText, education, t, meetT]);
+        return dumbifyText(translated, dumbScore);
+    }, [actionOutcomeText, dumbScore, t, meetT]);
 
     // --- Show result after action ---
     if (actionTaken.taken && actionTaken.power) {

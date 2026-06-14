@@ -5,7 +5,7 @@ import styles from './Tabs.module.css'
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
 import { useMemo } from 'react'
-import { dumbifyText, educationToDumbScore } from '../../Utils/String'
+import { dumbifyText } from '../../Utils/String'
 
 const Laws = () => {
     const { t: commonT } = useTranslation()
@@ -13,14 +13,14 @@ const Laws = () => {
     const currentLaw = useGameStore(s => s.law.current);
     const lawDecided = useGameStore(s => s.law.lawDecided)
     const actUponLaw = useGameStore(s => s.law.actUponLaw)
-    const education = useGameStore(s => s.budget.expenditures.education)
+    const dumbScore = useGameStore(s => s.gameManagement.dumbScore)
 
     const powerName = currentLaw
         ? (currentLaw.type === 'weird' ? '???' : commonT(`power.${currentLaw.power}`))
         : ''
-    const lawHeader = useMemo(() => 
-        dumbifyText(t('proposal_by', { power: powerName }), educationToDumbScore(education)),
-        [powerName, education, t]
+    const lawHeader = useMemo(() =>
+        dumbifyText(t('proposal_by', { power: powerName }), dumbScore),
+        [powerName, dumbScore, t]
     )
 
     return (
