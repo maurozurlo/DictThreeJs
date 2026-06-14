@@ -32,20 +32,26 @@ describe('checkCoup — coup threshold evaluation', () => {
     // AC-1 edge: charisma at −2 (above CHARISMA_THRESHOLD of −3) → no coup
     it('does not fire coup when charisma is −2 (above threshold), even with relation at +8', () => {
         // charisma −2 > CHARISMA_THRESHOLD (−3) → armed check fails
-        // charisma −2 ≤ WARN_CHARISMA (0), relation 8 ≥ WARN_RELATION (6) → yellow warning
+        // charisma −2 ≤ WARN_CHARISMA (−2), relation 8 ≥ WARN_RELATION (6) → yellow warning
         const result = checkCoup(makeRelations({ military: 8 }), -2, 0.9, false);
         expect(result.outcome).not.toBe('coup');
         expect(result.outcome).not.toBe('grace');
         expect(result.outcome).toBe('yellow-warning');
     });
 
-    // AC-2: Yellow warning (relation ≥+6, charisma ≤0, but below armed threshold)
-    it('returns yellow-warning when relation ≥+6 and charisma ≤0 but below armed threshold', () => {
-        const result = checkCoup(makeRelations({ people: 7 }), -1, 0.9, false);
+    // AC-2: Yellow warning fires at WARN_CHARISMA boundary (−2) with relation ≥+6
+    it('returns yellow-warning when relation ≥+6 and charisma ≤−2 but below armed threshold', () => {
+        const result = checkCoup(makeRelations({ people: 7 }), -2, 0.9, false);
         expect(result.outcome).toBe('yellow-warning');
         if (result.outcome === 'yellow-warning') {
             expect(result.faction).toBe('people');
         }
+    });
+
+    // AC-2b: No warning when charisma is −1 (above WARN_CHARISMA), even with high relation
+    it('returns safe when charisma is −1 and relation ≥+6 (charisma above warning threshold)', () => {
+        const result = checkCoup(makeRelations({ people: 7 }), -1, 0.9, false);
+        expect(result.outcome).toBe('safe');
     });
 
     // AC-3: Grace — armed threshold met, first trigger, survives 50% roll (0.3 < 0.5)

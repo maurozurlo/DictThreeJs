@@ -1,5 +1,6 @@
 import { useGameStore } from '../../Stores/GameState'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
+import { GAMESTATE } from '../../Constants/GameState'
 import Typography from '../Typography/Typography'
 import Button from '../Button/Button'
 import { useTranslation } from 'react-i18next'
@@ -20,8 +21,18 @@ const DayEnded = () => {
     // coupArmedLastRound is written at the START of the current round by nextRound().
     // When true here, the player survived a grace roll this round.
     // Clicking Continue calls nextRound() with graceTaken=true → certain coup.
-    const coupArmed         = useGameStore(s => s.gameManagement.coupArmedLastRound)
-    const nextRound         = useGameStore(s => s.gameManagement.nextRound)
+    const coupArmed              = useGameStore(s => s.gameManagement.coupArmedLastRound)
+    const coupWarningFaction     = useGameStore(s => s.gameManagement.coupWarningFaction)
+    const currentRelations       = useGameStore(s => s.relations.current)
+    const currentCharisma        = useGameStore(s => s.gameManagement.charisma.current)
+    const nextRound              = useGameStore(s => s.gameManagement.nextRound)
+
+    // Re-evaluate whether the threat is still live at round-end.
+    // If the player eliminated the faction this round, the warning is no longer valid.
+    const coupStillActive = coupArmed
+        && coupWarningFaction !== null
+        && currentRelations[coupWarningFaction] >= GAMESTATE.COUP.RELATION_THRESHOLD
+        && currentCharisma <= GAMESTATE.COUP.CHARISMA_THRESHOLD
 
     if (!dayEnded || phase !== 'start') return null
 
@@ -70,7 +81,7 @@ const DayEnded = () => {
                         {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
                     </span>
                 </div>
-                {coupArmed && (
+                {coupStillActive && (
                     <div className={styles.coupWarning}>
                         {t('actionPanel.coup_warning')}
                     </div>

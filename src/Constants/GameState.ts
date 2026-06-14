@@ -227,7 +227,7 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         RELATION_THRESHOLD: 8,
         CHARISMA_THRESHOLD: -3,
         WARN_RELATION: 6,
-        WARN_CHARISMA: 0,
+        WARN_CHARISMA: -2,
         GRACE_CHANCE: 0.5,
     },
     REPEAL_COST: {
