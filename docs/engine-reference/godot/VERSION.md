@@ -1,31 +1,30 @@
-# Godot Engine — Version Reference
+# Web Stack — Version Reference
+
+> **Note**: This project uses React + Vite + Three.js — NOT Godot.
+> This file path (`engine-reference/godot/VERSION.md`) is a leftover from
+> the project template and has been repurposed. Do not apply any Godot API
+> suggestions. The actual stack is in `.claude/docs/technical-preferences.md`.
 
 | Field | Value |
 |-------|-------|
-| **Engine Version** | Godot 4.6 |
-| **Release Date** | January 2026 |
-| **Project Pinned** | 2026-02-12 |
-| **Last Docs Verified** | 2026-02-12 |
-| **LLM Knowledge Cutoff** | May 2025 |
+| **Framework** | React 19 |
+| **Language** | TypeScript (strict) |
+| **Renderer** | Three.js via `@react-three/fiber` + `@react-three/drei` |
+| **State** | Zustand |
+| **Build tool** | Vite |
+| **Test runner** | Vitest + React Testing Library |
+| **Pinned** | 2026-06-14 |
 
-## Knowledge Gap Warning
+## Knowledge Notes
 
-The LLM's training data likely covers Godot up to ~4.3. Versions 4.4, 4.5,
-and 4.6 introduced significant changes that the model does NOT know about.
-Always cross-reference this directory before suggesting Godot API calls.
+- React 19 (stable, 2024): concurrent features, new `use()` hook, Actions API.
+  LLM training data covers this fully — no post-cutoff risk.
+- `@react-three/fiber` v8+: standard R3F patterns in use. No post-cutoff API risk.
+- Three.js r168+: standard material/geometry APIs. No known gaps.
+- Zustand v5: `create()` API in use. No post-cutoff risk.
 
-## Post-Cutoff Version Timeline
+## Authoritative References
 
-| Version | Release | Risk Level | Key Theme |
-|---------|---------|------------|-----------|
-| 4.4 | ~Mid 2025 | MEDIUM | Jolt physics option, FileAccess return types, shader texture type changes |
-| 4.5 | ~Late 2025 | HIGH | Accessibility (AccessKit), variadic args, @abstract, shader baker, SMAA |
-| 4.6 | Jan 2026 | HIGH | Jolt default, glow rework, D3D12 default on Windows, IK restored |
-
-## Verified Sources
-
-- Official docs: https://docs.godotengine.org/en/stable/
-- 4.5→4.6 migration: https://docs.godotengine.org/en/stable/tutorials/migrating/upgrading_to_godot_4.6.html
-- 4.4→4.5 migration: https://docs.godotengine.org/en/stable/tutorials/migrating/upgrading_to_godot_4.5.html
-- Changelog: https://github.com/godotengine/godot/blob/master/CHANGELOG.md
-- Release notes: https://godotengine.org/releases/4.6/
+- Stack ADRs: `docs/architecture/adr-0001-tech-stack-choice.md`
+- Naming conventions / patterns: `.claude/docs/technical-preferences.md`
+- Architecture overview: `docs/architecture/architecture-review-2026-06-10.md`

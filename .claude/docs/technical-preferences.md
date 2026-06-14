@@ -71,11 +71,11 @@
 ## Architecture Decisions Log
 
 - [ADR-0001](../../docs/architecture/adr-0001-tech-stack-choice.md) — Tech Stack Choice (Accepted 2026-06-13)
-- [ADR-0002](../../docs/architecture/adr-0002-state-management.md) — State Management Pattern (Zustand + Handler pattern)
+- [ADR-0002](../../docs/architecture/adr-0002-state-management-pattern.md) — State Management Pattern (Zustand + Handler pattern)
 - [ADR-0003](../../docs/architecture/adr-0003-react-threejs-integration.md) — React / Three.js Integration
-- [ADR-0004](../../docs/architecture/adr-0004-rng-utility.md) — RNG Utility (`src/Utils/Math.ts`)
-- [ADR-0005](../../docs/architecture/adr-0005-i18n.md) — Internationalisation (i18next multi-namespace)
-- [ADR-0006](../../docs/architecture/adr-0006-round-timer.md) — Round Timer / Game Loop
+- [ADR-0004](../../docs/architecture/adr-0004-rng-determinism.md) — RNG & Determinism Strategy (`src/Utils/Math.ts`)
+- [ADR-0005](../../docs/architecture/adr-0005-event-scheduling.md) — Event Scheduling System
+- [ADR-0006](../../docs/architecture/adr-0006-round-timer-game-loop.md) — Round Timer / Game Loop
 - [ADR-0007](../../docs/architecture/adr-0007-effect-timing.md) — End-of-Round Effect Timing (Proposed — deferred Sprint 5+)
 
 ## Engine Specialists

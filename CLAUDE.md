@@ -5,14 +5,17 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]
-- **Language**: [CHOOSE: GDScript / C# / C++ / Blueprint]
+- **Platform**: Web (browser) — React 19 + TypeScript (strict)
+- **Rendering**: Three.js via `@react-three/fiber` + `@react-three/drei`
+- **State**: Zustand (Handler pattern — see ADR-0002)
+- **Build**: Vite
+- **Tests**: Vitest + React Testing Library
 - **Version Control**: Git with trunk-based development
-- **Build System**: [SPECIFY after choosing engine]
-- **Asset Pipeline**: [SPECIFY after choosing engine]
+- **i18n**: i18next multi-namespace (EN + ES)
 
-> **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
-> dedicated sub-specialists. Use the set matching your engine.
+> **This is a web app, not a game-engine project.** Do not apply Godot/Unity/Unreal
+> patterns. See `.claude/docs/technical-preferences.md` for naming conventions,
+> forbidden patterns, and file-extension routing.
 
 ## Project Structure
 
