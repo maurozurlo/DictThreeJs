@@ -108,3 +108,43 @@
 @keyframes advanceSpin {
     100% { transform: translate(-50%, -50%) rotate(1turn); }
 }
+
+.advanceHint {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem;
+    color: #ffd700;
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: 0.08em;
+    animation: hintPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes hintPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.coupBadge {
+    font-size: 0.6rem;
+    color: #ffcc00;
+    white-space: nowrap;
+    padding: 2px 6px;
+    border: 1px solid #ffcc0066;
+    border-radius: 3px;
+    animation: hintPulse 2s ease-in-out infinite;
+    letter-spacing: 0.05em;
+}
+
+.coupBadgeDanger {
+    color: #ff4444;
+    border-color: #ff444466;
+    animation: dangerPulse 1s ease-in-out infinite;
+}
+
+@keyframes dangerPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
