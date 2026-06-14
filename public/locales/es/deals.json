@@ -99,10 +99,31 @@
             "acceptText": "El programa se pone en marcha. El pueblo lo adora; las empresas resienten el coste recurrente.",
             "rejectText": "Rechazaste a la ONG. El pueblo lo recordará."
         },
+        "19": {
+            "text": "El Consorcio Agrícola Internacional te ofrece una patente de ganado miniatura. Vacas diminutas, burocracia infinita.",
+            "acceptText": "Las vacas diminutas llegan al país. Resultan rentables. El pueblo está inquieto.",
+            "rejectText": "Rechazas el ganado miniatura. Algunas oportunidades es mejor no ordeñarlas."
+        },
+        "20": {
+            "text": "El Ministerio de Tecnología propone construir el ratón de ordenador más grande del mundo como monumento nacional. Coste: 50 M.",
+            "acceptText": "El ratón se encarga. Llegará el turismo para generaciones. Tu popularidad sube inexplicablemente.",
+            "rejectText": "Cancelas el ratón. El ministerio refunfuña, pero el erario te lo agradece."
+        },
+        "21": {
+            "text": "Inteligencia militar propone sustituir los drones de vigilancia por palomas entrenadas. Más baratas. Más aleteo.",
+            "acceptText": "Las palomas son desplegadas. El ejército se siente poderoso. El pueblo está suspicaz.",
+            "rejectText": "Vetas el programa de palomas. La adquisición de drones continúa con normalidad."
+        },
+        "22": {
+            "text": "El país vecino ha detenido a varios de tus ciudadanos tras un incidente diplomático. ¿Aceptas sus exigencias?",
+            "acceptText": "Cedes. Tus ciudadanos regresan. El ejército no está muy contento.",
+            "rejectText": "Te niegas. Siguen sanciones comerciales. Caro, pero el ejército respeta la decisión."
+        },
         "recurring": {
             "investment_income": "Dividendos de inversión",
             "arms_cost": "Mantenimiento de armas",
-            "aid_cost": "Ayuda humanitaria"
+            "aid_cost": "Ayuda humanitaria",
+            "cow_income": "Ingresos de ganado miniatura"
         }
     }
 }

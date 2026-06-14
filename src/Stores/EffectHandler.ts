@@ -140,6 +140,10 @@ export function handleDecision({
         if (hasAccepted && acceptScore > rejectScore) charismaDelta = 1;
         else if (!hasAccepted && rejectScore > acceptScore) charismaDelta = 1;
     }
+    // Direct charisma effect declared on the item (deal 20, weird laws handled via actUponLaw)
+    if (hasAccepted) {
+        charismaDelta += (item as { charismaEffect?: number }).charismaEffect ?? 0;
+    }
 
     const newCharisma = Clamp(
         state.gameManagement.charisma.current + charismaDelta,

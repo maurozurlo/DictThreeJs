@@ -164,5 +164,49 @@ export const DEALS: Deal[] = [
         rejectEffect: { people: -2 },
         power: 'people',
         recurringEffect: { expenseBonus: RECURRING.SMALL, label: 'deals.recurring.aid_cost' }
+    },
+
+    // --- Weird Deals Tier 1 (Story 5-3) ---
+
+    {
+        // Deal 19 — Dog-Sized Cow Initiative
+        id: 19,
+        text: 'deals.19.text',
+        acceptText: 'deals.19.acceptText',
+        rejectText: 'deals.19.rejectText',
+        acceptEffect: { treasury: 15, people: -1 },
+        rejectEffect: {},
+        power: 'people',
+        recurringEffect: { incomeBonus: RECURRING.TINY, label: 'deals.recurring.cow_income' }
+    },
+    {
+        // Deal 20 — Giant National Computer Mouse (no power = not repealable, no recurring)
+        id: 20,
+        text: 'deals.20.text',
+        acceptText: 'deals.20.acceptText',
+        rejectText: 'deals.20.rejectText',
+        acceptEffect: { treasury: -50 },
+        rejectEffect: {},
+        charismaEffect: 2
+    },
+    {
+        // Deal 21 — Strategic Pigeon Surveillance Program
+        id: 21,
+        text: 'deals.21.text',
+        acceptText: 'deals.21.acceptText',
+        rejectText: 'deals.21.rejectText',
+        acceptEffect: { military: 1, people: -1 },
+        rejectEffect: {},
+        power: 'military'
+    },
+    {
+        // Deal 22 — Swiss Hostage Diplomacy
+        id: 22,
+        text: 'deals.22.text',
+        acceptText: 'deals.22.acceptText',
+        rejectText: 'deals.22.rejectText',
+        acceptEffect: { military: -1, people: 1 },
+        rejectEffect: { military: 1, treasury: -20 },
+        power: 'people'
     }
 ];

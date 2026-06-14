@@ -99,10 +99,31 @@
             "acceptText": "The program launches. The people love it; business resents the recurring cost.",
             "rejectText": "You turned the NGO away. The people will remember."
         },
+        "19": {
+            "text": "The International Agricultural Consortium offers you a miniature cattle patent. Tiny cows, endless bureaucracy.",
+            "acceptText": "Tiny cows are shipped in. Somehow profitable. The people are uneasy.",
+            "rejectText": "You decline the miniature cattle. Some opportunities are better left unmilked."
+        },
+        "20": {
+            "text": "The Technology Ministry proposes the world's largest computer mouse as a national landmark. Cost: $50M.",
+            "acceptText": "The mouse is commissioned. Tourists will come for decades. Your approval rating rises inexplicably.",
+            "rejectText": "You cancel the mouse. The ministry sulks, but the treasury thanks you."
+        },
+        "21": {
+            "text": "Military intelligence proposes replacing surveillance drones with trained pigeons. Cheaper. Flappier.",
+            "acceptText": "Pigeons are deployed. The military feels powerful. The people are suspicious.",
+            "rejectText": "You veto the pigeon program. Drone procurement continues as normal."
+        },
+        "22": {
+            "text": "The neighboring country has detained several of your citizens after a diplomatic incident. Accept their demands?",
+            "acceptText": "You comply. Your citizens are returned. The military is less than thrilled.",
+            "rejectText": "You refuse. Trade sanctions follow. Costly, but the military respects the call."
+        },
         "recurring": {
             "investment_income": "Investment Dividends",
             "arms_cost": "Arms Maintenance",
-            "aid_cost": "Humanitarian Aid"
+            "aid_cost": "Humanitarian Aid",
+            "cow_income": "Miniature Cattle Revenue"
         }
     }
 }

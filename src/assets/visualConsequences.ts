@@ -94,6 +94,28 @@ export const VISUAL_CONSEQUENCES: VisualConsequenceEntry[] = [
         layer: 'street-prop-background',
         exclusive: ['dilapidated-buildings'],
     },
+    // Weird deal visual stubs (Story 5-3) — 3D assets wired in Sprint 5 visual pass
+    {
+        id: 'deal-19-tiny-cows',
+        label: 'Tiny cows wander parks and sidewalks (Dog-Sized Cow Initiative)',
+        condition: { activeRecurringEffectId: 'deal-19' },
+        assetSlot: 'weird_tiny_cows',
+        layer: 'street-prop-foreground',
+    },
+    {
+        id: 'deal-20-giant-mouse',
+        label: 'Giant mouse-shaped building on plaza (Giant National Computer Mouse)',
+        condition: { activeRecurringEffectId: 'deal-20' },
+        assetSlot: 'weird_giant_mouse',
+        layer: 'plaza-prop',
+    },
+    {
+        id: 'deal-21-pigeon-cameras',
+        label: 'Pigeons wear tiny cameras (Strategic Pigeon Surveillance Program)',
+        condition: { activeRecurringEffectId: 'deal-21' },
+        assetSlot: 'weird_pigeon_cameras',
+        layer: 'street-prop-foreground',
+    },
     // Weird law visual stubs (Story 5-2) — 3D assets wired in Sprint 5 visual pass
     {
         id: 'weird-cemeteries',

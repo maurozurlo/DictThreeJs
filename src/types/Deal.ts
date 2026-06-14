@@ -15,4 +15,6 @@ export interface Deal {
     power?: Power;
     /** Optional recurring effect — present only on lasting-effect deals. */
     recurringEffect?: RecurringEffect;
+    /** Direct charisma delta applied on accept — used for prestige deals (e.g. Deal 20). */
+    charismaEffect?: number;
 }

@@ -12,6 +12,8 @@ export const GAINS = {
 
 /** Per-round recurring effect tiers (lasting-effects PRD Feature 1, TR-lasting-004). */
 export const RECURRING = {
+    /** Below SMALL — used for minor flavour deals (e.g. Deal 19 Tiny Cows +5/round). */
+    TINY: 5,
     SMALL: 8,
     MEDIUM: 15,
     LARGE: 25,
