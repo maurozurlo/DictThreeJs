@@ -82,9 +82,12 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
             <div className={styles.navRight}>
                 {displayTabs && coupWarningFaction && (
                     <span className={clsx(styles.coupBadge, { [styles.coupBadgeDanger]: coupArmedLastRound })}>
-                        {coupArmedLastRound
-                            ? t('hud.coup_danger', { faction: t(`power.${coupWarningFaction}`) })
-                            : t('hud.coup_warning', { faction: t(`power.${coupWarningFaction}`) })}
+                        {coupArmedLastRound ? '🔴' : '⚠️'}
+                        <span className={styles.coupTooltip}>
+                            {coupArmedLastRound
+                                ? t('hud.coup_danger', { faction: t(`power.${coupWarningFaction}`) })
+                                : t('hud.coup_warning', { faction: t(`power.${coupWarningFaction}`) })}
+                        </span>
                     </span>
                 )}
                 {displayTabs && phase === 'start' && !dayEnded && (

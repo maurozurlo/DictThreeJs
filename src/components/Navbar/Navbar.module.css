@@ -10,7 +10,8 @@
     border-image-slice: 24 fill;
     border-image-width: 24px;
     border-image-repeat: stretch;
-    z-index: 100; /* above the fade overlay (z-index: 50) */
+    z-index: 100;
+    /* above the fade overlay (z-index: 50) */
     image-rendering: pixelated;
 
 
@@ -30,6 +31,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    gap: 1rem;
 }
 
 .gameTitle {
@@ -92,7 +94,7 @@
     width: 200px;
     height: 200px;
     transform: translate(-50%, -50%) rotate(0deg);
-    background: conic-gradient(rgba(0,0,0,0), #ffd700, rgba(0,0,0,0) 25%);
+    background: conic-gradient(rgba(0, 0, 0, 0), #ffd700, rgba(0, 0, 0, 0) 25%);
     animation: advanceSpin 3s linear infinite;
 }
 
@@ -106,7 +108,9 @@
 }
 
 @keyframes advanceSpin {
-    100% { transform: translate(-50%, -50%) rotate(1turn); }
+    100% {
+        transform: translate(-50%, -50%) rotate(1turn);
+    }
 }
 
 .advanceHint {
@@ -123,28 +127,55 @@
 }
 
 @keyframes hintPulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
+    0%, 100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 .coupBadge {
-    font-size: 0.6rem;
-    color: #ffcc00;
-    white-space: nowrap;
-    padding: 2px 6px;
-    border: 1px solid #ffcc0066;
-    border-radius: 3px;
+    position: relative;
+    font-size: 1rem;
+    cursor: default;
     animation: hintPulse 2s ease-in-out infinite;
-    letter-spacing: 0.05em;
+    background: rgba(1, 1, 1, .5);
+    padding: .5rem;
 }
 
 .coupBadgeDanger {
-    color: #ff4444;
-    border-color: #ff444466;
-    animation: dangerPulse 1s ease-in-out infinite;
+    animation: dangerPulse 0.8s ease-in-out infinite;
+}
+
+.coupTooltip {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: #111;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    color: var(--text-color);
+    pointer-events: none;
+    z-index: 200;
+    letter-spacing: 0.03em;
+}
+
+.coupBadge:hover .coupTooltip {
+    display: block;
 }
 
 @keyframes dangerPulse {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
+    0%, 100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
