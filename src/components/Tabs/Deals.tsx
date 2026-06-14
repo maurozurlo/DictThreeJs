@@ -9,6 +9,8 @@ import Typography from '../Typography/Typography'
 import clsx from 'clsx'
 import { useMemo } from 'react'
 import { dumbifyText } from '../../Utils/String'
+import AdvisorButton from '../Advisor/AdvisorButton'
+import { computeDealVerdict, computeDealTrigger } from '../../Utils/Advisor'
 
 const Deals = ({ isActive }: TabProps) => {
     const { t: menuT } = useTranslation('menu')
@@ -22,6 +24,8 @@ const Deals = ({ isActive }: TabProps) => {
         () => currentDeal ? dumbifyText(t(currentDeal.text), dumbScore) : '',
         [currentDeal?.text, dumbScore, t]
     )
+    const dealVerdict = currentDeal ? computeDealVerdict(currentDeal) : 'approve' as const
+    const dealTrigger = currentDeal ? computeDealTrigger(currentDeal) : undefined
     return (
         <TabLayout headerTitle={menuT('tabs.deals')} isActive={isActive}>
             {currentDeal ?
@@ -33,6 +37,7 @@ const Deals = ({ isActive }: TabProps) => {
                         <Button disabled={dealDecided} onClick={() => actUponDeal(true)}>{t('deals.accept')}</Button>
                         <Button disabled={dealDecided} onClick={() => actUponDeal(false)}>{t('deals.reject')}</Button>
                     </div>
+                    {!dealDecided && <AdvisorButton category="deal" verdict={dealVerdict} trigger={dealTrigger} />}
                     {dealDecided ? <>
                         <Typography variant='h3'>{t('deals.outcome')}</Typography>
                         {outcome && outcome.length ?

@@ -6,6 +6,8 @@ import Button from '../Button/Button'
 import { useTranslation } from 'react-i18next'
 import { Modal, ModalCard } from '../Modal/Modal'
 import styles from './DayEnded.module.css'
+import AdvisorButton from '../Advisor/AdvisorButton'
+import { computeDayendedVerdict, computeDayendedTrigger } from '../../Utils/Advisor'
 
 const DayEnded = () => {
     const { t } = useTranslation()
@@ -33,6 +35,10 @@ const DayEnded = () => {
         && coupWarningFaction !== null
         && currentRelations[coupWarningFaction] >= GAMESTATE.COUP.RELATION_THRESHOLD
         && currentCharisma <= GAMESTATE.COUP.CHARISMA_THRESHOLD
+
+    const treasury = useGameStore(s => s.budget.treasury)
+    const advisorVerdict = computeDayendedVerdict(coupStillActive, treasury)
+    const advisorTrigger = computeDayendedTrigger(coupStillActive, treasury)
 
     if (!dayEnded || phase !== 'start') return null
 
@@ -86,6 +92,7 @@ const DayEnded = () => {
                         {t('actionPanel.coup_warning')}
                     </div>
                 )}
+                <AdvisorButton category="dayended" verdict={advisorVerdict} trigger={advisorTrigger} />
                 <Button onClick={nextRound}>
                     {t('actionPanel.continue_day', { day: round + 1 })}
                 </Button>

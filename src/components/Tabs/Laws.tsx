@@ -7,6 +7,8 @@ import { useGameStore } from '../../Stores/GameState'
 import { useMemo } from 'react'
 import { dumbifyText } from '../../Utils/String'
 import { GAMESTATE } from '../../Constants/GameState'
+import AdvisorButton from '../Advisor/AdvisorButton'
+import { computeLawVerdict, computeLawTrigger } from '../../Utils/Advisor'
 
 const Laws = () => {
     const { t: commonT } = useTranslation()
@@ -37,6 +39,9 @@ const Laws = () => {
         return <Typography variant='caption' className={styles.title}>{t('rep_indisposed')}</Typography>
     }
 
+    const lawVerdict = currentLaw ? computeLawVerdict(currentLaw) : 'approve' as const
+    const lawTrigger = currentLaw ? computeLawTrigger(currentLaw) : undefined
+
     return (
         currentLaw === null ? null :
             lawDecided ? (
@@ -53,6 +58,7 @@ const Laws = () => {
                         <Icon type='reject' /> {t('laws.reject')}
                     </Button>
                 </div>
+                <AdvisorButton category="law" verdict={lawVerdict} trigger={lawTrigger} />
             </>
     )
 }

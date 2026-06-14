@@ -8,15 +8,27 @@ import { EXPENDITURES, TAXES, MoneyNumberFormatter } from '../../Constants/Budge
 import { useGameStore } from '../../Stores/GameState'
 import TabLayout from './TabLayout'
 import { calculateRoundFinancials, computeRoundsLeft } from '../../Stores/BudgetHandler'
+import { useMemo } from 'react'
+import { computeBudgetVerdict, computeBudgetTrigger, getAdvisorLine, ADVISOR_NAMES } from '../../Utils/Advisor'
 
 
 const Budget = ({ isActive }: TabProps) => {
     const { t } = useTranslation();
+    const { t: tAdvisor } = useTranslation('advisor')
     const budget = useGameStore(s => s.budget)
     const activeRecurringEffects = useGameStore(s => s.gameManagement.activeRecurringEffects)
+    const advisorLevel = useGameStore(s => s.shop.advisorLevel)
     const financials = calculateRoundFinancials(budget, activeRecurringEffects)
     const net = financials.netChange
     const roundsLeft = computeRoundsLeft(budget.treasury, net)
+    const budgetVerdict = computeBudgetVerdict(budget.expenditures)
+    const budgetTrigger = computeBudgetTrigger(budget.expenditures, budget.taxes)
+
+    const advisorKey = useMemo(
+        () => getAdvisorLine({ category: 'budget', verdict: budgetVerdict, level: advisorLevel, trigger: budgetTrigger }),
+        [budgetVerdict, advisorLevel, budgetTrigger]
+    )
+    const advisorText = advisorKey === 'No advice available.' ? advisorKey : tAdvisor(advisorKey)
 
     return (
         <TabLayout
@@ -44,6 +56,13 @@ const Budget = ({ isActive }: TabProps) => {
                         <BudgetRow key={tax.id} id={tax.id} label={tax.label} isTax />
                     ))}
                 </div>
+            </div>
+            <div className={styles.footer}>
+                <div className={styles.advisorMugshot}>
+                    <img src={`/assets/advisor_${advisorLevel}.png`} alt="Advisor" />
+                    <Typography variant="caption" className={styles.advisorName}>{ADVISOR_NAMES[advisorLevel]}</Typography>
+                </div>
+                <Typography variant="caption">{advisorText}</Typography>
             </div>
         </TabLayout>
     )

@@ -21,3 +21,10 @@ export interface AdvisorLine {
     key: string;
     trigger?: AdvisorOverrideTrigger;
 }
+
+export interface AdvisorContext {
+    category: AdvisorCategory;
+    verdict: AdvisorVerdict;
+    level: AdvisorLevel;
+    trigger?: AdvisorOverrideTrigger;
+}

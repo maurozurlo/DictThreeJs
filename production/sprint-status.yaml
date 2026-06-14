@@ -114,21 +114,21 @@ stories:
     name: "Economy Advisor — Dialogue Content"
     file: "production/stories/5-11-advisor-dialogue-content.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: "5-10"
-    completed: ""
+    completed: "2026-06-14"
 
   - id: "5-12"
     name: "Economy Advisor — UI & Selection Logic"
     file: "production/stories/5-12-advisor-ui.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: "5-10, 5-11"
-    completed: ""
+    completed: "2026-06-14"
 
   - id: "5-8"
     name: "External playtest — non-developer Medium difficulty session"
