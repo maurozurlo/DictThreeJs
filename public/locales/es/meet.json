@@ -2,9 +2,9 @@
     "bribe_success": "Sobornaste a {{power}}. Relación +3, Tesoro -${{cost}}M.",
     "bribe_insufficient_funds": "Fondos insuficientes para el soborno. Acción fallida.",
     "eliminate_success": "Eliminaste el liderazgo de {{power}}. La relación con {{power}} se reinicia a neutral.",
-    "eliminate_backlash": "Eliminaste el liderazgo de {{power}}. {{power}} reiniciado a neutral, relación con {{angryPower}} -2 (reacción adversa).",
-    "expropriate_success": "Expropiaste bienes de {{power}}. Tesoro +${{gain}}M, relación -3.",
-    "dialogue_fail": "El diálogo con {{power}} salió terriblemente mal. Relación -1.",
+    "eliminate_backlash": "Eliminaste el liderazgo de {{power}}. {{power}} reiniciado a neutral, relación con {{angryPower}} {{backlashDelta}} (reacción adversa).",
+    "expropriate_success": "Expropiaste bienes de {{power}}. Tesoro +${{gain}}M, relación {{relationDelta}}.",
+    "dialogue_fail": "El diálogo con {{power}} salió terriblemente mal. Relación {{relationDelta}}.",
     "dialogue_success": "Diálogo exitoso con {{power}}. Relación +1.",
     "dialogue_neutral": "El diálogo con {{power}} fue inconcluso. Sin cambios."
 }

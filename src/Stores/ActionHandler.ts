@@ -3,6 +3,7 @@ import type { GameState } from "../types/GameState";
 import type { MeetActionType, Power } from "../types/Power";
 import { handleRelations } from "./EffectHandler";
 import { getRandomFromList, rollChance, rollFloat } from "../Utils/Math";
+import { applyGraceDampening } from "../Utils/GracePeriod";
 
 type ActionResult = {
     resultText: { key: string; params?: Record<string, string | number> };
@@ -69,9 +70,10 @@ function handleEliminate(
 
     const otherPowers = Object.keys(newRelations).filter((p) => p !== power) as Power[];
     const angryPower = getRandomFromList(otherPowers);
+    const backlashDelta = applyGraceDampening(-2, state.gameManagement.round);
 
     return {
-        resultText: { key: "eliminate_backlash", params: { power, angryPower } },
+        resultText: { key: "eliminate_backlash", params: { power, angryPower, backlashDelta } },
         actionTaken: true,
         charismaDelta: -2,
         newRelations: {
@@ -89,9 +91,11 @@ function handleEliminate(
 
 function handleExpropriate(power: Power, state: GameState): ActionResult {
     const gain = GAMESTATE.MEET.ACTIONS.EXPROPRIATE.GAINS[power];
+    const round = state.gameManagement.round;
+    const relationDelta = applyGraceDampening(-3, round);
 
     return {
-        resultText: { key: "expropriate_success", params: { power, gain } },
+        resultText: { key: "expropriate_success", params: { power, gain, relationDelta } },
         treasuryUpdate: gain,
         actionTaken: true,
         // -2 matches eliminate: expropriation is treasury-positive aggression,
@@ -116,9 +120,10 @@ function handleDialogue(
     // Education too low — population can't hold a productive conversation
     const education = state.budget.expenditures.education
     const round = state.gameManagement.round;
+    const dialogueFailDelta = applyGraceDampening(-1, round);
     if (education <= GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN + 1) {
         return {
-            resultText: { key: "dialogue_fail", params: { power } },
+            resultText: { key: "dialogue_fail", params: { power, relationDelta: dialogueFailDelta } },
             actionTaken: true,
             charismaDelta: -1,
             newRelations: {
@@ -143,7 +148,7 @@ function handleDialogue(
 
     if (roll < failThreshold) {
         return {
-            resultText: { key: "dialogue_fail", params: { power } },
+            resultText: { key: "dialogue_fail", params: { power, relationDelta: dialogueFailDelta } },
             actionTaken: true,
             charismaDelta: 0,
             newRelations: {

@@ -72,7 +72,8 @@ describe('handleActionOutcome', () => {
                 }
             },
             gameManagement: {
-                charisma: { current: 0 }
+                charisma: { current: 0 },
+                round: 3,
             }
         } as unknown as GameState;
     });
@@ -157,6 +158,7 @@ describe('handleActionOutcome', () => {
                 params: {
                     angryPower: "business",
                     power: "military",
+                    backlashDelta: -2,
                 },
             });
 
@@ -221,6 +223,7 @@ describe('handleActionOutcome', () => {
                 params: {
                     gain: 120,
                     power: "business",
+                    relationDelta: -3,
                 },
             });
         });
@@ -257,7 +260,7 @@ describe('handleActionOutcome', () => {
             expect(result.newRelations.people).toBe(2); // -1 relation
             expect(result.resultText).toStrictEqual({
                 key: 'dialogue_fail',
-                params: { power: 'people' },
+                params: { power: 'people', relationDelta: -1 },
             });
         });
 
@@ -274,6 +277,7 @@ describe('handleActionOutcome', () => {
                 key: "dialogue_fail",
                 params: {
                     power: "people",
+                    relationDelta: -1,
                 },
             });
 
