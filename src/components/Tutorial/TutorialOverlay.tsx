@@ -4,6 +4,7 @@ import { Tabs } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next'
 import styles from './TutorialOverlay.module.css'
 import Button from '../Button/Button'
+import { Icon } from '../Icon/Icon'
 
 // ─── Step config ─────────────────────────────────────────────────────────────
 
@@ -202,7 +203,7 @@ const TutorialOverlay = () => {
                     <Button onClick={advance}>{t('cta')}</Button>
                 )}
                 {!showCta && step === 3 && (
-                    <span className={styles.waiting}>▼</span>
+                    <span className={styles.waiting}><Icon type="caret" /></span>
                 )}
                 <button className={styles.skipLink} onClick={skip}>
                     {t('skip')}

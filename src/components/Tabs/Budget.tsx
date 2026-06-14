@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import styles from './Tabs.module.css'
 import type { TabProps } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next'
+import { Icon } from '../Icon/Icon'
 import Typography from '../Typography/Typography'
 import { BudgetRow } from '../BudgetRow/BudgetRow'
 import { EXPENDITURES, TAXES, MoneyNumberFormatter } from '../../Constants/Budget'
@@ -41,7 +42,7 @@ const Budget = ({ isActive }: TabProps) => {
                 <div className={clsx(styles.netStatus, net >= 0 ? styles.positive : styles.negative)}>
                     {t('budget.net')}: {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
                 </div>
-                {roundsLeft !== null && <Typography variant="caption" className={styles.roundsWarning}>⚠️ {t('budget.rounds_left', { rounds: roundsLeft })}</Typography>}
+                {roundsLeft !== null && <Typography variant="caption" className={styles.roundsWarning}><Icon type="warning" /> {t('budget.rounds_left', { rounds: roundsLeft })}</Typography>}
             </>}
             isActive={isActive}>
             <div className={styles.columns}>

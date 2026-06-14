@@ -1,5 +1,6 @@
 import styles from './HelpOverlay.module.css'
 import Button from '../Button/Button'
+import { Icon } from '../Icon/Icon'
 import { Modal, ModalCard } from '../Modal/Modal'
 import { useTranslation } from 'react-i18next'
 
@@ -33,7 +34,7 @@ const HelpOverlay = ({ onClose }: HelpOverlayProps) => {
             <ModalCard maxWidth="1400px" padding="1.5rem 2rem" className={styles.card}>
                 <div className={styles.header}>
                     <div className={styles.title}>{t('title')}</div>
-                    <Button onClick={onClose}>✕</Button>
+                    <Button onClick={onClose}><Icon type="reject" /></Button>
                 </div>
 
                 <div className={styles.grid}>

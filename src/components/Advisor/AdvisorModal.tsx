@@ -1,4 +1,5 @@
 import styles from './AdvisorModal.module.css';
+import { Icon } from '../Icon/Icon';
 
 interface Props {
     name: string;
@@ -11,7 +12,7 @@ const AdvisorModal = ({ name, text, onClose }: Props) => {
         <div className={styles.popover}>
             <div className={styles.header}>
                 <span className={styles.name}>{name}</span>
-                <button className={styles.closeButton} onClick={onClose} aria-label="Close advisor">✕</button>
+                <button className={styles.closeButton} onClick={onClose} aria-label="Close advisor"><Icon type="reject" /></button>
             </div>
             <p className={styles.text}>{text}</p>
         </div>

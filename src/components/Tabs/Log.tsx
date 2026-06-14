@@ -6,6 +6,7 @@ import Newspaper from '../Newspaper/Newspaper'
 import Typography from '../Typography/Typography'
 import Card from '../Card/Card'
 import Button from '../Button/Button'
+import { Icon } from '../Icon/Icon'
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../Stores/GameState'
 import { getGameDate } from '../../Utils/GameDate'
@@ -151,16 +152,16 @@ const Log = ({ isActive }: TabProps) => {
                                 [styles.resolved]: miniChallenge.decided
                             }
                         )}>
-                            🎲 {t('log.mini_challenge_title')}
+                            <Icon type="random" /> {t('log.mini_challenge_title')}
                         </Typography>
                         <Typography variant='body'>{challengeText}</Typography>
                         {!miniChallenge.decided ? (
                             <div className={eventStyles.challengeButtons}>
                                 <Button onClick={() => miniChallenge.resolve(true)}>
-                                    ✓ {t('log.mini_challenge_accept')}
+                                    <Icon type="approve" /> {t('log.mini_challenge_accept')}
                                 </Button>
                                 <Button onClick={() => miniChallenge.resolve(false)}>
-                                    ✗ {t('log.mini_challenge_reject')}
+                                    <Icon type="reject" /> {t('log.mini_challenge_reject')}
                                 </Button>
                             </div>
                         ) : (
@@ -183,7 +184,7 @@ const Log = ({ isActive }: TabProps) => {
                 {periodicEvent.current && (
                     <div className={clsx(eventStyles.eventPanel)}>
                         <Typography variant='h2' className={clsx(eventStyles.eventTitle, { [eventStyles.resolved]: periodicEvent.decided })}>
-                            ⚡ {periodicT(`${periodicEvent.current.id}.title`)}
+                            <Icon type="lightning" /> {periodicT(`${periodicEvent.current.id}.title`)}
                         </Typography>
                         <Typography variant='body'>{periodicT(`${periodicEvent.current.id}.text`)}</Typography>
 
