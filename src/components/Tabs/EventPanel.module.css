@@ -15,6 +15,9 @@
 .eventTitle {
     color: var(--accent-color);
     margin-bottom: 0.75rem;
+    display: flex;
+    gap: .5rem;
+    align-items: center;
 }
 
 .optionsGrid {

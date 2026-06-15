@@ -8,8 +8,13 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.positive { color: var(--income-green); }
-.negative { color: var(--expense-red); }
+.positive {
+    color: var(--income-green);
+}
+
+.negative {
+    color: var(--expense-red);
+}
 
 .coupWarning {
     color: var(--expense-red);
@@ -18,6 +23,14 @@
     padding: 0.5rem;
     margin-top: 0.5rem;
     border: 1px solid var(--expense-red);
-    background-color: rgba(231, 76, 60, 0.12); /* --expense-red at 12% */
+    background-color: rgba(231, 76, 60, 0.12);
+    /* --expense-red at 12% */
     text-align: center;
+}
+
+.header {
+    display: flex;
+    font-size: 1rem;
+    align-items: center;
+    gap: .5rem;
 }

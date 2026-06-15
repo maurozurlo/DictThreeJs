@@ -14,7 +14,7 @@ goal: "Establish Polish quality baseline and ship content polish (weird laws, we
 start: "2026-06-14"
 end: "2026-06-21"
 generated: "2026-06-14"
-updated: "2026-06-14"
+updated: "2026-06-15"
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
@@ -42,11 +42,11 @@ stories:
     name: "Weird Deals Tier 1 — deals 19-22 (existing deal shape)"
     file: "production/stories/5-3-weird-deals-tier1.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.75
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "5-4"
     name: "Timer tuning experiment — evaluate 3-minute timer"

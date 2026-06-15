@@ -5,6 +5,7 @@ import type { AdvisorCategory, AdvisorOverrideTrigger, AdvisorVerdict } from '..
 import { getAdvisorLine, ADVISOR_NAMES } from '../../Utils/Advisor';
 import AdvisorModal from './AdvisorModal';
 import styles from './AdvisorButton.module.css';
+import { Icon } from '../Icon/Icon';
 
 interface Props {
     category: AdvisorCategory;
@@ -32,7 +33,7 @@ const AdvisorButton = ({ category, verdict, trigger }: Props) => {
                 title={ADVISOR_NAMES[advisorLevel]}
                 aria-label="Ask advisor"
             >
-                ⓘ
+                <Icon type="info" />
             </button>
             {open && (
                 <AdvisorModal

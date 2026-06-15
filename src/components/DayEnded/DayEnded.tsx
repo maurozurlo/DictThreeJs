@@ -8,26 +8,27 @@ import { Modal, ModalCard } from '../Modal/Modal'
 import styles from './DayEnded.module.css'
 import AdvisorButton from '../Advisor/AdvisorButton'
 import { computeDayendedVerdict, computeDayendedTrigger } from '../../Utils/Advisor'
+import { Icon } from '../Icon/Icon'
 
 const DayEnded = () => {
     const { t } = useTranslation()
-    const phase             = useGameStore(s => s.gameManagement.phase)
-    const dayEnded          = useGameStore(s => s.gameManagement.dayEnded)
-    const round             = useGameStore(s => s.gameManagement.round)
-    const lastRoundIncome   = useGameStore(s => s.gameManagement.lastRoundIncome)
+    const phase = useGameStore(s => s.gameManagement.phase)
+    const dayEnded = useGameStore(s => s.gameManagement.dayEnded)
+    const round = useGameStore(s => s.gameManagement.round)
+    const lastRoundIncome = useGameStore(s => s.gameManagement.lastRoundIncome)
     const lastRoundExpenses = useGameStore(s => s.gameManagement.lastRoundExpenses)
-    const recurringIncome   = useGameStore(s => s.gameManagement.lastRoundRecurringIncome)
+    const recurringIncome = useGameStore(s => s.gameManagement.lastRoundRecurringIncome)
     const recurringExpenses = useGameStore(s => s.gameManagement.lastRoundRecurringExpenses)
-    const extraIncome       = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
-    const extraExpenses     = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
+    const extraIncome = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
+    const extraExpenses = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
     // coupArmedLastRound is written at the START of the current round by nextRound().
     // When true here, the player survived a grace roll this round.
     // Clicking Continue calls nextRound() with graceTaken=true → certain coup.
-    const coupArmed              = useGameStore(s => s.gameManagement.coupArmedLastRound)
-    const coupWarningFaction     = useGameStore(s => s.gameManagement.coupWarningFaction)
-    const currentRelations       = useGameStore(s => s.relations.current)
-    const currentCharisma        = useGameStore(s => s.gameManagement.charisma.current)
-    const nextRound              = useGameStore(s => s.gameManagement.nextRound)
+    const coupArmed = useGameStore(s => s.gameManagement.coupArmedLastRound)
+    const coupWarningFaction = useGameStore(s => s.gameManagement.coupWarningFaction)
+    const currentRelations = useGameStore(s => s.relations.current)
+    const currentCharisma = useGameStore(s => s.gameManagement.charisma.current)
+    const nextRound = useGameStore(s => s.gameManagement.nextRound)
 
     // Re-evaluate whether the threat is still live at round-end.
     // If the player eliminated the faction this round, the warning is no longer valid.
@@ -48,7 +49,9 @@ const DayEnded = () => {
     return (
         <Modal>
             <ModalCard>
-                <Typography variant="h2" color="accent">{t('actionPanel.day_ended', { round })}</Typography>
+                <Typography variant="h2" color="accent" className={styles.header}>
+                    <Icon type="calendar" />
+                    {t('actionPanel.month_ended', { round })}</Typography>
                 <div className={styles.statRow}>
                     <span>{t('actionPanel.tax_income')}</span>
                     <span className={styles.positive}>+{MoneyNumberFormatter(lastRoundIncome)}</span>
@@ -94,7 +97,7 @@ const DayEnded = () => {
                 )}
                 <AdvisorButton category="dayended" verdict={advisorVerdict} trigger={advisorTrigger} />
                 <Button onClick={nextRound}>
-                    {t('actionPanel.continue_day', { day: round + 1 })}
+                    {round + 1 <= GAMESTATE.ROUNDS.MAX ? t('actionPanel.continue_month', { month: round + 1 }) : t('actionPanel.finish_month', { month: round })}
                 </Button>
             </ModalCard>
         </Modal>

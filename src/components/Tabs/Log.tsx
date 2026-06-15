@@ -152,7 +152,7 @@ const Log = ({ isActive }: TabProps) => {
                                 [styles.resolved]: miniChallenge.decided
                             }
                         )}>
-                            <Icon type="random" /> {t('log.mini_challenge_title')}
+                            <Icon type="random" />{t('log.mini_challenge_title')}
                         </Typography>
                         <Typography variant='body'>{challengeText}</Typography>
                         {!miniChallenge.decided ? (

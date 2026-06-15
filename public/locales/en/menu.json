@@ -19,7 +19,7 @@
     "cancel": "Cancel",
     "next_round": "Next Round →",
     "skip": "Skip →",
-    "day_ended": "📅 Day {{round}} Has Ended",
+    "month_ended": "Month {{round}} Has Ended",
     "tax_income": "Tax income:",
     "bonus_income": "Bonus income:",
     "budget_expenses": "Budget expenses:",
@@ -27,8 +27,9 @@
     "recurring_expenses": "Legislation costs:",
     "extra_expenses": "Extra expenses:",
     "net": "Net:",
-    "coup_warning": "⚠ Coup imminent! A faction is moving against you.",
-    "continue_day": "Continue to Day {{day}} →"
+    "coup_warning": "Coup imminent! A faction is moving against you.",
+    "continue_month": "Continue to Month {{month}} →",
+    "finish_month": "Finish Month {{month}}"
   },
   "log": {
     "today": "Today's paper:",
@@ -113,8 +114,8 @@
     "eliminate": "Eliminate",
     "expropriate": "Expropriate",
     "dialogue": "Dialogue",
-    "coup_badge_yellow": "⚠ This faction is growing dangerously influential",
-    "coup_badge_red": "☠ This faction is plotting a coup!"
+    "coup_badge_yellow": "This faction is growing dangerously influential",
+    "coup_badge_red": "This faction is plotting a coup!"
   },
   "power": {
     "military": "Military",
@@ -151,8 +152,8 @@
     "ending_secret_room_2_bad": "The Greenhouse — Bad"
   },
   "hud": {
-    "coup_warning": "⚠ {{faction}} grows restless",
-    "coup_danger": "🔴 {{faction}} is armed",
+    "coup_warning": "{{faction}} grows restless",
+    "coup_danger": "{{faction}} is armed",
     "advance_ready": "All done!"
   }
 }

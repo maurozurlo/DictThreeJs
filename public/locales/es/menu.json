@@ -19,7 +19,7 @@
         "cancel": "Cancelar",
         "next_round": "Siguiente ronda →",
         "skip": "Omitir →",
-        "day_ended": "📅 El día {{round}} ha terminado",
+        "month_ended": "El mes {{round}} ha terminado",
         "tax_income": "Ingresos fiscales:",
         "bonus_income": "Ingresos extra:",
         "budget_expenses": "Gastos del presupuesto:",
@@ -27,11 +27,12 @@
         "recurring_expenses": "Costos legislativos:",
         "extra_expenses": "Gastos extra:",
         "net": "Neto:",
-        "coup_warning": "⚠ ¡Golpe de estado inminente! Una facción se mueve en tu contra.",
-        "continue_day": "Continuar al día {{day}} →"
+        "coup_warning": "¡Golpe de estado inminente! Una facción se mueve en tu contra.",
+        "continue_month": "Continuar al mes {{month}} →",
+        "finish_month": "Finalizar Mes {{month}}"
     },
     "log": {
-        "today": "El periódico de hoy:",
+        "today": "El periódico del día:",
         "sports": "Deportes",
         "weather": "El clima",
         "no_charge": "Sin costo",
@@ -113,8 +114,8 @@
         "eliminate": "Eliminar",
         "expropriate": "Expropiar",
         "dialogue": "Dialogar",
-        "coup_badge_yellow": "⚠ Esta facción está ganando demasiada influencia",
-        "coup_badge_red": "☠ ¡Esta facción está tramando un golpe de estado!"
+        "coup_badge_yellow": "Esta facción está ganando demasiada influencia",
+        "coup_badge_red": "¡Esta facción está tramando un golpe de estado!"
     },
     "power": {
         "military": "Militares",
@@ -151,8 +152,8 @@
         "ending_secret_room_2_bad": "El Invernadero — Mal"
     },
     "hud": {
-        "coup_warning": "⚠ {{faction}} se inquieta",
-        "coup_danger": "🔴 {{faction}} está armado",
+        "coup_warning": "{{faction}} se inquieta",
+        "coup_danger": "{{faction}} está armado",
         "advance_ready": "¡Listo!"
     }
 }
