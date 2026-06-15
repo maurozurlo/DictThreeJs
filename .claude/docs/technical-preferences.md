@@ -76,7 +76,9 @@
 - [ADR-0004](../../docs/architecture/adr-0004-rng-determinism.md) — RNG & Determinism Strategy (`src/Utils/Math.ts`)
 - [ADR-0005](../../docs/architecture/adr-0005-event-scheduling.md) — Event Scheduling System
 - [ADR-0006](../../docs/architecture/adr-0006-round-timer-game-loop.md) — Round Timer / Game Loop
-- [ADR-0007](../../docs/architecture/adr-0007-effect-timing.md) — End-of-Round Effect Timing (Proposed — deferred Sprint 5+)
+- [ADR-0007](../../docs/architecture/adr-0007-effect-timing.md) — End-of-Round Effect Timing (Proposed — narrowed to non-stat delayed consequences by ADR-0008)
+- [ADR-0008](../../docs/architecture/adr-0008-timed-modifier-engine.md) — Timed Modifier Engine / Unified Effect System (Accepted 2026-06-15)
+- ADR-0009 — Coup Telegraphing & Fairness (Planned — not yet written)
 
 ## Engine Specialists
 

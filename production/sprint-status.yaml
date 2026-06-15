@@ -9,129 +9,79 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 5
-goal: "Establish Polish quality baseline and ship content polish (weird laws, weird deals Tier 1) — making the game feel alive before external playtesting"
-start: "2026-06-14"
-end: "2026-06-21"
-generated: "2026-06-14"
+sprint: 6
+goal: "Pay down effect-system tech debt by implementing ADR-0008 (Timed Modifier Engine) — one data-driven engine for laws/deals/weird-laws/structures so effect math is uniform and new content is trivial to add"
+start: "2026-06-22"
+end: "2026-06-28"
+generated: "2026-06-15"
 updated: "2026-06-15"
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
-  - id: "5-1"
-    name: "Performance baseline measurement"
-    file: "production/stories/5-1-performance-baseline.md"
+  - id: "6-1"
+    name: "ADR-0008 P1 — modifier schema + charisma/relations windowing"
+    file: "production/stories/6-1-modifier-engine-p1.md"
     priority: must-have
-    status: done
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.5
+    blocker: ""
+    completed: ""
+
+  - id: "6-4"
+    name: "Repeal-tier balance pass (generic modifier economic magnitude)"
+    file: "production/stories/6-4-repeal-tier-balance.md"
+    priority: must-have
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-14"
+    completed: ""
 
-  - id: "5-2"
-    name: "Weird Laws — 14-law pool implementation"
-    file: "production/stories/5-2-weird-laws.md"
+  - id: "6-2"
+    name: "ADR-0008 P2 — replace ActiveRecurringEffect with modifiers"
+    file: "production/stories/6-2-modifier-engine-p2.md"
     priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-15"
-
-  - id: "5-3"
-    name: "Weird Deals Tier 1 — deals 19-22 (existing deal shape)"
-    file: "production/stories/5-3-weird-deals-tier1.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.75
-    blocker: ""
-    completed: "2026-06-15"
-
-  - id: "5-4"
-    name: "Timer tuning experiment — evaluate 3-minute timer"
-    file: "production/stories/5-4-timer-tuning.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.25
-    blocker: ""
-    completed: "2026-06-15"
-
-  # ── Should Have ─────────────────────────────────────────────────────────
-  - id: "5-5"
-    name: "Interaction patterns doc"
-    file: "production/stories/5-5-interaction-patterns.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-15"
-
-  - id: "5-6"
-    name: "Doc drift cleanup — ADR log + Godot scaffolding"
-    file: "production/stories/5-6-doc-drift.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.25
-    blocker: ""
-    completed: "2026-06-15"
-
-  - id: "5-7"
-    name: "Street View deferral decision + tutorial audit"
-    file: "production/stories/5-7-street-view-deferral.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.25
-    blocker: ""
-    completed: "2026-06-15"
-
-  - id: "3-5"
-    name: "Budget Tier Consequences (Polish enhancement)"
-    file: "production/stories/3-5-budget-tier-consequences.md"
-    priority: should-have
-    status: done
+    status: backlog
     owner: ""
     estimate_days: 2.0
-    blocker: ""
-    completed: "2026-06-15"
+    blocker: "6-1, 6-4"
+    completed: ""
 
-  # ── Nice to Have ────────────────────────────────────────────────────────
-  - id: "5-10"
-    name: "Economy Advisor — State & Shop Integration"
-    file: "production/stories/5-10-advisor-state-shop.md"
-    priority: must-have
-    status: done
+  # ── Should Have ─────────────────────────────────────────────────────────
+  - id: "6-3"
+    name: "ADR-0008 P3 — remaining content + Street View/Advisor consumers"
+    file: "production/stories/6-3-modifier-engine-p3.md"
+    priority: should-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.5
+    blocker: "6-2"
+    completed: ""
+
+  - id: "6-5"
+    name: "Author ADR-0009 — Coup Telegraphing & Fairness"
+    file: "production/stories/6-5-coup-fairness-adr.md"
+    priority: should-have
+    status: backlog
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-14"
+    completed: ""
 
-  - id: "5-11"
-    name: "Economy Advisor — Dialogue Content"
-    file: "production/stories/5-11-advisor-dialogue-content.md"
-    priority: must-have
-    status: done
+  - id: "6-6"
+    name: "Modifier authoring guide (expandability doc)"
+    file: "production/stories/6-6-modifier-authoring-guide.md"
+    priority: should-have
+    status: backlog
     owner: ""
-    estimate_days: 1.0
-    blocker: "5-10"
-    completed: "2026-06-14"
+    estimate_days: 0.5
+    blocker: "6-1"
+    completed: ""
 
-  - id: "5-12"
-    name: "Economy Advisor — UI & Selection Logic"
-    file: "production/stories/5-12-advisor-ui.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: "5-10, 5-11"
-    completed: "2026-06-14"
-
+  # ── Nice to Have ────────────────────────────────────────────────────────
   - id: "5-8"
-    name: "External playtest — non-developer Medium difficulty session"
+    name: "External playtest — non-developer Medium difficulty session (carryover)"
     file: "production/stories/5-8-external-playtest.md"
     priority: nice-to-have
     status: backlog
@@ -141,11 +91,21 @@ stories:
     completed: ""
 
   - id: "5-9"
-    name: "Hard difficulty playtest reconciliation"
+    name: "Hard difficulty playtest reconciliation (carryover)"
     file: "production/stories/5-9-hard-difficulty-reconciliation.md"
     priority: nice-to-have
     status: backlog
     owner: ""
     estimate_days: 0.25
     blocker: ""
+    completed: ""
+
+  - id: "6-7"
+    name: "Coup fairness UI — telegraphing readout"
+    file: "production/stories/6-7-coup-fairness-ui.md"
+    priority: nice-to-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.0
+    blocker: "6-5"
     completed: ""

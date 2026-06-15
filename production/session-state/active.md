@@ -246,3 +246,5 @@ Task: Implemented — pending story-done
 - Test written: None — UI story, manual walkthrough required
 - Blockers: None
 - Next: /code-review src/components/ActionPanel/SecretPanel.tsx src/components/ActionPanel/ActionPanel.tsx src/components/Tabs/Secret.tsx then /story-done production/stories/3-6-secret-room-action-panel-layout.md
+
+<!-- QA-PLAN: 2026-06-15 | System: sprint-6 | Plan written: production/qa/qa-plan-sprint-6-2026-06-15.md -->

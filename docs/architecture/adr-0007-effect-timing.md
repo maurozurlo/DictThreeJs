@@ -8,6 +8,13 @@ Options A/B/C) will be made before Sprint 6 begins, when Tier 2 weird deals are 
 Stories referencing Tier 2 weird deals are blocked on this ADR reaching Accepted.
 No current sprint stories depend on this ADR.
 
+> **Scope narrowed by [ADR-0008](adr-0008-timed-modifier-engine.md) (Accepted 2026-06-15).**
+> Delayed/windowed effects expressible as *stat contributions* (charisma, relations,
+> per-round income/expense) are now handled by the Timed Modifier Engine. This ADR is
+> therefore reduced to **non-stat one-shot delayed consequences only** — e.g. delayed
+> one-shot base relation/treasury hits and cosmetic triggers (education dumbify text,
+> infrastructure textures). Revisit and finalise its scope alongside ADR-0008 Phase 3.
+
 ## Date
 
 2026-06-13
