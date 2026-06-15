@@ -24,8 +24,8 @@
 #
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
-version: 2
-last_updated: "2026-06-10"
+version: 3
+last_updated: "2026-06-15"
 
 requirements:
   # --- Platform ---
@@ -282,4 +282,107 @@ requirements:
     created: 2026-06-12
     revised: ""
     adr: docs/architecture/adr-0002-state-management-pattern.md
+    status: active
+
+  # --- Modifier Engine (ADR-0008 / Sprint 6) ---
+  - id: TR-mod-001
+    system: mod
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Single unified modifiers[] array is the one mechanism for persistent and time-windowed contributions to derived stats (charisma, the three relations, per-round income/expense) and also the decision ledger (active/rejected) across laws, weird-laws, deals, opportunities, mini-challenges, structures — replacing ActiveRecurringEffect[]"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-mod-002
+    system: mod
+    gdd: design/gdd/weird-deals.md
+    requirement: "Per-StatMod timing: each contribution's window and onStart trigger round are resolved to concrete rounds at acquisition from a TIME_MODIFIERS authoring registry; resolved windows are persisted, never the timing id (registry rebalance cannot alter a live save)"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-mod-003
+    system: mod
+    gdd: design/gdd/game-concept.md
+    requirement: "Read-through summation chokepoint: sumModifiers(stat, round) sums in-window active contributions; effective charisma/relation = Clamp(base + sum, MIN, MAX) re-clamped to ±10; base still erodes via gameplay; isWindowActive uses exclusive upper bound (round < endRound)"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-mod-004
+    system: mod
+    gdd: design/gdd/weird-deals.md
+    requirement: "One-time narrative hook (onStart) fires exactly once at the resolved onStartTriggerRound, guarded by onStartFired across save/load, fired at a single site in nextRound(); never fires if the run ends before the trigger; headline key is content (looked up by id), not stored on the modifier"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-mod-005
+    system: mod
+    gdd: design/gdd/game-concept.md
+    requirement: "Save/load persists resolved windows + decision ledger; one-way migration converts legacy activeRecurringEffects into roundIncome/roundExpense modifiers; missing modifiers field rehydrates with ?? []; missing windows default to permanent"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-mod-006
+    system: mod
+    gdd: design/gdd/weird-laws.md
+    requirement: "Type-keyed machinery over modifiers[]: weird-law one-active slot via findIndex(type==='weird-law' && state==='active'); law-pool exclusion via filter on active law-recurring ids; repeal flips state to 'rejected' (ledger retained) and penalises the proposing faction's base relation looked up by id; repeal tier derives from economic magnitude (Σ|amount| over roundIncome/roundExpense) frozen at acquisition"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+
+  # --- Weird Deals (Sprint 5 Tier 1 / Sprint 6 Tier 2) ---
+  - id: TR-deals-001
+    system: deals
+    gdd: design/gdd/weird-deals.md
+    requirement: "Tier 1 (4 absurd deals: Cows, Mouse, Pigeons, Swiss) use the existing immediate accept/reject deal system with optional recurringEffect and optional power; Deal 20 non-repealable (no faction sponsor)"
+    created: 2026-06-15
+    revised: ""
+    status: active
+  - id: TR-deals-002
+    system: deals
+    gdd: design/gdd/weird-deals.md
+    requirement: "Tier 2 deals' recurring and windowed STAT consequences (per-round income/expense and N-round-delayed stat deltas) are expressed as timed modifiers"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-deals-003
+    system: deals
+    gdd: design/gdd/weird-deals.md
+    requirement: "Tier 2 deals' probabilistic and one-shot NON-stat delayed outcomes (binary success/failure treasury hits at round+N, the bee-event sub-pool) — fire N rounds after acceptance, cancelled cleanly if the run ends first; depends on ADR-0007 (effect timing queue), which is still Proposed"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0007-effect-timing.md
+    status: active
+
+  # --- Coup Telegraphing & Fairness (ADR-0009 planned / Sprint 6) ---
+  - id: TR-coup-001
+    system: coup
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Coup armed/warn check, overthrow check (<= MIN), special-ending threshold, and DayEnded coup re-check all read EFFECTIVE relations (base + in-window modifier sum, re-clamped ±10); repeal relation-penalty and timer-skip target selection read BASE relations"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-coup-002
+    system: coup
+    gdd: design/gdd/lasting-effects-prd.md
+    requirement: "Coup arming is telegraphed at least one round ahead with visible, deterministic inputs and a player-facing risk readout (faction + distance-to-threshold from effective relations); arming determinism and warning contract defined by ADR-0009 (planned, not yet written)"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0009-coup-telegraphing-fairness.md
+    status: active
+
+  # --- Street View modifier consumer (ADR-0008 / deferred visual sprint) ---
+  - id: TR-street-001
+    system: street
+    gdd: design/gdd/street-view.md
+    requirement: "Street View and the Advisor read a single getVisibleModifiers(modifiers, round) projection (active, in-window entries only) as their source of active-effect state, with label/headline text looked up from content assets by id; no gameplay imports in the Scene (ADR-0003 boundary)"
+    created: 2026-06-15
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
     status: active

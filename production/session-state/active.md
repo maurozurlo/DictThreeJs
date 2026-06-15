@@ -248,3 +248,12 @@ Task: Implemented — pending story-done
 - Next: /code-review src/components/ActionPanel/SecretPanel.tsx src/components/ActionPanel/ActionPanel.tsx src/components/Tabs/Secret.tsx then /story-done production/stories/3-6-secret-room-action-panel-layout.md
 
 <!-- QA-PLAN: 2026-06-15 | System: sprint-6 | Plan written: production/qa/qa-plan-sprint-6-2026-06-15.md -->
+
+## Session Extract — /architecture-review 2026-06-15
+- Verdict: CONCERNS (no blockers for Sprint 6 — ADR-0008 covered + unblocked)
+- Requirements (new/affected): 12 — 9 covered, 1 partial (TR-deals-003 / ADR-0007 Proposed), 1 gap (TR-coup-002 / ADR-0009 unwritten)
+- New TR-IDs registered: 12 (TR-mod-001..006, TR-deals-001..003, TR-coup-001..002, TR-street-001); registry bumped to v3
+- GDD revision flags: None
+- Top ADR gaps: ADR-0009 Coup Telegraphing (Sprint 6 story 6-5), ADR-0007 finalisation (non-Sprint-6)
+- Story TR-ID placeholders replaced with real IDs in 6-1/6-2/6-3/6-5/6-7
+- Report: docs/architecture/architecture-review-2026-06-15.md

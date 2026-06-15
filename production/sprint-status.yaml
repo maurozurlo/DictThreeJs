@@ -42,7 +42,7 @@ stories:
     name: "ADR-0008 P2 — replace ActiveRecurringEffect with modifiers"
     file: "production/stories/6-2-modifier-engine-p2.md"
     priority: must-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 2.0
     blocker: "6-1, 6-4"
@@ -53,7 +53,7 @@ stories:
     name: "ADR-0008 P3 — remaining content + Street View/Advisor consumers"
     file: "production/stories/6-3-modifier-engine-p3.md"
     priority: should-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.5
     blocker: "6-2"
@@ -63,7 +63,7 @@ stories:
     name: "Author ADR-0009 — Coup Telegraphing & Fairness"
     file: "production/stories/6-5-coup-fairness-adr.md"
     priority: should-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.5
     blocker: ""
@@ -73,7 +73,7 @@ stories:
     name: "Modifier authoring guide (expandability doc)"
     file: "production/stories/6-6-modifier-authoring-guide.md"
     priority: should-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.5
     blocker: "6-1"
@@ -84,7 +84,7 @@ stories:
     name: "External playtest — non-developer Medium difficulty session (carryover)"
     file: "production/stories/5-8-external-playtest.md"
     priority: nice-to-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.5
     blocker: ""
@@ -94,7 +94,7 @@ stories:
     name: "Hard difficulty playtest reconciliation (carryover)"
     file: "production/stories/5-9-hard-difficulty-reconciliation.md"
     priority: nice-to-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.25
     blocker: ""
@@ -104,7 +104,7 @@ stories:
     name: "Coup fairness UI — telegraphing readout"
     file: "production/stories/6-7-coup-fairness-ui.md"
     priority: nice-to-have
-    status: backlog
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.0
     blocker: "6-5"
