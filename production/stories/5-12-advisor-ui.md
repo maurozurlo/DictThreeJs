@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 5-12
 - **Sprint**: 5
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: UI
 - **Layer**: Feature
 - **TR-ID**: TR-advisor-003

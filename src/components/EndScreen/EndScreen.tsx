@@ -10,6 +10,7 @@ import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { Modal, ModalCard } from '../Modal/Modal'
 import { recordGameEnd } from '../../Utils/MetaProgress'
 import type { EndingId, TierRank } from '../../types/MetaProgress'
+import { Icon } from '../Icon/Icon'
 
 type Tier = {
     tier: string
@@ -27,16 +28,16 @@ function calcTier(
     treasury: number
 ): Tier {
     if (phase === 'lose') {
-        if (round <= 4) return { tier: 'F', nameKey: 'endscreen.tiers.lose_early.name',     flavourKey: 'endscreen.tiers.lose_early.flavour',     color: '#e74c3c' }
+        if (round <= 4) return { tier: 'F', nameKey: 'endscreen.tiers.lose_early.name', flavourKey: 'endscreen.tiers.lose_early.flavour', color: '#e74c3c' }
         switch (endCause) {
-            case 'military':      return { tier: 'D', nameKey: 'endscreen.tiers.lose_military.name',      flavourKey: 'endscreen.tiers.lose_military.flavour',      color: '#c0392b' }
-            case 'business':      return { tier: 'D', nameKey: 'endscreen.tiers.lose_business.name',      flavourKey: 'endscreen.tiers.lose_business.flavour',      color: '#c0392b' }
-            case 'people':        return { tier: 'D', nameKey: 'endscreen.tiers.lose_people.name',        flavourKey: 'endscreen.tiers.lose_people.flavour',        color: '#c0392b' }
-            case 'bankruptcy':    return { tier: 'D', nameKey: 'endscreen.tiers.lose_bankruptcy.name',    flavourKey: 'endscreen.tiers.lose_bankruptcy.flavour',    color: '#c0392b' }
+            case 'military': return { tier: 'D', nameKey: 'endscreen.tiers.lose_military.name', flavourKey: 'endscreen.tiers.lose_military.flavour', color: '#c0392b' }
+            case 'business': return { tier: 'D', nameKey: 'endscreen.tiers.lose_business.name', flavourKey: 'endscreen.tiers.lose_business.flavour', color: '#c0392b' }
+            case 'people': return { tier: 'D', nameKey: 'endscreen.tiers.lose_people.name', flavourKey: 'endscreen.tiers.lose_people.flavour', color: '#c0392b' }
+            case 'bankruptcy': return { tier: 'D', nameKey: 'endscreen.tiers.lose_bankruptcy.name', flavourKey: 'endscreen.tiers.lose_bankruptcy.flavour', color: '#c0392b' }
             case 'military_coup': return { tier: 'D', nameKey: 'endscreen.tiers.lose_military_coup.name', flavourKey: 'endscreen.tiers.lose_military_coup.flavour', color: '#c0392b' }
             case 'business_coup': return { tier: 'D', nameKey: 'endscreen.tiers.lose_business_coup.name', flavourKey: 'endscreen.tiers.lose_business_coup.flavour', color: '#c0392b' }
-            case 'people_coup':   return { tier: 'D', nameKey: 'endscreen.tiers.lose_people_coup.name',   flavourKey: 'endscreen.tiers.lose_people_coup.flavour',   color: '#c0392b' }
-            default:              return { tier: 'D', nameKey: 'endscreen.tiers.lose_default.name',       flavourKey: 'endscreen.tiers.lose_default.flavour',       color: '#c0392b' }
+            case 'people_coup': return { tier: 'D', nameKey: 'endscreen.tiers.lose_people_coup.name', flavourKey: 'endscreen.tiers.lose_people_coup.flavour', color: '#c0392b' }
+            default: return { tier: 'D', nameKey: 'endscreen.tiers.lose_default.name', flavourKey: 'endscreen.tiers.lose_default.flavour', color: '#c0392b' }
         }
     }
 
@@ -46,9 +47,9 @@ function calcTier(
     if (score >= 40) return { tier: 'S', nameKey: 'endscreen.tiers.S.name', flavourKey: 'endscreen.tiers.S.flavour', color: '#f1c40f' }
     if (score >= 25) return { tier: 'A', nameKey: 'endscreen.tiers.A.name', flavourKey: 'endscreen.tiers.A.flavour', color: '#27ae60' }
     if (score >= 10) return { tier: 'B', nameKey: 'endscreen.tiers.B.name', flavourKey: 'endscreen.tiers.B.flavour', color: '#3498db' }
-    if (score >= 0)  return { tier: 'C', nameKey: 'endscreen.tiers.C.name', flavourKey: 'endscreen.tiers.C.flavour', color: '#9b59b6' }
+    if (score >= 0) return { tier: 'C', nameKey: 'endscreen.tiers.C.name', flavourKey: 'endscreen.tiers.C.flavour', color: '#9b59b6' }
     if (score >= -15) return { tier: 'D', nameKey: 'endscreen.tiers.D_accidental.name', flavourKey: 'endscreen.tiers.D_accidental.flavour', color: '#e67e22' }
-    return               { tier: 'F', nameKey: 'endscreen.tiers.F.name', flavourKey: 'endscreen.tiers.F.flavour', color: '#e74c3c' }
+    return { tier: 'F', nameKey: 'endscreen.tiers.F.name', flavourKey: 'endscreen.tiers.F.flavour', color: '#e74c3c' }
 }
 
 function relationColor(val: number): string {
@@ -109,8 +110,8 @@ const EndScreen = () => {
         phase === 'special_ending'
             ? (`secret_room_${secretRoomIndex}_${specialEndingOutcome ?? 'bad'}` as EndingId)
             : phase === 'victory'
-            ? 'victory'
-            : (endCause ?? 'military') as EndingId
+                ? 'victory'
+                : (endCause ?? 'military') as EndingId
 
     useEffect(() => {
         recordGameEnd(tier.tier as TierRank, endingId)
@@ -124,7 +125,17 @@ const EndScreen = () => {
                 {/* Header */}
                 <div className={styles.header}>
                     <Typography variant="h2" className={styles.outcome}>
-                        {isWin ? t('endscreen.outcome.victory') : t('endscreen.outcome.game_over')}
+                        {isWin ?
+                            <>
+                                <Icon type="trophy" />
+                                {t('endscreen.outcome.victory')}
+                            </>
+                            :
+                            <>
+                                <Icon type="skull" />
+                                {t('endscreen.outcome.game_over')}
+                            </>
+                        }
                     </Typography>
                     {phase === 'special_ending' && specialEndingFaction && specialEndingOutcome && (
                         <p className={styles.endReason}>{secretT(`${specialEndingFaction}.outcome_${specialEndingOutcome}`)}</p>

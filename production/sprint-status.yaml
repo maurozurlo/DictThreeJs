@@ -32,11 +32,11 @@ stories:
     name: "Weird Laws — 14-law pool implementation"
     file: "production/stories/5-2-weird-laws.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "5-3"
     name: "Weird Deals Tier 1 — deals 19-22 (existing deal shape)"
@@ -52,52 +52,52 @@ stories:
     name: "Timer tuning experiment — evaluate 3-minute timer"
     file: "production/stories/5-4-timer-tuning.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   # ── Should Have ─────────────────────────────────────────────────────────
   - id: "5-5"
     name: "Interaction patterns doc"
     file: "production/stories/5-5-interaction-patterns.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "5-6"
     name: "Doc drift cleanup — ADR log + Godot scaffolding"
     file: "production/stories/5-6-doc-drift.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "5-7"
     name: "Street View deferral decision + tutorial audit"
     file: "production/stories/5-7-street-view-deferral.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "3-5"
     name: "Budget Tier Consequences (Polish enhancement)"
     file: "production/stories/3-5-budget-tier-consequences.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 2.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   # ── Nice to Have ────────────────────────────────────────────────────────
   - id: "5-10"

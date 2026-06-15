@@ -1,8 +1,8 @@
 {
     "endscreen": {
         "outcome": {
-            "victory": "🏆 Victoria",
-            "game_over": "☠ Fin del juego"
+            "victory": "Victoria",
+            "game_over": "Fin del juego"
         },
         "play_again": "Jugar de nuevo",
         "sections": {
@@ -44,21 +44,66 @@
             "people": "La plaza se llenó a medianoche. Por la mañana, las fuerzas de seguridad se habían unido a la multitud. Vinieron por tus llaves."
         },
         "tiers": {
-            "lose_early":     { "name": "Breve experimento en autoritarismo",          "flavour": "Un intento valiente. Trágicamente breve." },
-            "lose_military_coup": { "name": "Superado en rango y en armas",            "flavour": "Les diste tanques. Ellos te dieron la salida." },
-            "lose_business_coup": { "name": "Activo liquidado",                        "flavour": "Resulta que el pasivo siempre fuiste tú." },
-            "lose_people_coup":   { "name": "La elección del pueblo (por la fuerza)",  "flavour": "Los hiciste fuertes. Ellos te hicieron desaparecer." },
-            "lose_military":  { "name": "Retirado a punta de pistola",                "flavour": "Los generales tuvieron una reunión. No te invitaron." },
-            "lose_business":  { "name": "Adquisición hostil, edición personal",       "flavour": "El capitalismo te atrapó antes de que pudieras atraparlo." },
-            "lose_people":    { "name": "Removido democráticamente (definitivamente)", "flavour": "El pueblo habló. En voz alta. Con antorchas." },
-            "lose_bankruptcy":{ "name": "Exlíder con problemas fiscales",              "flavour": "Se te acabó el dinero de los demás." },
-            "lose_default":   { "name": "Dictador depuesto",                           "flavour": "Tu reinado ha terminado. Como todos los demás." },
-            "S":              { "name": "Señor Supremo",                               "flavour": "Construirán estatuas. Tú ya lo hiciste." },
-            "A":              { "name": "Autócrata experimentado",                     "flavour": "Gobernó con propósito y solo atrocidades leves." },
-            "B":              { "name": "El pragmático",                               "flavour": "Hizo lo que había que hacer. Mayormente legal." },
-            "C":              { "name": "Majestad mediocre",                           "flavour": "Sobrevivió gracias a la suerte, el soborno y la terquedad." },
-            "D_accidental":   { "name": "Dictador accidental",                         "flavour": "Aún de pie. Nadie está más sorprendido que tú." },
-            "F":              { "name": "El problema de la democracia ahora",          "flavour": "Ganó por tecnicidad. Por favor, no le digan a la ONU." }
+            "lose_early": {
+                "name": "Breve experimento en autoritarismo",
+                "flavour": "Un intento valiente. Trágicamente breve."
+            },
+            "lose_military_coup": {
+                "name": "Superado en rango y en armas",
+                "flavour": "Les diste tanques. Ellos te dieron la salida."
+            },
+            "lose_business_coup": {
+                "name": "Activo liquidado",
+                "flavour": "Resulta que el pasivo siempre fuiste tú."
+            },
+            "lose_people_coup": {
+                "name": "La elección del pueblo (por la fuerza)",
+                "flavour": "Los hiciste fuertes. Ellos te hicieron desaparecer."
+            },
+            "lose_military": {
+                "name": "Retirado a punta de pistola",
+                "flavour": "Los generales tuvieron una reunión. No te invitaron."
+            },
+            "lose_business": {
+                "name": "Adquisición hostil, edición personal",
+                "flavour": "El capitalismo te atrapó antes de que pudieras atraparlo."
+            },
+            "lose_people": {
+                "name": "Removido democráticamente (definitivamente)",
+                "flavour": "El pueblo habló. En voz alta. Con antorchas."
+            },
+            "lose_bankruptcy": {
+                "name": "Exlíder con problemas fiscales",
+                "flavour": "Se te acabó el dinero de los demás."
+            },
+            "lose_default": {
+                "name": "Dictador depuesto",
+                "flavour": "Tu reinado ha terminado. Como todos los demás."
+            },
+            "S": {
+                "name": "Señor Supremo",
+                "flavour": "Construirán estatuas. Tú ya lo hiciste."
+            },
+            "A": {
+                "name": "Autócrata experimentado",
+                "flavour": "Gobernó con propósito y solo atrocidades leves."
+            },
+            "B": {
+                "name": "El pragmático",
+                "flavour": "Hizo lo que había que hacer. Mayormente legal."
+            },
+            "C": {
+                "name": "Majestad mediocre",
+                "flavour": "Sobrevivió gracias a la suerte, el soborno y la terquedad."
+            },
+            "D_accidental": {
+                "name": "Dictador accidental",
+                "flavour": "Aún de pie. Nadie está más sorprendido que tú."
+            },
+            "F": {
+                "name": "El problema de la democracia ahora",
+                "flavour": "Ganó por tecnicidad. Por favor, no le digan a la ONU."
+            }
         }
     }
 }

@@ -12,12 +12,15 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 1rem;
 }
 
 .outcome {
     color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .endReason {
@@ -71,7 +74,7 @@
 }
 
 .section {
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 1rem;
     display: flex;
     flex-direction: column;
@@ -85,7 +88,7 @@
     opacity: 0.85;
     letter-spacing: 0.1em;
     margin-bottom: 0.25rem;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     padding-bottom: 0.35rem;
 }
 
@@ -127,7 +130,7 @@
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 0.5rem 0.25rem;
 }
 

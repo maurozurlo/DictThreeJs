@@ -1,8 +1,8 @@
 {
     "endscreen": {
         "outcome": {
-            "victory": "🏆 Victory",
-            "game_over": "☠ Game Over"
+            "victory": "Victory",
+            "game_over": "Game Over"
         },
         "play_again": "Play Again",
         "sections": {
@@ -44,21 +44,66 @@
             "people": "The square filled at midnight. By morning, the security forces had joined the crowd. They came for your keys."
         },
         "tiers": {
-            "lose_early":     { "name": "Brief Experiment in Authoritarianism", "flavour": "A bold attempt. Tragically brief." },
-            "lose_military_coup": { "name": "Outranked and Outgunned",          "flavour": "You gave them tanks. They gave you an exit." },
-            "lose_business_coup": { "name": "Liquidated Asset",                 "flavour": "Turns out you were the liability all along." },
-            "lose_people_coup":   { "name": "The People's Choice (Forcibly)",   "flavour": "You made them strong. They made you gone." },
-            "lose_military":  { "name": "Retired at Gunpoint",                  "flavour": "The generals had a meeting. You weren't invited." },
-            "lose_business":  { "name": "Hostile Takeover, Personal Edition",   "flavour": "Capitalism got you before you could get capitalism." },
-            "lose_people":    { "name": "Democratically Removed (Permanently)", "flavour": "The people have spoken. Loudly. With torches." },
-            "lose_bankruptcy":{ "name": "Fiscally Challenged Former Leader",    "flavour": "You ran out of other people's money." },
-            "lose_default":   { "name": "Deposed Dictator",                     "flavour": "Your reign has ended. As they all do." },
-            "S":              { "name": "Supreme Overlord",                     "flavour": "They'll build statues. You already did." },
-            "A":              { "name": "Seasoned Autocrat",                    "flavour": "Ruled with purpose and only mild atrocities." },
-            "B":              { "name": "The Pragmatist",                       "flavour": "Did what had to be done. Mostly legal." },
-            "C":              { "name": "Mediocre Majesty",                     "flavour": "Survived through luck, bribery, and stubbornness." },
-            "D_accidental":   { "name": "Accidental Dictator",                  "flavour": "Still standing. Nobody's more surprised than you." },
-            "F":              { "name": "Democracy's Problem Now",              "flavour": "Won on a technicality. Please don't tell the UN." }
+            "lose_early": {
+                "name": "Brief Experiment in Authoritarianism",
+                "flavour": "A bold attempt. Tragically brief."
+            },
+            "lose_military_coup": {
+                "name": "Outranked and Outgunned",
+                "flavour": "You gave them tanks. They gave you an exit."
+            },
+            "lose_business_coup": {
+                "name": "Liquidated Asset",
+                "flavour": "Turns out you were the liability all along."
+            },
+            "lose_people_coup": {
+                "name": "The People's Choice (Forcibly)",
+                "flavour": "You made them strong. They made you gone."
+            },
+            "lose_military": {
+                "name": "Retired at Gunpoint",
+                "flavour": "The generals had a meeting. You weren't invited."
+            },
+            "lose_business": {
+                "name": "Hostile Takeover, Personal Edition",
+                "flavour": "Capitalism got you before you could get capitalism."
+            },
+            "lose_people": {
+                "name": "Democratically Removed (Permanently)",
+                "flavour": "The people have spoken. Loudly. With torches."
+            },
+            "lose_bankruptcy": {
+                "name": "Fiscally Challenged Former Leader",
+                "flavour": "You ran out of other people's money."
+            },
+            "lose_default": {
+                "name": "Deposed Dictator",
+                "flavour": "Your reign has ended. As they all do."
+            },
+            "S": {
+                "name": "Supreme Overlord",
+                "flavour": "They'll build statues. You already did."
+            },
+            "A": {
+                "name": "Seasoned Autocrat",
+                "flavour": "Ruled with purpose and only mild atrocities."
+            },
+            "B": {
+                "name": "The Pragmatist",
+                "flavour": "Did what had to be done. Mostly legal."
+            },
+            "C": {
+                "name": "Mediocre Majesty",
+                "flavour": "Survived through luck, bribery, and stubbornness."
+            },
+            "D_accidental": {
+                "name": "Accidental Dictator",
+                "flavour": "Still standing. Nobody's more surprised than you."
+            },
+            "F": {
+                "name": "Democracy's Problem Now",
+                "flavour": "Won on a technicality. Please don't tell the UN."
+            }
         }
     }
 }

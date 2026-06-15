@@ -33,6 +33,8 @@ export type IconType =
   | "warning"
   | "caret"
   | "random"
+  | "trophy"
+  | "skull"
   ;
 
 export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
