@@ -1,4 +1,4 @@
-import type { Modifier, ModifierStat, ResolvedStatMod, ResolvedWindow } from '../types/GameState';
+import type { Modifier, ModifierStat, ModifierType, ResolvedStatMod, ResolvedWindow } from '../types/GameState';
 import type { Power } from '../types/Power';
 import { GAMESTATE } from '../Constants/GameState';
 import { Clamp } from './Math';
@@ -96,6 +96,15 @@ export function getEffectiveRelation(
         GAMESTATE.RELATIONS.MIN,
         GAMESTATE.RELATIONS.MAX,
     );
+}
+
+/**
+ * Count active modifiers of a given type. Generic — the engine knows no content,
+ * so the caller names the type (e.g. 'statue'). Single source of truth for
+ * "how many of X do I own", replacing duplicated counters in the store.
+ */
+export function countModifiersByType(modifiers: Modifier[], type: ModifierType): number {
+    return modifiers.reduce((n, m) => (m.type === type && m.state === 'active' ? n + 1 : n), 0);
 }
 
 /** Repeal cost tier — drives treasury/relation cost lookup (GAMESTATE.REPEAL_COST). */

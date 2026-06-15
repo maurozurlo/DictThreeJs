@@ -269,7 +269,6 @@ export type GameState = {
     },
     shop: {
         frozenFactions: Set<Power>;
-        statueCount: number;
         advisorLevel: AdvisorLevel;
         buy: (item: ShopItemId) => void;
     };

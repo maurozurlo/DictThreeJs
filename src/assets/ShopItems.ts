@@ -73,3 +73,10 @@ export function buildShopModifier(item: ShopItem, round: number): Modifier {
         })),
     };
 }
+
+
+export const ADVISOR_ITEMS = [
+    { id: 'advisor_1' as const, targetLevel: 1 as const, cost: 100 },
+    { id: 'advisor_2' as const, targetLevel: 2 as const, cost: 150 },
+    { id: 'advisor_3' as const, targetLevel: 3 as const, cost: 200 },
+];

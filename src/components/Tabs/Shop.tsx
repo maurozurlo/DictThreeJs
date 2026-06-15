@@ -5,20 +5,15 @@ import { useGameStore } from '../../Stores/GameState'
 import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import { useTranslation } from 'react-i18next'
-import { STATUES, MEDIA_PACKAGES } from '../../assets/ShopItems'
-
-const ADVISOR_ITEMS = [
-    { id: 'advisor_1' as const, targetLevel: 1 as const, cost: 100 },
-    { id: 'advisor_2' as const, targetLevel: 2 as const, cost: 150 },
-    { id: 'advisor_3' as const, targetLevel: 3 as const, cost: 200 },
-];
+import { STATUES, MEDIA_PACKAGES, ADVISOR_ITEMS } from '../../assets/ShopItems'
+import { countModifiersByType } from '../../Utils/Modifiers'
 
 const Shop = ({ isActive }: TabProps) => {
     const { t } = useTranslation('shop')
     const { t: menuT } = useTranslation('menu')
     const treasury = useGameStore(s => s.budget.treasury);
     const frozenFactions = useGameStore(s => s.shop.frozenFactions);
-    const statueCount = useGameStore(s => s.shop.statueCount);
+    const statueCount = useGameStore(s => countModifiersByType(s.gameManagement.modifiers, 'statue'));
     const advisorLevel = useGameStore(s => s.shop.advisorLevel);
     const buy = useGameStore(s => s.shop.buy);
     const phase = useGameStore(s => s.gameManagement.phase);

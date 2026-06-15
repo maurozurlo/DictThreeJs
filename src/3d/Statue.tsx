@@ -1,4 +1,5 @@
 import { useGameStore } from "../Stores/GameState";
+import { countModifiersByType } from "../Utils/Modifiers";
 
 const POSITIONS: [number, number, number][] = [
     [0.969, 0.079, -1.643],
@@ -9,7 +10,7 @@ const POSITIONS: [number, number, number][] = [
 const STATUE_HALF_HEIGHT = 0.175; // half of box height 0.35
 
 function Statue() {
-    const statueCount  = useGameStore(s => s.shop.statueCount);
+    const statueCount  = useGameStore(s => countModifiersByType(s.gameManagement.modifiers, 'statue'));
     const debugEnabled = useGameStore(s => s.debug.enabled);
     const visibleCount = debugEnabled ? POSITIONS.length : statueCount;
     if (visibleCount === 0) return null;

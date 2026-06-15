@@ -25,7 +25,7 @@ import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, normalizeModifier } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, normalizeModifier, countModifiersByType } from "../Utils/Modifiers";
 import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
@@ -449,7 +449,6 @@ export const INITIAL_STATE = ({ set, get }: {
     },
     shop: {
         frozenFactions: new Set<Power>(),
-        statueCount: 0,
         advisorLevel: 0 as 0 | 1 | 2 | 3,
         buy: (item: ShopItemId) => {
             const state = get();
@@ -465,13 +464,13 @@ export const INITIAL_STATE = ({ set, get }: {
                     shop: { ...s.shop, advisorLevel: targetLevel },
                 }));
             } else if (item === 'statue') {
-                const { statueCount } = state.shop;
+                // Owned count is derived from the modifiers ledger — single source of truth.
+                const statueCount = countModifiersByType(state.gameManagement.modifiers, 'statue');
                 const shopItem = STATUES[statueCount];
                 if (!shopItem) return; // all tiers owned
                 if (state.budget.treasury < shopItem.price) return;
                 set((s) => ({
                     budget: { ...s.budget, treasury: s.budget.treasury - shopItem.price },
-                    shop: { ...s.shop, statueCount: s.shop.statueCount + 1 },
                     gameManagement: {
                         ...s.gameManagement,
                         modifiers: [
@@ -616,7 +615,6 @@ export const INITIAL_STATE = ({ set, get }: {
                         shop: {
                             ...state.shop,
                             frozenFactions: new Set<Power>(),
-                            statueCount: 0,
                             advisorLevel: 0 as 0 | 1 | 2 | 3,
                         },
                         relations: {
@@ -1217,6 +1215,16 @@ export const INITIAL_STATE = ({ set, get }: {
             const savedDealId = (savedDeals.current as Record<string, unknown> | null)?.id;
             const restoredDeal = typeof savedDealId === 'number' ? (DEALS.find(d => d.id === savedDealId) ?? null) : null;
 
+            // Modifiers: normalize legacy entries (no id/state/window) to the ADR-0008 schema.
+            const loadedModifiers = ((gm.modifiers as unknown[]) ?? []).map(normalizeModifier);
+            // Backward-compat: pre-modifier-engine saves tracked statues via shop.statueCount
+            // (now removed — count is derived from modifiers). Reconstruct any statues that
+            // aren't already present so old saves don't silently lose them.
+            const legacyStatueCount = ((data.shop as Record<string, unknown>)?.statueCount as number) ?? 0;
+            for (let i = countModifiersByType(loadedModifiers, 'statue'); i < legacyStatueCount && i < STATUES.length; i++) {
+                loadedModifiers.push(buildShopModifier(STATUES[i], 0));
+            }
+
             set((s) => ({
                 gameManagement: {
                     ...s.gameManagement,
@@ -1231,9 +1239,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,
                     lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
                     activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
-                    // Modifiers (e.g. statues) — default empty for saves predating the modifier
-                    // system; normalize legacy entries (no id/state/window) to the ADR-0008 schema.
-                    modifiers: ((gm.modifiers as unknown[]) ?? []).map(normalizeModifier),
+                    modifiers: loadedModifiers,
                     repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
                     // Coup fields — default to safe state for saves predating story 2-7
                     coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,
@@ -1287,7 +1293,6 @@ export const INITIAL_STATE = ({ set, get }: {
                 tabs: { ...s.tabs, activeTab: (data.tabs as Record<string, unknown>)?.activeTab as Tabs ?? Tabs.Log, tabsLocked: false },
                 shop: {
                     ...s.shop,
-                    statueCount: ((data.shop as Record<string, unknown>)?.statueCount as number) ?? 0,
                     frozenFactions: new Set((data.shop as Record<string, unknown>)?.frozenFactions as Power[] ?? []),
                     advisorLevel: ((data.shop as Record<string, unknown>)?.advisorLevel as 0 | 1 | 2 | 3) ?? 0,
                 },
