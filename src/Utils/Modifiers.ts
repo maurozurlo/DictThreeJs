@@ -1,4 +1,4 @@
-import type { Modifier, ModifierStat, ResolvedWindow } from '../types/GameState';
+import type { Modifier, ModifierStat, ResolvedStatMod, ResolvedWindow } from '../types/GameState';
 import type { Power } from '../types/Power';
 import { GAMESTATE } from '../Constants/GameState';
 import { Clamp } from './Math';
@@ -96,6 +96,44 @@ export function getEffectiveRelation(
         GAMESTATE.RELATIONS.MIN,
         GAMESTATE.RELATIONS.MAX,
     );
+}
+
+/** Repeal cost tier — drives treasury/relation cost lookup (GAMESTATE.REPEAL_COST). */
+export type RepealTier = 'Small' | 'Medium' | 'Large';
+
+/**
+ * Economic magnitude of a modifier (ADR-0008 §8): Σ|amount| over its
+ * roundIncome/roundExpense contributions, frozen at acquisition. Stat-only
+ * modifiers (charisma/relations) have magnitude 0.
+ */
+export function modifierEconomicMagnitude(mods: ResolvedStatMod[]): number {
+    let total = 0;
+    for (const sm of mods) {
+        if (sm.stat === 'roundIncome' || sm.stat === 'roundExpense') total += Math.abs(sm.amount);
+    }
+    return total;
+}
+
+/**
+ * Generic repeal tier from a modifier's economic magnitude (Story 6-4 balance
+ * pass). Thresholds preserved from the legacy RecurringHandler.getRepealTier
+ * (≤8 Small / ≤15 Medium / >15 Large) — parity-checked against all current
+ * law/deal recurring content: each carries a single recurring mod, so
+ * Σ|amount| == the legacy max(incomeBonus, expenseBonus). Stat-only modifiers
+ * (magnitude 0) → Small (minimum cost; matches current weird-law behaviour).
+ *
+ * Parity table (current content):
+ *   TINY 5  (Deal 19 cows)      → Small   (legacy Small)
+ *   SMALL 8 (Deal 18 aid)       → Small   (legacy Small)
+ *   MEDIUM 15 (most laws/deals) → Medium  (legacy Medium)
+ *   LARGE 25 (gambling/works)   → Large   (legacy Large)
+ *   weird-law / statue (0)      → Small   (legacy Small)
+ */
+export function computeRepealTier(mods: ResolvedStatMod[]): RepealTier {
+    const magnitude = modifierEconomicMagnitude(mods);
+    if (magnitude <= 8) return 'Small';
+    if (magnitude <= 15) return 'Medium';
+    return 'Large';
 }
 
 /** Result of the beginning-of-round onStart pass. */

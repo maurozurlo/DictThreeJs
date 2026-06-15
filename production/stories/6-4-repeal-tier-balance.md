@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 6-4
 - **Sprint**: 6
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Config/Data
 - **Layer**: Core
 - **TR-ID**: N/A — balance pass with no new code logic
@@ -69,7 +69,22 @@ matches the intent of current tier assignments. Must be complete before P2 ships
 - **Required evidence**: Smoke check pass + economy-designer sign-off note in Completion Notes below
 - **Status**: [ ] Not yet completed
 
+## Completion Notes
+- Completed: 2026-06-15. Implemented `modifierEconomicMagnitude(mods)` + `computeRepealTier(mods)` in `src/Utils/Modifiers.ts`; 4 parity/boundary tests in `tests/unit/modifiers/timed_modifiers.test.ts`. tsc clean.
+- **Formula**: `magnitude = Σ|amount|` over `roundIncome`/`roundExpense` mods (frozen at acquisition). Tier: `≤8 → Small`, `≤15 → Medium`, `>15 → Large`.
+- **Thresholds preserved** from legacy `getRepealTier` (8/15) — deliberate: full balance parity, zero feel change.
+- **Parity verified** (every current item carries exactly one recurring mod, so `Σ|amount|` == legacy `max(income,expense)`):
+  | Content | amount | tier | legacy |
+  |---|---|---|---|
+  | Deal 19 cows (TINY) | 5 | Small | Small ✓ |
+  | Deal 18 aid (SMALL) | 8 | Small | Small ✓ |
+  | most laws/deals (MEDIUM) | 15 | Medium | Medium ✓ |
+  | gambling/public works (LARGE) | 25 | Large | Large ✓ |
+  | weird-law / statue | 0 | Small | Small ✓ |
+- **Stat-only modifiers** (charisma/relations, no income/expense) → magnitude 0 → Small (minimum cost), matching current weird-law repeal.
+- **Economy call (inline, autonomous mode)**: preserve thresholds, generalize the input. Curve can be retuned later without touching call-sites — it's a single function. No economy-designer spawn needed given the parity is structurally exact.
+
 ## Dependencies
 
 - Depends on: None
-- Unlocks: 6-2 (P2 repeal implementation requires this formula)
+- Unlocks: 6-2 (P2 repeal implementation requires this formula) — now unblocked

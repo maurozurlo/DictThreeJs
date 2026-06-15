@@ -16,7 +16,10 @@ import {
     fireOnStartModifiers,
     resolveWindow,
     normalizeModifier,
+    modifierEconomicMagnitude,
+    computeRepealTier,
 } from '../../../src/Utils/Modifiers';
+import { RECURRING } from '../../../src/Constants/Costs';
 import type { Modifier, ModifierStat, ResolvedWindow } from '../../../src/types/GameState';
 
 // --- factories (no shared mutable state) ---
@@ -132,6 +135,41 @@ describe('fireOnStartModifiers — fire-once guard', () => {
         const res = fireOnStartModifiers([m], 100);
         expect(res.fired).toHaveLength(0);
         expect(res.modifiers).toEqual([m]);
+    });
+});
+
+describe('computeRepealTier — generic economic magnitude (Story 6-4)', () => {
+    const incomeMods = (amount: number) => [statMod('roundIncome', amount, permanent())];
+    const expenseMods = (amount: number) => [statMod('roundExpense', amount, permanent())];
+
+    it('test_magnitude_sums_only_income_expense_abs', () => {
+        const mods = [
+            statMod('roundIncome', 5, permanent()),
+            statMod('roundExpense', 3, permanent()),
+            statMod('charisma', 2, permanent()), // ignored — not economic
+        ];
+        expect(modifierEconomicMagnitude(mods)).toBe(8);
+    });
+
+    it('test_stat_only_modifier_has_zero_magnitude_and_small_tier', () => {
+        const statueMods = [statMod('charisma', 1, permanent())];
+        expect(modifierEconomicMagnitude(statueMods)).toBe(0);
+        expect(computeRepealTier(statueMods)).toBe('Small');
+    });
+
+    // Parity with legacy getRepealTier across all current recurring content tiers.
+    it('test_tier_parity_with_legacy_recurring_tiers', () => {
+        expect(computeRepealTier(incomeMods(RECURRING.TINY))).toBe('Small');    // 5  → Small
+        expect(computeRepealTier(expenseMods(RECURRING.SMALL))).toBe('Small');  // 8  → Small
+        expect(computeRepealTier(incomeMods(RECURRING.MEDIUM))).toBe('Medium'); // 15 → Medium
+        expect(computeRepealTier(expenseMods(RECURRING.LARGE))).toBe('Large');  // 25 → Large
+    });
+
+    it('test_tier_boundaries', () => {
+        expect(computeRepealTier(incomeMods(8))).toBe('Small');   // boundary ≤8
+        expect(computeRepealTier(incomeMods(9))).toBe('Medium');  // just over
+        expect(computeRepealTier(incomeMods(15))).toBe('Medium'); // boundary ≤15
+        expect(computeRepealTier(incomeMods(16))).toBe('Large');  // just over
     });
 });
 

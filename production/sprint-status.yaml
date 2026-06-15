@@ -32,11 +32,11 @@ stories:
     name: "Repeal-tier balance pass (generic modifier economic magnitude)"
     file: "production/stories/6-4-repeal-tier-balance.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "6-2"
     name: "ADR-0008 P2 — replace ActiveRecurringEffect with modifiers"
