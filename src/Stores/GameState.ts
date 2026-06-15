@@ -25,7 +25,8 @@ import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma, getEffectiveRelation, resolveWindow, fireOnStartModifiers, normalizeModifier } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, normalizeModifier } from "../Utils/Modifiers";
+import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
 
@@ -452,13 +453,6 @@ export const INITIAL_STATE = ({ set, get }: {
         advisorLevel: 0 as 0 | 1 | 2 | 3,
         buy: (item: ShopItemId) => {
             const state = get();
-            const FREEZE_COST = 80;
-            const STATUE_COSTS = [100, 150, 200];
-            const FREEZE_MAP: Record<string, Power> = {
-                media_coverage: 'people',
-                media_shielding: 'military',
-                media_blackout: 'business',
-            };
             if (item === 'advisor_1' || item === 'advisor_2' || item === 'advisor_3') {
                 const ADVISOR_COSTS: Record<typeof item, number> = { advisor_1: 100, advisor_2: 150, advisor_3: 200 };
                 const ADVISOR_LEVELS: Record<typeof item, 1 | 2 | 3> = { advisor_1: 1, advisor_2: 2, advisor_3: 3 };
@@ -472,42 +466,28 @@ export const INITIAL_STATE = ({ set, get }: {
                 }));
             } else if (item === 'statue') {
                 const { statueCount } = state.shop;
-                if (statueCount >= 3) return;
-                const cost = STATUE_COSTS[statueCount];
-                if (state.budget.treasury < cost) return;
+                const shopItem = STATUES[statueCount];
+                if (!shopItem) return; // all tiers owned
+                if (state.budget.treasury < shopItem.price) return;
                 set((s) => ({
-                    budget: { ...s.budget, treasury: s.budget.treasury - cost },
+                    budget: { ...s.budget, treasury: s.budget.treasury - shopItem.price },
                     shop: { ...s.shop, statueCount: s.shop.statueCount + 1 },
-                    // Statue is a permanent modifier: it contributes +1 to effective
-                    // charisma in real time, rather than mutating base charisma (which
-                    // fluctuates with gameplay). See getEffectiveCharisma. Window is
-                    // resolved from TIME_MODIFIERS[0] (immediate + permanent).
                     gameManagement: {
                         ...s.gameManagement,
                         modifiers: [
                             ...s.gameManagement.modifiers,
-                            {
-                                id: `statue.${statueCount}`,
-                                type: 'statue',
-                                state: 'active',
-                                acquiredRound: state.gameManagement.round,
-                                mods: [{
-                                    stat: 'charisma',
-                                    amount: 1,
-                                    window: resolveWindow(0, state.gameManagement.round),
-                                }],
-                            },
+                            buildShopModifier(shopItem, state.gameManagement.round),
                         ],
                     },
                 }));
             } else {
-                const faction = FREEZE_MAP[item];
-                if (!faction || state.shop.frozenFactions.has(faction)) return;
-                if (state.budget.treasury < FREEZE_COST) return;
+                const mediaPackage = MEDIA_PACKAGES.find(p => p.id === item);
+                if (!mediaPackage || state.shop.frozenFactions.has(mediaPackage.faction)) return;
+                if (state.budget.treasury < mediaPackage.price) return;
                 const newFrozen = new Set(state.shop.frozenFactions);
-                newFrozen.add(faction);
+                newFrozen.add(mediaPackage.faction);
                 set((s) => ({
-                    budget: { ...s.budget, treasury: s.budget.treasury - FREEZE_COST },
+                    budget: { ...s.budget, treasury: s.budget.treasury - mediaPackage.price },
                     shop: { ...s.shop, frozenFactions: newFrozen },
                 }));
             }

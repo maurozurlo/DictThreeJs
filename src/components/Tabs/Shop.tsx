@@ -4,27 +4,13 @@ import Card from '../Card/Card'
 import { useGameStore } from '../../Stores/GameState'
 import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
-import type { ShopItemId } from '../../types/GameState'
-import type { Power } from '../../types/Power'
 import { useTranslation } from 'react-i18next'
-
-const STATUE_COSTS = [100, 150, 200];
+import { STATUES, MEDIA_PACKAGES } from '../../assets/ShopItems'
 
 const ADVISOR_ITEMS = [
     { id: 'advisor_1' as const, targetLevel: 1 as const, cost: 100 },
     { id: 'advisor_2' as const, targetLevel: 2 as const, cost: 150 },
     { id: 'advisor_3' as const, targetLevel: 3 as const, cost: 200 },
-];
-
-type FreezeItem = {
-    id: ShopItemId;
-    faction: Power;
-};
-
-const FREEZE_ITEMS: FreezeItem[] = [
-    { id: 'media_coverage', faction: 'people' },
-    { id: 'media_shielding', faction: 'military' },
-    { id: 'media_blackout', faction: 'business' },
 ];
 
 const Shop = ({ isActive }: TabProps) => {
@@ -46,19 +32,19 @@ const Shop = ({ isActive }: TabProps) => {
                 <Typography variant="h2">{t('shop.treasury', { amount: treasury })}</Typography>
             </Card>
 
-            {FREEZE_ITEMS.map(item => {
+            {MEDIA_PACKAGES.map(item => {
                 const frozen = frozenFactions.has(item.faction);
                 return (
                     <Card key={item.id}>
                         <Typography variant="h2">{t(`shop.${item.id}.name`)}</Typography>
                         <Typography variant="body">{t(`shop.${item.id}.description`)}</Typography>
-                        <Typography variant="body">{t('shop.cost', { amount: 80 })}</Typography>
+                        <Typography variant="body">{t('shop.cost', { amount: item.price })}</Typography>
                         {frozen && <Typography variant="body">{t('shop.active_this_round')}</Typography>}
                         <Button
-                            disabled={!canBuy || frozen || treasury < 80}
+                            disabled={!canBuy || frozen || treasury < item.price}
                             onClick={() => buy(item.id)}
                         >
-                            {t('shop.buy', { amount: 80 })}
+                            {t('shop.buy', { amount: item.price })}
                         </Button>
                     </Card>
                 );
@@ -82,22 +68,24 @@ const Shop = ({ isActive }: TabProps) => {
                 <Typography variant="body">{t(`shop.advisor_${advisorLevel}.description`)}</Typography>
             </Card>
 
-            <Card>
-                <Typography variant="h2">{t('shop.statue.name')}</Typography>
-                <Typography variant="body">{t('shop.statue.description')}</Typography>
-                <Typography variant="body">{t('shop.statue.owned', { count: statueCount })}</Typography>
-                {statueCount < 3 && (
+            {STATUES.slice(statueCount, statueCount + 1).map(item => (
+                <Card key={item.id}>
+                    <Typography variant="h2">{t(item.nameKey)}</Typography>
+                    <Typography variant="body">{t(item.descriptionKey)}</Typography>
+                    <Typography variant="body">{t('shop.statue.owned', { count: statueCount })}</Typography>
                     <Button
-                        disabled={!canBuy || treasury < STATUE_COSTS[statueCount]}
+                        disabled={!canBuy || treasury < item.price}
                         onClick={() => buy('statue')}
                     >
-                        {t('shop.buy', { amount: STATUE_COSTS[statueCount] })}
+                        {t('shop.buy', { amount: item.price })}
                     </Button>
-                )}
-                {statueCount >= 3 && (
+                </Card>
+            ))}
+            {statueCount >= STATUES.length && (
+                <Card>
                     <Typography variant="body">{t('shop.statue.full')}</Typography>
-                )}
-            </Card>
+                </Card>
+            )}
         </TabLayout>
     );
 };

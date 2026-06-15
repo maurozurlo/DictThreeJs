@@ -185,8 +185,8 @@ export function normalizeModifier(raw: unknown, index: number): Modifier {
         };
     });
     return {
-        id: m.id ?? `${m.type ?? 'statue'}.${index}`,
-        type: m.type ?? 'statue',
+        id: m.id ?? `${m.type ?? 'unknown'}.${index}`,
+        type: m.type ?? 'unknown',
         state: m.state ?? 'active',
         acquiredRound: m.acquiredRound ?? 0,
         onStartTriggerRound: m.onStartTriggerRound,
