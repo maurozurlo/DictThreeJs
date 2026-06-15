@@ -56,9 +56,9 @@ export type ModifierStat =
  * "one active" slot, law-pool exclusion, and the repeal list.
  */
 export type ModifierType =
-    | 'statue' | 'structure'
+    | 'statue' | 'structure' | 'media'
     | 'deal' | 'opportunity' | 'mini-challenge'
-    | 'law-recurring' | 'weird-law';
+    | 'law-recurring' | 'weird-law' | 'unknown';
 
 /**
  * A contribution's active window, resolved to concrete rounds at acquisition

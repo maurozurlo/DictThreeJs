@@ -10,8 +10,7 @@ import { useGameStore } from '../../Stores/GameState'
 import TabLayout from './TabLayout'
 import { calculateRoundFinancials, computeRoundsLeft } from '../../Stores/BudgetHandler'
 import { useMemo } from 'react'
-import { computeBudgetVerdict, computeBudgetTrigger, getAdvisorLine, ADVISOR_NAMES } from '../../Utils/Advisor'
-import AdvisorButton from '../Advisor/AdvisorButton'
+import { computeBudgetVerdict, computeBudgetTrigger, getAdvisorLine } from '../../Utils/Advisor'
 import { AdvisorFooter } from '../Advisor/AdvisorFooter'
 
 
