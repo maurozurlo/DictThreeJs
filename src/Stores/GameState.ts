@@ -25,7 +25,7 @@ import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, resolveWindow, fireOnStartModifiers, normalizeModifier } from "../Utils/Modifiers";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
 
@@ -480,12 +480,23 @@ export const INITIAL_STATE = ({ set, get }: {
                     shop: { ...s.shop, statueCount: s.shop.statueCount + 1 },
                     // Statue is a permanent modifier: it contributes +1 to effective
                     // charisma in real time, rather than mutating base charisma (which
-                    // fluctuates with gameplay). See getEffectiveCharisma.
+                    // fluctuates with gameplay). See getEffectiveCharisma. Window is
+                    // resolved from TIME_MODIFIERS[0] (immediate + permanent).
                     gameManagement: {
                         ...s.gameManagement,
                         modifiers: [
                             ...s.gameManagement.modifiers,
-                            { type: 'statue', mods: [{ stat: 'charisma', amount: 1 }] },
+                            {
+                                id: `statue.${statueCount}`,
+                                type: 'statue',
+                                state: 'active',
+                                acquiredRound: state.gameManagement.round,
+                                mods: [{
+                                    stat: 'charisma',
+                                    amount: 1,
+                                    window: resolveWindow(0, state.gameManagement.round),
+                                }],
+                            },
                         ],
                     },
                 }));
@@ -510,7 +521,7 @@ export const INITIAL_STATE = ({ set, get }: {
         use: () => {
             const state = get();
             if (state.specialEnding.used || !state.specialEnding.faction) return;
-            const charisma = getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers);
+            const charisma = getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers, state.gameManagement.round);
             const goodChance = 0.5 + (charisma / 10) * 0.25;
             const isGood = rollChance(goodChance);
             // Outcome narrative is rendered via i18n key `secret.{faction}.outcome_{good|bad}`
@@ -762,9 +773,18 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
 
             // --- 0. Coup check (fires before financial resolution — ADR-0006 ordering) ---
+            // Coup reads EFFECTIVE relations + charisma (ADR-0008 §6): a modifier that
+            // placates a faction genuinely lowers coup risk. In P1 no relation modifiers
+            // exist, so effective == base here — behaviour-identical, structurally correct.
+            const coupRound = state.gameManagement.round;
+            const effectiveRelationsForCoup: Record<Power, number> = {
+                military: getEffectiveRelation(state.relations.current.military, state.gameManagement.modifiers, 'military', coupRound),
+                business: getEffectiveRelation(state.relations.current.business, state.gameManagement.modifiers, 'business', coupRound),
+                people: getEffectiveRelation(state.relations.current.people, state.gameManagement.modifiers, 'people', coupRound),
+            };
             const coupResult = checkCoup(
-                state.relations.current,
-                getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers),
+                effectiveRelationsForCoup,
+                getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers, coupRound),
                 rollFloat(),
                 state.gameManagement.coupArmedLastRound ?? false,
                 state.budget.expenditures.security
@@ -875,6 +895,17 @@ export const INITIAL_STATE = ({ set, get }: {
 
             // --- 6. Increment round, draw next daily event ---
             const newRound = state.gameManagement.round + 1;
+
+            // onStart narrative-hook pass (ADR-0008 §7): flip the fire-once guard for any
+            // modifier whose resolved trigger round is reached. Fires only on surviving
+            // branches below (a run that ends this round never fires — game-over branches
+            // keep the un-fired modifiers via ...s.gameManagement). In P1 no content carries
+            // onStartTriggerRound, so `fired` is empty and modifiers are unchanged. The
+            // headline key lookup by modifier id lands with content in P2/P3.
+            const { modifiers: modifiersAfterOnStart } = fireOnStartModifiers(
+                state.gameManagement.modifiers,
+                newRound,
+            );
             const buildStatsUpdate = (s: GameState): GameStats => ({
                 ...s.stats,
                 totalIncomeEarned: s.stats.totalIncomeEarned + financials.totalIncome,
@@ -924,7 +955,10 @@ export const INITIAL_STATE = ({ set, get }: {
 
             // --- 8. Check game-over / victory ---
             const bankruptcy = newTreasury <= 0;
-            const overthrown = (Object.keys(newRelations) as Power[]).find(p => newRelations[p] <= GAMESTATE.RELATIONS.MIN);
+            // Overthrow reads EFFECTIVE relations (ADR-0008 §6), consistent with the coup check.
+            const overthrown = (Object.keys(newRelations) as Power[]).find(
+                p => getEffectiveRelation(newRelations[p], state.gameManagement.modifiers, p, newRound) <= GAMESTATE.RELATIONS.MIN
+            );
 
             if (bankruptcy) {
                 set((s) => ({
@@ -1010,8 +1044,9 @@ export const INITIAL_STATE = ({ set, get }: {
             });
 
             // --- 8.5. Unlock special ending at round 9 if any faction meets threshold ---
+            // Special ending reads EFFECTIVE relations (ADR-0008 §6), consistent with coup/overthrow.
             const factionsAtThreshold = (Object.keys(newRelations) as Power[]).filter(
-                p => newRelations[p] >= GAMESTATE.SPECIAL_ENDING_THRESHOLD
+                p => getEffectiveRelation(newRelations[p], state.gameManagement.modifiers, p, newRound) >= GAMESTATE.SPECIAL_ENDING_THRESHOLD
             );
             let specialEndingFaction: Power | null = null;
             if (newRound === 9 && factionsAtThreshold.length > 0 && !state.specialEnding.used) {
@@ -1070,6 +1105,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                         representativeStatuses: newRepStatuses,
                         dumbScore: newDumbScore,
+                        modifiers: modifiersAfterOnStart,
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
@@ -1122,6 +1158,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     charisma: { ...s.gameManagement.charisma, current: newCharisma },
                     representativeStatuses: newRepStatuses,
                     dumbScore: newDumbScore,
+                    modifiers: modifiersAfterOnStart,
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
                 tabs: {
@@ -1214,8 +1251,9 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,
                     lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
                     activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
-                    // Modifiers (e.g. statues) — default empty for saves predating the modifier system
-                    modifiers: (gm.modifiers as GameState['gameManagement']['modifiers']) ?? [],
+                    // Modifiers (e.g. statues) — default empty for saves predating the modifier
+                    // system; normalize legacy entries (no id/state/window) to the ADR-0008 schema.
+                    modifiers: ((gm.modifiers as unknown[]) ?? []).map(normalizeModifier),
                     repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
                     // Coup fields — default to safe state for saves predating story 2-7
                     coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,

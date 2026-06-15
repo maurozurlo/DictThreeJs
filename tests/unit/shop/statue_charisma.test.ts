@@ -31,7 +31,7 @@ function base() {
 }
 function effective() {
     const s = useGameStore.getState();
-    return getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers);
+    return getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round);
 }
 
 describe('statue modifier — purchase', () => {
@@ -43,11 +43,15 @@ describe('statue modifier — purchase', () => {
         const baseBefore = base();
         // Act
         useGameStore.getState().shop.buy('statue');
-        // Assert: base untouched, modifier added, effective +1
+        // Assert: base untouched, modifier added (ADR-0008 schema), effective +1
         expect(base()).toBe(baseBefore);
-        expect(useGameStore.getState().gameManagement.modifiers).toEqual([
-            { type: 'statue', mods: [{ stat: 'charisma', amount: 1 }] },
-        ]);
+        const mods = useGameStore.getState().gameManagement.modifiers;
+        expect(mods).toHaveLength(1);
+        expect(mods[0]).toMatchObject({
+            type: 'statue',
+            state: 'active',
+            mods: [{ stat: 'charisma', amount: 1, window: { startRound: expect.any(Number), endRound: null } }],
+        });
         expect(effective()).toBe(baseBefore + 1);
     });
 

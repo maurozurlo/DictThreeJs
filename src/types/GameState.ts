@@ -40,24 +40,65 @@ export interface ActiveRecurringEffect {
     roundActivated: number;
 }
 
-/** Stats a modifier can influence. Extend as new modifier-driven stats appear. */
-export type ModifierStat = 'charisma';
+/**
+ * Read-through stats a modifier can influence (ADR-0008 §4). Charisma and the
+ * three relations sum on read and are re-clamped to ±10; roundIncome/roundExpense
+ * feed per-round economics (replaces ActiveRecurringEffect in P2). One-shot
+ * treasury/risk/budget deltas are NOT modeled here — they stay base mutations.
+ */
+export type ModifierStat =
+    | 'charisma'
+    | 'military' | 'business' | 'people'
+    | 'roundIncome' | 'roundExpense';
 
-/** A single stat contribution within a modifier. */
-export interface StatMod {
-    stat: ModifierStat;
-    amount: number;
+/**
+ * Discriminator for cheap filter/findIndex (ADR-0008 §4). Drives the weird-law
+ * "one active" slot, law-pool exclusion, and the repeal list.
+ */
+export type ModifierType =
+    | 'statue' | 'structure'
+    | 'deal' | 'opportunity' | 'mini-challenge'
+    | 'law-recurring' | 'weird-law';
+
+/**
+ * A contribution's active window, resolved to concrete rounds at acquisition
+ * from a TimeModifier (ADR-0008 §2). `endRound: null` = permanent. Activity is
+ * derived on read via isWindowActive (exclusive upper bound) — never stored.
+ */
+export interface ResolvedWindow {
+    startRound: number;
+    endRound: number | null;
 }
 
 /**
- * A persistent, run-scoped modifier that contributes to derived stats in real
- * time (effective stat = base + sum of matching modifier amounts). Unlike base
- * stats, modifier contributions are never eroded by gameplay — they persist
- * until explicitly removed. First use: the Giant Statue (+1 charisma each).
+ * A single stat contribution within a modifier, with its own resolved timing
+ * (ADR-0008 §3 — per-StatMod timing lets one deal carry delayed income AND a
+ * one-round relation bump together).
+ */
+export interface ResolvedStatMod {
+    stat: ModifierStat;
+    amount: number;
+    window: ResolvedWindow;
+}
+
+/**
+ * A run-scoped modifier and decision-ledger entry (ADR-0008 §4). Contributes to
+ * derived stats in real time (effective = base + Σ in-window active mods, never
+ * eroded). Carries no content/display fields — the label and any narrative
+ * headline live on the content asset and are looked up by `id`.
  */
 export interface Modifier {
-    type: 'statue';
-    mods: StatMod[];
+    /** Namespaced id — e.g. 'deals.1', 'laws.5', 'weird.1001', 'statue.0'. Dedup + content-lookup key. */
+    id: string;
+    type: ModifierType;
+    /** Lifecycle/ledger: 'active' contributes; 'rejected' is retained history, never summed. No 'expired'. */
+    state: 'active' | 'rejected';
+    acquiredRound: number;
+    /** Resolved at acquisition — the round the content-defined headline fires (if any). */
+    onStartTriggerRound?: number;
+    /** Fire-once guard across save/load. */
+    onStartFired?: boolean;
+    mods: ResolvedStatMod[];
 }
 
 export type RelationSnapshot = {

@@ -313,6 +313,18 @@ The faction (`people`), label, and headline key all stay in the asset and are lo
 
 **Rollback:** P1 is additive; revert by removing timing fields (statue → permanent). Windowed saves degrade gracefully.
 
+> **P1 implemented 2026-06-15** (`src/Utils/Modifiers.ts`, `src/types/GameState.ts`, `src/Stores/GameState.ts`).
+> Engine: `TIME_MODIFIERS` + `resolveWindow`, `isWindowActive`, round-aware `sumModifiers`,
+> `getEffectiveCharisma`/`getEffectiveRelation` (re-clamped ±10), `fireOnStartModifiers`, `normalizeModifier`.
+> Coup/overthrow/special-ending switched to effective relations; statue byte-identical (regression green;
+> 429/429 suite, tsc clean). **Two deliberate P1 deferrals (provably no-ops until content/relation modifiers exist):**
+> (1) **Relation displays** (ActionPanel/DayEnded/EndScreen) still read base relations — charisma already reads
+> effective everywhere; relation effective-display lands in P2/P3 when the first relation modifier ships (until
+> then effective == base). (2) **`onStart` headline firing** — the fire-once *guard* is wired in `nextRound()`,
+> but the headline-key lookup by content id is deferred to P2/P3 (no content carries an `onStart` key yet, so
+> `fired` is always empty in P1). `Power` is typed as `string` (const array not `as const`), so
+> `getEffectiveRelation` accepts `Power` and casts to `ModifierStat` internally.
+
 ## Validation Criteria
 
 - [ ] Statue behaviour identical after P1 (`statue_charisma.test.ts` passes).

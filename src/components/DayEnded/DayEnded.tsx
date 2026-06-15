@@ -28,7 +28,7 @@ const DayEnded = () => {
     const coupArmed = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const coupWarningFaction = useGameStore(s => s.gameManagement.coupWarningFaction)
     const currentRelations = useGameStore(s => s.relations.current)
-    const currentCharisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers))
+    const currentCharisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
     const nextRound = useGameStore(s => s.gameManagement.nextRound)
 
     // Re-evaluate whether the threat is still live at round-end.

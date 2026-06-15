@@ -22,11 +22,11 @@ stories:
     name: "ADR-0008 P1 — modifier schema + charisma/relations windowing"
     file: "production/stories/6-1-modifier-engine-p1.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-15"
 
   - id: "6-4"
     name: "Repeal-tier balance pass (generic modifier economic magnitude)"

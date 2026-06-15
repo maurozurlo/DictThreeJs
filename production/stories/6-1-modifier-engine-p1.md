@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 6-1
 - **Sprint**: 6
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Integration
 - **Layer**: Foundation
 - **TR-ID**: TR-mod-001, TR-mod-002, TR-mod-003, TR-mod-004, TR-mod-005, TR-coup-001
@@ -127,6 +127,12 @@ coup/overthrow/special-ending/display read-sites to effective relations. Wires t
 - **Story Type**: Integration
 - **Required evidence**: `tests/unit/modifiers/timed_modifiers_test.ts` — must exist and pass; `tests/unit/shop/statue_charisma.test.ts` — all pre-existing tests must remain green
 - **Status**: [ ] Not yet created
+
+## Completion Notes
+- Completed: 2026-06-15. Suite 429/429 green; tsc clean. Statue byte-identical (regression updated to new schema).
+- Engine in `src/Utils/Modifiers.ts`; types in `src/types/GameState.ts`; wiring + loadGame migration in `src/Stores/GameState.ts`.
+- New tests: `tests/unit/modifiers/timed_modifiers.test.ts` (15). Coup/overthrow/special-ending now read effective relations.
+- Two deliberate deferrals (provable no-ops in P1, documented in ADR-0008 P1 note): relation *displays* still read base (charisma already effective); `onStart` headline content-lookup deferred to P2/P3 (guard wired).
 
 ## Dependencies
 

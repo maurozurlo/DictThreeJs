@@ -20,7 +20,7 @@ const ActionPanel = () => {
     const activeTab = useGameStore((s) => s.tabs.activeTab)
     const relations = useGameStore((s) => s.relations.current)
     const money = useGameStore((s) => s.budget.treasury)
-    const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers))
+    const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
     const round = useGameStore(s => s.gameManagement.round)
     const { displayTime, progress } = useRoundTimer()
     const totalMinutes = progress * 480

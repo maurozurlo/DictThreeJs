@@ -93,7 +93,7 @@ const EndScreen = () => {
     const round = useGameStore(s => s.gameManagement.round)
     const endReason = useGameStore(s => s.gameManagement.endReason)
     const endCause = useGameStore(s => s.gameManagement.endCause)
-    const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers))
+    const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
     const meetCounts = useGameStore(s => s.gameManagement.meetCounts)
     const relations = useGameStore(s => s.relations.current)
     const treasury = useGameStore(s => s.budget.treasury)
