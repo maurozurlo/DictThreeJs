@@ -25,6 +25,7 @@ import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
+import { getEffectiveCharisma } from "../Utils/Modifiers";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 
 
@@ -474,14 +475,20 @@ export const INITIAL_STATE = ({ set, get }: {
                 if (statueCount >= 3) return;
                 const cost = STATUE_COSTS[statueCount];
                 if (state.budget.treasury < cost) return;
-                set((s) => {
-                    const newCharisma = Clamp(s.gameManagement.charisma.current + 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-                    return {
-                        budget: { ...s.budget, treasury: s.budget.treasury - cost },
-                        shop: { ...s.shop, statueCount: s.shop.statueCount + 1 },
-                        gameManagement: { ...s.gameManagement, charisma: { ...s.gameManagement.charisma, current: newCharisma } },
-                    };
-                });
+                set((s) => ({
+                    budget: { ...s.budget, treasury: s.budget.treasury - cost },
+                    shop: { ...s.shop, statueCount: s.shop.statueCount + 1 },
+                    // Statue is a permanent modifier: it contributes +1 to effective
+                    // charisma in real time, rather than mutating base charisma (which
+                    // fluctuates with gameplay). See getEffectiveCharisma.
+                    gameManagement: {
+                        ...s.gameManagement,
+                        modifiers: [
+                            ...s.gameManagement.modifiers,
+                            { type: 'statue', mods: [{ stat: 'charisma', amount: 1 }] },
+                        ],
+                    },
+                }));
             } else {
                 const faction = FREEZE_MAP[item];
                 if (!faction || state.shop.frozenFactions.has(faction)) return;
@@ -503,7 +510,7 @@ export const INITIAL_STATE = ({ set, get }: {
         use: () => {
             const state = get();
             if (state.specialEnding.used || !state.specialEnding.faction) return;
-            const charisma = state.gameManagement.charisma.current;
+            const charisma = getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers);
             const goodChance = 0.5 + (charisma / 10) * 0.25;
             const isGood = rollChance(goodChance);
             // Outcome narrative is rendered via i18n key `secret.{faction}.outcome_{good|bad}`
@@ -546,6 +553,7 @@ export const INITIAL_STATE = ({ set, get }: {
         timerStartedAt: null,
         timerPausedAt: null,
         activeRecurringEffects: [],
+        modifiers: [],
         repealTakenThisRound: false,
         coupArmedLastRound: false,
         coupWarningFaction: null,
@@ -596,6 +604,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             lastRoundRecurringIncome: 0,
                             lastRoundRecurringExpenses: 0,
                             activeRecurringEffects: [],
+                            modifiers: [],
                             repealTakenThisRound: false,
                             coupArmedLastRound: false,
                             coupWarningFaction: null,
@@ -755,7 +764,7 @@ export const INITIAL_STATE = ({ set, get }: {
             // --- 0. Coup check (fires before financial resolution — ADR-0006 ordering) ---
             const coupResult = checkCoup(
                 state.relations.current,
-                state.gameManagement.charisma.current,
+                getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers),
                 rollFloat(),
                 state.gameManagement.coupArmedLastRound ?? false,
                 state.budget.expenditures.security
@@ -1205,6 +1214,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,
                     lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
                     activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
+                    // Modifiers (e.g. statues) — default empty for saves predating the modifier system
+                    modifiers: (gm.modifiers as GameState['gameManagement']['modifiers']) ?? [],
                     repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
                     // Coup fields — default to safe state for saves predating story 2-7
                     coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,

@@ -22,6 +22,11 @@ vi.mock('../Constants/GameState', () => ({
             MIN: -10,
             MAX: 10
         },
+        CHARISMA: {
+            INITIAL: 0,
+            MIN: -10,
+            MAX: 10
+        },
         BUDGET: {
             BOUNDS: {
                 EXPENDITURE: { MIN: 1 }
@@ -74,6 +79,7 @@ describe('handleActionOutcome', () => {
             gameManagement: {
                 charisma: { current: 0 },
                 round: 3,
+                modifiers: [],
             }
         } as unknown as GameState;
     });

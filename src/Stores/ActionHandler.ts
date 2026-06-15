@@ -4,6 +4,7 @@ import type { MeetActionType, Power } from "../types/Power";
 import { handleRelations } from "./EffectHandler";
 import { getRandomFromList, rollChance, rollFloat } from "../Utils/Math";
 import { applyGraceDampening } from "../Utils/GracePeriod";
+import { getEffectiveCharisma } from "../Utils/Modifiers";
 
 type ActionResult = {
     resultText: { key: string; params?: Record<string, string | number> };
@@ -48,7 +49,7 @@ function handleEliminate(
     newRelations: Record<Power, number>,
     state: GameState
 ): Omit<ActionResult, "treasuryUpdate"> {
-    const charisma = state.gameManagement.charisma.current;
+    const charisma = getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers);
     // Backlash base 30%; high charisma halves it, low charisma raises it by 50%
     let backlashChance = 0.3;
     if (charisma >= 5) backlashChance = 0.15;
@@ -139,7 +140,7 @@ function handleDialogue(
     }
 
     const baseSuccessRate = GAMESTATE.MEET.ACTIONS.DIALOGUE.BASE_SUCCESS_RATE[power];
-    const charisma = state.gameManagement.charisma.current;
+    const charisma = getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers);
     // High charisma expands the success zone; low charisma shrinks it
     const charismaBonus = Math.max(-0.25, Math.min(0.25, charisma * 0.03));
     const failThreshold = 0.1 * (1 - baseSuccessRate);

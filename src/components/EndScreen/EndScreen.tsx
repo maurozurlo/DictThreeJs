@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { Modal, ModalCard } from '../Modal/Modal'
 import { recordGameEnd } from '../../Utils/MetaProgress'
+import { getEffectiveCharisma } from '../../Utils/Modifiers'
 import type { EndingId, TierRank } from '../../types/MetaProgress'
 import { Icon } from '../Icon/Icon'
 
@@ -92,7 +93,7 @@ const EndScreen = () => {
     const round = useGameStore(s => s.gameManagement.round)
     const endReason = useGameStore(s => s.gameManagement.endReason)
     const endCause = useGameStore(s => s.gameManagement.endCause)
-    const charisma = useGameStore(s => s.gameManagement.charisma.current)
+    const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers))
     const meetCounts = useGameStore(s => s.gameManagement.meetCounts)
     const relations = useGameStore(s => s.relations.current)
     const treasury = useGameStore(s => s.budget.treasury)

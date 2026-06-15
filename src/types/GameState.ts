@@ -40,6 +40,26 @@ export interface ActiveRecurringEffect {
     roundActivated: number;
 }
 
+/** Stats a modifier can influence. Extend as new modifier-driven stats appear. */
+export type ModifierStat = 'charisma';
+
+/** A single stat contribution within a modifier. */
+export interface StatMod {
+    stat: ModifierStat;
+    amount: number;
+}
+
+/**
+ * A persistent, run-scoped modifier that contributes to derived stats in real
+ * time (effective stat = base + sum of matching modifier amounts). Unlike base
+ * stats, modifier contributions are never eroded by gameplay — they persist
+ * until explicitly removed. First use: the Giant Statue (+1 charisma each).
+ */
+export interface Modifier {
+    type: 'statue';
+    mods: StatMod[];
+}
+
 export type RelationSnapshot = {
     round: number;
     military: number;
@@ -123,6 +143,8 @@ export type GameState = {
         timerPausedAt: number | null;
         /** All currently active recurring effects from accepted laws and deals. */
         activeRecurringEffects: ActiveRecurringEffect[];
+        /** Persistent run-scoped modifiers (e.g. statues) that feed derived stats in real time. */
+        modifiers: Modifier[];
         /** True after a repeal is used this round; reset to false in nextRound(). */
         repealTakenThisRound: boolean;
         /** True when the START of this round yielded a 'grace' coup result (armed but survived).

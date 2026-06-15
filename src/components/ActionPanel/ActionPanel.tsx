@@ -8,6 +8,7 @@ import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { getCharismaLeft } from '../../Utils/UI'
+import { getEffectiveCharisma } from '../../Utils/Modifiers'
 import { useTranslation } from 'react-i18next'
 import { useRoundTimer } from '../../Hooks/useRoundTimer'
 import { useDebugControls } from '../../Hooks/useDebugControls'
@@ -19,7 +20,7 @@ const ActionPanel = () => {
     const activeTab = useGameStore((s) => s.tabs.activeTab)
     const relations = useGameStore((s) => s.relations.current)
     const money = useGameStore((s) => s.budget.treasury)
-    const charisma = useGameStore(s => s.gameManagement.charisma.current)
+    const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers))
     const round = useGameStore(s => s.gameManagement.round)
     const { displayTime, progress } = useRoundTimer()
     const totalMinutes = progress * 480

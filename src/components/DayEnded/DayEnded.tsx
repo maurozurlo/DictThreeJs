@@ -8,6 +8,7 @@ import { Modal, ModalCard } from '../Modal/Modal'
 import styles from './DayEnded.module.css'
 import AdvisorButton from '../Advisor/AdvisorButton'
 import { computeDayendedVerdict, computeDayendedTrigger } from '../../Utils/Advisor'
+import { getEffectiveCharisma } from '../../Utils/Modifiers'
 import { Icon } from '../Icon/Icon'
 
 const DayEnded = () => {
@@ -27,7 +28,7 @@ const DayEnded = () => {
     const coupArmed = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const coupWarningFaction = useGameStore(s => s.gameManagement.coupWarningFaction)
     const currentRelations = useGameStore(s => s.relations.current)
-    const currentCharisma = useGameStore(s => s.gameManagement.charisma.current)
+    const currentCharisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers))
     const nextRound = useGameStore(s => s.gameManagement.nextRound)
 
     // Re-evaluate whether the threat is still live at round-end.
