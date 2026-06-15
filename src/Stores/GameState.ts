@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
-import { GAMESTATE, DIFFICULTY_TREASURY } from "../Constants/GameState";
+import { GAMESTATE } from "../Constants/GameState";
 import type { Difficulty } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
@@ -25,9 +25,10 @@ import { filterLawPool, getRepealTier } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, normalizeModifier, countModifiersByType } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, countModifiersByType } from "../Utils/Modifiers";
 import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
 import { SECRET_ROOMS } from "../assets/secretRooms";
+import { buildStartState, buildLoadedState } from "./StateFactory";
 
 
 export const INITIAL_STATE = ({ set, get }: {
@@ -552,116 +553,11 @@ export const INITIAL_STATE = ({ set, get }: {
         dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
         setPhase: (phase, difficulty) => {
             if (phase === 'start') {
-                const chosenDifficulty: Difficulty = difficulty ?? 'medium';
-                const startingTreasury = DIFFICULTY_TREASURY[chosenDifficulty];
-                return set((state) => {
-                    const freshLaws = new Set<typeof LAWS[number]>();
-                    const freshDeals = new Set<typeof DEALS[number]>();
-                    const randomLaw = getRandomUniqueItem(LAWS, freshLaws);
-                    const randomDeal = getRandomUniqueItem(DEALS, freshDeals);
-                    if (randomLaw) freshLaws.add(randomLaw);
-                    if (randomDeal) freshDeals.add(randomDeal);
-
-                    return {
-                        tabs: {
-                            ...state.tabs,
-                            activeTab: Tabs.Log,
-                            tabsLocked: false,
-                        },
-                        stats: {
-                            lawsPassed: 0, lawsRejected: 0,
-                            dealsAccepted: 0, dealsRejected: 0,
-                            totalIncomeEarned: 0, totalExpensesSpent: 0,
-                            totalExtrasEarned: 0, totalExtrasSpent: 0,
-                            peakTreasury: startingTreasury,
-                            lowestTreasury: startingTreasury,
-                            relationsHistory: [],
-                            coupGraceFired: false,
-                            totalRecurringIncomeEarned: 0,
-                            totalRecurringExpensesSpent: 0,
-                            repealCount: 0,
-                        },
-                        gameManagement: {
-                            ...state.gameManagement,
-                            phase,
-                            difficulty: chosenDifficulty,
-                            round: GAMESTATE.ROUNDS.START,
-                            dayEnded: false,
-                            endReason: null,
-                            endCause: null,
-                            currentRoundExtraIncome: 0,
-                            currentRoundExtraExpenses: 0,
-                            lastRoundRecurringIncome: 0,
-                            lastRoundRecurringExpenses: 0,
-                            activeRecurringEffects: [],
-                            modifiers: [],
-                            repealTakenThisRound: false,
-                            coupArmedLastRound: false,
-                            coupWarningFaction: null,
-                            timerStartedAt: Date.now(),
-                            timerPausedAt: null,
-                            charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },
-                            meetCounts: { military: 0, business: 0, people: 0 },
-                            representativeStatuses: { military: 'active', business: 'active', people: 'active' },
-                            dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
-                        },
-                        specialEnding: {
-                            ...state.specialEnding,
-                            available: false,
-                            faction: null,
-                            used: false,
-                            outcome: null,
-                        },
-                        shop: {
-                            ...state.shop,
-                            frozenFactions: new Set<Power>(),
-                            advisorLevel: 0 as 0 | 1 | 2 | 3,
-                        },
-                        relations: {
-                            ...state.relations,
-                            current: { ...GAMESTATE.RELATIONS.INITIAL },
-                        },
-                        budget: {
-                            ...state.budget,
-                            treasury: startingTreasury,
-                            expenditures: { ...GAMESTATE.BUDGET.EXPENDITURES },
-                            taxes: { ...GAMESTATE.BUDGET.TAXES },
-                        },
-                        log: [],
-                        dailyEvent: { current: getRandomDailyEvent() },
-                        meet: {
-                            ...state.meet,
-                            actionTaken: { type: undefined, taken: false, power: undefined },
-                            actionOutcomeText: null,
-                            selectedPower: 'none',
-                        },
-                        periodicEvent: { ...state.periodicEvent, current: null, decided: false, resultKey: null },
-                        miniChallenge: { ...state.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
-                        deals: {
-                            ...state.deals,
-                            current: randomDeal,
-                            dealDecided: false,
-                            interactedWithDeals: freshDeals,
-                            lastDealOutcome: null,
-                            lastDealAccepted: null,
-                        },
-                        law: {
-                            ...state.law,
-                            current: randomLaw,
-                            lawDecided: false,
-                            interactedWithLaws: freshLaws,
-                            lastLawOutcome: null,
-                        },
-                    };
-                });
+                return set((state) => buildStartState(state, difficulty));
             }
-
             return set((state) => ({
-                gameManagement: {
-                    ...state.gameManagement,
-                    phase,
-                }
-            }))
+                gameManagement: { ...state.gameManagement, phase },
+            }));
         },
         charisma: {
             current: GAMESTATE.CHARISMA.INITIAL,
@@ -1201,110 +1097,7 @@ export const INITIAL_STATE = ({ set, get }: {
             exportSave(get());
         },
         loadGame: (data: Record<string, unknown>) => {
-            const gm = data.gameManagement as Record<string, unknown> ?? {};
-            const savedBudget = data.budget as Record<string, unknown> ?? {};
-            const savedRelations = data.relations as Record<string, unknown> ?? {};
-            const savedLaw = data.law as Record<string, unknown> ?? {};
-            const savedDeals = data.deals as Record<string, unknown> ?? {};
-            const savedMeet = data.meet as Record<string, unknown> ?? {};
-            const savedStats = data.stats as Record<string, unknown> ?? {};
-
-            // Restore current law/deal by id so undecided rounds resume correctly
-            const savedLawId = (savedLaw.current as Record<string, unknown> | null)?.id;
-            const restoredLaw = typeof savedLawId === 'number' ? (LAWS.find(l => l.id === savedLawId) ?? null) : null;
-            const savedDealId = (savedDeals.current as Record<string, unknown> | null)?.id;
-            const restoredDeal = typeof savedDealId === 'number' ? (DEALS.find(d => d.id === savedDealId) ?? null) : null;
-
-            // Modifiers: normalize legacy entries (no id/state/window) to the ADR-0008 schema.
-            const loadedModifiers = ((gm.modifiers as unknown[]) ?? []).map(normalizeModifier);
-            // Backward-compat: pre-modifier-engine saves tracked statues via shop.statueCount
-            // (now removed — count is derived from modifiers). Reconstruct any statues that
-            // aren't already present so old saves don't silently lose them.
-            const legacyStatueCount = ((data.shop as Record<string, unknown>)?.statueCount as number) ?? 0;
-            for (let i = countModifiersByType(loadedModifiers, 'statue'); i < legacyStatueCount && i < STATUES.length; i++) {
-                loadedModifiers.push(buildShopModifier(STATUES[i], 0));
-            }
-
-            set((s) => ({
-                gameManagement: {
-                    ...s.gameManagement,
-                    round: (gm.round as number) ?? s.gameManagement.round,
-                    phase: (gm.phase as GameState['gameManagement']['phase']) ?? s.gameManagement.phase,
-                    difficulty: (gm.difficulty as Difficulty) ?? 'medium',
-                    endReason: (gm.endReason as string | null) ?? null,
-                    dayEnded: (gm.dayEnded as boolean) ?? false,
-                    lastRoundIncome: (gm.lastRoundIncome as number) ?? 0,
-                    lastRoundExpenses: (gm.lastRoundExpenses as number) ?? 0,
-                    // Recurring effect fields — default to empty/0 for saves predating sprint 2
-                    lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,
-                    lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
-                    activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
-                    modifiers: loadedModifiers,
-                    repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
-                    // Coup fields — default to safe state for saves predating story 2-7
-                    coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,
-                    coupWarningFaction: (gm.coupWarningFaction as Power | null) ?? null,
-                    // Representative statuses — default all active for saves predating story 3-5
-                    representativeStatuses: (gm.representativeStatuses as Record<Power, 'active' | 'sick' | 'eliminated'>) ?? { military: 'active', business: 'active', people: 'active' },
-                    // dumbScore — recompute from saved education for saves predating this feature
-                    dumbScore: typeof gm.dumbScore === 'number' ? gm.dumbScore : educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
-                    timerStartedAt: Date.now(),
-                    timerPausedAt: null,
-                    charisma: {
-                        ...s.gameManagement.charisma,
-                        current: ((gm.charisma as Record<string, unknown>)?.current as number) ?? s.gameManagement.charisma.current,
-                    },
-                },
-                budget: {
-                    ...s.budget,
-                    treasury: (savedBudget.treasury as number) ?? s.budget.treasury,
-                    expenditures: (savedBudget.expenditures as typeof s.budget.expenditures) ?? s.budget.expenditures,
-                    taxes: (savedBudget.taxes as typeof s.budget.taxes) ?? s.budget.taxes,
-                },
-                relations: {
-                    ...s.relations,
-                    current: (savedRelations.current as typeof s.relations.current) ?? s.relations.current,
-                },
-                log: (data.log as GameState['log']) ?? [],
-                dailyEvent: { current: (data.dailyEvent as Record<string, unknown>)?.current as GameState['dailyEvent']['current'] ?? null },
-                law: {
-                    ...s.law,
-                    current: restoredLaw,
-                    lawDecided: (savedLaw.lawDecided as boolean) ?? false,
-                    lastLawOutcome: (savedLaw.lastLawOutcome as boolean | null) ?? null,
-                    interactedWithLaws: new Set(),
-                },
-                deals: {
-                    ...s.deals,
-                    current: restoredDeal,
-                    dealDecided: (savedDeals.dealDecided as boolean) ?? false,
-                    lastDealOutcome: (savedDeals.lastDealOutcome as string[] | null) ?? null,
-                    lastDealAccepted: (savedDeals.lastDealAccepted as boolean | null) ?? null,
-                    interactedWithDeals: new Set(),
-                },
-                meet: {
-                    ...s.meet,
-                    actionTaken: (savedMeet.actionTaken as typeof s.meet.actionTaken) ?? { type: undefined, taken: false, power: undefined },
-                    actionOutcomeText: (savedMeet.actionOutcomeText as typeof s.meet.actionOutcomeText) ?? null,
-                    selectedPower: 'none',
-                },
-                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultKey: null },
-                miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null },
-                tabs: { ...s.tabs, activeTab: (data.tabs as Record<string, unknown>)?.activeTab as Tabs ?? Tabs.Log, tabsLocked: false },
-                shop: {
-                    ...s.shop,
-                    frozenFactions: new Set((data.shop as Record<string, unknown>)?.frozenFactions as Power[] ?? []),
-                    advisorLevel: ((data.shop as Record<string, unknown>)?.advisorLevel as 0 | 1 | 2 | 3) ?? 0,
-                },
-                stats: {
-                    ...s.stats,
-                    // Safe defaults for fields added in story 3-4 (saves predating this story lack them)
-                    coupGraceFired: (savedStats.coupGraceFired as boolean) ?? false,
-                    totalRecurringIncomeEarned: (savedStats.totalRecurringIncomeEarned as number) ?? 0,
-                    totalRecurringExpensesSpent: (savedStats.totalRecurringExpensesSpent as number) ?? 0,
-                    repealCount: (savedStats.repealCount as number) ?? 0,
-                },
-            }));
+            set((s) => buildLoadedState(s, data));
         }
     },
     meet: {
