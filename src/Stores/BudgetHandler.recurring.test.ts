@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { calculateRoundFinancials, sumRecurringEffects } from './BudgetHandler';
-import type { ActiveRecurringEffect, GameState } from '../types/GameState';
+import { calculateRoundFinancials } from './BudgetHandler';
+import type { GameState, Modifier, ResolvedStatMod } from '../types/GameState';
 
 /**
- * Story 2-2: calculateRoundFinancials — recurring effect summation.
+ * calculateRoundFinancials — recurring income/expense from modifiers (ADR-0008 P2,
+ * formerly Story 2-2's ActiveRecurringEffect summation).
  *
- * Four required cases: zero effects / income-only / expense-only / mixed,
- * plus backwards compatibility (callers without the new parameter).
+ * Four required cases: zero effects / income-only / expense-only / mixed, plus
+ * parameter back-compat (callers without modifiers / round).
  */
 
 /** Factory: a neutral budget whose base financials are easy to reason about. */
@@ -26,47 +27,34 @@ function makeBudget(): GameState['budget'] {
     } as unknown as GameState['budget'];
 }
 
-/** Factory: a recurring effect entry with overridable fields. */
-function makeEffect(overrides: Partial<ActiveRecurringEffect> = {}): ActiveRecurringEffect {
+let modSeq = 0;
+/** Factory: a permanent recurring-income/expense modifier (active from round 1). */
+function makeMod(opts: { income?: number; expense?: number; id?: string } = {}): Modifier {
+    const window = { startRound: 1, endRound: null };
+    const mods: ResolvedStatMod[] = [];
+    if (opts.income) mods.push({ stat: 'roundIncome', amount: opts.income, window });
+    if (opts.expense) mods.push({ stat: 'roundExpense', amount: opts.expense, window });
     return {
-        sourceId: 'law-test',
-        sourceType: 'law',
-        sourceFaction: 'business',
-        label: 'laws.recurring.test',
-        incomeBonus: 0,
-        expenseBonus: 0,
-        roundActivated: 1,
-        ...overrides,
+        id: opts.id ?? `laws.${1000 + modSeq++}`,
+        type: 'law-recurring',
+        state: 'active',
+        acquiredRound: 1,
+        mods,
     };
 }
 
-describe('sumRecurringEffects', () => {
-    it('returns zeros for an empty array', () => {
-        const result = sumRecurringEffects([]);
-        expect(result.recurringIncome).toBe(0);
-        expect(result.recurringExpenses).toBe(0);
-    });
+/** Any round ≥ 1 keeps the permanent windows active. */
+const ROUND = 5;
 
-    it('sums multiple mixed entries', () => {
-        const result = sumRecurringEffects([
-            makeEffect({ incomeBonus: 25 }),
-            makeEffect({ sourceId: 'law-2', incomeBonus: 15 }),
-            makeEffect({ sourceId: 'law-3', expenseBonus: 8 }),
-        ]);
-        expect(result.recurringIncome).toBe(40);
-        expect(result.recurringExpenses).toBe(8);
-    });
-});
-
-describe('calculateRoundFinancials — recurring effects', () => {
+describe('calculateRoundFinancials — recurring modifiers', () => {
     it('zero effects: recurring sums are 0 and net is unchanged (AC-1)', () => {
         const budget = makeBudget();
-        const withEmpty = calculateRoundFinancials(budget, []);
+        const withEmpty = calculateRoundFinancials(budget, [], ROUND);
         const withoutParam = calculateRoundFinancials(budget);
 
         expect(withEmpty.recurringIncome).toBe(0);
         expect(withEmpty.recurringExpenses).toBe(0);
-        // Backwards compatible: omitting the parameter gives identical results
+        // Parameter back-compat: omitting modifiers/round gives identical results
         expect(withoutParam).toEqual(withEmpty);
         // Net is base income minus base expenses only
         expect(withEmpty.netChange).toBe(withEmpty.totalIncome - withEmpty.expenses);
@@ -76,9 +64,9 @@ describe('calculateRoundFinancials — recurring effects', () => {
         const budget = makeBudget();
         const baseline = calculateRoundFinancials(budget);
         const result = calculateRoundFinancials(budget, [
-            makeEffect({ incomeBonus: 25 }),
-            makeEffect({ sourceId: 'law-2', incomeBonus: 15 }),
-        ]);
+            makeMod({ income: 25 }),
+            makeMod({ income: 15 }),
+        ], ROUND);
 
         expect(result.recurringIncome).toBe(40);
         expect(result.recurringExpenses).toBe(0);
@@ -89,9 +77,9 @@ describe('calculateRoundFinancials — recurring effects', () => {
         const budget = makeBudget();
         const baseline = calculateRoundFinancials(budget);
         const result = calculateRoundFinancials(budget, [
-            makeEffect({ expenseBonus: 15 }),
-            makeEffect({ sourceId: 'law-2', expenseBonus: 25 }),
-        ]);
+            makeMod({ expense: 15 }),
+            makeMod({ expense: 25 }),
+        ], ROUND);
 
         expect(result.recurringIncome).toBe(0);
         expect(result.recurringExpenses).toBe(40);
@@ -102,21 +90,33 @@ describe('calculateRoundFinancials — recurring effects', () => {
         const budget = makeBudget();
         const baseline = calculateRoundFinancials(budget);
         const result = calculateRoundFinancials(budget, [
-            makeEffect({ incomeBonus: 25 }),
-            makeEffect({ sourceId: 'law-2', expenseBonus: 15 }),
-        ]);
+            makeMod({ income: 25 }),
+            makeMod({ expense: 15 }),
+        ], ROUND);
 
         expect(result.recurringIncome).toBe(25);
         expect(result.recurringExpenses).toBe(15);
         expect(result.netChange).toBe(baseline.netChange + 25 - 15);
     });
 
+    it('rejected modifiers and out-of-window contributions are excluded', () => {
+        const budget = makeBudget();
+        const baseline = calculateRoundFinancials(budget);
+        const rejected: Modifier = { ...makeMod({ income: 50 }), state: 'rejected' };
+        const future: Modifier = {
+            id: 'laws.future', type: 'law-recurring', state: 'active', acquiredRound: 1,
+            mods: [{ stat: 'roundIncome', amount: 99, window: { startRound: ROUND + 2, endRound: null } }],
+        };
+        const result = calculateRoundFinancials(budget, [rejected, future], ROUND);
+
+        expect(result.recurringIncome).toBe(0);
+        expect(result.netChange).toBe(baseline.netChange);
+    });
+
     it('base fields are unaffected by recurring effects', () => {
         const budget = makeBudget();
         const baseline = calculateRoundFinancials(budget);
-        const result = calculateRoundFinancials(budget, [
-            makeEffect({ incomeBonus: 25, expenseBonus: 15 }),
-        ]);
+        const result = calculateRoundFinancials(budget, [makeMod({ income: 25, expense: 15 })], ROUND);
 
         expect(result.peopleIncome).toBe(baseline.peopleIncome);
         expect(result.businessIncome).toBe(baseline.businessIncome);

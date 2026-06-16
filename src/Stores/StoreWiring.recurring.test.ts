@@ -1,14 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore } from './GameState';
-import type { ActiveRecurringEffect } from '../types/GameState';
+import type { Modifier } from '../types/GameState';
 import type { Law } from '../types/Law';
 
 /**
- * Story 2-3: Store wiring integration tests — recurring effect lifecycle.
+ * Store wiring integration tests — recurring effect lifecycle on the modifier
+ * engine (ADR-0008 P2, formerly Story 2-3).
  *
- * Exercises the REAL Zustand store: activation via actUponLaw/actUponDeal,
- * round resolution via nextRound, reset via setPhase('start'), and the
- * loadGame whitelist (save/load round-trip).
+ * Exercises the REAL Zustand store: activation via actUponLaw/actUponDeal, round
+ * resolution via nextRound, reset via setPhase('start'), and save/load (modifier
+ * round-trip + one-way legacy migration).
  */
 
 // i18n is initialised with an http backend — return keys verbatim in node
@@ -36,9 +37,9 @@ function decideLaw(law: Law, accept: boolean): void {
     useGameStore.getState().law.actUponLaw(accept);
 }
 
-/** Reads the active effects from the live store. */
-function activeEffects(): ActiveRecurringEffect[] {
-    return useGameStore.getState().gameManagement.activeRecurringEffects;
+/** Active recurring/ledger modifiers from the live store. */
+function activeMods(): Modifier[] {
+    return useGameStore.getState().gameManagement.modifiers.filter(m => m.state === 'active');
 }
 
 describe('recurring effect store wiring', () => {
@@ -48,42 +49,42 @@ describe('recurring effect store wiring', () => {
     });
 
     describe('activation (AC-1, AC-2)', () => {
-        it('accepting a law with recurringEffect adds exactly one entry', () => {
+        it('accepting a law with recurringEffect adds exactly one modifier', () => {
             decideLaw(makeRecurringLaw(), true);
 
-            const effects = activeEffects();
-            expect(effects).toHaveLength(1);
-            expect(effects[0]).toMatchObject({
-                sourceId: 'law-9001',
-                sourceType: 'law',
-                sourceFaction: 'business',
-                label: 'laws.recurring.test_income',
-                incomeBonus: 25,
-                expenseBonus: 0,
+            const mods = activeMods();
+            expect(mods).toHaveLength(1);
+            expect(mods[0]).toMatchObject({
+                id: 'laws.9001',
+                type: 'law-recurring',
+                state: 'active',
             });
+            expect(mods[0].mods).toEqual([
+                { stat: 'roundIncome', amount: 25, window: { startRound: mods[0].acquiredRound, endRound: null } },
+            ]);
         });
 
-        it('accepting the same law twice does not duplicate the entry (pool reset dedup)', () => {
+        it('accepting the same law twice does not duplicate the modifier (dedup)', () => {
             const law = makeRecurringLaw();
             decideLaw(law, true);
             decideLaw(law, true);
 
-            expect(activeEffects()).toHaveLength(1);
+            expect(activeMods()).toHaveLength(1);
         });
 
         it('rejecting a law never activates its effect', () => {
             decideLaw(makeRecurringLaw(), false);
 
-            expect(activeEffects()).toHaveLength(0);
+            expect(activeMods()).toHaveLength(0);
         });
 
         it('accepting a law without recurringEffect adds nothing', () => {
             decideLaw(makeRecurringLaw({ recurringEffect: undefined }), true);
 
-            expect(activeEffects()).toHaveLength(0);
+            expect(activeMods()).toHaveLength(0);
         });
 
-        it('accepting a deal with recurringEffect adds an entry with sourceType deal', () => {
+        it('accepting a deal with recurringEffect adds a deal modifier', () => {
             useGameStore.setState((s) => ({
                 deals: {
                     ...s.deals,
@@ -102,15 +103,12 @@ describe('recurring effect store wiring', () => {
             }));
             useGameStore.getState().deals.actUponDeal(true);
 
-            const effects = activeEffects();
-            expect(effects).toHaveLength(1);
-            expect(effects[0]).toMatchObject({
-                sourceId: 'deal-9002',
-                sourceType: 'deal',
-                sourceFaction: 'military',
-                incomeBonus: 0,
-                expenseBonus: 15,
-            });
+            const mods = activeMods();
+            expect(mods).toHaveLength(1);
+            expect(mods[0]).toMatchObject({ id: 'deals.9002', type: 'deal' });
+            expect(mods[0].mods).toEqual([
+                { stat: 'roundExpense', amount: 15, window: { startRound: mods[0].acquiredRound, endRound: null } },
+            ]);
         });
     });
 
@@ -158,13 +156,13 @@ describe('recurring effect store wiring', () => {
             expect(useGameStore.getState().gameManagement.repealTakenThisRound).toBe(false);
         });
 
-        it('effects persist across rounds (not cleared by nextRound)', () => {
+        it('modifiers persist across rounds (not cleared by nextRound)', () => {
             decideLaw(makeRecurringLaw(), true);
 
             useGameStore.getState().gameManagement.nextRound();
             useGameStore.getState().gameManagement.nextRound();
 
-            expect(activeEffects()).toHaveLength(1);
+            expect(activeMods()).toHaveLength(1);
         });
     });
 
@@ -183,7 +181,7 @@ describe('recurring effect store wiring', () => {
             useGameStore.getState().gameManagement.setPhase('start');
 
             const gm = useGameStore.getState().gameManagement;
-            expect(gm.activeRecurringEffects).toHaveLength(0);
+            expect(gm.modifiers).toHaveLength(0);
             expect(gm.repealTakenThisRound).toBe(false);
             expect(gm.lastRoundRecurringIncome).toBe(0);
             expect(gm.lastRoundRecurringExpenses).toBe(0);
@@ -191,22 +189,20 @@ describe('recurring effect store wiring', () => {
     });
 
     describe('save/load (AC-7)', () => {
-        it('loadGame restores activeRecurringEffects from save data', () => {
-            const savedEffect: ActiveRecurringEffect = {
-                sourceId: 'law-9001',
-                sourceType: 'law',
-                sourceFaction: 'business',
-                label: 'laws.recurring.test_income',
-                incomeBonus: 25,
-                expenseBonus: 0,
-                roundActivated: 2,
+        it('loadGame restores modifiers from save data', () => {
+            const savedMod: Modifier = {
+                id: 'laws.9001',
+                type: 'law-recurring',
+                state: 'active',
+                acquiredRound: 2,
+                mods: [{ stat: 'roundIncome', amount: 25, window: { startRound: 2, endRound: null } }],
             };
 
             useGameStore.getState().gameManagement.loadGame({
                 gameManagement: {
                     round: 3,
                     phase: 'start',
-                    activeRecurringEffects: [savedEffect],
+                    modifiers: [savedMod],
                     repealTakenThisRound: true,
                     lastRoundRecurringIncome: 25,
                     lastRoundRecurringExpenses: 0,
@@ -214,13 +210,37 @@ describe('recurring effect store wiring', () => {
             });
 
             const gm = useGameStore.getState().gameManagement;
-            expect(gm.activeRecurringEffects).toEqual([savedEffect]);
+            expect(gm.modifiers).toEqual([savedMod]);
             expect(gm.repealTakenThisRound).toBe(true);
             expect(gm.lastRoundRecurringIncome).toBe(25);
         });
 
-        it('loadGame defaults recurring fields for saves predating sprint 2', () => {
-            // Seed non-default values, then load an old save without the fields
+        it('loadGame migrates a legacy activeRecurringEffects save (one-way, ADR-0008 P2)', () => {
+            useGameStore.getState().gameManagement.loadGame({
+                gameManagement: {
+                    round: 3,
+                    phase: 'start',
+                    activeRecurringEffects: [{
+                        sourceId: 'law-9001',
+                        sourceType: 'law',
+                        sourceFaction: 'business',
+                        label: 'laws.recurring.test_income',
+                        incomeBonus: 25,
+                        expenseBonus: 0,
+                        roundActivated: 2,
+                    }],
+                },
+            });
+
+            const gm = useGameStore.getState().gameManagement;
+            expect(gm.modifiers).toHaveLength(1);
+            expect(gm.modifiers[0]).toMatchObject({ id: 'laws.9001', type: 'law-recurring', state: 'active', acquiredRound: 2 });
+            expect(gm.modifiers[0].mods).toEqual([
+                { stat: 'roundIncome', amount: 25, window: { startRound: 1, endRound: null } },
+            ]);
+        });
+
+        it('loadGame defaults modifiers to [] for saves predating the engine', () => {
             decideLaw(makeRecurringLaw(), true);
 
             useGameStore.getState().gameManagement.loadGame({
@@ -228,10 +248,9 @@ describe('recurring effect store wiring', () => {
             });
 
             const gm = useGameStore.getState().gameManagement;
-            expect(gm.activeRecurringEffects).toEqual([]);
+            expect(gm.modifiers).toEqual([]);
             expect(gm.repealTakenThisRound).toBe(false);
             expect(gm.lastRoundRecurringIncome).toBe(0);
-            expect(gm.lastRoundRecurringExpenses).toBe(0);
         });
     });
 });

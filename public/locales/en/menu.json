@@ -64,6 +64,7 @@
     "repeal_confirm": "Confirm Repeal",
     "repeal_cancel": "Cancel",
     "repeal_cost": "Cost: {{treasury}} treasury + {{relation}} {{faction}} relation",
+    "repeal_cost_no_faction": "Cost: {{treasury}} treasury",
     "repeal_effect_income": "+{{amount}}m/round",
     "repeal_effect_expense": "-{{amount}}m/round",
     "repeal_activated_round": "Active since round {{round}}",

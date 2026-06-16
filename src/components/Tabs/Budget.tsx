@@ -18,9 +18,10 @@ const Budget = ({ isActive }: TabProps) => {
     const { t } = useTranslation();
     const { t: tAdvisor } = useTranslation('advisor')
     const budget = useGameStore(s => s.budget)
-    const activeRecurringEffects = useGameStore(s => s.gameManagement.activeRecurringEffects)
+    const modifiers = useGameStore(s => s.gameManagement.modifiers)
+    const round = useGameStore(s => s.gameManagement.round)
     const advisorLevel = useGameStore(s => s.shop.advisorLevel)
-    const financials = calculateRoundFinancials(budget, activeRecurringEffects)
+    const financials = calculateRoundFinancials(budget, modifiers, round)
     const net = financials.netChange
     const roundsLeft = computeRoundsLeft(budget.treasury, net)
     const budgetVerdict = computeBudgetVerdict(budget.expenditures)

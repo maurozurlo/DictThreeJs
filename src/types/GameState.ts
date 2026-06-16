@@ -20,27 +20,6 @@ export type AdvisorLevel = 0 | 1 | 2 | 3;
 export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | 'military_coup' | 'business_coup' | 'people_coup' | null;
 
 /**
- * A law or deal whose recurring effect is currently active.
- * Entries are pushed on accept and removed only via repeal.
- * Plain-object shape ensures JSON save/load round-trips cleanly.
- */
-export interface ActiveRecurringEffect {
-    /** Unique stable key matching the source law/deal id — used for dedup and repeal lookup. */
-    sourceId: string;
-    sourceType: 'law' | 'deal' | 'opportunity' | 'weird-law';
-    /** Faction that proposed this law/deal — used to apply the repeal relation penalty. */
-    sourceFaction: Power;
-    /** i18n key shown in DayEnded and Active Legislation list. */
-    label: string;
-    /** Added to treasury each round. 0 when n/a. */
-    incomeBonus: number;
-    /** Subtracted from treasury each round. 0 when n/a. */
-    expenseBonus: number;
-    /** Round the effect was activated — display-only in iteration 1. */
-    roundActivated: number;
-}
-
-/**
  * Read-through stats a modifier can influence (ADR-0008 §4). Charisma and the
  * three relations sum on read and are re-clamped to ±10; roundIncome/roundExpense
  * feed per-round economics (replaces ActiveRecurringEffect in P2). One-shot
@@ -182,9 +161,11 @@ export type GameState = {
         currentRoundExtraExpenses: number;
         timerStartedAt: number | null;
         timerPausedAt: number | null;
-        /** All currently active recurring effects from accepted laws and deals. */
-        activeRecurringEffects: ActiveRecurringEffect[];
-        /** Persistent run-scoped modifiers (e.g. statues) that feed derived stats in real time. */
+        /**
+         * Single source of truth for recurring/windowed effects and the decision
+         * ledger (ADR-0008): statues, recurring laws/deals, weird-law slots. Feeds
+         * derived stats (charisma/relations) and per-round income/expense in real time.
+         */
         modifiers: Modifier[];
         /** True after a repeal is used this round; reset to false in nextRound(). */
         repealTakenThisRound: boolean;

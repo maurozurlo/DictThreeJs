@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore } from './GameState';
-import { getRepealTier } from './RecurringHandler';
-import type { ActiveRecurringEffect } from '../types/GameState';
+import { computeRepealTier } from '../Utils/Modifiers';
+import type { Modifier, ResolvedStatMod } from '../types/GameState';
 
 /**
- * Story 2-8: repeal() store action + getRepealTier() pure helper.
+ * repeal() store action + computeRepealTier() pure helper (ADR-0008 P2).
  *
- * Exercises the REAL Zustand store. Follows the same seeding/reset
- * pattern established in StoreWiring.recurring.test.ts.
+ * Repeal flips the modifier's state to 'rejected' (retained as ledger), applies the
+ * tier relation penalty to the proposing faction's base relation (looked up from the
+ * content pool by id), and deducts the treasury cost. Exercises the REAL store.
  */
 
 // i18n uses an http backend — return keys verbatim in node
@@ -19,46 +20,46 @@ vi.mock('../i18n', () => ({
 // Shared helpers
 // ---------------------------------------------------------------------------
 
-/** Builds a minimal ActiveRecurringEffect for seeding the store. */
-function makeEffect(overrides: Partial<ActiveRecurringEffect> = {}): ActiveRecurringEffect {
-    return {
-        sourceId: 'law-1',
-        sourceType: 'law',
-        sourceFaction: 'people',
-        label: 'laws.recurring.gambling_income',
-        incomeBonus: 25,
-        expenseBonus: 0,
-        roundActivated: 1,
-        ...overrides,
-    };
+const PERMANENT = { startRound: 1, endRound: null };
+
+/**
+ * Builds a recurring law modifier. `id` must map to a real law (faction lookup);
+ * the mods drive the repeal tier. Recurring law factions:
+ *   laws.40 housing → people, laws.42 media → military, laws.44 public works → people.
+ */
+function makeMod(id: string, opts: { income?: number; expense?: number } = {}): Modifier {
+    const mods: ResolvedStatMod[] = [];
+    if (opts.income) mods.push({ stat: 'roundIncome', amount: opts.income, window: PERMANENT });
+    if (opts.expense) mods.push({ stat: 'roundExpense', amount: opts.expense, window: PERMANENT });
+    return { id, type: 'law-recurring', state: 'active', acquiredRound: 1, mods };
 }
 
-/** Seeds the store with the given treasury, relations, and effects. */
+/** Seeds the store with the given treasury, relations, and modifiers. */
 function seedStore({
     treasury,
-    peopleRelation,
-    effects,
+    relations = {},
+    modifiers,
     repealTakenThisRound = false,
 }: {
     treasury: number;
-    peopleRelation: number;
-    effects: ActiveRecurringEffect[];
+    relations?: Partial<Record<'military' | 'business' | 'people', number>>;
+    modifiers: Modifier[];
     repealTakenThisRound?: boolean;
 }) {
     useGameStore.setState((s) => ({
         budget: { ...s.budget, treasury },
-        relations: {
-            ...s.relations,
-            current: { ...s.relations.current, people: peopleRelation },
-        },
+        relations: { ...s.relations, current: { ...s.relations.current, ...relations } },
         gameManagement: {
             ...s.gameManagement,
-            activeRecurringEffects: effects,
+            modifiers,
             repealTakenThisRound,
-            round: 3, // bypass grace dampening — repeal tests cover repeal mechanics, not early-game grace period
+            round: 3, // bypass grace dampening — repeal tests cover repeal mechanics, not the grace period
         },
     }));
 }
+
+const activeCount = () =>
+    useGameStore.getState().gameManagement.modifiers.filter(m => m.state === 'active').length;
 
 // ---------------------------------------------------------------------------
 // repeal() store action tests
@@ -69,61 +70,58 @@ describe('repeal() store action', () => {
         useGameStore.getState().gameManagement.setPhase('start');
     });
 
-    it('successful repeal: deducts treasury, adjusts relation, removes entry, sets flag', () => {
-        // Medium-tier effect: incomeBonus 15 (≤15) → cost 25 treasury, −2 relation
-        const effect = makeEffect({ incomeBonus: 15 });
-        seedStore({ treasury: 100, peopleRelation: 3, effects: [effect] });
+    it('successful repeal: deducts treasury, adjusts faction relation, flips to rejected, sets flag', () => {
+        // laws.40 (people, expense 15 → Medium): cost 25 treasury, −2 relation
+        seedStore({ treasury: 100, relations: { people: 3 }, modifiers: [makeMod('laws.40', { expense: 15 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-1');
+        useGameStore.getState().gameManagement.repeal('laws.40');
 
         const state = useGameStore.getState();
         expect(state.budget.treasury).toBe(75);
         expect(state.relations.current.people).toBe(1);
-        expect(state.gameManagement.activeRecurringEffects).toHaveLength(0);
+        expect(activeCount()).toBe(0);
+        // Entry retained as ledger history, flipped to rejected
+        expect(state.gameManagement.modifiers).toHaveLength(1);
+        expect(state.gameManagement.modifiers[0].state).toBe('rejected');
         expect(state.gameManagement.repealTakenThisRound).toBe(true);
     });
 
     it('second repeal same round is a no-op (guarded by repealTakenThisRound)', () => {
-        const effect = makeEffect({ incomeBonus: 25 });
-        seedStore({ treasury: 100, peopleRelation: 3, effects: [effect] });
+        seedStore({ treasury: 100, relations: { people: 3 }, modifiers: [makeMod('laws.40', { expense: 15 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-1');
-        // Capture state after first repeal
+        useGameStore.getState().gameManagement.repeal('laws.40');
         const afterFirst = useGameStore.getState();
 
-        // Seed a second effect to ensure we don't skip due to empty list
+        // Seed a second active modifier; flag is already true from the first repeal
         useGameStore.setState((s) => ({
             gameManagement: {
                 ...s.gameManagement,
-                activeRecurringEffects: [makeEffect({ sourceId: 'law-2', incomeBonus: 25 })],
-                repealTakenThisRound: true,
+                modifiers: [...s.gameManagement.modifiers, makeMod('laws.42', { income: 15 })],
             },
         }));
 
-        useGameStore.getState().gameManagement.repeal('law-2');
+        useGameStore.getState().gameManagement.repeal('laws.42');
 
-        // Treasury and flag unchanged from first repeal's snapshot
         expect(useGameStore.getState().budget.treasury).toBe(afterFirst.budget.treasury);
-        expect(useGameStore.getState().gameManagement.activeRecurringEffects).toHaveLength(1);
+        expect(activeCount()).toBe(1); // the second modifier is still active (repeal blocked)
     });
 
     it('insufficient treasury → no-op', () => {
         // Medium-tier costs 25; give only 24
-        const effect = makeEffect({ incomeBonus: 15 });
-        seedStore({ treasury: 24, peopleRelation: 3, effects: [effect] });
+        seedStore({ treasury: 24, relations: { people: 3 }, modifiers: [makeMod('laws.40', { expense: 15 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-1');
+        useGameStore.getState().gameManagement.repeal('laws.40');
 
         const state = useGameStore.getState();
         expect(state.budget.treasury).toBe(24);
-        expect(state.gameManagement.activeRecurringEffects).toHaveLength(1);
+        expect(activeCount()).toBe(1);
         expect(state.gameManagement.repealTakenThisRound).toBe(false);
     });
 
-    it('repeal of a non-existent sourceId is a no-op', () => {
-        seedStore({ treasury: 100, peopleRelation: 3, effects: [] });
+    it('repeal of a non-existent id is a no-op', () => {
+        seedStore({ treasury: 100, relations: { people: 3 }, modifiers: [] });
 
-        useGameStore.getState().gameManagement.repeal('law-999');
+        useGameStore.getState().gameManagement.repeal('laws.999');
 
         expect(useGameStore.getState().budget.treasury).toBe(100);
         expect(useGameStore.getState().gameManagement.repealTakenThisRound).toBe(false);
@@ -131,10 +129,9 @@ describe('repeal() store action', () => {
 
     it('bankruptcy trigger: treasury exactly equal to cost causes phase lose', () => {
         // Medium-tier costs 25; treasury = 25 → new treasury = 0 → bankruptcy
-        const effect = makeEffect({ incomeBonus: 15 });
-        seedStore({ treasury: 25, peopleRelation: 3, effects: [effect] });
+        seedStore({ treasury: 25, relations: { people: 3 }, modifiers: [makeMod('laws.40', { expense: 15 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-1');
+        useGameStore.getState().gameManagement.repeal('laws.40');
 
         const state = useGameStore.getState();
         expect(state.budget.treasury).toBe(0);
@@ -142,36 +139,29 @@ describe('repeal() store action', () => {
         expect(state.gameManagement.endCause).toBe('bankruptcy');
     });
 
-    it('repeal updates the correct faction (military) when sourceFaction is military', () => {
-        const effect = makeEffect({ sourceId: 'law-mil', sourceFaction: 'military', incomeBonus: 15 });
-        seedStore({ treasury: 100, peopleRelation: 3, effects: [effect] });
-        useGameStore.setState((s) => ({
-            relations: { ...s.relations, current: { ...s.relations.current, military: 5 } },
-        }));
+    it('repeal updates the correct faction (military) looked up from the content pool', () => {
+        // laws.42 (media) → military, income 15 → Medium (−2)
+        seedStore({ treasury: 100, relations: { military: 5, people: 3 }, modifiers: [makeMod('laws.42', { income: 15 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-mil');
+        useGameStore.getState().gameManagement.repeal('laws.42');
 
-        // Medium-tier: −2 relation; 5 − 2 = 3
         expect(useGameStore.getState().relations.current.military).toBe(3);
-        // People relation must be untouched
-        expect(useGameStore.getState().relations.current.people).toBe(3);
+        expect(useGameStore.getState().relations.current.people).toBe(3); // untouched
     });
 
     it('repeal clamps relation at the minimum (−10)', () => {
-        // Large-tier: −3 relation; current −8 → clamps to −10
-        const effect = makeEffect({ sourceId: 'law-large', incomeBonus: 20 });
-        seedStore({ treasury: 100, peopleRelation: -8, effects: [effect] });
+        // laws.44 (public works) → people, expense 25 → Large (−3); −8 − 3 → clamps to −10
+        seedStore({ treasury: 100, relations: { people: -8 }, modifiers: [makeMod('laws.44', { expense: 25 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-large');
+        useGameStore.getState().gameManagement.repeal('laws.44');
 
         expect(useGameStore.getState().relations.current.people).toBe(-10);
     });
 
     it('repeal is re-enabled after nextRound() resets repealTakenThisRound', () => {
-        const effect = makeEffect({ incomeBonus: 25 });
-        seedStore({ treasury: 200, peopleRelation: 3, effects: [effect] });
+        seedStore({ treasury: 200, relations: { people: 3 }, modifiers: [makeMod('laws.40', { expense: 15 })] });
 
-        useGameStore.getState().gameManagement.repeal('law-1');
+        useGameStore.getState().gameManagement.repeal('laws.40');
         expect(useGameStore.getState().gameManagement.repealTakenThisRound).toBe(true);
 
         useGameStore.getState().gameManagement.nextRound();
@@ -180,32 +170,38 @@ describe('repeal() store action', () => {
 });
 
 // ---------------------------------------------------------------------------
-// getRepealTier() pure helper — tier boundary tests
+// computeRepealTier() pure helper — tier boundary tests (Σ|amount| magnitude)
 // ---------------------------------------------------------------------------
 
-describe('getRepealTier()', () => {
-    it('incomeBonus 8 → Small (boundary)', () => {
-        expect(getRepealTier(makeEffect({ incomeBonus: 8 }))).toBe('Small');
+function mods(income = 0, expense = 0): ResolvedStatMod[] {
+    const out: ResolvedStatMod[] = [];
+    if (income) out.push({ stat: 'roundIncome', amount: income, window: PERMANENT });
+    if (expense) out.push({ stat: 'roundExpense', amount: expense, window: PERMANENT });
+    return out;
+}
+
+describe('computeRepealTier()', () => {
+    it('magnitude 8 → Small (boundary)', () => {
+        expect(computeRepealTier(mods(8))).toBe('Small');
     });
 
-    it('incomeBonus 9 → Medium (one above Small boundary)', () => {
-        expect(getRepealTier(makeEffect({ incomeBonus: 9 }))).toBe('Medium');
+    it('magnitude 9 → Medium (one above Small boundary)', () => {
+        expect(computeRepealTier(mods(9))).toBe('Medium');
     });
 
-    it('incomeBonus 15 → Medium (boundary)', () => {
-        expect(getRepealTier(makeEffect({ incomeBonus: 15 }))).toBe('Medium');
+    it('magnitude 15 → Medium (boundary)', () => {
+        expect(computeRepealTier(mods(15))).toBe('Medium');
     });
 
-    it('incomeBonus 16 → Large (one above Medium boundary)', () => {
-        expect(getRepealTier(makeEffect({ incomeBonus: 16 }))).toBe('Large');
+    it('magnitude 16 → Large (one above Medium boundary)', () => {
+        expect(computeRepealTier(mods(16))).toBe('Large');
     });
 
-    it('expenseBonus drives tier when larger than incomeBonus', () => {
-        // incomeBonus 0, expenseBonus 20 → Large
-        expect(getRepealTier(makeEffect({ incomeBonus: 0, expenseBonus: 20 }))).toBe('Large');
+    it('expense drives tier', () => {
+        expect(computeRepealTier(mods(0, 20))).toBe('Large');
     });
 
-    it('incomeBonus 0, expenseBonus 0 → Small (minimum)', () => {
-        expect(getRepealTier(makeEffect({ incomeBonus: 0, expenseBonus: 0 }))).toBe('Small');
+    it('no economic mods (magnitude 0) → Small (minimum; matches weird-law behaviour)', () => {
+        expect(computeRepealTier([])).toBe('Small');
     });
 });

@@ -14,7 +14,7 @@ goal: "Pay down effect-system tech debt by implementing ADR-0008 (Timed Modifier
 start: "2026-06-22"
 end: "2026-06-28"
 generated: "2026-06-15"
-updated: "2026-06-15"
+updated: "2026-06-16"
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
@@ -42,11 +42,11 @@ stories:
     name: "ADR-0008 P2 — replace ActiveRecurringEffect with modifiers"
     file: "production/stories/6-2-modifier-engine-p2.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 2.0
     blocker: "6-1, 6-4"
-    completed: ""
+    completed: "2026-06-16"
 
   # ── Should Have ─────────────────────────────────────────────────────────
   - id: "6-3"

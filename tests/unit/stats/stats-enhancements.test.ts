@@ -18,7 +18,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useGameStore } from '../../../src/Stores/GameState';
-import type { ActiveRecurringEffect } from '../../../src/types/GameState';
+import type { Modifier, ResolvedStatMod } from '../../../src/types/GameState';
 
 // i18n uses an http backend — return keys verbatim in node
 vi.mock('../../../src/i18n', () => ({
@@ -34,23 +34,16 @@ function resetStore(): void {
     useGameStore.getState().gameManagement.setPhase('start');
 }
 
-/** Seeds a single active recurring effect directly into the store. */
-function seedEffect(overrides: Partial<ActiveRecurringEffect> = {}): void {
-    const effect: ActiveRecurringEffect = {
-        sourceId: 'law-test-1',
-        sourceType: 'law',
-        sourceFaction: 'business',
-        label: 'laws.recurring.test',
-        incomeBonus: 0,
-        expenseBonus: 0,
-        roundActivated: 1,
-        ...overrides,
-    };
+const PERMANENT = { startRound: 1, endRound: null };
+
+/** Seeds a single active recurring-income/expense modifier directly into the store. */
+function seedEffect({ incomeBonus = 0, expenseBonus = 0 }: { incomeBonus?: number; expenseBonus?: number } = {}): void {
+    const mods: ResolvedStatMod[] = [];
+    if (incomeBonus) mods.push({ stat: 'roundIncome', amount: incomeBonus, window: PERMANENT });
+    if (expenseBonus) mods.push({ stat: 'roundExpense', amount: expenseBonus, window: PERMANENT });
+    const mod: Modifier = { id: 'laws.39', type: 'law-recurring', state: 'active', acquiredRound: 1, mods };
     useGameStore.setState((s) => ({
-        gameManagement: {
-            ...s.gameManagement,
-            activeRecurringEffects: [effect],
-        },
+        gameManagement: { ...s.gameManagement, modifiers: [mod] },
     }));
 }
 
@@ -176,21 +169,20 @@ describe('repealCount tracking', () => {
     beforeEach(resetStore);
 
     function seedRepeal(): void {
-        const effect: ActiveRecurringEffect = {
-            sourceId: 'law-repeal-1',
-            sourceType: 'law',
-            sourceFaction: 'people',
-            label: 'laws.recurring.test',
-            incomeBonus: 25,
-            expenseBonus: 0,
-            roundActivated: 1,
+        // laws.39 (gambling) → faction business; mods drive Large tier (cost 40).
+        const mod: Modifier = {
+            id: 'laws.39',
+            type: 'law-recurring',
+            state: 'active',
+            acquiredRound: 1,
+            mods: [{ stat: 'roundIncome', amount: 25, window: PERMANENT }],
         };
         useGameStore.setState((s) => ({
             budget: { ...s.budget, treasury: 500 },
-            relations: { ...s.relations, current: { ...s.relations.current, people: 3 } },
+            relations: { ...s.relations, current: { ...s.relations.current, business: 3 } },
             gameManagement: {
                 ...s.gameManagement,
-                activeRecurringEffects: [effect],
+                modifiers: [mod],
                 repealTakenThisRound: false,
             },
         }));
@@ -202,7 +194,7 @@ describe('repealCount tracking', () => {
         expect(useGameStore.getState().stats.repealCount).toBe(0);
 
         // Act
-        useGameStore.getState().gameManagement.repeal('law-repeal-1');
+        useGameStore.getState().gameManagement.repeal('laws.39');
 
         // Assert
         expect(useGameStore.getState().stats.repealCount).toBe(1);
@@ -215,8 +207,8 @@ describe('repealCount tracking', () => {
             gameManagement: { ...s.gameManagement, repealTakenThisRound: true },
         }));
 
-        // Act: second repeal attempt on a different law — still blocked
-        useGameStore.getState().gameManagement.repeal('law-repeal-1');
+        // Act: repeal attempt — still blocked by repealTakenThisRound
+        useGameStore.getState().gameManagement.repeal('laws.39');
 
         // Assert
         expect(useGameStore.getState().stats.repealCount).toBe(0);

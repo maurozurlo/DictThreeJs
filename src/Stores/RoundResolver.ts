@@ -83,8 +83,10 @@ export function resolveRound(state: GameState): RoundResolution {
             ? coupResult.faction
             : null;
 
-    // --- 1. Financial resolution (includes active recurring effects) ---
-    const financials = calculateRoundFinancials(state.budget, state.gameManagement.activeRecurringEffects);
+    // --- 1. Financial resolution (recurring income/expense from active modifiers
+    //        at the resolving round; ADR-0008 §5). All current recurring content is
+    //        immediate+permanent, so the resolving round and round+1 are equivalent. ---
+    const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, coupRound);
     const newTreasury = state.budget.treasury + financials.netChange;
     const recurringGmFields = recurringFieldKeys(financials);
 
@@ -206,11 +208,13 @@ export function pickNextLaw(
     newRepStatuses: RepStatuses,
     usedLaws: Set<typeof LAWS[number]>,
 ): typeof LAWS[number] | null {
-    const hasActiveWeirdLaw = state.gameManagement.activeRecurringEffects.some(e => e.sourceType === 'weird-law');
+    const hasActiveWeirdLaw = state.gameManagement.modifiers.findIndex(
+        m => m.type === 'weird-law' && m.state === 'active',
+    ) !== -1;
     if (!hasActiveWeirdLaw && rollChance(0.10)) {
         return getRandomFromList(WEIRD_LAWS);
     }
-    const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
+    const lawPool = filterLawPool(LAWS, state.gameManagement.modifiers);
     const unavailablePowers = (['military', 'business', 'people'] as Power[])
         .filter(p => newRepStatuses[p] !== 'active');
     const effectiveLawPool = unavailablePowers.length > 0

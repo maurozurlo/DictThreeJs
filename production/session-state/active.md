@@ -1,5 +1,16 @@
 # Session State
 
+## Session Extract — /dev-story 6-2 2026-06-16 (ADR-0008 P2)
+- Story: production/stories/6-2-modifier-engine-p2.md — replace ActiveRecurringEffect with the modifier engine. Status → Complete.
+- Pre-step: committed/pushed in-flight RoundResolver refactor (user's commit 16e16aa); fixed leftover `buildStatsUpdate`→`buildRoundStats` (18 failing tests) + removed dangling imports the refactor left (npm run build was broken on master — now green).
+- New file: src/assets/modifierContent.ts — buildRecurringModifier / buildWeirdLawModifier / getModifierContent (id→label+faction) / isRepealable / migrateLegacyEffect. Engine stays content-free (ADR-0008 §4); content lookup lives here.
+- Modifier id namespace: laws.{id} / deals.{id} / weird.{id} (statues keep statue.{n}). filterLawPool AC requires `laws.${law.id}`.
+- Source touched: BudgetHandler (sumModifiers at round, dropped sumRecurringEffects), RecurringHandler (filterLawPool(modifiers) + re-offer guard; removed withRecurringEffect/getRepealTier), EffectHandler (build recurring modifier on accept, dedup by active id), RoundResolver (financials at resolving round = state.round pre-increment; weird-slot findIndex), GameState (weird path, expireTimer, repeal flips state→rejected w/ content faction lookup, swapLaw), StateFactory (one-way legacy→modifiers migration, console.info), types/GameState (removed ActiveRecurringEffect type+field), Log RepealCard, Budget forecast, DebugRecurringOverlay, visualConsequences (id namespace + reads modifiers). New i18n key log.repeal_cost_no_faction (EN/ES).
+- Decision: recurring summed at PRE-increment resolving round (state.gameManagement.round) in both resolveRound + expireTimer — parity for all current immediate+permanent content; documented in code.
+- Tests: rewrote 7 tsc-erroring + 3 runtime-failing suites for the modifier API; created tests/integration/modifiers/recurring_migration.test.ts (renamed from `_test.ts` — default vitest glob only collects `.test.ts`). 438/438 pass, tsc -b clean, npm run build green.
+- Lint: 3 PRE-EXISTING errors left as-is (let peopleIncome, miniChallenge let newTreasury, Log useMemo dep) — not in changed logic; honoring "no drive-by refactors".
+- Next: 6-3 (P3 — opportunities/mini-challenges/structures + Street View/Advisor consumers; unblocked) OR 6-5/6-6 (no blockers).
+
 ## Session Extract — Charisma action tuning 2026-06-12
 - Owner decision after economy-designer review (a02bb3f5ac062c463): expropriate charisma −1→−2 (same price as eliminate; treasury-positive aggression), dialogue success 0→+1 (charisma recovery loop), dialogue roll-fail stays 0 (agent's tuning — 2-7% band, not player-controlled; owner agreed own −1 proposal "would be unfair"), education-gated fail stays −1, bribe stays 0, eliminate stays −2
 - Range decision: charisma stays −10..+10 (agent: thresholds well-placed; +5..+10 is unhooked dead space — future idea only)

@@ -17,7 +17,7 @@ import type { Expenditures } from '../types/Budget';
  * fields — undefined fields are ignored (always pass).
  */
 export type VisualTriggerCondition = {
-    /** Matches when an entry with this sourceId exists in activeRecurringEffects. */
+    /** Matches when an active modifier with this namespaced id exists (e.g. 'laws.39', 'deals.19', 'weird.1001'). */
     activeRecurringEffectId?: string;
     /** Restricts factionRelation to one faction. Without factionRelation this field has no effect. */
     faction?: Power;
@@ -53,14 +53,14 @@ export type VisualConsequenceEntry = {
 
 /**
  * Starter registry — 5 entries (PRD Feature 5).
- * sourceId strings use the real `${sourceType}-${law.id}` format from
- * RecurringHandler: law-39 = L-A Legalize Gambling, law-40 = L-B Free Housing.
+ * Modifier-id strings use the namespaced ADR-0008 format: laws.39 = L-A Legalize
+ * Gambling, laws.40 = L-B Free Housing, deals.19 = cows, weird.1001 = cemeteries.
  */
 export const VISUAL_CONSEQUENCES: VisualConsequenceEntry[] = [
     {
         id: 'casino-sign',
         label: 'Casino sign on main street',
-        condition: { activeRecurringEffectId: 'law-39' }, // L-A: Legalize Gambling
+        condition: { activeRecurringEffectId: 'laws.39' }, // L-A: Legalize Gambling
         assetSlot: 'casino_sign',
         layer: 'street-prop-foreground',
     },
@@ -89,7 +89,7 @@ export const VISUAL_CONSEQUENCES: VisualConsequenceEntry[] = [
     {
         id: 'public-housing-blocks',
         label: 'Public housing towers in background',
-        condition: { activeRecurringEffectId: 'law-40' }, // L-B: Free Housing Program
+        condition: { activeRecurringEffectId: 'laws.40' }, // L-B: Free Housing Program
         assetSlot: 'public_housing_blocks',
         layer: 'street-prop-background',
         exclusive: ['dilapidated-buildings'],
@@ -98,21 +98,21 @@ export const VISUAL_CONSEQUENCES: VisualConsequenceEntry[] = [
     {
         id: 'deal-19-tiny-cows',
         label: 'Tiny cows wander parks and sidewalks (Dog-Sized Cow Initiative)',
-        condition: { activeRecurringEffectId: 'deal-19' },
+        condition: { activeRecurringEffectId: 'deals.19' },
         assetSlot: 'weird_tiny_cows',
         layer: 'street-prop-foreground',
     },
     {
         id: 'deal-20-giant-mouse',
         label: 'Giant mouse-shaped building on plaza (Giant National Computer Mouse)',
-        condition: { activeRecurringEffectId: 'deal-20' },
+        condition: { activeRecurringEffectId: 'deals.20' },
         assetSlot: 'weird_giant_mouse',
         layer: 'plaza-prop',
     },
     {
         id: 'deal-21-pigeon-cameras',
         label: 'Pigeons wear tiny cameras (Strategic Pigeon Surveillance Program)',
-        condition: { activeRecurringEffectId: 'deal-21' },
+        condition: { activeRecurringEffectId: 'deals.21' },
         assetSlot: 'weird_pigeon_cameras',
         layer: 'street-prop-foreground',
     },
@@ -120,84 +120,84 @@ export const VISUAL_CONSEQUENCES: VisualConsequenceEntry[] = [
     {
         id: 'weird-cemeteries',
         label: 'Zombies wander streets (24/7 Cemeteries Act)',
-        condition: { activeRecurringEffectId: 'weird-law-1001' },
+        condition: { activeRecurringEffectId: 'weird.1001' },
         assetSlot: 'weird_cemeteries_zombies',
         layer: 'street-prop-foreground',
     },
     {
         id: 'weird-pigeon-hats',
         label: 'All pigeons wear tiny hats (Mandatory Pigeon Hats)',
-        condition: { activeRecurringEffectId: 'weird-law-1002' },
+        condition: { activeRecurringEffectId: 'weird.1002' },
         assetSlot: 'weird_pigeon_hats',
         layer: 'street-prop-foreground',
     },
     {
         id: 'weird-night-sun',
         label: 'A second sun appears (Night Sun Initiative)',
-        condition: { activeRecurringEffectId: 'weird-law-1003' },
+        condition: { activeRecurringEffectId: 'weird.1003' },
         assetSlot: 'weird_night_sun',
         layer: 'street-overlay',
     },
     {
         id: 'weird-skeletons',
         label: 'Skeletons appear on plaza (Skeleton Employment Act)',
-        condition: { activeRecurringEffectId: 'weird-law-1005' },
+        condition: { activeRecurringEffectId: 'weird.1005' },
         assetSlot: 'weird_skeletons',
         layer: 'plaza-prop',
     },
     {
         id: 'weird-giraffes',
         label: 'Random giraffes appear (National Giraffe Appreciation Act)',
-        condition: { activeRecurringEffectId: 'weird-law-1007' },
+        condition: { activeRecurringEffectId: 'weird.1007' },
         assetSlot: 'weird_giraffes',
         layer: 'street-prop-background',
     },
     {
         id: 'weird-idling',
         label: 'Citizens stop moving (Public Idling Initiative)',
-        condition: { activeRecurringEffectId: 'weird-law-1008' },
+        condition: { activeRecurringEffectId: 'weird.1008' },
         assetSlot: 'weird_idling_citizens',
         layer: 'street-prop-foreground',
     },
     {
         id: 'weird-building-height',
         label: 'All buildings same height (Building Height Equality Act)',
-        condition: { activeRecurringEffectId: 'weird-law-1009' },
+        condition: { activeRecurringEffectId: 'weird.1009' },
         assetSlot: 'weird_building_height',
         layer: 'street-prop-background',
     },
     {
         id: 'weird-water-coolers',
         label: 'Meet room full of water coolers (Department of Water Coolers)',
-        condition: { activeRecurringEffectId: 'weird-law-1010' },
+        condition: { activeRecurringEffectId: 'weird.1010' },
         assetSlot: 'weird_water_coolers',
         layer: 'meet-character-badge',
     },
     {
         id: 'weird-backwards-walking',
         label: 'Some pedestrians walk backwards (Mandatory Backwards Walking Friday)',
-        condition: { activeRecurringEffectId: 'weird-law-1011' },
+        condition: { activeRecurringEffectId: 'weird.1011' },
         assetSlot: 'weird_backwards_walking',
         layer: 'street-prop-foreground',
     },
     {
         id: 'weird-statues',
         label: 'Plaza holds 10 mini statues (Ministry of Excessive Statues)',
-        condition: { activeRecurringEffectId: 'weird-law-1012' },
+        condition: { activeRecurringEffectId: 'weird.1012' },
         assetSlot: 'weird_statues',
         layer: 'plaza-prop',
     },
     {
         id: 'weird-left-traffic',
         label: 'Vehicles drive on left side (National Left-Handed Traffic Trial)',
-        condition: { activeRecurringEffectId: 'weird-law-1013' },
+        condition: { activeRecurringEffectId: 'weird.1013' },
         assetSlot: 'weird_left_traffic',
         layer: 'street-prop-foreground',
     },
     {
         id: 'weird-ghosts',
         label: 'Transparent citizens appear (Legal Recognition of Ghosts)',
-        condition: { activeRecurringEffectId: 'weird-law-1014' },
+        condition: { activeRecurringEffectId: 'weird.1014' },
         assetSlot: 'weird_ghosts',
         layer: 'street-prop-foreground',
     },
@@ -247,7 +247,9 @@ function conditionMet(
  * an active entry removes every ID in its `exclusive` list from the result.
  */
 export function getActiveVisualConsequences(state: GameState): VisualConsequenceEntry[] {
-    const activeIds = new Set(state.gameManagement.activeRecurringEffects.map(e => e.sourceId));
+    const activeIds = new Set(
+        state.gameManagement.modifiers.filter(m => m.state === 'active').map(m => m.id),
+    );
 
     const matched = VISUAL_CONSEQUENCES.filter(entry => conditionMet(entry.condition, state, activeIds));
 

@@ -5,27 +5,24 @@ import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
 import { GAMESTATE } from "../Constants/GameState";
 import type { Difficulty } from "../Constants/GameState";
-import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } from "../Utils/Math";
+import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
-import type { EndCause, GameState, GameStats, ShopItemId } from "../types/GameState";
+import type { EndCause, GameState, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
-import { WEIRD_LAWS } from "../assets/weirdLaws";
-import { handleDecision, handleRelations, applyBudgetEffects } from "./EffectHandler";
+import { handleDecision, handleRelations } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
 import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import { PERIODIC_EVENTS } from "../assets/periodicEvents";
 import { MINI_CHALLENGES } from "../assets/miniChallenges";
 import i18n from '../i18n';
 import type { Power, MeetActionType } from "../types/Power";
-import { getRandomDailyEvent } from "./DailyEventHandler";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
-import { getGameDate } from "../Utils/GameDate";
-import { filterLawPool, getRepealTier } from "./RecurringHandler";
-import { checkCoup } from "./CoupHandler";
+import { filterLawPool } from "./RecurringHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, countModifiersByType } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, countModifiersByType, computeRepealTier } from "../Utils/Modifiers";
+import { buildWeirdLawModifier, getModifierContent } from "../assets/modifierContent";
 import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 import { buildStartState, buildLoadedState } from "./StateFactory";
@@ -193,7 +190,7 @@ export const INITIAL_STATE = ({ set, get }: {
             set((state) => {
                 const updatedLaws = new Set(state.law.interactedWithLaws);
                 const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
-                    const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
+                    const lawPool = filterLawPool(LAWS, state.gameManagement.modifiers);
                     if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
                         return getRandomUniqueItemForPower(lawPool, usedLaws, 'people') ?? getRandomUniqueItem(lawPool, usedLaws);
                     }
@@ -240,22 +237,19 @@ export const INITIAL_STATE = ({ set, get }: {
                         GAMESTATE.CHARISMA.MIN,
                         GAMESTATE.CHARISMA.MAX
                     );
-                    const weirdEntry = {
-                        sourceId: `weird-law-${current.id}`,
-                        sourceType: 'weird-law' as const,
-                        sourceFaction: 'people' as const,
-                        label: `laws.weird.${current.id}.label`,
-                        incomeBonus: 0,
-                        expenseBonus: 0,
-                        roundActivated: round,
-                    };
+                    // Weird-law ledger/slot modifier — effects above are immediate base
+                    // mutations (ADR-0008 class A); this entry enforces the "one weird law
+                    // active" slot, drives Street View, and is a repealable ledger entry.
+                    const weirdMod = buildWeirdLawModifier(current.id, round);
                     set((s) => ({
                         budget: { ...s.budget, treasury: newTreasury },
                         relations: { ...s.relations, current: newRelations },
                         gameManagement: {
                             ...s.gameManagement,
                             charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                            activeRecurringEffects: [...s.gameManagement.activeRecurringEffects, weirdEntry],
+                            modifiers: s.gameManagement.modifiers.some(m => m.id === weirdMod.id && m.state === 'active')
+                                ? s.gameManagement.modifiers
+                                : [...s.gameManagement.modifiers, weirdMod],
                         },
                         law: {
                             ...s.law,
@@ -544,7 +538,6 @@ export const INITIAL_STATE = ({ set, get }: {
         currentRoundExtraExpenses: 0,
         timerStartedAt: null,
         timerPausedAt: null,
-        activeRecurringEffects: [],
         modifiers: [],
         repealTakenThisRound: false,
         coupArmedLastRound: false,
@@ -580,7 +573,7 @@ export const INITIAL_STATE = ({ set, get }: {
         },
         expireTimer: () => {
             const state = get();
-            const financials = calculateRoundFinancials(state.budget, state.gameManagement.activeRecurringEffects);
+            const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, state.gameManagement.round);
 
             // Apply relation/charisma penalty only when meet action was skipped
             if (!state.meet.actionTaken.taken) {
@@ -888,26 +881,30 @@ export const INITIAL_STATE = ({ set, get }: {
                 } : {}),
             }));
         },
-        repeal: (sourceId: string) => {
+        repeal: (modifierId: string) => {
             const state = get();
             const gm = state.gameManagement;
             if (gm.repealTakenThisRound) return;
-            const entry = gm.activeRecurringEffects.find(e => e.sourceId === sourceId);
-            if (!entry) return;
-            const tier = getRepealTier(entry);
+            const mod = gm.modifiers.find(m => m.id === modifierId && m.state === 'active');
+            if (!mod) return;
+            // Tier from the modifier's economic magnitude, frozen at acquisition (ADR-0008 §8 / Story 6-4).
+            const tier = computeRepealTier(mod.mods);
             const cost = GAMESTATE.REPEAL_COST[tier].treasury;
             if (state.budget.treasury < cost) return;
-            // Weird-law entries have no proposing faction — skip the relation penalty.
-            const isWeirdLaw = entry.sourceType === 'weird-law';
-            const relationPenalty = isWeirdLaw ? 0 : GAMESTATE.REPEAL_COST[tier].relation;
-            const newRelation = isWeirdLaw
-                ? state.relations.current[entry.sourceFaction]
-                : handleRelations({
-                    power: entry.sourceFaction,
-                    amount: relationPenalty,
-                    current: state.relations.current[entry.sourceFaction],
-                    round: state.gameManagement.round,
-                });
+            // Faction is content (looked up by id from the law/deal pool). Weird laws
+            // have no proposing faction → no relation penalty.
+            const faction = mod.type === 'weird-law' ? null : getModifierContent(modifierId)?.faction ?? null;
+            const repealedRelations = faction
+                ? {
+                    ...state.relations.current,
+                    [faction]: handleRelations({
+                        power: faction,
+                        amount: GAMESTATE.REPEAL_COST[tier].relation,
+                        current: state.relations.current[faction],
+                        round: state.gameManagement.round,
+                    }),
+                }
+                : state.relations.current;
             // Bankruptcy check folded into the same set() — single atomic
             // multi-slice update per ADR-0002 (no mid-update render of a
             // zero-treasury state without the lose phase).
@@ -915,17 +912,17 @@ export const INITIAL_STATE = ({ set, get }: {
             const bankrupt = newTreasury <= 0;
             set((s) => ({
                 budget: { ...s.budget, treasury: newTreasury },
-                relations: {
-                    ...s.relations,
-                    current: { ...s.relations.current, [entry.sourceFaction]: newRelation },
-                },
+                relations: { ...s.relations, current: repealedRelations },
                 stats: {
                     ...s.stats,
                     repealCount: s.stats.repealCount + 1,
                 },
                 gameManagement: {
                     ...s.gameManagement,
-                    activeRecurringEffects: s.gameManagement.activeRecurringEffects.filter(e => e.sourceId !== sourceId),
+                    // Flip to 'rejected' — retained as ledger history, no longer summed (ADR-0008 §4).
+                    modifiers: s.gameManagement.modifiers.map(m =>
+                        m.id === modifierId && m.state === 'active' ? { ...m, state: 'rejected' as const } : m,
+                    ),
                     repealTakenThisRound: true,
                     ...(bankrupt ? {
                         phase: 'lose' as const,

@@ -1,78 +1,68 @@
 import { describe, it, expect } from 'vitest';
-import type { ActiveRecurringEffect } from '../types/GameState';
 import type { Law } from '../types/Law';
 import type { Deal } from '../types/Deal';
+import { buildRecurringModifier, buildWeirdLawModifier } from '../assets/modifierContent';
 
 /**
- * Story 2-1: Recurring effect types and store shape.
+ * Recurring-effect data model (ADR-0008 P2 — formerly Story 2-1's ActiveRecurringEffect).
  *
- * These tests verify:
- *  - ActiveRecurringEffect objects can be constructed with the correct shape
+ * Verifies:
+ *  - recurring law/deal effects build correctly shaped roundIncome/roundExpense modifiers
  *  - Law and Deal types accept an optional recurringEffect field
- *  - The documented initial / default values match the spec
- *
- * Store initial-value correctness (AC-2 through AC-4) is additionally confirmed
- * by the full test suite passing after the type changes (AC-5).
+ *  - weird-law modifiers are ledger/slot markers (no economic mods)
  */
 
-describe('ActiveRecurringEffect type shape', () => {
-    it('accepts all required fields', () => {
-        const effect: ActiveRecurringEffect = {
-            sourceId: 'law-gambling',
-            sourceType: 'law',
-            sourceFaction: 'business',
-            label: 'laws.recurring.gambling_income',
-            incomeBonus: 25,
-            expenseBonus: 0,
-            roundActivated: 1,
+describe('buildRecurringModifier — modifier shape', () => {
+    it('income law → permanent roundIncome modifier with namespaced id', () => {
+        const law: Law = {
+            id: 39,
+            power: 'business',
+            acceptEffect: {},
+            rejectEffect: {},
+            recurringEffect: { incomeBonus: 25, label: 'laws.recurring.gambling_income' },
         };
+        const mod = buildRecurringModifier(law, 'law', 4)!;
 
-        expect(effect.sourceId).toBe('law-gambling');
-        expect(effect.sourceType).toBe('law');
-        expect(effect.sourceFaction).toBe('business');
-        expect(effect.incomeBonus).toBe(25);
-        expect(effect.expenseBonus).toBe(0);
-        expect(effect.roundActivated).toBe(1);
+        expect(mod.id).toBe('laws.39');
+        expect(mod.type).toBe('law-recurring');
+        expect(mod.state).toBe('active');
+        expect(mod.acquiredRound).toBe(4);
+        expect(mod.mods).toEqual([
+            { stat: 'roundIncome', amount: 25, window: { startRound: 4, endRound: null } },
+        ]);
     });
 
-    it('accepts deal and opportunity sourceTypes', () => {
-        const dealEffect: ActiveRecurringEffect = {
-            sourceId: 'deal-foreign-investment',
-            sourceType: 'deal',
-            sourceFaction: 'business',
-            label: 'deals.recurring.foreign_investment',
-            incomeBonus: 15,
-            expenseBonus: 0,
-            roundActivated: 3,
+    it('expense deal → permanent roundExpense modifier under the deals namespace', () => {
+        const deal: Deal = {
+            id: 17,
+            text: 'x', acceptText: 'x', rejectText: 'x',
+            acceptEffect: {}, rejectEffect: {},
+            power: 'military',
+            recurringEffect: { expenseBonus: 15, label: 'deals.recurring.arms_cost' },
         };
+        const mod = buildRecurringModifier(deal, 'deal', 2)!;
 
-        const opportunityEffect: ActiveRecurringEffect = {
-            sourceId: 'opp-1',
-            sourceType: 'opportunity',
-            sourceFaction: 'military',
-            label: 'opp.recurring.contract',
-            incomeBonus: 0,
-            expenseBonus: 8,
-            roundActivated: 5,
-        };
-
-        expect(dealEffect.sourceType).toBe('deal');
-        expect(opportunityEffect.sourceType).toBe('opportunity');
+        expect(mod.id).toBe('deals.17');
+        expect(mod.type).toBe('deal');
+        expect(mod.mods).toEqual([
+            { stat: 'roundExpense', amount: 15, window: { startRound: 2, endRound: null } },
+        ]);
     });
 
-    it('expense-only effect has incomeBonus 0', () => {
-        const expenseEffect: ActiveRecurringEffect = {
-            sourceId: 'law-housing',
-            sourceType: 'law',
-            sourceFaction: 'people',
-            label: 'laws.recurring.housing_cost',
-            incomeBonus: 0,
-            expenseBonus: 15,
-            roundActivated: 2,
-        };
+    it('returns null when the item carries no recurringEffect', () => {
+        const law: Law = { id: 1, power: 'military', acceptEffect: {}, rejectEffect: {} };
+        expect(buildRecurringModifier(law, 'law', 1)).toBeNull();
+    });
+});
 
-        expect(expenseEffect.incomeBonus).toBe(0);
-        expect(expenseEffect.expenseBonus).toBe(15);
+describe('buildWeirdLawModifier — ledger/slot marker', () => {
+    it('carries no economic mods (effects applied as base mutations on accept)', () => {
+        const mod = buildWeirdLawModifier(1001, 5);
+        expect(mod.id).toBe('weird.1001');
+        expect(mod.type).toBe('weird-law');
+        expect(mod.state).toBe('active');
+        expect(mod.acquiredRound).toBe(5);
+        expect(mod.mods).toEqual([]);
     });
 });
 
@@ -84,7 +74,6 @@ describe('Law type — recurringEffect field (AC-1)', () => {
             acceptEffect: { military: 1 },
             rejectEffect: { military: -1 },
         };
-
         expect(law.recurringEffect).toBeUndefined();
     });
 
@@ -94,97 +83,26 @@ describe('Law type — recurringEffect field (AC-1)', () => {
             power: 'business',
             acceptEffect: { business: 1, people: -2 },
             rejectEffect: {},
-            recurringEffect: {
-                incomeBonus: 25,
-                label: 'laws.recurring.gambling_income',
-            },
+            recurringEffect: { incomeBonus: 25, label: 'laws.recurring.gambling_income' },
         };
-
-        expect(law.recurringEffect).toBeDefined();
         expect(law.recurringEffect?.incomeBonus).toBe(25);
-        expect(law.recurringEffect?.label).toBe('laws.recurring.gambling_income');
         expect(law.recurringEffect?.expenseBonus).toBeUndefined();
-    });
-
-    it('accepts a law with recurringEffect — expense', () => {
-        const law: Law = {
-            id: 16,
-            power: 'people',
-            acceptEffect: { people: 2, treasury: -30 },
-            rejectEffect: {},
-            recurringEffect: {
-                expenseBonus: 15,
-                label: 'laws.recurring.housing_cost',
-            },
-        };
-
-        expect(law.recurringEffect?.expenseBonus).toBe(15);
-        expect(law.recurringEffect?.incomeBonus).toBeUndefined();
     });
 });
 
 describe('Deal type — recurringEffect field (AC-1)', () => {
-    it('accepts a deal without recurringEffect', () => {
-        const deal: Deal = {
-            id: 1,
-            text: 'deal.text',
-            acceptText: 'deal.accept',
-            rejectText: 'deal.reject',
-            acceptEffect: { treasury: 40 },
-            rejectEffect: {},
-        };
-
-        expect(deal.recurringEffect).toBeUndefined();
-    });
-
     it('accepts a deal with recurringEffect', () => {
         const deal: Deal = {
             id: 9,
-            text: 'deal.foreign_investment.text',
-            acceptText: 'deal.foreign_investment.accept',
-            rejectText: 'deal.foreign_investment.reject',
+            text: 'deal.text',
+            acceptText: 'deal.accept',
+            rejectText: 'deal.reject',
             acceptEffect: { treasury: 40, business: 1 },
             rejectEffect: {},
-            recurringEffect: {
-                incomeBonus: 15,
-                label: 'deals.recurring.foreign_investment',
-            },
+            power: 'business',
+            recurringEffect: { incomeBonus: 15, label: 'deals.recurring.foreign_investment' },
         };
-
         expect(deal.recurringEffect?.incomeBonus).toBe(15);
         expect(deal.recurringEffect?.label).toBe('deals.recurring.foreign_investment');
-    });
-});
-
-describe('Store initial values spec (AC-2 through AC-4)', () => {
-    /**
-     * These tests document the required initial values as specified in story 2-1.
-     * The Zustand store (GameState.ts) initialises gameManagement with these exact values.
-     * Verified by: (a) TypeScript type correctness, (b) the full test suite passing (AC-5).
-     */
-
-    it('activeRecurringEffects initial value is an empty array', () => {
-        // Spec: activeRecurringEffects: [] as ActiveRecurringEffect[]
-        const initial: ActiveRecurringEffect[] = [];
-        expect(initial).toHaveLength(0);
-        expect(Array.isArray(initial)).toBe(true);
-    });
-
-    it('repealTakenThisRound initial value is false', () => {
-        // Spec: repealTakenThisRound: false
-        const initial = false;
-        expect(initial).toBe(false);
-    });
-
-    it('lastRoundRecurringIncome initial value is 0', () => {
-        // Spec: lastRoundRecurringIncome: 0
-        const initial = 0;
-        expect(initial).toBe(0);
-    });
-
-    it('lastRoundRecurringExpenses initial value is 0', () => {
-        // Spec: lastRoundRecurringExpenses: 0
-        const initial = 0;
-        expect(initial).toBe(0);
     });
 });

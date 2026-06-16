@@ -12,8 +12,9 @@ import { useGameStore } from '../../Stores/GameState'
 import { getGameDate } from '../../Utils/GameDate'
 import { useMemo, useState } from 'react'
 import { dumbifyText } from '../../Utils/String'
-import type { ActiveRecurringEffect } from '../../types/GameState'
-import { getRepealTier } from '../../Stores/RecurringHandler'
+import type { Modifier } from '../../types/GameState'
+import { computeRepealTier, sumModifiers } from '../../Utils/Modifiers'
+import { getModifierContent, isRepealable } from '../../assets/modifierContent'
 import { GAMESTATE } from '../../Constants/GameState'
 
 // ---------------------------------------------------------------------------
@@ -21,19 +22,19 @@ import { GAMESTATE } from '../../Constants/GameState'
 // ---------------------------------------------------------------------------
 
 interface RepealCardProps {
-    entry: ActiveRecurringEffect;
+    mod: Modifier;
     treasury: number;
     repealTakenThisRound: boolean;
-    repeal: (sourceId: string) => void;
+    repeal: (modifierId: string) => void;
 }
 
-const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCardProps) => {
+const RepealCard = ({ mod, treasury, repealTakenThisRound, repeal }: RepealCardProps) => {
     const { t } = useTranslation()
     const { t: lawsT } = useTranslation('laws')
     const { t: dealsT } = useTranslation('deals')
     const [confirming, setConfirming] = useState(false)
 
-    const tier = getRepealTier(entry)
+    const tier = computeRepealTier(mod.mods)
     const cost = GAMESTATE.REPEAL_COST[tier]
     const canAfford = treasury >= cost.treasury
     const isDisabled = repealTakenThisRound || !canAfford
@@ -44,12 +45,19 @@ const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCar
             ? t('log.repeal_disabled_funds')
             : undefined
 
-    const effectIsIncome = entry.incomeBonus > 0
+    // Economic contribution + display content are looked up from the modifier and
+    // its content asset (ADR-0008 §4 — no content stored on the engine instance).
+    const income = sumModifiers([mod], 'roundIncome', mod.acquiredRound)
+    const expense = sumModifiers([mod], 'roundExpense', mod.acquiredRound)
+    const hasEffect = income > 0 || expense > 0
+    const effectIsIncome = income > 0
     const effectLabel = effectIsIncome
-        ? t('log.repeal_effect_income', { amount: entry.incomeBonus })
-        : t('log.repeal_effect_expense', { amount: entry.expenseBonus })
+        ? t('log.repeal_effect_income', { amount: income })
+        : t('log.repeal_effect_expense', { amount: expense })
 
-    const lawLabel = entry.label.startsWith('deals.') ? dealsT(entry.label) : lawsT(entry.label)
+    const content = getModifierContent(mod.id)
+    const labelKey = content?.label ?? mod.id
+    const lawLabel = labelKey.startsWith('deals.') ? dealsT(labelKey) : lawsT(labelKey)
 
     const handleRepealClick = () => {
         if (isDisabled) return
@@ -57,7 +65,7 @@ const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCar
     }
 
     const handleConfirm = () => {
-        repeal(entry.sourceId)
+        repeal(mod.id)
         setConfirming(false)
     }
 
@@ -81,21 +89,25 @@ const RepealCard = ({ entry, treasury, repealTakenThisRound, repeal }: RepealCar
             </div>
 
             <span className={styles.repealCardMeta}>
-                {t('log.repeal_activated_round', { round: entry.roundActivated })}
+                {t('log.repeal_activated_round', { round: mod.acquiredRound })}
             </span>
 
-            <span className={clsx(styles.repealCardEffect, effectIsIncome ? styles.income : styles.expense)}>
-                {effectLabel}
-            </span>
+            {hasEffect && (
+                <span className={clsx(styles.repealCardEffect, effectIsIncome ? styles.income : styles.expense)}>
+                    {effectLabel}
+                </span>
+            )}
 
             {confirming && (
                 <div className={styles.repealConfirmPanel}>
                     <span className={styles.repealConfirmCost}>
-                        {t('log.repeal_cost', {
-                            treasury: cost.treasury,
-                            relation: cost.relation,
-                            faction: t(`power.${entry.sourceFaction}`),
-                        })}
+                        {content?.faction
+                            ? t('log.repeal_cost', {
+                                treasury: cost.treasury,
+                                relation: cost.relation,
+                                faction: t(`power.${content.faction}`),
+                            })
+                            : t('log.repeal_cost_no_faction', { treasury: cost.treasury })}
                     </span>
                     <div className={styles.repealConfirmButtons}>
                         <Button onClick={handleConfirm}>
@@ -126,7 +138,7 @@ const Log = ({ isActive }: TabProps) => {
     const round = useGameStore((s) => s.gameManagement.round)
     const dailyEventKey = useGameStore((s) => s.dailyEvent.current?.key)
     const dumbScore = useGameStore((s) => s.gameManagement.dumbScore)
-    const activeRecurringEffects = useGameStore((s) => s.gameManagement.activeRecurringEffects)
+    const modifiers = useGameStore((s) => s.gameManagement.modifiers)
     const repealTakenThisRound = useGameStore((s) => s.gameManagement.repealTakenThisRound)
     const treasury = useGameStore((s) => s.budget.treasury)
     const repeal = useGameStore((s) => s.gameManagement.repeal)
@@ -209,20 +221,24 @@ const Log = ({ isActive }: TabProps) => {
                 )}
 
                 {/* --- Active Legislation Section --- */}
-                {activeRecurringEffects.length > 0 && (
-                    <section className={styles.activeLegislation}>
-                        <h3>{t('log.active_legislation')}</h3>
-                        {activeRecurringEffects.map(entry => (
-                            <RepealCard
-                                key={entry.sourceId}
-                                entry={entry}
-                                treasury={treasury}
-                                repealTakenThisRound={repealTakenThisRound}
-                                repeal={repeal}
-                            />
-                        ))}
-                    </section>
-                )}
+                {(() => {
+                    const repealable = modifiers.filter(m => m.state === 'active' && isRepealable(m))
+                    if (repealable.length === 0) return null
+                    return (
+                        <section className={styles.activeLegislation}>
+                            <h3>{t('log.active_legislation')}</h3>
+                            {repealable.map(mod => (
+                                <RepealCard
+                                    key={mod.id}
+                                    mod={mod}
+                                    treasury={treasury}
+                                    repealTakenThisRound={repealTakenThisRound}
+                                    repeal={repeal}
+                                />
+                            ))}
+                        </section>
+                    )
+                })()}
 
                 <Typography variant='h2'>{t('log.today')}</Typography>
                 <Newspaper headline={dailyEventHeadline} date={getGameDate(round)} />

@@ -14,6 +14,7 @@ import type { Power } from "../types/Power";
 import { getRandomDailyEvent } from "./DailyEventHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { normalizeModifier } from "../Utils/Modifiers";
+import { migrateLegacyEffect } from "../assets/modifierContent";
 
 /** Full new-game reset patch (setPhase('start')). Draws the first law/deal. */
 export function buildStartState(state: GameState, difficulty?: Difficulty): Partial<GameState> {
@@ -54,7 +55,6 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             currentRoundExtraExpenses: 0,
             lastRoundRecurringIncome: 0,
             lastRoundRecurringExpenses: 0,
-            activeRecurringEffects: [],
             modifiers: [],
             repealTakenThisRound: false,
             coupArmedLastRound: false,
@@ -119,7 +119,19 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
     const savedDealId = (savedDeals.current as Record<string, unknown> | null)?.id;
     const restoredDeal = typeof savedDealId === 'number' ? (DEALS.find(d => d.id === savedDealId) ?? null) : null;
 
-    const loadedModifiers = ((gm.modifiers as unknown[]) ?? []).map(normalizeModifier);
+    // Modifiers are the source of truth. One-way migration (ADR-0008 P2): a pre-P2
+    // save carries `activeRecurringEffects` and no/empty `modifiers` — convert each
+    // legacy entry into a permanent roundIncome/roundExpense modifier so income,
+    // the weird-law slot, and repeal keep working identically.
+    const savedModifiers = ((gm.modifiers as unknown[]) ?? []).map(normalizeModifier);
+    const legacyEffects = (gm.activeRecurringEffects as Parameters<typeof migrateLegacyEffect>[0][]) ?? [];
+    const migratedModifiers = savedModifiers.length === 0 && legacyEffects.length > 0
+        ? legacyEffects.map(migrateLegacyEffect)
+        : [];
+    if (migratedModifiers.length > 0) {
+        console.info(`Migrated ${migratedModifiers.length} legacy recurring effect(s) to modifiers (ADR-0008 P2).`);
+    }
+    const loadedModifiers = [...savedModifiers, ...migratedModifiers];
 
     return {
         gameManagement: {
@@ -133,7 +145,6 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
             lastRoundExpenses: (gm.lastRoundExpenses as number) ?? 0,
             lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,
             lastRoundRecurringExpenses: (gm.lastRoundRecurringExpenses as number) ?? 0,
-            activeRecurringEffects: (gm.activeRecurringEffects as GameState['gameManagement']['activeRecurringEffects']) ?? [],
             modifiers: loadedModifiers,
             repealTakenThisRound: (gm.repealTakenThisRound as boolean) ?? false,
             coupArmedLastRound: (gm.coupArmedLastRound as boolean) ?? false,

@@ -64,6 +64,7 @@
         "repeal_confirm": "Confirmar derogación",
         "repeal_cancel": "Cancelar",
         "repeal_cost": "Costo: {{treasury}} tesoro + {{relation}} relación con {{faction}}",
+        "repeal_cost_no_faction": "Costo: {{treasury}} tesoro",
         "repeal_effect_income": "+{{amount}}m/ronda",
         "repeal_effect_expense": "-{{amount}}m/ronda",
         "repeal_activated_round": "Activa desde la ronda {{round}}",

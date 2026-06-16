@@ -184,19 +184,19 @@ describe('visual consequence stubs for weird deals (Story 5-3)', () => {
     it('test_deal19_visual_stub_exists_with_correct_condition', () => {
         const entry = VISUAL_CONSEQUENCES.find(v => v.id === 'deal-19-tiny-cows');
         expect(entry).toBeDefined();
-        expect(entry?.condition.activeRecurringEffectId).toBe('deal-19');
+        expect(entry?.condition.activeRecurringEffectId).toBe('deals.19');
     });
 
     it('test_deal20_visual_stub_exists', () => {
         const entry = VISUAL_CONSEQUENCES.find(v => v.id === 'deal-20-giant-mouse');
         expect(entry).toBeDefined();
-        expect(entry?.condition.activeRecurringEffectId).toBe('deal-20');
+        expect(entry?.condition.activeRecurringEffectId).toBe('deals.20');
     });
 
     it('test_deal21_visual_stub_exists_with_correct_condition', () => {
         const entry = VISUAL_CONSEQUENCES.find(v => v.id === 'deal-21-pigeon-cameras');
         expect(entry).toBeDefined();
-        expect(entry?.condition.activeRecurringEffectId).toBe('deal-21');
+        expect(entry?.condition.activeRecurringEffectId).toBe('deals.21');
     });
 });
 
@@ -242,7 +242,7 @@ describe('actUponDeal store integration (Story 5-3)', () => {
         expect(useGameStore.getState().gameManagement.charisma.current).toBe(5);
     });
 
-    it('test_accepting_deal19_adds_recurring_entry_to_active_effects', () => {
+    it('test_accepting_deal19_adds_recurring_modifier', () => {
         const deal19 = getDeal(19);
 
         useGameStore.setState(s => ({
@@ -252,11 +252,12 @@ describe('actUponDeal store integration (Story 5-3)', () => {
 
         useGameStore.getState().deals.actUponDeal(true);
 
-        const effects = useGameStore.getState().gameManagement.activeRecurringEffects;
-        const entry = effects.find(e => e.sourceId === 'deal-19');
-        expect(entry).toBeDefined();
-        expect(entry?.sourceType).toBe('deal');
-        expect(entry?.incomeBonus).toBe(RECURRING.TINY);
+        const mod = useGameStore.getState().gameManagement.modifiers.find(m => m.id === 'deals.19');
+        expect(mod).toBeDefined();
+        expect(mod?.type).toBe('deal');
+        expect(mod?.mods).toContainEqual(
+            expect.objectContaining({ stat: 'roundIncome', amount: RECURRING.TINY }),
+        );
     });
 
     it('test_accepting_deal19_applies_treasury_and_people_effects', () => {

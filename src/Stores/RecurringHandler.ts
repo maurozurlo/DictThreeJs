@@ -1,85 +1,34 @@
-import type { ActiveRecurringEffect } from "../types/GameState";
 import type { Law } from "../types/Law";
-import type { Deal } from "../types/Deal";
-import type { Power } from "../types/Power";
+import type { Modifier } from "../types/GameState";
 import { RECURRING } from "../Constants/Costs";
-
-/** Repeal tier discriminant — drives treasury and relation cost lookup. */
-export type RepealTier = 'Small' | 'Medium' | 'Large';
+import { lawModifierId } from "../assets/modifierContent";
 
 /**
- * Returns a new effects array with the item's recurring effect activated.
+ * Law-pool filter (ADR-0008 §8). Two exclusions, both driven by the modifiers
+ * array (the single source of truth after P2):
  *
- * - No-op (same array back) when the item has no recurringEffect.
- * - No-op when an entry with the same sourceId already exists (dedup — a law
- *   re-offered after pool reset must not double its effect).
+ *  1. **Re-offer guard** — a law whose `law-recurring` modifier is currently active
+ *     is removed from the pool (`m.id === 'laws.{id}' && state === 'active'`), so an
+ *     active lasting law is never re-offered.
+ *  2. **Income-law cap** — once `maxIncomeLaws` lasting-income laws are active,
+ *     further lasting-income laws are excluded (PRD Feature 1, no-cap mitigation 2).
  *
- * Pure function: never mutates the input array.
- */
-export function withRecurringEffect({
-    effects,
-    item,
-    sourceType,
-    round,
-}: {
-    effects: ActiveRecurringEffect[];
-    item: Law | Deal;
-    sourceType: 'law' | 'deal';
-    round: number;
-}): ActiveRecurringEffect[] {
-    if (!item.recurringEffect) return effects;
-
-    const sourceId = `${sourceType}-${item.id}`;
-    if (effects.some(e => e.sourceId === sourceId)) return effects;
-
-    // Content rule: items carrying a recurringEffect must declare a proposing
-    // faction (Law.power is required; recurring Deals must set power too).
-    const sourceFaction: Power = item.power ?? 'people';
-
-    return [
-        ...effects,
-        {
-            sourceId,
-            sourceType,
-            sourceFaction,
-            label: item.recurringEffect.label,
-            incomeBonus: item.recurringEffect.incomeBonus ?? 0,
-            expenseBonus: item.recurringEffect.expenseBonus ?? 0,
-            roundActivated: round,
-        },
-    ];
-}
-
-/**
- * Derives the repeal cost tier for a recurring effect entry.
- *
- * Tier is driven by the larger of the two bonus fields:
- *   - ≤ 8  → Small  (15 treasury / −2 relation)
- *   - ≤ 15 → Medium (25 treasury / −2 relation)
- *   - > 15 → Large  (40 treasury / −3 relation)
- *
- * Pure function: does not access the store.
- */
-export function getRepealTier(entry: ActiveRecurringEffect): RepealTier {
-    const amount = Math.max(entry.incomeBonus, entry.expenseBonus);
-    if (amount <= 8) return 'Small';
-    if (amount <= 15) return 'Medium';
-    return 'Large';
-}
-
-/**
- * Pool weighting (PRD Feature 1, no-cap mitigation 2): once `maxIncomeLaws`
- * lasting-income laws are active, further lasting-income laws are excluded
- * from the candidate pool. Runs at pool-generation time, not render time.
- *
- * Pure function: returns the input array unchanged while under the cap.
+ * Pure function: returns a filtered copy; never mutates the inputs.
  */
 export function filterLawPool(
     laws: Law[],
-    effects: ActiveRecurringEffect[],
+    modifiers: Modifier[],
     maxIncomeLaws: number = RECURRING.MAX_INCOME_LAWS_PER_RUN,
 ): Law[] {
-    const activeIncomeLaws = effects.filter(e => e.sourceType === 'law' && e.incomeBonus > 0).length;
-    if (activeIncomeLaws < maxIncomeLaws) return laws;
-    return laws.filter(law => (law.recurringEffect?.incomeBonus ?? 0) <= 0);
+    const activeRecurringLaws = modifiers.filter(m => m.type === 'law-recurring' && m.state === 'active');
+    const activeLawIds = new Set(activeRecurringLaws.map(m => m.id));
+    const activeIncomeLaws = activeRecurringLaws.filter(
+        m => m.mods.some(sm => sm.stat === 'roundIncome' && sm.amount > 0),
+    ).length;
+
+    const underCap = activeIncomeLaws < maxIncomeLaws
+        ? laws
+        : laws.filter(law => (law.recurringEffect?.incomeBonus ?? 0) <= 0);
+
+    return underCap.filter(law => !activeLawIds.has(lawModifierId(law.id)));
 }

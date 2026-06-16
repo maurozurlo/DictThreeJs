@@ -3,14 +3,15 @@
 ## Header
 - **Story ID**: 6-2
 - **Sprint**: 6
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Integration
 - **Layer**: Foundation
 - **TR-ID**: TR-mod-001, TR-mod-005, TR-mod-006, TR-deals-002
 - **Governing ADR**: docs/architecture/adr-0008-timed-modifier-engine.md
 - **Manifest Version**: 2026-06-13
 - **Estimate**: 2.0 days
-- **Last Updated**: 2026-06-15
+- **Last Updated**: 2026-06-16
+- **Completed**: 2026-06-16
 
 ## Summary
 
@@ -23,17 +24,17 @@ The Active-Legislation UI renders from the modifiers array.
 
 ## Acceptance Criteria
 
-- [ ] `ActiveRecurringEffect` type removed (or deprecated + unused); `activeRecurringEffects` field removed from `gameManagement` store slice
-- [ ] All deal/law recurring income/expense create `Modifier` entries with `roundIncome`/`roundExpense` `ResolvedStatMod`s at acceptance
-- [ ] `nextRound()` computes `roundIncome = sumModifiers(mods,'roundIncome',resolvingRound)`, banks into treasury, writes `lastRoundRecurringIncome`, accumulates `stats.totalRecurringIncomeEarned` — **parity** with pre-migration totals
-- [ ] Weird-law "one active" slot enforced via `modifiers.findIndex(m => m.type === 'weird-law' && m.state === 'active') !== -1`
-- [ ] `filterLawPool` excludes laws whose `law-recurring` modifier id is active: `modifiers.some(m => m.type === 'law-recurring' && m.id === \`laws.${law.id}\` && m.state === 'active')`
-- [ ] Repeal flips `state` to `'rejected'` (entry retained as ledger); relation penalty applies to the **proposing faction's base** relation, looked up from the content pool via `modifier.id`
-- [ ] Repeal tier computed from formula defined in 6-4
-- [ ] Active-Legislation UI renders from `modifiers.filter(m => m.state === 'active' && isRepealable(m))`
-- [ ] Save migration: a save with `activeRecurringEffects` is loaded and converted to modifiers; missing `modifiers` field defaults to `?? []`; round-trip save/load preserves all modifier state
-- [ ] Dedup: re-encountering the same law/deal id while its modifier is `active` no-ops (does not push a second entry)
-- [ ] Full test suite green; tsc clean; no regression on income/repeal behaviour
+- [x] `ActiveRecurringEffect` type removed (or deprecated + unused); `activeRecurringEffects` field removed from `gameManagement` store slice
+- [x] All deal/law recurring income/expense create `Modifier` entries with `roundIncome`/`roundExpense` `ResolvedStatMod`s at acceptance
+- [x] `nextRound()` computes `roundIncome = sumModifiers(mods,'roundIncome',resolvingRound)`, banks into treasury, writes `lastRoundRecurringIncome`, accumulates `stats.totalRecurringIncomeEarned` — **parity** with pre-migration totals
+- [x] Weird-law "one active" slot enforced via `modifiers.findIndex(m => m.type === 'weird-law' && m.state === 'active') !== -1`
+- [x] `filterLawPool` excludes laws whose `law-recurring` modifier id is active: `modifiers.some(m => m.type === 'law-recurring' && m.id === \`laws.${law.id}\` && m.state === 'active')`
+- [x] Repeal flips `state` to `'rejected'` (entry retained as ledger); relation penalty applies to the **proposing faction's base** relation, looked up from the content pool via `modifier.id`
+- [x] Repeal tier computed from formula defined in 6-4
+- [x] Active-Legislation UI renders from `modifiers.filter(m => m.state === 'active' && isRepealable(m))`
+- [x] Save migration: a save with `activeRecurringEffects` is loaded and converted to modifiers; missing `modifiers` field defaults to `?? []`; round-trip save/load preserves all modifier state
+- [x] Dedup: re-encountering the same law/deal id while its modifier is `active` no-ops (does not push a second entry)
+- [x] Full test suite green; tsc clean; no regression on income/repeal behaviour
 
 ## Implementation Notes
 
@@ -101,8 +102,8 @@ The Active-Legislation UI renders from the modifiers array.
 ## Test Evidence
 
 - **Story Type**: Integration
-- **Required evidence**: `tests/integration/modifiers/recurring_migration_test.ts` — must exist and pass; no regression on `tests/unit/laws/weird_laws.test.ts` or income accounting tests
-- **Status**: [ ] Not yet created
+- **Required evidence**: `tests/integration/modifiers/recurring_migration.test.ts` — exists and passes (7 cases: income parity, roundExpense netting, weird-law slot, law-pool filter, repeal flips state, dedup, legacy migration round-trip); no regression on `tests/unit/laws/weird_laws.test.ts` or income-accounting tests
+- **Status**: [x] Created and passing — renamed to `.test.ts` (the repo/vitest glob convention; `_test.ts` is not collected)
 
 ## Dependencies
 

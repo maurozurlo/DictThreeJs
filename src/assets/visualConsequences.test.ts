@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { getActiveVisualConsequences, VISUAL_CONSEQUENCES } from './visualConsequences';
-import type { GameState, ActiveRecurringEffect } from '../types/GameState';
+import type { GameState, Modifier } from '../types/GameState';
 import type { Power } from '../types/Power';
 
 /**
- * Story 2-9: Visual Consequence Registry — pure evaluator (TR-lasting-009).
+ * Visual Consequence Registry — pure evaluator (TR-lasting-009, formerly Story 2-9).
  *
- * getActiveVisualConsequences only reads relations.current, budget.expenditures,
- * gameManagement.round and gameManagement.activeRecurringEffects, so the factory
+ * getActiveVisualConsequences reads relations.current, budget.expenditures,
+ * gameManagement.round and the active modifier ids (ADR-0008 P2), so the factory
  * builds just that slice and casts (same pattern as ActionHandler.test.ts).
  */
 
@@ -15,10 +15,18 @@ type StateOverrides = {
     relations?: Partial<Record<Power, number>>;
     expenditures?: Partial<Record<'health' | 'infrastructure' | 'security' | 'education', number>>;
     round?: number;
-    activeEffects?: Array<Partial<ActiveRecurringEffect> & { sourceId: string }>;
+    /** Namespaced ids of active modifiers (e.g. 'laws.39', 'deals.19', 'weird.1001'). */
+    modifierIds?: string[];
 };
 
 function makeState(overrides: StateOverrides = {}): GameState {
+    const modifiers: Modifier[] = (overrides.modifierIds ?? []).map(id => ({
+        id,
+        type: 'law-recurring',
+        state: 'active',
+        acquiredRound: 1,
+        mods: [],
+    }));
     return {
         relations: {
             current: { military: 0, business: 0, people: 0, ...overrides.relations },
@@ -29,15 +37,7 @@ function makeState(overrides: StateOverrides = {}): GameState {
         },
         gameManagement: {
             round: overrides.round ?? 1,
-            activeRecurringEffects: (overrides.activeEffects ?? []).map(e => ({
-                sourceType: 'law',
-                sourceFaction: 'business',
-                label: 'laws.recurring.test',
-                incomeBonus: 0,
-                expenseBonus: 0,
-                roundActivated: 1,
-                ...e,
-            })),
+            modifiers,
         },
     } as unknown as GameState;
 }
@@ -75,22 +75,22 @@ describe('getActiveVisualConsequences', () => {
         expect(getActiveVisualConsequences(makeState())).toEqual([]);
     });
 
-    // AC-3: activeRecurringEffectId condition
-    it('includes casino-sign when the gambling law recurring effect is active (AC-3)', () => {
-        const state = makeState({ activeEffects: [{ sourceId: 'law-39' }] });
+    // AC-3: active modifier id condition
+    it('includes casino-sign when the gambling law modifier is active (AC-3)', () => {
+        const state = makeState({ modifierIds: ['laws.39'] });
         expect(resultIds(state)).toContain('casino-sign');
     });
 
-    it('does not include casino-sign for a different active sourceId', () => {
-        const state = makeState({ activeEffects: [{ sourceId: 'law-40' }] });
+    it('does not include casino-sign for a different active modifier id', () => {
+        const state = makeState({ modifierIds: ['laws.40'] });
         expect(resultIds(state)).not.toContain('casino-sign');
     });
 
     // AC-4: Exclusive replacement — public-housing-blocks removes dilapidated-buildings
     it('removes dilapidated-buildings when public-housing-blocks is also active (AC-4)', () => {
         const state = makeState({
-            expenditures: { infrastructure: 1 },           // dilapidated condition met
-            activeEffects: [{ sourceId: 'law-40' }],        // public-housing condition met
+            expenditures: { infrastructure: 1 },     // dilapidated condition met
+            modifierIds: ['laws.40'],                // public-housing condition met
         });
         const ids = resultIds(state);
         expect(ids).toContain('public-housing-blocks');
@@ -106,7 +106,7 @@ describe('getActiveVisualConsequences', () => {
     it('returns both military-checkpoint and casino-sign when both conditions hold (AC-5)', () => {
         const state = makeState({
             expenditures: { security: 8 },
-            activeEffects: [{ sourceId: 'law-39' }],
+            modifierIds: ['laws.39'],
         });
         const ids = resultIds(state);
         expect(ids).toContain('military-checkpoint');
@@ -123,6 +123,12 @@ describe('getActiveVisualConsequences', () => {
     it('does not include faction-coup-crown when all relations are below +6', () => {
         const state = makeState({ relations: { military: 5, business: 5, people: 5 } });
         expect(resultIds(state)).not.toContain('faction-coup-crown');
+    });
+
+    // weird-law and deal modifier ids drive their stub entries
+    it('includes the cemeteries stub when its weird-law modifier is active', () => {
+        const state = makeState({ modifierIds: ['weird.1001'] });
+        expect(resultIds(state)).toContain('weird-cemeteries');
     });
 
     // Purity: evaluator does not mutate state or the registry

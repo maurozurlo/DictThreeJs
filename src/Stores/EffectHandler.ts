@@ -6,7 +6,7 @@ import { Clamp, getRandomFromList, rollChance } from "../Utils/Math";
 import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
 import type { Expenditures, Taxes } from "../types/Budget";
-import { withRecurringEffect } from "./RecurringHandler";
+import { buildRecurringModifier } from "../assets/modifierContent";
 import { applyGraceDampening } from "../Utils/GracePeriod";
 
 export type BudgetEffectResult = {
@@ -141,15 +141,16 @@ export function handleDecision({
         GAMESTATE.CHARISMA.MAX
     );
 
-    // Activate the item's recurring effect on acceptance (deduped by sourceId)
-    const newActiveRecurringEffects = hasAccepted
-        ? withRecurringEffect({
-            effects: state.gameManagement.activeRecurringEffects,
-            item,
-            sourceType: type,
-            round: state.gameManagement.round,
-        })
-        : state.gameManagement.activeRecurringEffects;
+    // Activate the item's recurring effect on acceptance as a roundIncome/roundExpense
+    // modifier (ADR-0008 §8). Deduped by id: re-encountering a law/deal whose modifier
+    // is already active no-ops (preserving the unique-pool behaviour).
+    const recurringMod = hasAccepted
+        ? buildRecurringModifier(item, type, state.gameManagement.round)
+        : null;
+    const newModifiers = recurringMod
+        && !state.gameManagement.modifiers.some(m => m.id === recurringMod.id && m.state === 'active')
+        ? [...state.gameManagement.modifiers, recurringMod]
+        : state.gameManagement.modifiers;
 
     // Shared state update
     const baseUpdate = {
@@ -158,7 +159,7 @@ export function handleDecision({
         gameManagement: {
             ...state.gameManagement,
             charisma: { ...state.gameManagement.charisma, current: newCharisma },
-            activeRecurringEffects: newActiveRecurringEffects,
+            modifiers: newModifiers,
         },
     };
 

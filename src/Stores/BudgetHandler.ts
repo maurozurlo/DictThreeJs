@@ -1,7 +1,8 @@
 import { GAMESTATE } from "../Constants/GameState";
 import type { Expenditures, Taxes } from "../types/Budget";
-import type { ActiveRecurringEffect, GameState } from "../types/GameState";
+import type { GameState, Modifier } from "../types/GameState";
 import { Clamp } from "../Utils/Math";
+import { sumModifiers } from "../Utils/Modifiers";
 
 export type RoundFinancials = {
     peopleIncome: number;
@@ -15,31 +16,20 @@ export type RoundFinancials = {
     netChange: number;
 };
 
-/** Sums incomeBonus and expenseBonus across all active recurring effects.
- *  Weird-law entries (sourceType === 'weird-law') are excluded — they have
- *  one-time effects already applied on accept; they carry no per-round income. */
-export function sumRecurringEffects(effects: ActiveRecurringEffect[]): {
-    recurringIncome: number;
-    recurringExpenses: number;
-} {
-    const recurring = effects.filter(e => e.sourceType !== 'weird-law');
-    return {
-        recurringIncome: recurring.reduce((sum, e) => sum + e.incomeBonus, 0),
-        recurringExpenses: recurring.reduce((sum, e) => sum + e.expenseBonus, 0),
-    };
-}
-
 /**
  * Calculates round income and expenses based on POC logic.
  * - People income = base × (peopleTaxes / 100)
  * - Business income = base × (businessTaxes / 100), modified by infrastructure & education levels
  * - Expenses = sum of all expenditure levels × cost per level
- * - Recurring income/expenses = sums over active recurring effects (laws/deals)
+ * - Recurring income/expenses = active modifier contributions to roundIncome/roundExpense
+ *   at `round` (ADR-0008 §5 — weird-law/statue modifiers carry no economic mods, so
+ *   they naturally contribute 0)
  * - Net change includes both base and recurring terms
  */
 export function calculateRoundFinancials(
     budget: GameState["budget"],
-    activeRecurringEffects: ActiveRecurringEffect[] = []
+    modifiers: Modifier[] = [],
+    round: number = 0,
 ): RoundFinancials {
     const { INCOME } = GAMESTATE;
     const { peopleTaxes, businessTaxes } = budget.taxes;
@@ -62,7 +52,8 @@ export function calculateRoundFinancials(
 
     const totalIncome = peopleIncome + businessIncome;
     const expenses = (health + infrastructure + security + education) * INCOME.EXPENDITURE_COST_PER_LEVEL;
-    const { recurringIncome, recurringExpenses } = sumRecurringEffects(activeRecurringEffects);
+    const recurringIncome = sumModifiers(modifiers, 'roundIncome', round);
+    const recurringExpenses = sumModifiers(modifiers, 'roundExpense', round);
     const netChange = totalIncome + recurringIncome - expenses - recurringExpenses;
 
     return { peopleIncome, businessIncome, totalIncome, expenses, recurringIncome, recurringExpenses, netChange };

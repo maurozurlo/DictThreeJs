@@ -1,18 +1,18 @@
 /**
- * Story 5-2: Weird Laws — unit tests
+ * Story 5-2: Weird Laws — unit tests (updated for the modifier engine, ADR-0008 P2)
  *
  * Covers: trigger gating, one-time effects, no-penalty reject, repeal (no relation penalty),
- * slot cap enforcement, sumRecurringEffects exclusion, visual consequence stubs,
- * charismaEffect application, and the full 14-law pool.
+ * modifier economic exclusion, visual consequence stubs, charismaEffect application, and the
+ * full 14-law pool.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore } from '../../../src/Stores/GameState';
 import { WEIRD_LAWS } from '../../../src/assets/weirdLaws';
-import { sumRecurringEffects } from '../../../src/Stores/BudgetHandler';
-import { getRepealTier } from '../../../src/Stores/RecurringHandler';
+import { sumModifiers, computeRepealTier } from '../../../src/Utils/Modifiers';
+import { buildWeirdLawModifier } from '../../../src/assets/modifierContent';
 import { VISUAL_CONSEQUENCES } from '../../../src/assets/visualConsequences';
-import type { ActiveRecurringEffect } from '../../../src/types/GameState';
+import type { Modifier, ResolvedStatMod } from '../../../src/types/GameState';
 
 vi.mock('../../../src/i18n', () => ({
     default: { t: (key: string) => key }
@@ -22,28 +22,17 @@ vi.mock('../../../src/i18n', () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeWeirdEntry(id: number): ActiveRecurringEffect {
-    return {
-        sourceId: `weird-law-${id}`,
-        sourceType: 'weird-law',
-        sourceFaction: 'people',
-        label: `laws.labels.${id}`,
-        incomeBonus: 0,
-        expenseBonus: 0,
-        roundActivated: 1,
-    };
+const PERMANENT = { startRound: 1, endRound: null };
+
+/** Weird-law modifier: ledger/slot marker with no economic mods. */
+function makeWeirdMod(id: number): Modifier {
+    return buildWeirdLawModifier(id, 1);
 }
 
-function makeNormalEntry(id: number, income: number): ActiveRecurringEffect {
-    return {
-        sourceId: `law-${id}`,
-        sourceType: 'law',
-        sourceFaction: 'business',
-        label: `laws.recurring.test_${id}`,
-        incomeBonus: income,
-        expenseBonus: 0,
-        roundActivated: 1,
-    };
+/** Normal recurring-income law modifier. */
+function makeNormalMod(id: number, income: number): Modifier {
+    const mods: ResolvedStatMod[] = [{ stat: 'roundIncome', amount: income, window: PERMANENT }];
+    return { id: `laws.${id}`, type: 'law-recurring', state: 'active', acquiredRound: 1, mods };
 }
 
 // ---------------------------------------------------------------------------
@@ -89,41 +78,34 @@ describe('WEIRD_LAWS asset pool (Story 5-2)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// sumRecurringEffects — weird-law exclusion
+// Modifier economics — weird-law modifiers contribute nothing
 // ---------------------------------------------------------------------------
 
-describe('sumRecurringEffects excludes weird-law entries (Story 5-2)', () => {
+describe('weird-law modifiers carry no recurring economics (Story 5-2)', () => {
     it('test_weird_law_entry_not_counted_in_recurring_sum', () => {
-        const effects: ActiveRecurringEffect[] = [makeWeirdEntry(1001)];
-        const result = sumRecurringEffects(effects);
-        expect(result.recurringIncome).toBe(0);
-        expect(result.recurringExpenses).toBe(0);
+        const mods = [makeWeirdMod(1001)];
+        expect(sumModifiers(mods, 'roundIncome', 5)).toBe(0);
+        expect(sumModifiers(mods, 'roundExpense', 5)).toBe(0);
     });
 
     it('test_normal_law_still_counted_when_weird_law_also_active', () => {
-        const effects: ActiveRecurringEffect[] = [
-            makeNormalEntry(39, 15),
-            makeWeirdEntry(1005),
-        ];
-        const result = sumRecurringEffects(effects);
-        expect(result.recurringIncome).toBe(15);
+        const mods = [makeNormalMod(39, 15), makeWeirdMod(1005)];
+        expect(sumModifiers(mods, 'roundIncome', 5)).toBe(15);
     });
 
     it('test_empty_effects_array_returns_zero', () => {
-        const result = sumRecurringEffects([]);
-        expect(result.recurringIncome).toBe(0);
-        expect(result.recurringExpenses).toBe(0);
+        expect(sumModifiers([], 'roundIncome', 5)).toBe(0);
+        expect(sumModifiers([], 'roundExpense', 5)).toBe(0);
     });
 });
 
 // ---------------------------------------------------------------------------
-// getRepealTier — weird-law entries always Small (incomeBonus=0)
+// computeRepealTier — weird-law modifiers always Small (no economic mods)
 // ---------------------------------------------------------------------------
 
-describe('getRepealTier for weird-law entries (Story 5-2)', () => {
+describe('computeRepealTier for weird-law modifiers (Story 5-2)', () => {
     it('test_weird_law_entry_is_small_tier', () => {
-        const entry = makeWeirdEntry(1001);
-        expect(getRepealTier(entry)).toBe('Small');
+        expect(computeRepealTier(makeWeirdMod(1001).mods)).toBe('Small');
     });
 });
 
@@ -135,13 +117,13 @@ describe('visual consequence stubs for weird laws (Story 5-2)', () => {
     it('test_cemeteries_stub_exists_with_correct_condition', () => {
         const entry = VISUAL_CONSEQUENCES.find(v => v.id === 'weird-cemeteries');
         expect(entry).toBeDefined();
-        expect(entry?.condition.activeRecurringEffectId).toBe('weird-law-1001');
+        expect(entry?.condition.activeRecurringEffectId).toBe('weird.1001');
     });
 
     it('test_skeletons_stub_exists', () => {
         const entry = VISUAL_CONSEQUENCES.find(v => v.id === 'weird-skeletons');
         expect(entry).toBeDefined();
-        expect(entry?.condition.activeRecurringEffectId).toBe('weird-law-1005');
+        expect(entry?.condition.activeRecurringEffectId).toBe('weird.1005');
     });
 
     it('test_at_least_12_weird_visual_stubs_registered', () => {
@@ -159,7 +141,7 @@ describe('actUponLaw weird law path (Story 5-2)', () => {
         useGameStore.getState().gameManagement.setPhase('start');
     });
 
-    it('test_accepting_weird_law_adds_entry_to_active_recurring_effects', () => {
+    it('test_accepting_weird_law_adds_modifier', () => {
         const weirdLaw = WEIRD_LAWS.find(l => l.id === 1005)!; // Skeletons: +20 treasury
 
         useGameStore.setState(s => ({
@@ -169,12 +151,10 @@ describe('actUponLaw weird law path (Story 5-2)', () => {
 
         useGameStore.getState().law.actUponLaw(true);
 
-        const state = useGameStore.getState();
-        const entry = state.gameManagement.activeRecurringEffects.find(
-            e => e.sourceId === 'weird-law-1005'
-        );
-        expect(entry).toBeDefined();
-        expect(entry?.sourceType).toBe('weird-law');
+        const mod = useGameStore.getState().gameManagement.modifiers.find(m => m.id === 'weird.1005');
+        expect(mod).toBeDefined();
+        expect(mod?.type).toBe('weird-law');
+        expect(mod?.state).toBe('active');
     });
 
     it('test_accepting_weird_law_applies_treasury_effect', () => {
@@ -229,7 +209,7 @@ describe('actUponLaw weird law path (Story 5-2)', () => {
         expect(useGameStore.getState().gameManagement.charisma.current).toBe(6);
     });
 
-    it('test_weird_law_entry_not_counted_in_round_recurring_income', () => {
+    it('test_weird_law_modifier_not_counted_in_round_recurring_income', () => {
         const weirdLaw = WEIRD_LAWS.find(l => l.id === 1005)!;
 
         useGameStore.setState(s => ({
@@ -239,10 +219,9 @@ describe('actUponLaw weird law path (Story 5-2)', () => {
 
         useGameStore.getState().law.actUponLaw(true);
 
-        const effects = useGameStore.getState().gameManagement.activeRecurringEffects;
-        const sum = sumRecurringEffects(effects);
-        expect(sum.recurringIncome).toBe(0);
-        expect(sum.recurringExpenses).toBe(0);
+        const { modifiers, round } = useGameStore.getState().gameManagement;
+        expect(sumModifiers(modifiers, 'roundIncome', round)).toBe(0);
+        expect(sumModifiers(modifiers, 'roundExpense', round)).toBe(0);
     });
 });
 
@@ -250,61 +229,39 @@ describe('actUponLaw weird law path (Story 5-2)', () => {
 // Repeal — weird-law no relation penalty
 // ---------------------------------------------------------------------------
 
-describe('repeal weird-law entry skips relation penalty (Story 5-2)', () => {
+describe('repeal weird-law modifier skips relation penalty (Story 5-2)', () => {
     beforeEach(() => {
         useGameStore.getState().gameManagement.setPhase('start');
     });
 
-    it('test_repeal_weird_law_does_not_reduce_relation', () => {
-        const entry = makeWeirdEntry(1001);
-
+    function seedWeird(extra: Partial<{ treasury: number; people: number }> = {}) {
         useGameStore.setState(s => ({
             gameManagement: {
                 ...s.gameManagement,
-                activeRecurringEffects: [entry],
+                modifiers: [makeWeirdMod(1001)],
                 repealTakenThisRound: false,
             },
-            budget: { ...s.budget, treasury: 200 },
-            relations: { ...s.relations, current: { military: 0, business: 0, people: 5 } },
+            budget: { ...s.budget, treasury: extra.treasury ?? 200 },
+            relations: { ...s.relations, current: { military: 0, business: 0, people: extra.people ?? 0 } },
         }));
+    }
 
-        useGameStore.getState().gameManagement.repeal('weird-law-1001');
-
+    it('test_repeal_weird_law_does_not_reduce_relation', () => {
+        seedWeird({ people: 5 });
+        useGameStore.getState().gameManagement.repeal('weird.1001');
         expect(useGameStore.getState().relations.current.people).toBe(5);
     });
 
-    it('test_repeal_weird_law_removes_entry_from_active_effects', () => {
-        const entry = makeWeirdEntry(1001);
-
-        useGameStore.setState(s => ({
-            gameManagement: {
-                ...s.gameManagement,
-                activeRecurringEffects: [entry],
-                repealTakenThisRound: false,
-            },
-            budget: { ...s.budget, treasury: 200 },
-        }));
-
-        useGameStore.getState().gameManagement.repeal('weird-law-1001');
-
-        const remaining = useGameStore.getState().gameManagement.activeRecurringEffects;
-        expect(remaining.find(e => e.sourceId === 'weird-law-1001')).toBeUndefined();
+    it('test_repeal_weird_law_flips_modifier_to_rejected', () => {
+        seedWeird();
+        useGameStore.getState().gameManagement.repeal('weird.1001');
+        const mod = useGameStore.getState().gameManagement.modifiers.find(m => m.id === 'weird.1001');
+        expect(mod?.state).toBe('rejected');
     });
 
     it('test_repeal_weird_law_deducts_small_tier_treasury_cost', () => {
-        const entry = makeWeirdEntry(1001);
-
-        useGameStore.setState(s => ({
-            gameManagement: {
-                ...s.gameManagement,
-                activeRecurringEffects: [entry],
-                repealTakenThisRound: false,
-            },
-            budget: { ...s.budget, treasury: 200 },
-        }));
-
-        useGameStore.getState().gameManagement.repeal('weird-law-1001');
-
+        seedWeird({ treasury: 200 });
+        useGameStore.getState().gameManagement.repeal('weird.1001');
         // Small tier = 15 treasury cost
         expect(useGameStore.getState().budget.treasury).toBe(185);
     });
