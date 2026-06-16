@@ -63,11 +63,11 @@ stories:
     name: "Author ADR-0009 — Coup Telegraphing & Fairness"
     file: "production/stories/6-5-coup-fairness-adr.md"
     priority: should-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-16"
 
   - id: "6-6"
     name: "Modifier authoring guide (expandability doc)"

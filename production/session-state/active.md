@@ -1,5 +1,12 @@
 # Session State
 
+## Session Extract — /dev-story 6-5 2026-06-16 (Author ADR-0009)
+- Story: production/stories/6-5-coup-fairness-adr.md — Status → Complete.
+- Wrote docs/architecture/adr-0009-coup-telegraphing-fairness.md (Status: Accepted), grounded in live CoupHandler.ts + GAMESTATE.COUP. Added to ADR log in .claude/docs/technical-preferences.md.
+- KEY DECISION: replace the 50% grace roll with DETERMINISTIC first-armed-round grace → guarantees ≥1 explicit red-warning round + removes all RNG from the coup path. Coup fires only if armed condition still met next round (re-evaluated on effective relations, so a deal/charisma/repeal or a windowed modifier expiring can defuse it). Threshold values stay designer-owned balance. Implementation (retire GRACE_CHANCE) = Story 6-7's slice.
+- Honesty: self-reviewed vs implementation; no separate technical-director agent run; owner ratification recommended (flagged in ADR Status).
+- Sprint 6 now: MUST-HAVES done (6-1,6-4,6-2); SHOULD-HAVES done (6-5,6-6); remaining should-have 6-3 (P3 content + Street View/Advisor consumers, ~1.5d code). Nice-to-haves: 5-8/5-9 playtests (need human), 6-7 coup UI (now unblocked by 6-5).
+
 ## Session Extract — /dev-story 6-6 2026-06-16 (Modifier authoring guide)
 - Story: production/stories/6-6-modifier-authoring-guide.md — Status → Complete.
 - Wrote docs/modifier-authoring-guide.md: 5-field quick ref, TIME_MODIFIERS table, Cattle worked example (content asset → runtime instance → round-by-round table matching isWindowActive), 6-step "add a timed deal" recipe, anti-patterns. Cross-checked vs shipped P2 code; honest self-review note (no separate lead-programmer agent run).
