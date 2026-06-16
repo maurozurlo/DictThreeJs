@@ -1,5 +1,11 @@
 # Session State
 
+## Session Extract — /dev-story 6-6 2026-06-16 (Modifier authoring guide)
+- Story: production/stories/6-6-modifier-authoring-guide.md — Status → Complete.
+- Wrote docs/modifier-authoring-guide.md: 5-field quick ref, TIME_MODIFIERS table, Cattle worked example (content asset → runtime instance → round-by-round table matching isWindowActive), 6-step "add a timed deal" recipe, anti-patterns. Cross-checked vs shipped P2 code; honest self-review note (no separate lead-programmer agent run).
+- Sprint 6 status: all MUST-HAVES done (6-1, 6-4, 6-2). Should-haves: 6-6 done; remaining 6-3 (P3 content + Street View/Advisor consumers, larger), 6-5 (author ADR-0009). Nice-to-have: 5-8/5-9 playtests (need human), 6-7 (blocked by 6-5).
+- Next: 6-5 (ADR-0009 authoring, 0.5d) or 6-3 (1.5d code).
+
 ## Session Extract — /dev-story 6-2 2026-06-16 (ADR-0008 P2)
 - Story: production/stories/6-2-modifier-engine-p2.md — replace ActiveRecurringEffect with the modifier engine. Status → Complete.
 - Pre-step: committed/pushed in-flight RoundResolver refactor (user's commit 16e16aa); fixed leftover `buildStatsUpdate`→`buildRoundStats` (18 failing tests) + removed dangling imports the refactor left (npm run build was broken on master — now green).

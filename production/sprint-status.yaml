@@ -73,11 +73,11 @@ stories:
     name: "Modifier authoring guide (expandability doc)"
     file: "production/stories/6-6-modifier-authoring-guide.md"
     priority: should-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: "6-1"
-    completed: ""
+    completed: "2026-06-16"
 
   # ── Nice to Have ────────────────────────────────────────────────────────
   - id: "5-8"
