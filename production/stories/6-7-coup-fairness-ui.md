@@ -79,7 +79,22 @@ Provisional notes:
 
 ## Completion Notes
 
-*(Update acceptance criteria from ADR-0009 before starting implementation)*
+**2026-06-16 — ADR-0009 ratified; deterministic-grace LOGIC slice shipped (UI readout still pending).**
+
+ADR-0009 was ratified by the owner. The balance-critical **logic** half of this story's ADR is
+now implemented and tested, ahead of the UI readout:
+
+- `src/Stores/CoupHandler.ts` — retired the 50% grace roll; `checkCoup` is now RNG-free.
+  First armed round always returns `grace`; coup fires only when armed persists into the next
+  round (`graceTaken`). Defuse paths (relation drop / charisma rise) verified.
+- `src/Constants/GameState.ts` — `GRACE_CHANCE` removed from the `Coup` interface and `GAMESTATE.COUP`.
+- `src/Stores/RoundResolver.ts` — dropped the `rollFloat()` argument from the coup call (and the now-unused import).
+- Tests updated: `src/Stores/CoupHandler.test.ts` (deterministic grace + defuse cases),
+  `tests/unit/meet/budget_tier_consequences.test.ts`, `tests/unit/stats/stats-enhancements.test.ts`. Suite 439/439.
+
+**Remaining scope for this story = the player-facing readout UI only** (the telegraphing panel:
+threatening faction, effective relation, distance to threshold). Update the provisional ACs above
+from ADR-0009 §1/§4 before implementing the UI.
 
 ## Dependencies
 

@@ -104,8 +104,9 @@ stories:
     name: "Coup fairness UI — telegraphing readout"
     file: "production/stories/6-7-coup-fairness-ui.md"
     priority: nice-to-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 1.0
-    blocker: "6-5"
+    blocker: ""
     completed: ""
+    notes: "ADR-0009 ratified; deterministic-grace LOGIC slice shipped + tested. Remaining: UI readout only."

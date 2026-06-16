@@ -10,8 +10,6 @@ export interface Coup {
     WARN_RELATION: number;
     /** Player charisma threshold for the yellow warning (charisma ≤ this). */
     WARN_CHARISMA: number;
-    /** Probability of surviving the first armed trigger (50% grace roll). */
-    GRACE_CHANCE: number;
 }
 
 /** Cost entry for repealing an active recurring law at a given tier. */
@@ -228,7 +226,6 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
         CHARISMA_THRESHOLD: -3,
         WARN_RELATION: 6,
         WARN_CHARISMA: -2,
-        GRACE_CHANCE: 0.5,
     },
     REPEAL_COST: {
         Small:  { treasury: 15, relation: -2 },

@@ -2,14 +2,17 @@
 
 ## Status
 
-Accepted — 2026-06-16. Authored alongside Sprint 6 (ADR-0008 P2 shipped). Establishes the
-**fairness contract** for the coup system: what the player is guaranteed to see and act on
-before a coup can end a run. The data source (effective relations) is already live from
-ADR-0008/Story 6-1; this ADR governs the telegraphing/fairness design on top of it.
+Accepted — 2026-06-16. **Ratified by owner (Mauro Zurlo) 2026-06-16.** Authored alongside
+Sprint 6 (ADR-0008 P2 shipped). Establishes the **fairness contract** for the coup system:
+what the player is guaranteed to see and act on before a coup can end a run. The data source
+(effective relations) is already live from ADR-0008/Story 6-1; this ADR governs the
+telegraphing/fairness design on top of it.
 
-> **Authorship note:** authored and self-reviewed against the live `CoupHandler`
-> implementation in an autonomous session; owner (Mauro Zurlo) / Technical-Director
-> ratification recommended before the UI work in Story 6-7 ships the player-facing readout.
+> **Authorship & ratification note:** authored and self-reviewed against the live `CoupHandler`
+> implementation in an autonomous session; **owner (Mauro Zurlo) ratified the deterministic-grace
+> decision (§2) on 2026-06-16** as a core balance fix. The deterministic-grace **logic slice**
+> (retire `GRACE_CHANCE`, RNG-free arming/firing) shipped the same day — see `CoupHandler.ts`,
+> `CoupHandler.test.ts`. The player-facing **readout** (Story 6-7 UI) remains outstanding.
 
 ## Date
 
@@ -21,7 +24,7 @@ ADR-0008/Story 6-1; this ADR governs the telegraphing/fairness design on top of 
 
 ## Decision Makers
 
-Authored by Claude (autonomous session, 2026-06-16); pending owner (Mauro Zurlo) ratification.
+Authored by Claude (autonomous session, 2026-06-16); ratified by owner (Mauro Zurlo) 2026-06-16.
 
 ## Overview
 
@@ -219,17 +222,25 @@ None. Retiring the grace roll removes one RNG call; `checkCoup` stays O(factions
 
 ## Validation Criteria
 
-- [ ] A faction reaching the armed condition for the first time **never** ends the run that
+- [x] A faction reaching the armed condition for the first time **never** ends the run that
       round — it arms and emits an explicit red warning naming the faction.
-- [ ] A coup fires only when the armed condition is **still** met the following round.
-- [ ] Dropping the faction's effective relation below `armedThreshold` (or raising charisma
+      *(CoupHandler.test.ts: "returns grace (never coup) on the first armed round".)*
+- [x] A coup fires only when the armed condition is **still** met the following round.
+      *(CoupHandler.test.ts: "returns coup when armed and graceTaken=true".)*
+- [x] Dropping the faction's effective relation below `armedThreshold` (or raising charisma
       above `CHARISMA_THRESHOLD`) during the grace round prevents the coup.
-- [ ] A windowed relation modifier expiring between the armed round and the next round, such
+      *(CoupHandler.test.ts: two "defused" tests for relation-drop and charisma-rise.)*
+- [~] A windowed relation modifier expiring between the armed round and the next round, such
       that effective relation falls below `armedThreshold`, prevents the coup.
-- [ ] `checkCoup` is a deterministic function of `(effectiveRelations, charisma, securitySpend,
-      coupArmedLastRound)` — no RNG (the grace roll is retired).
-- [ ] The yellow tier surfaces an advisory signal whenever its (lower) condition is met.
-- [ ] Threshold *values* remain in `GAMESTATE.COUP` (data-driven; balance-owned).
+      *Mechanism in place — coup reads effective relations (RoundResolver) and re-evaluates each
+      round; covered compositionally by `getEffectiveRelation` window tests (6-1) + the checkCoup
+      defuse tests. A dedicated end-to-end integration test is deferred to Story 6-7.*
+- [x] `checkCoup` is a deterministic function of `(effectiveRelations, charisma, securitySpend,
+      coupArmedLastRound)` — no RNG (the grace roll is retired; `GRACE_CHANCE` removed from
+      `GAMESTATE.COUP`).
+- [x] The yellow tier surfaces an advisory signal whenever its (lower) condition is met.
+      *(Unchanged from prior implementation; CoupHandler.test.ts yellow-warning cases.)*
+- [x] Threshold *values* remain in `GAMESTATE.COUP` (data-driven; balance-owned).
 
 ## Related
 

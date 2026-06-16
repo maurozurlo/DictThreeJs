@@ -6,7 +6,7 @@
 // steps that must run AFTER the end-condition checks).
 
 import { GAMESTATE } from "../Constants/GameState";
-import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance, rollFloat } from "../Utils/Math";
+import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { LAWS } from "../assets/laws";
 import { WEIRD_LAWS } from "../assets/weirdLaws";
 import type { GameState, GameStats, RoundLogEntry, Modifier } from "../types/GameState";
@@ -71,7 +71,6 @@ export function resolveRound(state: GameState): RoundResolution {
     const coupResult = checkCoup(
         effectiveRelationsForCoup,
         getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers, coupRound),
-        rollFloat(),
         state.gameManagement.coupArmedLastRound ?? false,
         state.budget.expenditures.security,
     );

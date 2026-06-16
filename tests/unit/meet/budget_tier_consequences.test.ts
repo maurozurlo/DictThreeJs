@@ -220,7 +220,7 @@ describe('checkCoup — security spend modifier', () => {
 
     it('test_checkCoup_high_security_raises_armed_threshold_by_one', () => {
         // With HIGH security, threshold becomes 9 → military at 8 is NOT armed
-        const result = checkCoup(baseRelations, lowCharisma, 0.9, false, HIGH_SEC);
+        const result = checkCoup(baseRelations, lowCharisma, false, HIGH_SEC);
         // military = 8 < 9 (raised threshold) → not armed; but may still yellow-warn
         expect(result.outcome).not.toBe('coup');
         expect(result.outcome).not.toBe('grace');
@@ -229,30 +229,30 @@ describe('checkCoup — security spend modifier', () => {
     it('test_checkCoup_normal_security_uses_default_threshold', () => {
         // Normal security (between LOW and HIGH): threshold stays at 8 → military at 8 is armed
         const normalSec = GAMESTATE.BUDGET_EFFECTS.SECURITY.LOW; // 3
-        const result = checkCoup(baseRelations, lowCharisma, 0.9, false, normalSec);
-        // Relation 8 >= threshold 8 → armed; graceRoll 0.9 >= GRACE_CHANCE 0.5 → coup
+        const result = checkCoup(baseRelations, lowCharisma, false, normalSec);
+        // Relation 8 >= threshold 8 → armed; first armed round → grace (deterministic)
         expect(result.outcome === 'coup' || result.outcome === 'grace').toBe(true);
     });
 
     it('test_checkCoup_low_security_lowers_armed_threshold_by_one', () => {
         // With LOW security, threshold becomes 7 → military at 7 is armed
         const relations7 = { military: 7, business: 0, people: 0 };
-        const result = checkCoup(relations7, lowCharisma, 0.9, false, LOW_SEC);
-        // military = 7 >= 7 (lowered threshold) → armed; graceRoll 0.9 >= GRACE_CHANCE → coup
+        const result = checkCoup(relations7, lowCharisma, false, LOW_SEC);
+        // military = 7 >= 7 (lowered threshold) → armed; first armed round → grace (deterministic)
         expect(result.outcome === 'coup' || result.outcome === 'grace').toBe(true);
     });
 
     it('test_checkCoup_low_security_no_effect_if_relation_below_lowered_threshold', () => {
         // military at 6 — below even the lowered threshold of 7
         const relations6 = { military: 6, business: 0, people: 0 };
-        const result = checkCoup(relations6, lowCharisma, 0.9, false, LOW_SEC);
+        const result = checkCoup(relations6, lowCharisma, false, LOW_SEC);
         expect(result.outcome).not.toBe('coup');
         expect(result.outcome).not.toBe('grace');
     });
 
     it('test_checkCoup_omitted_security_param_applies_no_modifier', () => {
         // Calling without securitySpend → no modifier → threshold stays at 8 → military at 8 is armed
-        const result = checkCoup(baseRelations, lowCharisma, 0.9, false);
+        const result = checkCoup(baseRelations, lowCharisma, false);
         expect(result.outcome === 'coup' || result.outcome === 'grace').toBe(true);
     });
 });

@@ -10,8 +10,9 @@
  * Tests exercise the real Zustand store following the pattern from repeal.test.ts
  * and StoreWiring.recurring.test.ts.
  *
- * COUP constants: RELATION_THRESHOLD=8, CHARISMA_THRESHOLD=-3, GRACE_CHANCE=0.5
- * Math.random is spied on to force deterministic coup roll outcomes.
+ * COUP constants: RELATION_THRESHOLD=8, CHARISMA_THRESHOLD=-3.
+ * Coup grace is deterministic (ADR-0009): the first armed round always grace-survives;
+ * a second consecutive armed round fires the coup. No RNG in the coup path.
  *
  * Design doc: production/stories/3-4-stats-enhancements.md
  */
@@ -94,8 +95,9 @@ describe('coupGraceFired tracking', () => {
     beforeEach(resetStore);
     afterEach(() => vi.restoreAllMocks());
 
-    it('coupGraceFired becomes true when a grace roll fires', () => {
-        // Arrange: relation 8 + charisma -3 arms the coup; roll 0.3 < 0.5 (GRACE_CHANCE) → grace
+    it('coupGraceFired becomes true when grace fires on the first armed round', () => {
+        // Arrange: relation 8 + charisma -3 arms the coup; first armed round → grace (deterministic).
+        // Spy keeps the rest of nextRound's RNG (sick rolls, mini-challenge) deterministic.
         vi.spyOn(Math, 'random').mockReturnValue(0.3);
         seedCoupState({ coupArmedLastRound: false });
 
@@ -107,13 +109,14 @@ describe('coupGraceFired tracking', () => {
     });
 
     it('coupGraceFired stays true after a subsequent coup ends the game', () => {
-        // Round 1: grace fires → coupGraceFired = true, coupArmedLastRound = true
+        // Round 1: grace fires deterministically → coupGraceFired = true, coupArmedLastRound = true.
+        // Spy keeps the rest of nextRound's RNG (sick rolls, mini-challenge) deterministic.
         vi.spyOn(Math, 'random').mockReturnValue(0.3);
         seedCoupState({ coupArmedLastRound: false });
         useGameStore.getState().gameManagement.nextRound();
         expect(useGameStore.getState().stats.coupGraceFired).toBe(true);
 
-        // Round 2: coupArmedLastRound is now true → coup fires regardless of roll
+        // Round 2: coupArmedLastRound is now true → coup fires (armed condition still met)
         // Game ends (phase: 'lose') without changing coupGraceFired
         useGameStore.getState().gameManagement.nextRound();
         expect(useGameStore.getState().stats.coupGraceFired).toBe(true);

@@ -4,8 +4,11 @@ import type { EndCause } from '../types/GameState';
 
 /**
  * The possible outcomes of a coup threshold check.
- * 'grace'   — armed threshold met on first trigger; player survives the 50% roll this round.
- * 'coup'    — coup fires (either grace exhausted or bad first roll).
+ * 'grace'   — armed threshold met for the FIRST time; the run is deterministically
+ *             survived this round and an explicit red warning is emitted (ADR-0009 §2
+ *             guaranteed warning round).
+ * 'coup'    — armed threshold STILL met the round after a grace round (graceTaken);
+ *             the run ends.
  */
 export type CoupResult =
     | { outcome: 'safe' }
@@ -32,30 +35,30 @@ const COUP_CAUSE_MAP: Record<Power, EndCause> = {
 };
 
 /**
- * Pure coup threshold evaluation (TR-lasting-007).
+ * Pure coup threshold evaluation (TR-coup-002, ADR-0009).
  *
- * Checks two thresholds in priority order:
+ * Fully deterministic — no RNG. The output is a pure function of
+ * (relations, charisma, graceTaken, securitySpend). Checks two tiers in priority order:
  *   1. Armed (relation ≥ effective threshold AND charisma ≤ CHARISMA_THRESHOLD)
  *   2. Yellow warning (relation ≥ WARN_RELATION AND charisma ≤ WARN_CHARISMA)
  *
- * The graceRoll parameter makes this deterministically testable without
- * mocking Math.random globally (ADR-0004). Pass rollFloat() in production,
- * a fixed value in tests.
+ * Deterministic grace (ADR-0009 §2): the FIRST armed round is always survived — the
+ * system arms, emits the red warning, and the caller sets coupArmedLastRound = true.
+ * The coup fires only if the armed condition is STILL met the next round (graceTaken),
+ * guaranteeing at least one explicit, actionable warning round before a run can end.
  *
  * Security spend modifies the armed threshold (Story 3-5):
  *   HIGH security (≥ BUDGET_EFFECTS.SECURITY.HIGH): threshold +1 (harder to coup)
  *   LOW  security (< BUDGET_EFFECTS.SECURITY.LOW):  threshold -1 (easier to coup)
  *
- * @param relations    - Snapshot of current faction relations
- * @param charisma     - Player's current charisma value
- * @param graceRoll    - Random float [0, 1); compared against GRACE_CHANCE (0.5)
- * @param graceTaken   - Was the armed state active last round? (second trigger = certain coup)
+ * @param relations     - Snapshot of current (effective) faction relations
+ * @param charisma      - Player's current (effective) charisma value
+ * @param graceTaken    - Was the armed state active last round? (second consecutive armed round = certain coup)
  * @param securitySpend - Current security expenditure level; omit for no modifier
  */
 export function checkCoup(
     relations: Record<Power, number>,
     charisma: number,
-    graceRoll: number,
     graceTaken: boolean,
     securitySpend?: number
 ): CoupResult {
@@ -74,13 +77,15 @@ export function checkCoup(
     if (armedFactions.length > 0 && charisma <= COUP.CHARISMA_THRESHOLD) {
         const faction = pickCoupFaction(armedFactions, relations);
         const cause = COUP_CAUSE_MAP[faction];
-        if (graceTaken || graceRoll >= COUP.GRACE_CHANCE) {
+        // Deterministic grace (ADR-0009 §2): first armed round always survives;
+        // the coup fires only when the armed condition persists into the next round.
+        if (graceTaken) {
             return { outcome: 'coup', faction, cause };
         }
         return { outcome: 'grace', faction };
     }
 
-    // --- Yellow warning threshold (relation ≥ +6 AND charisma ≤ 0) ---
+    // --- Yellow warning threshold (relation ≥ WARN_RELATION AND charisma ≤ WARN_CHARISMA) ---
     const warnFactions = powers.filter(p => relations[p] >= COUP.WARN_RELATION);
     if (warnFactions.length > 0 && charisma <= COUP.WARN_CHARISMA) {
         const faction = pickCoupFaction(warnFactions, relations);
