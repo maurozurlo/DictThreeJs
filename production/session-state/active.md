@@ -1,5 +1,15 @@
 # Session State
 
+## Session Extract — /design-system citizen-simulation 2026-06-16 (in progress)
+- Coup: deterministic grace SHIPPED + pushed (commit 0cf6c1b) — ADR-0009 ratified by owner; GRACE_CHANCE retired; 439/439 tests. Story 6-7 logic slice done, UI readout remains.
+- Visual update planning kicked off. Owner decisions: LIGHT-FEEDBACK sim tier; full GDD+art-bible+asset-spec pipeline.
+- Source braindumps: "user ideas.md" (infra/health/security → palette/body/spawn rules), "wills ideas.md" (faction+role+happiness sim, education fork, light-feedback hooks, Marco example), "entities.md" (ped/vehicle asset sheet, mix-and-match textures).
+- STRUCTURE DECISION: new GDD design/gdd/citizen-simulation.md owns the sim; street-view.md citizen sections (§3.4-3.6, §4) to be TRIMMED to a pointer afterward (street-view stays environment/buildings/props doc). street-view.md is deferred+unbuilt so safe to restructure.
+- This GDD realizes game-concept.md Open Q#2 + §5 deferred "too dumb to revolt" education mechanic.
+- Review mode: lean (systems-designer/qa-lead only for Formulas + Acceptance Criteria).
+- Skeleton created. Sections: Overview (in progress).
+- TODO after GDD: /art-bible (palettes + middle-ground interpolation), /asset-spec (entities.md), trim street-view.md, carve epics/stories.
+
 ## Session Extract — /dev-story 6-5 2026-06-16 (Author ADR-0009)
 - Story: production/stories/6-5-coup-fairness-adr.md — Status → Complete.
 - Wrote docs/architecture/adr-0009-coup-telegraphing-fairness.md (Status: Accepted), grounded in live CoupHandler.ts + GAMESTATE.COUP. Added to ADR log in .claude/docs/technical-preferences.md.
@@ -281,3 +291,15 @@ Task: Implemented — pending story-done
 - Top ADR gaps: ADR-0009 Coup Telegraphing (Sprint 6 story 6-5), ADR-0007 finalisation (non-Sprint-6)
 - Story TR-ID placeholders replaced with real IDs in 6-1/6-2/6-3/6-5/6-7
 - Report: docs/architecture/architecture-review-2026-06-15.md
+
+## Session Extract — /design-system 2026-06-16 (Citizen Simulation GDD)
+- File: design/gdd/citizen-simulation.md — ALL 11 sections written (Overview → Open Questions). Status: Draft, pending /design-review.
+- Model: 25 persistent citizens (born name/skin/faction, fixed split 11 people/7 army/7 business). Per-round: happiness (Will's formula) → employment → role fork (content/neutral/thief/protestor/gone via happiness × education) → death. Feedback: peopleRelation -= min(floor(protestorCount/3), 5); treasury -= thiefCount*2.
+- New constants (proposed, all tuning knobs): GONE_CHANCE=0.15, HEALTH_DEATH_THRESHOLD=3, DEATH_RATE_MAX=0.15, PROTEST_DIVISOR=3, PROTEST_FEEDBACK_CAP=5 (NEW safety rail, not in Will's draft), THIEF_SKIM=2.
+- New feature added mid-session (user idea): displayedPopulation HUD = round(aliveCount/25 * 5,924,511) [Cuba 1950]; ~237k/death. §4.8.
+- Click-to-inspect citizen feature speced in UI Requirements (AC-16).
+- NEW asset required: ped_special_man_protestor (registered in entities.yaml + flagged for /asset-spec).
+- Trimmed street-view.md: §3.4-3.6 + all of §4 + citizen edge/tuning/AC replaced with pointers to citizen-simulation.md. Environment half (assets/buildings/statues/clickables) retained.
+- Registry: entities.yaml bumped v1→v2; registered ped_special_man_protestor + TOTAL_CITIZENS. systems-index.md updated (new row + street-view row reworded).
+- Agent note: systems-designer (Formulas) and qa-lead (AC) NOT spawned — both fail on "Usage credits required for 1M context". Authored directly; recommend qa-lead review before production.
+- NOT committed yet (awaiting user). Next: /design-review design/gdd/citizen-simulation.md → then /art-bible + /asset-spec → carve epics/stories.

@@ -36,8 +36,8 @@
 #   Sections: entities | items | formulas | constants
 #   Each entry: name, status, source, referenced_by[], attributes{}, added, revised
 
-version: 1
-last_updated: ""
+version: 2
+last_updated: "2026-06-16"
 
 # ─── ENTITIES ────────────────────────────────────────────────────────────────
 # Named game-world objects: enemies, NPCs, characters, factions, bosses.
@@ -48,7 +48,19 @@ last_updated: ""
 # Attribute fields: any key stats that could appear in another GDD
 #   (health, damage, drops, faction, etc.)
 
-entities: []
+entities:
+  - name: ped_special_man_protestor
+    status: active
+    source: design/gdd/citizen-simulation.md
+    referenced_by:
+      - design/gdd/citizen-simulation.md
+      - design/gdd/street-view.md       # places/animates the ped in the scene
+    faction: any                         # outfit derives from role, not born faction
+    notes: "NEW asset not in entities.md sheet — sign-carrying, agitated. Required
+      for the protestor role (citizen-simulation.md §3.2 outfit precedence).
+      Must be added in the /asset-spec pass."
+    added: 2026-06-16
+    revised: ""
 
 # Example (remove when first real entry is added):
 #
@@ -139,7 +151,19 @@ formulas: []
 #
 # Required fields: name, status, source, referenced_by, value, unit, added
 
-constants: []
+constants:
+  - name: TOTAL_CITIZENS
+    status: active
+    source: design/gdd/citizen-simulation.md
+    referenced_by:
+      - design/gdd/citizen-simulation.md
+      - design/gdd/street-view.md         # places this many peds in the scene
+    value: 25
+    unit: citizens
+    notes: "Faction split 11 people / 7 army / 7 business. Also the divisor for the
+      displayedPopulation HUD projection (BASE_POPULATION = 5,924,511)."
+    added: 2026-06-16
+    revised: ""
 
 # Example:
 #
