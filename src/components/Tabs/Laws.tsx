@@ -45,9 +45,15 @@ const Laws = () => {
     return (
         currentLaw === null ? null :
             lawDecided ? (
-                <Typography variant='caption' className={styles.title}>{t('acted_upon_law')}</Typography>
+                <div className={styles.lawHeader}>
+                    <Typography variant='h3' className={styles.title}>{t('acted_upon_law')}</Typography>
+                    <AdvisorButton category='law' verdict={lawVerdict} trigger={lawTrigger} />
+                </div>
             ) : <>
-                <Typography variant='caption' className={styles.title}>{lawHeader}</Typography>
+                <div className={styles.lawHeader}>
+                    <Typography variant='h3' className={styles.title}>{lawHeader}</Typography>
+                    <AdvisorButton category='law' verdict={lawVerdict} trigger={lawTrigger} />
+                </div>
                 <div className={styles.actionsContainer}>
                     <Button onClick={() => actUponLaw(true)} disabled={lawDecided}>
                         <Icon type='approve' /> {t('laws.approve')}
@@ -58,7 +64,7 @@ const Laws = () => {
                         <Icon type='reject' /> {t('laws.reject')}
                     </Button>
                 </div>
-                <AdvisorButton category="law" verdict={lawVerdict} trigger={lawTrigger} />
+
             </>
     )
 }

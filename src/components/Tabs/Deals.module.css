@@ -7,3 +7,7 @@
 .isInactive {
     opacity: .5;
 }
+
+.dealCard {
+    margin: 1rem 2rem;
+}

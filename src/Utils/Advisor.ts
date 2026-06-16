@@ -10,7 +10,7 @@ export const ADVISOR_NAMES: Record<AdvisorLevel, string> = {
     0: 'Kiki',
     1: 'Edward',
     2: 'Ricky',
-    3: 'Alfonso',
+    3: 'Al',
 };
 
 /** Returns an i18n key from the advisor namespace, or 'No advice available.' if no match found. */

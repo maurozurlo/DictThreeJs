@@ -29,6 +29,7 @@ import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers, count
 import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 import { buildStartState, buildLoadedState } from "./StateFactory";
+import { resolveRound, buildRoundStats, pickNextLaw } from "./RoundResolver";
 
 
 export const INITIAL_STATE = ({ set, get }: {
@@ -645,32 +646,15 @@ export const INITIAL_STATE = ({ set, get }: {
         })),
         nextRound: () => {
             const state = get();
+            const resolution = resolveRound(state);
 
-            // --- 0. Coup check (fires before financial resolution — ADR-0006 ordering) ---
-            // Coup reads EFFECTIVE relations + charisma (ADR-0008 §6): a modifier that
-            // placates a faction genuinely lowers coup risk. In P1 no relation modifiers
-            // exist, so effective == base here — behaviour-identical, structurally correct.
-            const coupRound = state.gameManagement.round;
-            const effectiveRelationsForCoup: Record<Power, number> = {
-                military: getEffectiveRelation(state.relations.current.military, state.gameManagement.modifiers, 'military', coupRound),
-                business: getEffectiveRelation(state.relations.current.business, state.gameManagement.modifiers, 'business', coupRound),
-                people: getEffectiveRelation(state.relations.current.people, state.gameManagement.modifiers, 'people', coupRound),
-            };
-            const coupResult = checkCoup(
-                effectiveRelationsForCoup,
-                getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers, coupRound),
-                rollFloat(),
-                state.gameManagement.coupArmedLastRound ?? false,
-                state.budget.expenditures.security
-            );
-
-            if (coupResult.outcome === 'coup') {
+            if (resolution.kind === 'coup') {
                 set((s) => ({
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
-                        endReason: i18n.t(`endscreen.coup_narrative.${coupResult.faction}`, { ns: 'endscreen' }),
-                        endCause: coupResult.cause,
+                        endReason: i18n.t(`endscreen.coup_narrative.${resolution.coupResult.faction}`, { ns: 'endscreen' }),
+                        endCause: resolution.coupResult.cause,
                         phase: 'lose',
                         coupArmedLastRound: false,
                         coupWarningFaction: null,
@@ -679,167 +663,25 @@ export const INITIAL_STATE = ({ set, get }: {
                 return;
             }
 
-            // Coup warning state to carry into this round's final state
-            const newCoupArmedLastRound = coupResult.outcome === 'grace';
-            const newCoupWarningFaction: Power | null =
-                coupResult.outcome === 'grace' || coupResult.outcome === 'yellow-warning'
-                    ? coupResult.faction
-                    : null;
+            const {
+                newCoupArmedLastRound, newCoupWarningFaction, financials, newTreasury,
+                recurringGmFields, newRelations, newCharisma, newRepStatuses,
+                newSelectedPower, newDumbScore, newLog, newRound, modifiersAfterOnStart,
+                nextDailyEvent, bankruptcy, overthrown,
+            } = resolution;
 
-            // --- 1. Financial resolution (includes active recurring effects) ---
-            const financials = calculateRoundFinancials(state.budget, state.gameManagement.activeRecurringEffects);
-            let newTreasury = state.budget.treasury + financials.netChange;
-
-            // Shared gameManagement fields written by every end-of-round branch below
-            const recurringGmFields = {
-                lastRoundRecurringIncome: financials.recurringIncome,
-                lastRoundRecurringExpenses: financials.recurringExpenses,
-                repealTakenThisRound: false,
+            // Context for the cumulative stats update applied in each surviving branch.
+            const statsCtx = {
+                financials, newTreasury, prevRound: state.gameManagement.round,
+                newRelations, coupGraceFired: newCoupArmedLastRound,
             };
-
-            // --- 2. Budget → relation effects ---
-            const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current);
-
-            // --- 3. Tax penalty + charisma corrosion (Plan G) ---
-            const taxMessages: string[] = [];
-            let newCharisma = state.gameManagement.charisma.current;
-            if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
-                newRelations.people = Clamp(newRelations.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-                newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-                taxMessages.push(i18n.t('log.tax_penalty_people'));
-            }
-            if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
-                newRelations.business = Clamp(newRelations.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-                newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-                taxMessages.push(i18n.t('log.tax_penalty_business'));
-            }
-
-            // --- 4. Representative status for next round ---
-            // Eliminated reps return next round as a new representative (same as sick — recalculated fresh).
-            const prevStatuses = state.gameManagement.representativeStatuses;
-            const newRepStatuses: Record<Power, 'active' | 'sick' | 'eliminated'> = {
-                military: 'active',
-                business: 'active',
-                people:   'active',
-            };
-            if (state.budget.expenditures.health < GAMESTATE.BUDGET_EFFECTS.HEALTH.LOW) {
-                (['military', 'business', 'people'] as Power[])
-                    .forEach(p => { if (rollChance(0.5)) newRepStatuses[p] = 'sick'; });
-            }
-            // Preserve selection only when the faction was already active and stays active.
-            // If they were eliminated this round and come back, reset to avoid phantom highlight.
-            const newSelectedPower: Power | 'none' =
-                state.meet.selectedPower !== 'none' &&
-                prevStatuses[state.meet.selectedPower] === 'active' &&
-                newRepStatuses[state.meet.selectedPower] === 'active'
-                    ? state.meet.selectedPower
-                    : 'none';
-            const newDumbScore = educationToDumbScore(state.budget.expenditures.education);
-
-            // --- 5. Build log entry ---
-            const logLines: string[] = [];
-            if (state.law.lawDecided && state.law.current && state.law.lastLawOutcome !== null) {
-                const verbKey = state.law.lastLawOutcome ? 'log.passed_law' : 'log.rejected_law';
-                const lawLabelKey = state.law.current.type === 'weird'
-                    ? `laws.weird.${state.law.current.id}.label`
-                    : `laws.labels.${state.law.current.id}`;
-                logLines.push(i18n.t(verbKey, { label: i18n.t(lawLabelKey, { ns: 'laws' }) }));
-            }
-            if (state.deals.dealDecided && state.deals.current) {
-                logLines.push(i18n.t(state.deals.lastDealAccepted ? 'log.accepted_deal' : 'log.declined_deal'));
-            }
-            if (state.meet.actionTaken.taken && state.meet.actionTaken.power && state.meet.actionTaken.type) {
-                logLines.push(i18n.t('log.met_with', {
-                    power: i18n.t(`power.${state.meet.actionTaken.power}`),
-                    action: i18n.t(`meet.${state.meet.actionTaken.type}`),
-                }));
-            }
-            logLines.push(i18n.t('log.financials', { income: financials.totalIncome, expenses: financials.expenses }));
-            logLines.push(...logMessages, ...taxMessages);
-            if (newCharisma > state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_up'));
-            else if (newCharisma < state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_down'));
-            // Coup warning log lines (appended after financial summary)
-            if (coupResult.outcome === 'yellow-warning') {
-                logLines.push(i18n.t('log.coup_yellow_warning', { faction: i18n.t(`power.${coupResult.faction}`) }));
-            }
-            if (coupResult.outcome === 'grace') {
-                logLines.push(i18n.t('log.coup_red_warning', { faction: i18n.t(`power.${coupResult.faction}`) }));
-            }
-            const newLog = [...state.log, { date: getGameDate(state.gameManagement.round), lines: logLines }];
-
-            // --- 6. Increment round, draw next daily event ---
-            const newRound = state.gameManagement.round + 1;
-
-            // onStart narrative-hook pass (ADR-0008 §7): flip the fire-once guard for any
-            // modifier whose resolved trigger round is reached. Fires only on surviving
-            // branches below (a run that ends this round never fires — game-over branches
-            // keep the un-fired modifiers via ...s.gameManagement). In P1 no content carries
-            // onStartTriggerRound, so `fired` is empty and modifiers are unchanged. The
-            // headline key lookup by modifier id lands with content in P2/P3.
-            const { modifiers: modifiersAfterOnStart } = fireOnStartModifiers(
-                state.gameManagement.modifiers,
-                newRound,
-            );
-            const buildStatsUpdate = (s: GameState): GameStats => ({
-                ...s.stats,
-                totalIncomeEarned: s.stats.totalIncomeEarned + financials.totalIncome,
-                totalExpensesSpent: s.stats.totalExpensesSpent + financials.expenses,
-                totalExtrasEarned: s.stats.totalExtrasEarned + s.gameManagement.currentRoundExtraIncome,
-                totalExtrasSpent: s.stats.totalExtrasSpent + s.gameManagement.currentRoundExtraExpenses,
-                peakTreasury: Math.max(s.stats.peakTreasury, newTreasury),
-                lowestTreasury: Math.min(s.stats.lowestTreasury, newTreasury),
-                relationsHistory: [...s.stats.relationsHistory, {
-                    round: state.gameManagement.round,
-                    military: newRelations.military,
-                    business: newRelations.business,
-                    people: newRelations.people,
-                }],
-                coupGraceFired: s.stats.coupGraceFired || coupResult.outcome === 'grace',
-                totalRecurringIncomeEarned: s.stats.totalRecurringIncomeEarned + financials.recurringIncome,
-                totalRecurringExpensesSpent: s.stats.totalRecurringExpensesSpent + financials.recurringExpenses,
-            });
-            const nextDailyEvent = getRandomDailyEvent();
-
-            // --- 7. Biased law selection (Plan G) + weird law trigger (Story 5-2) ---
-            const hasActiveWeirdLaw = state.gameManagement.activeRecurringEffects.some(
-                e => e.sourceType === 'weird-law'
-            );
-            const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>): typeof LAWS[number] | null => {
-                // 10% chance of a weird law when the slot is empty (weird laws are faction-neutral)
-                if (!hasActiveWeirdLaw && rollChance(0.10)) {
-                    return getRandomFromList(WEIRD_LAWS);
-                }
-                const lawPool = filterLawPool(LAWS, state.gameManagement.activeRecurringEffects);
-                // Exclude laws from sick or eliminated factions; fall back to full pool if none remain
-                const unavailablePowers = (['military', 'business', 'people'] as Power[])
-                    .filter(p => newRepStatuses[p] !== 'active');
-                const effectiveLawPool = unavailablePowers.length > 0
-                    ? (lawPool.filter(l => !unavailablePowers.includes(l.power)).length > 0
-                        ? lawPool.filter(l => !unavailablePowers.includes(l.power))
-                        : lawPool)
-                    : lawPool;
-                if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
-                    return getRandomUniqueItemForPower(effectiveLawPool, usedLaws, 'people') ?? getRandomUniqueItem(effectiveLawPool, usedLaws);
-                }
-                if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
-                    return getRandomUniqueItemForPower(effectiveLawPool, usedLaws, 'business') ?? getRandomUniqueItem(effectiveLawPool, usedLaws);
-                }
-                return getRandomUniqueItem(effectiveLawPool, usedLaws);
-            };
-
-            // --- 8. Check game-over / victory ---
-            const bankruptcy = newTreasury <= 0;
-            // Overthrow reads EFFECTIVE relations (ADR-0008 §6), consistent with the coup check.
-            const overthrown = (Object.keys(newRelations) as Power[]).find(
-                p => getEffectiveRelation(newRelations[p], state.gameManagement.modifiers, p, newRound) <= GAMESTATE.RELATIONS.MIN
-            );
 
             if (bankruptcy) {
                 set((s) => ({
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
-                    stats: buildStatsUpdate(s),
+                    stats: buildRoundStats(s, statsCtx),
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -865,7 +707,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
-                    stats: buildStatsUpdate(s),
+                    stats: buildRoundStats(s, statsCtx),
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -891,7 +733,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
-                    stats: buildStatsUpdate(s),
+                    stats: buildRoundStats(s, statsCtx),
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -943,7 +785,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 const updatedDeals = new Set(periodicDealPool);
                 if (randomDeal) updatedDeals.add(randomDeal);
                 const updatedLaws = new Set(state.law.interactedWithLaws);
-                const randomLaw = pickNextLaw(updatedLaws);
+                const randomLaw = pickNextLaw(state, newRepStatuses, updatedLaws);
                 if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
                 if (randomLaw) updatedLaws.add(randomLaw);
 
@@ -951,7 +793,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     budget: { ...s.budget, treasury: newTreasury },
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
-                    stats: buildStatsUpdate(s),
+                    stats: buildRoundStats(s, statsCtx),
                     dailyEvent: { current: nextDailyEvent },
                     periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultKey: null },
                     miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
@@ -1002,7 +844,7 @@ export const INITIAL_STATE = ({ set, get }: {
             const updatedDeals = new Set(normalDealPool);
             if (randomDeal) updatedDeals.add(randomDeal);
             const updatedLaws = new Set(state.law.interactedWithLaws);
-            const randomLaw = pickNextLaw(updatedLaws);
+            const randomLaw = pickNextLaw(state, newRepStatuses, updatedLaws);
             if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
             if (randomLaw) updatedLaws.add(randomLaw);
 
@@ -1010,7 +852,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 budget: { ...s.budget, treasury: newTreasury },
                 relations: { ...s.relations, current: newRelations },
                 log: newLog,
-                stats: buildStatsUpdate(s),
+                stats: buildRoundStats(s, statsCtx),
                 dailyEvent: { current: nextDailyEvent },
                 periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultKey: null },
                 miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultKey: null, riskTriggered: false },

@@ -27,17 +27,20 @@ const Deals = ({ isActive }: TabProps) => {
     const dealVerdict = currentDeal ? computeDealVerdict(currentDeal) : 'approve' as const
     const dealTrigger = currentDeal ? computeDealTrigger(currentDeal) : undefined
     return (
-        <TabLayout headerTitle={menuT('tabs.deals')} isActive={isActive}>
+        <TabLayout headerTitle={menuT('tabs.deals')} isActive={isActive} sideMenu={
+            !dealDecided && <AdvisorButton category="deal" position="bottom" verdict={dealVerdict} trigger={dealTrigger} />
+        }>
             {currentDeal ?
-                <Card>
+                <Card className={styles.dealCard}>
                     <Typography variant='body' className={clsx({
                         [styles.isInactive]: dealDecided
                     })}>{dealText}</Typography>
+
                     <div className={styles.cardActions}>
                         <Button disabled={dealDecided} onClick={() => actUponDeal(true)}>{t('deals.accept')}</Button>
                         <Button disabled={dealDecided} onClick={() => actUponDeal(false)}>{t('deals.reject')}</Button>
                     </div>
-                    {!dealDecided && <AdvisorButton category="deal" verdict={dealVerdict} trigger={dealTrigger} />}
+
                     {dealDecided ? <>
                         <Typography variant='h3'>{t('deals.outcome')}</Typography>
                         {outcome && outcome.length ?

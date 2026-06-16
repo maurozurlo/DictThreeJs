@@ -11,10 +11,11 @@ interface Props {
     category: AdvisorCategory;
     verdict: AdvisorVerdict;
     trigger?: AdvisorOverrideTrigger;
+    position?: 'top' | 'bottom';
 }
 
 /** Info button that reveals a context-aware adviser quote in a popover. */
-const AdvisorButton = ({ category, verdict, trigger }: Props) => {
+const AdvisorButton = ({ category, verdict, trigger, position = 'top' }: Props) => {
     const [open, setOpen] = useState(false);
     const advisorLevel = useGameStore(s => s.shop.advisorLevel);
     const { t } = useTranslation('advisor');
@@ -40,6 +41,7 @@ const AdvisorButton = ({ category, verdict, trigger }: Props) => {
                     name={ADVISOR_NAMES[advisorLevel]}
                     text={text}
                     onClose={() => setOpen(false)}
+                    position={position}
                 />
             )}
         </div>
