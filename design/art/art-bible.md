@@ -618,7 +618,7 @@ Body type (fat / fit / slim) is a fixed identity attribute that makes individual
 - **Fit**: Standard proportions, slight shoulder-to-hip taper. The baseline civilian build.
 - **Slim**: Narrow across shoulders and hips, slightly elongated. Increases in prevalence at low health. At overhead, a slim ped takes up less surface area, creating visible visual thinning of the crowd when the population is starving.
 
-**Production**: Three distinct base mesh variants (`ped_man_00_slim`, `ped_man_00_fit`, `ped_man_00_fat`) with faction outfits applied as overlaid geometry or swapped mesh components.
+**Production**: Three distinct base mesh variants per outfit type. **Generic civilian peds** carry 3 material slots (skin, torso, pants). **Outfit peds** (army, business, thief, protestor) carry 2 material slots (skin, outfit). See §6.7.2 for material structure and §10.6 for full naming convention.
 
 #### 6.3.3 Skin Tone Variation
 
@@ -699,7 +699,7 @@ Faction reps are static posed models — no expression animation, no idle moveme
 
 **Material approach**: MeshStandardMaterial with a single material per character. Faction costume color encoded in material `color` property. Face and hands use a single skin-tone material. Medal geometry on the Military rep uses a separate material (gold: `#c0a000`) — this is the only additional draw call per character. Each faction rep: 2 draw calls maximum.
 
-**Texture map policy**: Texture maps are optional (not required). If used, they must be 512×512 maximum per character, and must maintain the flat-shaded visual character of the MeshStandardMaterial style — no photorealistic gradients, no normal maps, no roughness/metallic maps. The 3D models must not read as more detailed than the pixel-art UI frame around them. Handpainted diffuse-only textures at 512×512 are acceptable for face detail that cannot be achieved with geometry alone.
+**Texture map policy**: Texture maps are optional (not required). If used, they must be **64×64 maximum** with a **256-color indexed palette** (PNG-8 or quantized PNG-24 to ≤256 colors). No photorealistic gradients, no normal maps, no roughness/metallic maps. The 3D models must not read as more detailed than the pixel-art UI frame around them. Handpainted flat-color diffuse textures at 64×64 are acceptable for face and costume detail that cannot be achieved with geometry alone.
 
 **Face standard**: Faces use 4–6 flat material or painted zones: skin base, brow-shadow zone (handled by geometry), eye/iris (recessed dark), and lip line (slight darkening of skin base). All zones remain flat or mildly painted — no gradient bakes.
 
@@ -716,9 +716,14 @@ Faction reps are static posed models — no expression animation, no idle moveme
 
 **Draw call budget**: 25 draw calls maximum for the entire 25-ped crowd, achieved by `InstancedMesh` grouping peds by body-type + outfit combination. Each instance group: 2 materials (outfit + skin) = 2 draw calls. With up to 12 active instance groups in a typical mid-game state: ~24 draw calls for the crowd.
 
-**Material approach**: One MeshStandardMaterial per outfit type (civilian, army, business, protestor-outfit). Skin tone variation via 5 skin mesh variants per body type — no per-ped material swaps.
+**Material approach**: Material slot count differs by ped type:
+- **Generic civilian peds** (`ped_man_[bodytype]_civilian`): 3 materials — skin, torso, pants. Allows independent colour variation per layer without separate mesh variants.
+- **Outfit peds** (`ped_man_[bodytype]_army/business/thief`): 2 materials — skin, outfit. Outfit covers torso and pants in one unified faction signal.
+- **Protestor ped** (`ped_special_man_protestor`): 2 materials — skin, outfit. Sign geometry uses the outfit material.
 
-**Texture map policy**: Same as §6.7.1 — optional, 512×512 max, smooth-shaded only. For crowd peds viewed exclusively overhead, texture maps are rarely necessary; material color is sufficient.
+Skin tone variation via 5 skin material values applied to face/hand geometry only — no per-ped material swaps.
+
+**Texture map policy**: Same as §6.7.1 — optional, 64×64 max, 256-color indexed palette, smooth-shaded only. For crowd peds viewed exclusively overhead, texture maps are rarely necessary; material color is sufficient.
 
 **Minimum readable silhouette**: A citizen ped at overhead distance must resolve as a distinct shape of at least 8×12 pixels at 1920×1080.
 
@@ -820,6 +825,10 @@ The player must read the setting's era and economic state from the building silh
 Peds walk on the full sidewalk width on both sides only — not in the road.
 
 #### 7.2.3 Infrastructure Tier Visual Escalation
+
+**Building architecture**: The street features **5 building types**. Each type has **3 separate FBX variants** — one per infrastructure tier (poor/normal/rich) — swapped at runtime based on the infra level. This gives 15 building FBX files total (5 types × 3 tiers). The 5 types are: apartment block, low-rise residential, commercial/market, civic/government, office/mixed-use. Naming convention: `env_bld_[type]_[tier].FBX` (e.g., `env_bld_apartment_poor.FBX`).
+
+**Skyline and Plaza**: Unlike buildings, the skyline silhouette and plaza/ground are **one FBX mesh each** with **three texture variants** (poor/normal/rich) swapped by infra level. This works because their geometry does not change between tiers — only the painted surface does.
 
 Tier transition is cumulative: Normal inherits surviving elements from Poor and adds assets; Rich inherits from Normal and adds further.
 
@@ -946,7 +955,7 @@ All environment assets use **MeshStandardMaterial**, identical in type to charac
 
 | Rule | Environment assets |
 |------|--------------------|
-| Maximum resolution | 256×256 per asset (characters are 512×512) |
+| Maximum resolution | 64×64 per asset (same limit as characters) |
 | Style | Flat-painted, no photorealistic gradients, no normal maps, no roughness/metallic maps |
 | What texture maps solve | Surface irregularity not achievable with material color alone (patching, stains, graffiti decals, pothole decals) |
 | Format | PNG with alpha channel where decal compositing is required |
@@ -1318,6 +1327,33 @@ All UI visual effects are CSS-only (Section 8.3). The advance-ring spin (`animat
 
 If a future feature requires effects that cannot be achieved with lighting + UV animation + CSS, it requires a draw call budget analysis and explicit architectural decision before implementation.
 
+### 9.5 Animated Sprite Definition — `ANIMATED_SPRITES` Constant
+
+For props that combine a static base mesh with a UV-animated sprite plane (e.g., `env_trash_can_burning_small.FBX` with its fire plane), animation parameters are centralised in `src/Constants/AnimatedSprites.ts`:
+
+```ts
+export const ANIMATED_SPRITES: Record<string, {
+  meshName: string;   // sub-mesh name within the FBX that carries the animated texture
+  textureX: number;   // pixel width of one animation frame
+  textureY: number;   // pixel height of one animation frame
+  frames: number;     // total frame count in the sprite strip
+  frameRate: number;  // target animation speed (frames per second)
+}[]> = {
+  env_trash_can_burning_small: [{
+    meshName: 'sprite',
+    textureX: 256,
+    textureY: 256,
+    frames: 4,
+    frameRate: 10,
+  }],
+  // register future animated props here
+};
+```
+
+**Artist instruction**: The animated sprite plane sub-mesh within any FBX must be named exactly `"sprite"`. The runtime animation system resolves entries by FBX filename at load time. If an entry is missing, the sprite plane renders as a static texture.
+
+**Sprite sheets are exempt from the 64×64 texture limit** (§10.3). The fire sprite sheet is 256×1024 (4 × 256×256 frames). Future animated sprite sheets should keep individual frame size ≤ 256×256.
+
 ---
 
 ## Section 10: Asset Standards
@@ -1352,18 +1388,22 @@ This section consolidates all technical production standards established across 
 
 | Context | Maximum resolution | Color space | Notes |
 |---------|-------------------|-------------|-------|
-| Faction rep face / skin | 512×512 | sRGB | Optional — material color may substitute. Flat-painted only, no photorealistic gradients. |
-| Environment decal (graffiti, stains, potholes) | 256×256 | sRGB + alpha | Required to have alpha channel for compositing. |
-| Sprite sheet (fire animation) | 256×1024 | sRGB | 4 frames at 256×256 each, vertical strip. |
-| Any other asset | 256×256 | sRGB | Hard limit. Larger textures are rejected. |
+| All 3D asset diffuse textures (chars, environment) | 64×64 | sRGB | 256-color indexed palette (PNG-8 or quantized). Hard limit — larger textures are rejected. |
+| Environment decal (graffiti, stains, potholes) | 64×64 | sRGB + alpha | Alpha channel required for compositing. 256-color indexed. |
+| Sprite sheet (fire animation) | 256×1024 | sRGB | 4 frames at 256×256 each, vertical strip. Sprite animation sheets are exempt from the 64×64 limit. |
+| Icon sprite sheet | 32×32 per icon | sRGB + alpha | `assets/icons.png` — existing grid. Not a 3D asset texture. |
 
 **MeshStandardMaterial does not use PBR texture channels.** Do not deliver `_roughness`, `_metalness`, `_normal`, or `_AO` maps. Only `map` (diffuse/color) is consumed.
 
 ### 10.4 Material Standards
 
-All 3D assets use `THREE.MeshStandardMaterial` with a single `gradientMap` (a 2-pixel 2-step ramp — dark band / light band — for toon shading). Do not use `MeshStandardMaterial` except for road and sidewalk plane surfaces (see Section 7.4).
+All 3D assets use `THREE.MeshStandardMaterial` with smooth shading — no flat shading, no toon shading, no `gradientMap`, no `MeshToonMaterial`. `MeshStandardMaterial` is the standard for all characters, crowd peds, and environment props.
 
-**Material per-asset**: Each asset should have the minimum number of material slots necessary — typically 1–2. Each material slot is one draw call when not instanced. Faction reps may have 2 (body + medal). Citizen peds have 2 (outfit + skin). All other assets: 1 material preferred; 2 materials if a second material is necessary (e.g., lamp + pole on a streetlight).
+**Material per-asset**: Each asset should have the minimum number of material slots necessary. Each material slot is one draw call when not instanced.
+- Faction reps: 2 materials (body + medal)
+- Generic civilian peds: 3 materials (skin + torso + pants)
+- Outfit peds (army, business, thief, protestor): 2 materials (skin + outfit)
+- All other assets: 1 material preferred; 2 materials if strictly necessary (e.g., lamp + pole on a streetlight)
 
 **Color encoding**: Assign base colors via `MeshStandardMaterial.color`. Do not embed color in texture where `color` alone is sufficient — this simplifies material swapping for faction outfit variants.
 
@@ -1371,11 +1411,16 @@ All 3D assets use `THREE.MeshStandardMaterial` with a single `gradientMap` (a 2-
 
 | Parameter | Requirement |
 |-----------|-------------|
-| Rig system | Bone-based armature, no blend shapes |
+| Rig system | **3ds Max Biped**; exported as bone-based armature in FBX. No blend shapes, no physics rigging, no cloth simulation. |
 | Bone count (citizen peds) | ≤ 9 bones: hips, L/R upper leg, L/R lower leg, spine, head, L/R upper arm |
 | Bone count (faction reps) | 0 bones (static pose, no animation) |
-| Walk cycle | 4–6 keyframes, looping seamlessly |
-| Timeline | Walk cycle embedded in FBX at frames 0–N. If carrying a protest sign: sign bone is a child of the right wrist bone. |
+| Animation clips (citizen peds) | Four clips embedded in the ped FBX: `idle`, `walk`, `protest`, `thief_sneak_walk` |
+| `idle` | 4–8 keyframes; looping subtle weight-shift. All ped types include this clip. |
+| `walk` | 4–6 keyframes; looping seamlessly. All ped types include this clip. |
+| `protest` | 12–16 keyframes; sign held up, slight sway. Protestor peds only; other ped types may omit. |
+| `thief_sneak_walk` | 8–12 keyframes; torso forward, low centre of gravity, quick steps. Thief peds only; other ped types may omit. |
+| Three.js retargeting | Three.js `AnimationMixer` with `THREE.AnimationClip` supports Biped FBX animation. Ensure Biped bone names export with standard names so clips can be retargeted across body-type variants of the same ped at runtime. |
+| Sign bone | Protest sign attaches as a child bone of the right wrist; included in `protest` clip only. |
 
 No physics-based rigging, no secondary motion, no cloth simulation. Rig complexity above the 9-bone budget requires architectural review.
 
@@ -1391,6 +1436,12 @@ No physics-based rigging, no secondary motion, no cloth simulation. Rig complexi
 | Environment prop — large | `env_[object]_large.FBX` | `env_tank_large.FBX` |
 | Statue | `env_statue_[material]_[style]_large.FBX` | `env_statue_bronze_standing_large.FBX` |
 | Environment texture / decal | `env_[object]_[descriptor]_[size].png` | `env_wall_stain_small.png` |
+| Building mesh (tier variant) | `env_bld_[type]_[tier].FBX` | `env_bld_apartment_poor.FBX` |
+| Skyline mesh | `env_skyline.FBX` | — one mesh, three texture variants |
+| Skyline texture variant | `env_skyline_[tier].png` | `env_skyline_poor.png` |
+| Plaza mesh | `env_plaza.FBX` | — one mesh, three texture variants |
+| Plaza texture variant | `env_plaza_[tier].png` | `env_plaza_normal.png` |
+| Vehicle | `env_[car\|bike]_[variant]_[size].FBX` | `env_car_01_medium.FBX` |
 
 **Versioning**: Use `_01`, `_02` etc. for iteration. Retire old versions by removing from `assets/` — do not keep unused variants in the bundle.
 
@@ -1405,6 +1456,25 @@ Before committing any 3D asset:
 - [ ] Walk cycle (if applicable) loops seamlessly at frames 0–N
 - [ ] Asset renders correctly under Standard Gameplay lighting (Section 5.2) AND its minimum scene lighting state (see Section 5.10 matrix)
 - [ ] Scene draw call count with asset added: still ≤ 100 total
+
+---
+
+### 10.8 Vehicle Mesh Split
+
+All car and bike FBX files are split into **four named sub-meshes** to support runtime colour variation and math-driven wheel rotation:
+
+| Sub-mesh name | Purpose |
+|---------------|---------|
+| `body` | Main vehicle body — the only sub-mesh that accepts colour swaps for vehicle variation |
+| `lights` | Headlights and taillights — separated to allow emissive material toggle at night / pressure states |
+| `wheels_front` | Front wheel pair — rotation driven by a `useFrame` math function (`wheel.rotation.x += velocity / wheelRadius`), **not** by animation keyframes |
+| `wheels_back` | Rear wheel pair — same approach as `wheels_front` |
+
+**No wheel animation is embedded in the FBX.** The FBX contains only the static T-pose with all four sub-meshes named exactly as above. Wheel rotation is applied at runtime.
+
+**Polygon budget**: Body + lights: < 300 tri total. Each wheel mesh: < 50 tri. Total per vehicle: < 500 tri.
+
+**Naming convention**: `env_car_[variant]_[size].FBX`, `env_bike_[variant]_[size].FBX`
 
 ---
 
@@ -1467,7 +1537,7 @@ Authoritative consolidated list. Each prohibition states what is forbidden and w
 - **No smiling on any faction representative.** The Business rep may appear faintly pleasant — not warm.
 - **No per-ped text labels in the 3D scene.** At 12–16px effective ped height, text is unreadable. Citizen information belongs in the screen-space inspect panel.
 - **No PBR texture channels on any character asset.** Deliver only a `map` (diffuse/color). `_roughness`, `_metalness`, `_normal`, and `_AO` maps are not consumed by `MeshStandardMaterial`.
-- **No texture maps exceeding 512×512 for characters.** All other character textures: 256×256 or below.
+- **No texture maps exceeding 64×64 for any 3D asset.** All character and environment diffuse textures: 64×64, 256-color indexed palette (PNG-8 or equivalent). Sprite animation sheets (fire, icons) are exempt from this limit.
 - **No single asset file exceeding 1,500 triangles.**
 - **No bone count above 9 for citizen peds.** No physics rigging, secondary motion, or cloth simulation.
 
@@ -1485,8 +1555,8 @@ Authoritative consolidated list. Each prohibition states what is forbidden and w
 - **No assets taller than 1.5 units in Street View** without explicit exception (statues, palm trees, searchlights).
 - **No assets taller than 2.5 units in the Meet tab position.**
 - **No props in the intermediate zone** (1.5–3 meters depth between faction reps and back wall).
-- **No texture maps exceeding 256×256 for environment assets.**
-- **No MeshStandardMaterial on environment props.** Exception: road surface and sidewalk planes only.
+- **No texture maps exceeding 64×64 for environment assets.** Same indexed-palette limit as characters.
+- **No toon shading or flat shading on any asset.** All assets use `MeshStandardMaterial` smooth shading — no `MeshToonMaterial`, no `gradientMap`, no `flatShading: true`.
 
 ---
 
