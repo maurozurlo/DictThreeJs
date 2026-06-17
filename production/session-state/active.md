@@ -306,7 +306,7 @@ Task: Implemented — pending story-done
 - File: design/gdd/citizen-simulation.md — ALL 11 sections written (Overview → Open Questions). Status: Draft, pending /design-review.
 - Model: 25 persistent citizens (born name/skin/faction, fixed split 11 people/7 army/7 business). Per-round: happiness (Will's formula) → employment → role fork (content/neutral/thief/protestor/gone via happiness × education) → death. Feedback: peopleRelation -= min(floor(protestorCount/3), 5); treasury -= thiefCount*2.
 - New constants (proposed, all tuning knobs): GONE_CHANCE=0.15, HEALTH_DEATH_THRESHOLD=3, DEATH_RATE_MAX=0.15, PROTEST_DIVISOR=3, PROTEST_FEEDBACK_CAP=5 (NEW safety rail, not in Will's draft), THIEF_SKIM=2.
-- New feature added mid-session (user idea): displayedPopulation HUD = round(aliveCount/25 * 5,924,511) [Cuba 1950]; ~237k/death. §4.8.
+- New feature added mid-session (user idea): displayedPopulation HUD = round(aliveCount/25 * BASE_POPULATION); ~237k/death at default scale. §4.8.
 - Click-to-inspect citizen feature speced in UI Requirements (AC-16).
 - NEW asset required: ped_special_man_protestor (registered in entities.yaml + flagged for /asset-spec).
 - Trimmed street-view.md: §3.4-3.6 + all of §4 + citizen edge/tuning/AC replaced with pointers to citizen-simulation.md. Environment half (assets/buildings/statues/clickables) retained.

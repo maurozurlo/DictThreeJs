@@ -8,11 +8,6 @@
 }
 
 @font-face {
-  font-family: '8-BIT WONDER';
-  src: url('/assets/fonts/8-BIT WONDER.ttf') format('truetype');
-}
-
-@font-face {
   font-family: 'Bitmgothic';
   src: url('/assets/fonts/Bitmgothic.ttf') format('truetype');
 }

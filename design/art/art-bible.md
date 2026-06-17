@@ -533,7 +533,7 @@ At overhead camera distance, individual face detail vanishes. A citizen ped read
 
 **Silhouette priority rule**: Every character archetype must be distinguishable from every other archetype using only a black filled silhouette against a white background. If two characters are not distinguishable as silhouettes, one of them must be redesigned before texture or color work begins.
 
-**The retro signal is the era, not the execution.** Low-poly models read as retro through the 1950s Latin American setting, historical costume, and MeshToonMaterial flat shading. The pixel aesthetic is the UI frame around them; the models inside that frame are low-poly but not intentionally degraded.
+**The retro signal is the era, not the execution.** Low-poly models read as retro through historical costume and MeshStandardMaterial smooth shading. The pixel aesthetic is the UI frame around them; the models inside that frame are low-poly but not intentionally degraded.
 
 ---
 
@@ -550,7 +550,7 @@ The lighting context (Section 5.3) produces a steep amber key from above-left wi
 **Silhouette feature**: The peaked military cap — a horizontal brim projecting beyond the skull line with a tall rigid crown. Nothing else in the character set produces this shape. Exaggerate the cap height by approximately 20% over realistic proportion to read clearly at thumbnail.
 
 **Costume and prop elements**:
-1. Full dress uniform in deep olive-green (`#3d4a1a`) or slate-blue-grey (`#2d3845`). A single flat material color — 1950s parade uniform, not fatigues.
+1. Full dress uniform in deep olive-green (`#3d4a1a`) or slate-blue-grey (`#2d3845`). A single flat material color — period dress uniform, not fatigues.
 2. Chest medals — at least three, placed center-left chest. Model as flat disc-plus-ribbon geometry. At close-up they signal rank; at overhead they break up the silhouette.
 3. Sam Browne belt — a diagonal strap from left shoulder to right hip creates a strong torso silhouette diagonal.
 
@@ -564,7 +564,7 @@ The lighting context (Section 5.3) produces a steep amber key from above-left wi
 
 **Dominant archetype**: The Oligarch's Fixer. Late 40s, groomed, slightly soft around the middle. Gets what he wants by being indispensable, not by being feared.
 
-**Silhouette feature**: The double-breasted suit with wide lapels — a distinctive V-shape at the upper chest. Squared, padded shoulders (1950s cut). The shoulder line is the silhouette identifier.
+**Silhouette feature**: The double-breasted suit with wide lapels — a distinctive V-shape at the upper chest. Squared, padded shoulders (classic wide-shouldered cut). The shoulder line is the silhouette identifier.
 
 **Costume and prop elements**:
 1. Double-breasted suit in charcoal or dark brown (`#2a1e14`) with visible button rows. Light-value necktie (cream or pale gold) — the only warm color in the ensemble, creating a vertical accent from throat to waist.
@@ -622,7 +622,7 @@ Body type (fat / fit / slim) is a fixed identity attribute that makes individual
 
 #### 6.3.3 Skin Tone Variation
 
-Skin values 0–4 map to five distinct `MeshStandardMaterial` values on face/hand geometry only (torso is covered by faction outfit). Range runs from light warm-olive to deep brown, consistent with the 1950s Latin American setting. Validate all five values under Meet tab lighting (Section 5.3) to ensure legibility under the amber key before use in crowd.
+Skin values 0–4 map to five distinct `MeshStandardMaterial` values on face/hand geometry only (torso is covered by faction outfit). Range runs from light warm-olive to deep brown, covering a broad human range. Validate all five values under Meet tab lighting (Section 5.3) to ensure legibility under the amber key before use in crowd.
 
 ---
 
@@ -656,7 +656,7 @@ The Business rep's padded shoulders, briefcase, button rows — horizontal lines
 The People rep and civilian peds have the fewest strong geometric features. The game's thesis is that individuals in the "People" category are most interchangeable to the dictator. The visual language reinforces this by giving them the least distinguishing geometry.
 
 **Forbidden shape categories**:
-1. **Round cartoon proportions are prohibited.** Heads must not exceed 1/7 of total body height. No chibi or exaggerated proportions. The 1950s realism must hold.
+1. **Round cartoon proportions are prohibited.** Heads must not exceed 1/7 of total body height. No chibi or exaggerated proportions. Realistic proportions must hold.
 2. **Soft curved silhouettes on institutional characters are prohibited.** Military and Business reps must have at least three angular inflection points in their silhouette. Rounded shoulders on the General produce a friendly read that contradicts transactional menace.
 3. **Symmetrical poses are permitted only for the Military rep.** The Business rep's briefcase asymmetry and the People rep's defensive posture must break symmetry. A fully symmetrical People rep reads as confident — wrong.
 4. **Oversized accessories are prohibited.** Props must not exceed 15% of character total height from the primary camera angle. Exception: the protest sign (see §6.4).
@@ -695,20 +695,20 @@ Faction reps are static posed models — no expression animation, no idle moveme
 
 #### 6.7.1 Faction Representatives (Close-Up — Meet Tab)
 
-**Polygon budget**: 800–1,200 triangles per faction rep. MeshToonMaterial flat shading.
+**Polygon budget**: 800–1,200 triangles per faction rep. MeshStandardMaterial smooth shading.
 
-**Material approach**: MeshToonMaterial with a single material per character. Faction costume color encoded in material `color` property. Face and hands use a single skin-tone material. Medal geometry on the Military rep uses a separate material (gold: `#c0a000`) — this is the only additional draw call per character. Each faction rep: 2 draw calls maximum.
+**Material approach**: MeshStandardMaterial with a single material per character. Faction costume color encoded in material `color` property. Face and hands use a single skin-tone material. Medal geometry on the Military rep uses a separate material (gold: `#c0a000`) — this is the only additional draw call per character. Each faction rep: 2 draw calls maximum.
 
-**Texture map policy**: Texture maps are optional (not required). If used, they must be 512×512 maximum per character, and must maintain the flat-shaded visual character of the MeshToonMaterial style — no photorealistic gradients, no normal maps, no roughness/metallic maps. The 3D models must not read as more detailed than the pixel-art UI frame around them. Handpainted diffuse-only textures at 512×512 are acceptable for face detail that cannot be achieved with geometry alone.
+**Texture map policy**: Texture maps are optional (not required). If used, they must be 512×512 maximum per character, and must maintain the flat-shaded visual character of the MeshStandardMaterial style — no photorealistic gradients, no normal maps, no roughness/metallic maps. The 3D models must not read as more detailed than the pixel-art UI frame around them. Handpainted diffuse-only textures at 512×512 are acceptable for face detail that cannot be achieved with geometry alone.
 
 **Face standard**: Faces use 4–6 flat material or painted zones: skin base, brow-shadow zone (handled by geometry), eye/iris (recessed dark), and lip line (slight darkening of skin base). All zones remain flat or mildly painted — no gradient bakes.
 
-**Delivery format**: GLB, Y-up, meter scale. One file per faction rep. No embedded animations.
+**Delivery format**: FBX, Y-up, meter scale. One file per faction rep. No embedded animations.
 
 **Asset naming**:
-- `char_military_rep_idle_01.glb`
-- `char_business_rep_idle_01.glb`
-- `char_people_rep_idle_01.glb`
+- `char_military_rep_idle_01.FBX`
+- `char_business_rep_idle_01.FBX`
+- `char_people_rep_idle_01.FBX`
 
 #### 6.7.2 Citizen Peds (Overhead — Street View)
 
@@ -716,19 +716,19 @@ Faction reps are static posed models — no expression animation, no idle moveme
 
 **Draw call budget**: 25 draw calls maximum for the entire 25-ped crowd, achieved by `InstancedMesh` grouping peds by body-type + outfit combination. Each instance group: 2 materials (outfit + skin) = 2 draw calls. With up to 12 active instance groups in a typical mid-game state: ~24 draw calls for the crowd.
 
-**Material approach**: One MeshToonMaterial per outfit type (civilian, army, business, protestor-outfit). Skin tone variation via 5 skin mesh variants per body type — no per-ped material swaps.
+**Material approach**: One MeshStandardMaterial per outfit type (civilian, army, business, protestor-outfit). Skin tone variation via 5 skin mesh variants per body type — no per-ped material swaps.
 
-**Texture map policy**: Same as §6.7.1 — optional, 512×512 max, flat-shaded only. For crowd peds viewed exclusively overhead, texture maps are rarely necessary; material color is sufficient.
+**Texture map policy**: Same as §6.7.1 — optional, 512×512 max, smooth-shaded only. For crowd peds viewed exclusively overhead, texture maps are rarely necessary; material color is sufficient.
 
 **Minimum readable silhouette**: A citizen ped at overhead distance must resolve as a distinct shape of at least 8×12 pixels at 1920×1080.
 
 **Walk cycle**: 4–6 frame bone animation. Minimal armature: 9 bones maximum (hips, two leg chains, two arm chains, spine, head). No facial bones. Protest sign attaches to a wrist bone.
 
 **Asset naming examples**:
-- `ped_man_fit_civilian_01.glb`
-- `ped_man_fat_army_01.glb`
-- `ped_man_slim_business_01.glb`
-- `ped_special_man_protestor.glb`
+- `ped_man_fit_civilian_01.FBX`
+- `ped_man_fat_army_01.FBX`
+- `ped_man_slim_business_01.FBX`
+- `ped_special_man_protestor.FBX`
 
 ---
 
@@ -764,7 +764,7 @@ Three faction representatives occupy fixed positions that communicate faction pr
 
 **Background and walls**: Warm off-white or pale gold flat planes. Any framed painting on the wall is low-poly frame geometry + flat canvas material (no handpainted detail; the painting reads as "A Painting" from its shape). Blocky chandeliers or ceiling fixtures may be present if already in scene — do not add them if not already there.
 
-**Tone note**: This scene should feel slightly absurd. A military man at permanent salute while a businessman lounges on a full-length couch while a civilian sits on a chair that was dragged in — the visual composition *is* the joke, without ever pointing at itself.
+**Tone note**: This scene should feel slightly absurd. A military man at permanent salute while a businessman lounges on a full-length couch while a civilian sits on a chair that was dragged in — the visual composition *is* the joke, without ever pointing at itself. Paintings inspired by The Dark Paintings of Goya.
 
 #### 7.1.3 Future — Elimination Animations
 
@@ -796,7 +796,7 @@ The Laws tab camera shows the dictator's working office within the palace. Alrea
 
 #### 7.2.1 Architectural Vocabulary
 
-The buildings lining both sides of the street are **colonial Spanish vernacular**, inflected by 1950s-era institutional expansion. Colonial-era one-and-two-story street-facing structures appended upward with cheap concrete additions. The silhouette is irregular: the original colonial ground floor (stucco over brick, low arched openings, tile roof overhang) topped by a 1940s or 1950s concrete upper floor (flat roof, simple rectangular windows, no ornament).
+The buildings lining both sides of the street are **colonial vernacular**, inflected by mid-century institutional expansion. Original one-and-two-story street-facing structures appended upward with cheap concrete additions. The silhouette is irregular: the original ground floor (stucco over brick, low arched openings, tile roof overhang) topped by a mid-century concrete upper floor (flat roof, simple rectangular windows, no ornament).
 
 **Required on all building variants regardless of infrastructure tier**:
 - Stucco (smooth plaster) exterior surfaces — never glass, never steel cladding.
@@ -806,7 +806,7 @@ The buildings lining both sides of the street are **colonial Spanish vernacular*
 
 **Absolutely forbidden on buildings**: Glass curtain walls or large horizontal window bands; metal panel cladding; contemporary proportions; US residential vernacular (pitched gable roofs, vinyl siding); European townhouse vernacular (mansard roofs, stone facades).
 
-The player must read "Latin American" from the building silhouettes alone.
+The player must read the setting's era and economic state from the building silhouettes alone.
 
 #### 7.2.2 Base Street Layout — Permanent Features
 
@@ -828,7 +828,7 @@ Tier transition is cumulative: Normal inherits surviving elements from Poor and 
 Building stucco: grey-brown with visible patching (`#5a4c38` base, irregular darker patches `#3a3028`). Terracotta eave tiles: some absent (small dark gaps in tile row geometry).
 
 Key assets:
-- **Burning Trash Can** (`env_trash_can_burning_small.glb`) — 4 instances along sidewalks, approximately one per building frontage. Fire is a 4-frame UV-scroll animated plane on a sprite sheet (no particle emitter — per no-particle-systems constraint in Section 5). Each carries a PointLight: color `#ff4400`, intensity 0.8, decay 3.
+- **Burning Trash Can** (`env_trash_can_burning_small.FBX`) — 4 instances along sidewalks, approximately one per building frontage. Fire is a 4-frame UV-scroll animated plane on a sprite sheet (no particle emitter — per no-particle-systems constraint in Section 5). Each carries a PointLight: color `#ff4400`, intensity 0.8, decay 3.
 - **Pothole Decal** — 10 instances, flat decal planes in road surface (~0.3 × 0.4 units each), cracked asphalt `#0d0c09` with irregular lighter edge `#2a2420`. Scattered across both lanes, not symmetrically placed.
 - **Improvised market awning** — corrugated-metal flat plane (`#6a6860`) at ground level on one building frontage.
 
@@ -837,7 +837,7 @@ Key assets:
 Building stucco returns to faded warm buff (`#8a7860`). Tile row intact. Facade regularity restored.
 
 Key assets added:
-- **Streetlight** (`env_streetlight_standard_medium.glb`) — 4 instances, evenly spaced on both sidewalks. Pole: dark painted iron (`#2a2010`). Lamp: amber lens (`#c87820` + emissive `#c87820` at 0.4). PointLight per lamp: color `#c87820`, intensity 0.6, decay 4. The dictator's amber — the same accent-color frequency, manifesting as literal street lighting.
+- **Streetlight** (`env_streetlight_standard_medium.FBX`) — 4 instances, evenly spaced on both sidewalks. Pole: dark painted iron (`#2a2010`). Lamp: amber lens (`#c87820` + emissive `#c87820` at 0.4). PointLight per lamp: color `#c87820`, intensity 0.6, decay 4. The dictator's amber — the same accent-color frequency, manifesting as literal street lighting.
 - **Park Bench** — 6 instances in pairs, sidewalk against facades. Timber slats `#5a3a1a`, cast-iron ends `#1a1612`.
 - **Electric Pole** — 6 instances, alternating sides with streetlights.
 - **Tree** (replaces dead tree from Poor) — 10 instances. Simple geometric low-poly canopy (4–6 irregular plane cuts), warm dusty green (`#4a5a28`).
@@ -847,8 +847,8 @@ Key assets added:
 Building stucco freshly whitewashed (`#c8c0a8`) or pale government cream. The renovation is too uniform — clearly the result of a decree, not organic care. Window grilles freshly painted black, sharp geometric contrast against pale walls.
 
 Key assets added:
-- **Luxury Streetlight** (`env_streetlight_luxury_medium.glb`) — 6 instances, replacing standard. Taller pole, decorative scroll (`#c0a000` accent). PointLight: color `#c87820`, intensity 0.7, decay 4.5.
-- **Big Fountain** (`env_fountain_large.glb`) — 2 instances at focal points. Tiered stone basin. Water plane: MeshToonMaterial `#4080a0`, emissive `#204060` at 0.2. Fountain PointLight: color `#4080c0`, intensity 0.4, decay 5 — the only cool-toned light source in the game.
+- **Luxury Streetlight** (`env_streetlight_luxury_medium.FBX`) — 6 instances, replacing standard. Taller pole, decorative scroll (`#c0a000` accent). PointLight: color `#c87820`, intensity 0.7, decay 4.5.
+- **Big Fountain** (`env_fountain_large.FBX`) — 2 instances at focal points. Tiered stone basin. Water plane: MeshStandardMaterial `#4080a0`, emissive `#204060` at 0.2. Fountain PointLight: color `#4080c0`, intensity 0.4, decay 5 — the only cool-toned light source in the game.
 - **Palm Tree** — 10 instances, replacing standard Trees. Tapered trunk (`#6a4820`), splayed frond canopy planes (`#3a5020`).
 - **Luxury Garden** — 2 instances. Low bush geometry (`#3a4a18`) inside stone border (`#8a8070`).
 - **Statue Pedestals** (3, always present in all tiers) — see §7.2.5.
@@ -862,14 +862,14 @@ Security props are an overlay layer — placed in addition to, never instead of,
 **Disorder Tier**: Empty. No security props. The visual signal is absence — the player's eye searches for authority and finds none.
 
 **Controlled Tier**:
-- **Guard Post** (`env_guard_post_small.glb`) — 2 instances, anchoring both ends of the block. Olive-grey paint (`#505840`). A low rectangular booth with square window openings, no glass.
-- **Security Camera Pole** (`env_camera_pole_medium.glb`) — 4 instances at regular intervals along building facades at second-floor height. Thin pole, small camera head angled 45° downward. Painted metal grey (`#4a4a40`). Deliberately difficult to notice until the player looks — the player should feel watched before they consciously see the cameras.
+- **Guard Post** (`env_guard_post_small.FBX`) — 2 instances, anchoring both ends of the block. Olive-grey paint (`#505840`). A low rectangular booth with square window openings, no glass.
+- **Security Camera Pole** (`env_camera_pole_medium.FBX`) — 4 instances at regular intervals along building facades at second-floor height. Thin pole, small camera head angled 45° downward. Painted metal grey (`#4a4a40`). Deliberately difficult to notice until the player looks — the player should feel watched before they consciously see the cameras.
 
 **Militarised Tier**:
-- **Tank** (`env_tank_large.glb`) — 2 instances. Parked on road at opposing ends, pointing toward center. Dark olive (`#2a3018`). The tank's mass creates a shadow presence even under strong overhead lighting.
-- **Cannon** (`env_cannon_medium.glb`) — 4 instances. Field artillery on sidewalk, barrel pointing toward building facades — not toward the crowd, toward the buildings. Occupation directed at civilians.
-- **Machine Gun Nest** (`env_gun_nest_medium.glb`) — 2 instances. Sandbag U-shape at road center. Sandbag buff (`#7a6a50`).
-- **Searchlight** (`env_searchlight_large.glb`) — 2 instances. Drum-mount on tripod. Animated PointLight: position rotates around Y axis at ~0.5 rad/s, color `#d0e0ff`, intensity 1.2, decay 6. The only animated light and the only cool-toned light in this tier.
+- **Tank** (`env_tank_large.FBX`) — 2 instances. Parked on road at opposing ends, pointing toward center. Dark olive (`#2a3018`). The tank's mass creates a shadow presence even under strong overhead lighting.
+- **Cannon** (`env_cannon_medium.FBX`) — 4 instances. Field artillery on sidewalk, barrel pointing toward building facades — not toward the crowd, toward the buildings. Occupation directed at civilians.
+- **Machine Gun Nest** (`env_gun_nest_medium.FBX`) — 2 instances. Sandbag U-shape at road center. Sandbag buff (`#7a6a50`).
+- **Searchlight** (`env_searchlight_large.FBX`) — 2 instances. Drum-mount on tripod. Animated PointLight: position rotates around Y axis at ~0.5 rad/s, color `#d0e0ff`, intensity 1.2, decay 6. The only animated light and the only cool-toned light in this tier.
 
 **Prop placement philosophy for security assets**: Security props are placed on a fixed grid — not scattered randomly. Guard Posts always anchor the ends. Cameras always occupy regular intervals. Tanks always face each other. The geometric regularity of military occupation contrasts with the scattered irregularity of Disorder-tier infrastructure props.
 
@@ -881,9 +881,9 @@ Three Empty Statue Pedestals are permanently placed at positions visible from ov
 
 | Statue | Asset | Material |
 |--------|-------|---------|
-| Bronze (standing) | `env_statue_bronze_standing_large.glb` | `#7a5c28` |
-| Silver (equestrian) | `env_statue_silver_equestrian_large.glb` | `#9090a0` |
-| Golden (triumph) | `env_statue_gold_triumph_large.glb` | `#c0a000`, emissive `#6a5000` at 0.15 |
+| Bronze (standing) | `env_statue_bronze_standing_large.FBX` | `#7a5c28` |
+| Silver (equestrian) | `env_statue_silver_equestrian_large.FBX` | `#9090a0` |
+| Golden (triumph) | `env_statue_gold_triumph_large.FBX` | `#c0a000`, emissive `#6a5000` at 0.15 |
 
 Statue plaque at the base: flat stone geometry, facing camera. No text in scene — plaque text is rendered as UI in the click panel, not as scene geometry.
 
@@ -940,7 +940,7 @@ These four signals are read simultaneously, before any UI update, the moment the
 
 #### Environment vs. Character Material Parity
 
-All environment assets use **MeshToonMaterial**, identical in type to character art (Section 6). The exception already established in Section 6 applies equally: MeshStandardMaterial is acceptable for large flat ground planes (road surface, sidewalk) where overhead-angle toon-shading banding would be distracting rather than stylistic. These surfaces receive no specular highlight even in MeshStandardMaterial.
+All environment assets use **MeshStandardMaterial**, identical in type to character art (Section 6). The exception already established in Section 6 applies equally: MeshStandardMaterial is acceptable for large flat ground planes (road surface, sidewalk) where overhead-angle toon-shading banding would be distracting rather than stylistic. These surfaces receive no specular highlight even in MeshStandardMaterial.
 
 #### Texture Map Policy — Environment Assets
 
@@ -952,7 +952,7 @@ All environment assets use **MeshToonMaterial**, identical in type to character 
 | Format | PNG with alpha channel where decal compositing is required |
 | Naming | `env_[object]_[descriptor]_[size].png` |
 
-Most environment geometry does not require texture maps — material color variation handles all permanent architectural surfaces. Texture maps are reserved for: (1) decal overlays (graffiti, stains, potholes), (2) the protest sign face (off-white flat plane), and (3) the country map in the laws office if present.
+Most environment geometry requires texture maps. Texture maps used also for: (1) decal overlays (graffiti, stains, potholes), (2) the protest sign face (off-white flat plane), and (3) the country map in the laws office if present.
 
 #### Environment Color Palette Extension
 
@@ -1286,13 +1286,13 @@ All visual effects in the game are achieved through three alternative approaches
 
 **Used for**: Burning Trash Can fire (Section 7.2.3).
 
-A flat rectangular plane mesh (`THREE.PlaneGeometry`) uses a `MeshToonMaterial` with a sprite sheet `map` property. The UV coordinates scroll vertically at a fixed rate via `material.map.offset.y` updated each frame in the `useFrame` callback. A 4-frame fire sprite strip (256×1024 total, 4 frames at 256×256 each) creates the looping fire illusion.
+A flat rectangular plane mesh (`THREE.PlaneGeometry`) uses a `MeshStandardMaterial` with a sprite sheet `map` property. The UV coordinates scroll vertically at a fixed rate via `material.map.offset.y` updated each frame in the `useFrame` callback. A 4-frame fire sprite strip (256×1024 total, 4 frames at 256×256 each) creates the looping fire illusion.
 
 - Frame duration: ~100ms per frame (10fps animation on a 60fps scene)
 - UV scroll rate: `offset.y += 0.25` per frame (for a 4-frame strip at 60fps target: advance one frame every 6 render frames at 60fps ≈ 10fps animation rate)
 - The fire plane is double-sided (`THREE.DoubleSide`) and billboard-oriented (faces camera or faces up — to be determined by engineer based on overhead vs. front visibility)
-- Each fire plane instance shares the same `MeshToonMaterial` — material is not cloned per instance. UV scroll is applied to the shared material (same fire rate on all trash cans, which is acceptable — identical fire behavior reinforces the impression of systemic failure)
-- No PointLight is added per fire plane independently — the fire PointLight is on the `env_trash_can_burning_small.glb` prop, not on the plane. Plane is purely visual.
+- Each fire plane instance shares the same `MeshStandardMaterial` — material is not cloned per instance. UV scroll is applied to the shared material (same fire rate on all trash cans, which is acceptable — identical fire behavior reinforces the impression of systemic failure)
+- No PointLight is added per fire plane independently — the fire PointLight is on the `env_trash_can_burning_small.FBX` prop, not on the plane. Plane is purely visual.
 
 ### 9.2 Three.js Lighting Animations
 
@@ -1328,8 +1328,8 @@ This section consolidates all technical production standards established across 
 
 | Asset type | Format | Notes |
 |-----------|--------|-------|
-| 3D models (characters, environment) | GLB (binary glTF 2.0) | Y-up coordinate system, meter scale. One file per asset. |
-| Animations | Embedded in GLB | Walk cycles embedded in the ped GLB. Faction reps have no animation — idle pose only. |
+| 3D models (characters, environment) | FBX (binary glTF 2.0) | Y-up coordinate system, meter scale. One file per asset. |
+| Animations | Embedded in FBX | Walk cycles embedded in the ped FBX. Faction reps have no animation — idle pose only. |
 | Texture maps | PNG | Power-of-2 dimensions. Alpha channel required for decal compositing. sRGB color space. |
 | Icon sprites | PNG, single sheet | `assets/icons.png` — 32×32 sprites on a grid. New icons append to existing sheet. |
 | UI border assets | PNG | `assets/hudbg.png` (9-slice, 24px), `assets/button.png` (9-slice, 12px). These are existing assets; do not replace or modify. |
@@ -1357,15 +1357,15 @@ This section consolidates all technical production standards established across 
 | Sprite sheet (fire animation) | 256×1024 | sRGB | 4 frames at 256×256 each, vertical strip. |
 | Any other asset | 256×256 | sRGB | Hard limit. Larger textures are rejected. |
 
-**MeshToonMaterial does not use PBR texture channels.** Do not deliver `_roughness`, `_metalness`, `_normal`, or `_AO` maps. Only `map` (diffuse/color) is consumed.
+**MeshStandardMaterial does not use PBR texture channels.** Do not deliver `_roughness`, `_metalness`, `_normal`, or `_AO` maps. Only `map` (diffuse/color) is consumed.
 
 ### 10.4 Material Standards
 
-All 3D assets use `THREE.MeshToonMaterial` with a single `gradientMap` (a 2-pixel 2-step ramp — dark band / light band — for toon shading). Do not use `MeshStandardMaterial` except for road and sidewalk plane surfaces (see Section 7.4).
+All 3D assets use `THREE.MeshStandardMaterial` with a single `gradientMap` (a 2-pixel 2-step ramp — dark band / light band — for toon shading). Do not use `MeshStandardMaterial` except for road and sidewalk plane surfaces (see Section 7.4).
 
 **Material per-asset**: Each asset should have the minimum number of material slots necessary — typically 1–2. Each material slot is one draw call when not instanced. Faction reps may have 2 (body + medal). Citizen peds have 2 (outfit + skin). All other assets: 1 material preferred; 2 materials if a second material is necessary (e.g., lamp + pole on a streetlight).
 
-**Color encoding**: Assign base colors via `MeshToonMaterial.color`. Do not embed color in texture where `color` alone is sufficient — this simplifies material swapping for faction outfit variants.
+**Color encoding**: Assign base colors via `MeshStandardMaterial.color`. Do not embed color in texture where `color` alone is sufficient — this simplifies material swapping for faction outfit variants.
 
 ### 10.5 Rigging and Animation Standards
 
@@ -1375,7 +1375,7 @@ All 3D assets use `THREE.MeshToonMaterial` with a single `gradientMap` (a 2-pixe
 | Bone count (citizen peds) | ≤ 9 bones: hips, L/R upper leg, L/R lower leg, spine, head, L/R upper arm |
 | Bone count (faction reps) | 0 bones (static pose, no animation) |
 | Walk cycle | 4–6 keyframes, looping seamlessly |
-| Timeline | Walk cycle embedded in GLB at frames 0–N. If carrying a protest sign: sign bone is a child of the right wrist bone. |
+| Timeline | Walk cycle embedded in FBX at frames 0–N. If carrying a protest sign: sign bone is a child of the right wrist bone. |
 
 No physics-based rigging, no secondary motion, no cloth simulation. Rig complexity above the 9-bone budget requires architectural review.
 
@@ -1383,13 +1383,13 @@ No physics-based rigging, no secondary motion, no cloth simulation. Rig complexi
 
 | Asset category | Convention | Example |
 |---------------|------------|---------|
-| Faction representative | `char_[faction]_rep_idle_[version].glb` | `char_military_rep_idle_01.glb` |
-| Citizen ped | `ped_[gender]_[bodytype]_[outfit]_[version].glb` | `ped_man_fit_civilian_01.glb` |
-| Special citizen ped | `ped_special_[gender]_[role].glb` | `ped_special_man_protestor.glb` |
-| Environment prop — small | `env_[object]_small.glb` | `env_trash_can_burning_small.glb` |
-| Environment prop — medium | `env_[object]_medium.glb` | `env_streetlight_standard_medium.glb` |
-| Environment prop — large | `env_[object]_large.glb` | `env_tank_large.glb` |
-| Statue | `env_statue_[material]_[style]_large.glb` | `env_statue_bronze_standing_large.glb` |
+| Faction representative | `char_[faction]_rep_idle_[version].FBX` | `char_military_rep_idle_01.FBX` |
+| Citizen ped | `ped_[gender]_[bodytype]_[outfit]_[version].FBX` | `ped_man_fit_civilian_01.FBX` |
+| Special citizen ped | `ped_special_[gender]_[role].FBX` | `ped_special_man_protestor.FBX` |
+| Environment prop — small | `env_[object]_small.FBX` | `env_trash_can_burning_small.FBX` |
+| Environment prop — medium | `env_[object]_medium.FBX` | `env_streetlight_standard_medium.FBX` |
+| Environment prop — large | `env_[object]_large.FBX` | `env_tank_large.FBX` |
+| Statue | `env_statue_[material]_[style]_large.FBX` | `env_statue_bronze_standing_large.FBX` |
 | Environment texture / decal | `env_[object]_[descriptor]_[size].png` | `env_wall_stain_small.png` |
 
 **Versioning**: Use `_01`, `_02` etc. for iteration. Retire old versions by removing from `assets/` — do not keep unused variants in the bundle.
@@ -1401,7 +1401,7 @@ Before committing any 3D asset:
 - [ ] Triangle count within budget for its category (§10.2)
 - [ ] Texture resolution ≤ budget for its category (§10.3)
 - [ ] Material slot count ≤ 2
-- [ ] GLB is Y-up, meter scale
+- [ ] FBX is Y-up, meter scale
 - [ ] Walk cycle (if applicable) loops seamlessly at frames 0–N
 - [ ] Asset renders correctly under Standard Gameplay lighting (Section 5.2) AND its minimum scene lighting state (see Section 5.10 matrix)
 - [ ] Scene draw call count with asset added: still ≤ 100 total
@@ -1458,7 +1458,7 @@ Authoritative consolidated list. Each prohibition states what is forbidden and w
 
 #### A. 3D Characters
 
-- **No cartoon or chibi proportions.** Heads must not exceed 1/7 of total body height. The 1950s Latin American institutional register requires credible human scale.
+- **No cartoon or chibi proportions.** Heads must not exceed 1/7 of total body height. The game's institutional register requires credible human scale.
 - **No rounded silhouettes on the Military or Business faction representatives.** Both must have at least three angular inflection points in their full-body silhouette. Rounded shoulders on the General read as friendly — contradicts transactional menace.
 - **No symmetrical poses on the Business or People representatives.** Symmetrical People rep reads as confident — wrong.
 - **No oversized accessories.** Props must not exceed 15% of character total height from the primary camera angle. Exception: the protest sign (`ped_special_man_protestor`).
@@ -1466,10 +1466,8 @@ Authoritative consolidated list. Each prohibition states what is forbidden and w
 - **No open mouths or visible teeth.** Closed or slightly pressed-together lips are the bureaucratic resting state.
 - **No smiling on any faction representative.** The Business rep may appear faintly pleasant — not warm.
 - **No per-ped text labels in the 3D scene.** At 12–16px effective ped height, text is unreadable. Citizen information belongs in the screen-space inspect panel.
-- **No PBR texture channels on any character asset.** Deliver only a `map` (diffuse/color). `_roughness`, `_metalness`, `_normal`, and `_AO` maps are not consumed by `MeshToonMaterial`.
+- **No PBR texture channels on any character asset.** Deliver only a `map` (diffuse/color). `_roughness`, `_metalness`, `_normal`, and `_AO` maps are not consumed by `MeshStandardMaterial`.
 - **No texture maps exceeding 512×512 for characters.** All other character textures: 256×256 or below.
-- **No photorealistic gradients or baked lighting in textures.** Flat or mildly painted zones only.
-- **No MeshStandardMaterial on characters.** `MeshToonMaterial` exclusively.
 - **No single asset file exceeding 1,500 triangles.**
 - **No bone count above 9 for citizen peds.** No physics rigging, secondary motion, or cloth simulation.
 
@@ -1526,7 +1524,7 @@ Authoritative consolidated list. Each prohibition states what is forbidden and w
 
 - **No cool ambient light as a base.** The ambient floor is always warm. The searchlight sweep (`#d0e0ff`) and fountain accent (`#4080c0`) are accent point sources, not ambient fills.
 - **No particle emitters of any kind.** Fire is UV-scroll plane animation only.
-- **No custom GLSL or `ShaderMaterial`.** All Three.js materials are `MeshToonMaterial` or `MeshStandardMaterial` (road/sidewalk only).
+- **No custom GLSL or `ShaderMaterial`.** All Three.js materials are `MeshStandardMaterial` (road/sidewalk only).
 - **No post-processing passes.** No `EffectComposer`, bloom, depth of field, lens flare, god rays, or SSAO.
 - **No animated vertex displacement or morphTargets.**
 - **No HDR or custom tone mapping.** Three.js default tone mapping only.
@@ -1539,8 +1537,8 @@ Authoritative consolidated list. Each prohibition states what is forbidden and w
 
 ## Open Questions (Sprint 5+)
 
-- **8-BIT WONDER and Bitmgothic**: Both fonts are loaded but unused. Decide use case or remove from bundle.
-- **Dark-mode variant**: `--text-color-dark` and `--text-body-dark` exist but light-background UI is rare. Audit whether these are genuinely needed or dead tokens.
+- **8-BIT WONDER and Bitmgothic**: 8-BIT WONDER removed. Bitmgothic is used. Check actual code before suggesting stupid shit.
+- **Dark-mode variant**: `--text-color-dark` and `--text-body-dark` exist but light-background UI is rare. This is used for laws, it should never be removed.
 
 ### Resolved (2026-06-14)
 

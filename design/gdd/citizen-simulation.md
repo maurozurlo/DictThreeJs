@@ -246,7 +246,7 @@ A cosmetic projection of living citizens onto a real-world scale — display-onl
 displayedPopulation = round(aliveCount / TOTAL_CITIZENS * BASE_POPULATION)
 ```
 
-- `TOTAL_CITIZENS = 25`, `BASE_POPULATION = 5_924_511` (Cuba, 1950).
+- `TOTAL_CITIZENS = 25`, `BASE_POPULATION = 5_924_511` (tuning knob — set to match intended national scale).
 - Rule of three: 25 alive → 5,924,511; 0 alive → 0; linear between.
 - Each citizen ≈ **236,980** people, so a single death drops the counter by ~237k — the street shows one body, the HUD shows what one body means at scale.
 - Monotonic: population only shrinks (citizens are never added), so the number only ever falls.
