@@ -1,6 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handleActionOutcome } from './ActionHandler';
+import * as MathUtils from '../Utils/Math';
 import type { GameState } from '../types/GameState';
+
+// Seeded RNG (ADR-0010): control randomness by mocking the named Utils/Math
+// functions, never Math.random. Defaults below = "no backlash, mid dialogue roll";
+// each test overrides as needed. For threshold tests, rollChance is mocked with an
+// implementation that compares a fixed rolled value against the real probability
+// `p` that ActionHandler computes — so charisma's effect on the threshold is still
+// exercised, exactly as `next() < p` would behave.
+vi.mock('../Utils/Math', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../Utils/Math')>();
+    return {
+        ...actual,
+        rollChance: vi.fn((_p: number) => false),
+        rollFloat: vi.fn(() => 0.5),
+        getRandomFromList: vi.fn((arr: unknown[]) => arr[0]),
+    };
+});
 
 // Mock the effect handler
 vi.mock('./EffectHandler', () => ({
@@ -64,6 +81,11 @@ describe('handleActionOutcome', () => {
     let mockState: GameState;
 
     beforeEach(() => {
+        // Reset RNG mocks to defaults before each test (ADR-0010 contract).
+        vi.mocked(MathUtils.rollChance).mockReset().mockImplementation((_p: number) => false);
+        vi.mocked(MathUtils.rollFloat).mockReset().mockReturnValue(0.5);
+        vi.mocked(MathUtils.getRandomFromList).mockReset().mockImplementation((arr: unknown[]) => arr[0]);
+
         mockState = {
             budget: {
                 treasury: 200,
@@ -126,7 +148,7 @@ describe('handleActionOutcome', () => {
 
     describe('eliminate action', () => {
         it('should reset target power to neutral without backlash', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.5); // No backlash (>0.3)
+            vi.mocked(MathUtils.rollChance).mockReturnValue(false); // No backlash
             mockState.relations.current.military = 5;
 
             const result = handleActionOutcome('military', 'eliminate', mockState);
@@ -142,14 +164,11 @@ describe('handleActionOutcome', () => {
                     power: "military",
                 },
             });
-
-            vi.restoreAllMocks();
         });
 
         it('should trigger backlash and anger another power', () => {
-            vi.spyOn(Math, 'random')
-                .mockReturnValueOnce(0.1) // Backlash triggers (0.1 < 0.3)
-                .mockReturnValueOnce(0); // Select first other power
+            vi.mocked(MathUtils.rollChance).mockReturnValue(true); // Backlash triggers
+            // getRandomFromList default selects the first other power (business)
 
             mockState.relations.current.military = -5;
             mockState.relations.current.business = 2;
@@ -167,14 +186,10 @@ describe('handleActionOutcome', () => {
                     backlashDelta: -2,
                 },
             });
-
-            vi.restoreAllMocks();
         });
 
         it('should not anger the eliminated power during backlash', () => {
-            vi.spyOn(Math, 'random')
-                .mockReturnValueOnce(0.1) // Backlash triggers
-                .mockReturnValueOnce(0.5); // Random selection
+            vi.mocked(MathUtils.rollChance).mockReturnValue(true); // Backlash triggers
 
             const result = handleActionOutcome('military', 'eliminate', mockState);
 
@@ -183,36 +198,28 @@ describe('handleActionOutcome', () => {
             const angryPowers = Object.entries(result.newRelations)
                 .filter(([power, value]) => power !== 'military' && value === -2);
             expect(angryPowers.length).toBe(1);
-
-            vi.restoreAllMocks();
         });
 
         it('should raise backlash chance to 45% at low charisma', () => {
-            // Roll 0.4: below the low-charisma threshold (0.45) but above the base (0.3).
-            // Backlash fires ONLY because charisma <= -5 raised the chance.
-            vi.spyOn(Math, 'random')
-                .mockReturnValueOnce(0.4) // Backlash triggers only at 0.45 threshold
-                .mockReturnValueOnce(0);  // Select first other power
+            // Rolled value 0.4: below the low-charisma threshold (0.45) but above the
+            // base (0.3). Backlash fires ONLY because charisma <= -5 raised `p` to 0.45.
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.4 < p);
             mockState.gameManagement.charisma.current = -5;
 
             const result = handleActionOutcome('military', 'eliminate', mockState);
 
             expect(result.resultText.key).toBe('eliminate_backlash');
-
-            vi.restoreAllMocks();
         });
 
         it('should lower backlash chance to 15% at high charisma', () => {
-            // Roll 0.2: above the high-charisma threshold (0.15) but below the base (0.3).
-            // Backlash is avoided ONLY because charisma >= 5 lowered the chance.
-            vi.spyOn(Math, 'random').mockReturnValue(0.2);
+            // Rolled value 0.2: above the high-charisma threshold (0.15) but below the
+            // base (0.3). Backlash is avoided ONLY because charisma >= 5 lowered `p` to 0.15.
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.2 < p);
             mockState.gameManagement.charisma.current = 5;
 
             const result = handleActionOutcome('military', 'eliminate', mockState);
 
             expect(result.resultText.key).toBe('eliminate_success');
-
-            vi.restoreAllMocks();
         });
     });
 
@@ -271,7 +278,7 @@ describe('handleActionOutcome', () => {
         });
 
         it('should handle terrible dialogue outcome (fails based on baseSuccessRate)', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.01); // For people (0.8), fail < 0.02
+            vi.mocked(MathUtils.rollFloat).mockReturnValue(0.01); // For people (0.8), fail < 0.02
 
             const result = handleActionOutcome('people', 'dialogue', mockState);
 
@@ -286,13 +293,11 @@ describe('handleActionOutcome', () => {
                     relationDelta: -1,
                 },
             });
-
-            vi.restoreAllMocks();
         });
 
         it('should handle successful dialogue outcome (depends on baseSuccessRate)', () => {
             // For military (0.4), success if roll >= 0.06 and < 0.42
-            vi.spyOn(Math, 'random').mockReturnValue(0.3);
+            vi.mocked(MathUtils.rollFloat).mockReturnValue(0.3);
 
             const result = handleActionOutcome('military', 'dialogue', mockState);
 
@@ -306,13 +311,11 @@ describe('handleActionOutcome', () => {
                     power: "military",
                 },
             });
-
-            vi.restoreAllMocks();
         });
 
         it('should handle inconclusive dialogue outcome (above success threshold)', () => {
             // For business (0.2), inconclusive if roll >= 0.56
-            vi.spyOn(Math, 'random').mockReturnValue(0.8);
+            vi.mocked(MathUtils.rollFloat).mockReturnValue(0.8);
 
             const result = handleActionOutcome('business', 'dialogue', mockState);
 
@@ -326,20 +329,16 @@ describe('handleActionOutcome', () => {
                     power: "business",
                 },
             });
-
-            vi.restoreAllMocks();
         });
 
         it('should clamp relations at maximum', () => {
             // For people (0.8), success range ends at 0.14, so use 0.1
-            vi.spyOn(Math, 'random').mockReturnValue(0.1);
+            vi.mocked(MathUtils.rollFloat).mockReturnValue(0.1);
             mockState.relations.current.people = 10;
 
             const result = handleActionOutcome('people', 'dialogue', mockState);
 
             expect(result.newRelations.people).toBe(10); // Already at max, stays there
-
-            vi.restoreAllMocks();
         });
     });
 

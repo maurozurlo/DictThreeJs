@@ -2,7 +2,14 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0010](adr-0010-seeded-rng-commit-on-roll.md) (2026-06-17)
+
+> **Superseded.** This ADR chose unseeded `Math.random()`, justified by "no
+> save/replay requirement." That missed that the shipped save system + the
+> "live with it" pillar make save-scum resistance a real requirement. ADR-0010
+> replaces the unseeded source with a seeded, save-persisted mulberry32 cursor
+> and formalises commit-on-roll. The centralisation contract below (all RNG via
+> `Utils/Math.ts`, no inline `Math.random()` in logic) is **retained** by ADR-0010.
 
 ## Date
 

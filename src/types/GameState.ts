@@ -182,6 +182,9 @@ export type GameState = {
         representativeStatuses: Record<Power, 'active' | 'sick' | 'eliminated'>;
         /** Dumbification score [0–100] frozen at the start of each round from the education budget. */
         dumbScore: number;
+        /** Seed the run's PRNG was initialized with at new-game (ADR-0010). Informational /
+         *  shareable; the live cursor is serialized separately by SaveLoad.buildSavePayload. */
+        rngSeed: number;
         nextRound: () => void;
         expireTimer: () => void;
         pauseTimer: () => void;

@@ -5,12 +5,15 @@ import type { Deal } from '../types/Deal';
 import type { Law } from '../types/Law';
 import * as MathUtils from '../Utils/Math';
 
-// Mock the math utilities — spread real module so rollChance/rollFloat remain functional
+// Mock the math utilities — spread the real module, then override the draws we
+// need to control. Randomness is controlled through these named functions, never
+// via Math.random (ADR-0010). rollChance defaults to "risk never triggers".
 vi.mock('../Utils/Math', async (importOriginal) => {
     const actual = await importOriginal<typeof import('../Utils/Math')>();
     return {
         ...actual,
         getRandomFromList: vi.fn((arr: string[]) => arr[0]),
+        rollChance: vi.fn((_p: number) => false),
     };
 });
 
@@ -296,7 +299,7 @@ describe('handleDecision', () => {
         });
 
         it('should handle risky deal when risk triggers on rejection', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.1); // Will trigger 30% risk
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.1 < p); // rolled 0.1 → triggers 30% risk
             vi.mocked(MathUtils.getRandomFromList).mockReturnValue('business');
 
             const deal: Deal = {
@@ -333,7 +336,7 @@ describe('handleDecision', () => {
         });
 
         it('should not apply risk penalty when risk does not trigger', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.9); // Won't trigger 30% risk
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.9 < p); // rolled 0.9 → won't trigger 30% risk
 
             const deal: Deal = {
                 id: 2,
@@ -369,7 +372,7 @@ describe('handleDecision', () => {
         });
 
         it('should not apply risk penalty on acceptance', () => {
-            vi.spyOn(Math, 'random').mockReturnValue(0.1); // Would trigger risk
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.1 < p); // rolled 0.1 → would trigger risk
 
             const deal: Deal = {
                 id: 2,

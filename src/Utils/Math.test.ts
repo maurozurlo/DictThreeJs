@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Clamp, getRandomNumberInRange, getRandomUniqueItem, getRandomFromList } from './Math';
+import { Clamp, getRandomNumberInRange, getRandomUniqueItem, getRandomFromList, seedRng } from './Math';
 
 describe('Math utilities', () => {
     describe('Clamp', () => {
@@ -80,17 +80,18 @@ describe('Math utilities', () => {
         });
 
         it('should include both min and max in possible results', () => {
-            const mockRandom = vi.spyOn(Math, 'random');
-
-            // Test min value (Math.random returns 0)
-            mockRandom.mockReturnValueOnce(0);
-            expect(getRandomNumberInRange(1, 10)).toBe(1);
-
-            // Test max value (Math.random returns ~0.999)
-            mockRandom.mockReturnValueOnce(0.999);
-            expect(getRandomNumberInRange(1, 10)).toBe(10);
-
-            mockRandom.mockRestore();
+            // Seeded stream (ADR-0010): both endpoints must be reachable and no draw
+            // may fall outside [min, max]. Deterministic given the fixed seed.
+            seedRng(12345);
+            const seen = new Set<number>();
+            for (let i = 0; i < 2000; i++) {
+                const v = getRandomNumberInRange(1, 10);
+                expect(v).toBeGreaterThanOrEqual(1);
+                expect(v).toBeLessThanOrEqual(10);
+                seen.add(v);
+            }
+            expect(seen.has(1)).toBe(true);
+            expect(seen.has(10)).toBe(true);
         });
     });
 

@@ -16,6 +16,7 @@
 
 import type { GameState } from "../types/GameState";
 import { isValidMetaProgress, loadMeta, mergeMeta, saveMeta } from "./MetaProgress";
+import { getRngState } from "./Math";
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -44,13 +45,16 @@ function stripFunctions(obj: unknown): unknown {
  * Strips all functions from state, then attaches the current MetaProgress as
  * a top-level `meta` field.
  *
- * Pure except for the `loadMeta()` localStorage read.
+ * Pure except for the `loadMeta()` localStorage read and the `getRngState()` read.
  * Note: call `recordGameEnd` before `exportSave` so the current run's result
  * is included — story 3-4 is responsible for this wiring.
  */
 export function buildSavePayload(state: GameState): Record<string, unknown> {
     const serializable = stripFunctions(state) as Record<string, unknown>;
     serializable.meta = loadMeta();
+    // Live PRNG cursor (ADR-0010) — restored by StateFactory.buildLoadedState so a
+    // reloaded run resumes the exact stream (anti-save-scum). Top-level like `meta`.
+    serializable.rngState = getRngState();
     return serializable;
 }
 

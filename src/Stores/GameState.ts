@@ -545,6 +545,7 @@ export const INITIAL_STATE = ({ set, get }: {
         meetCounts: { military: 0, business: 0, people: 0 },
         representativeStatuses: { military: 'active', business: 'active', people: 'active' },
         dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
+        rngSeed: 0,
         setPhase: (phase, difficulty) => {
             if (phase === 'start') {
                 return set((state) => buildStartState(state, difficulty));

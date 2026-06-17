@@ -51,7 +51,7 @@
 
 ## Forbidden Patterns
 
-- Inline `Math.random()` in stores, Handlers, or components — use `src/Utils/Math.ts` named functions (ADR-0004)
+- Inline `Math.random()` in stores, Handlers, or components — use `src/Utils/Math.ts` named functions, which draw from the seeded cursor (ADR-0010, supersedes ADR-0004). `Math.random()` is allowed only for seed entropy and cosmetic/non-logic paths.
 - Handler files importing from `../../Stores/GameState` — Handlers are pure functions (ADR-0002)
 - UI components importing from `three`, `@react-three/fiber`, or `@react-three/drei` — 3D is the Scene boundary's concern (ADR-0003)
 - Multiple `set()` calls within one logical state mutation — use a single atomic `set((s) => ({...}))` (ADR-0002)
@@ -73,12 +73,13 @@
 - [ADR-0001](../../docs/architecture/adr-0001-tech-stack-choice.md) — Tech Stack Choice (Accepted 2026-06-13)
 - [ADR-0002](../../docs/architecture/adr-0002-state-management-pattern.md) — State Management Pattern (Zustand + Handler pattern)
 - [ADR-0003](../../docs/architecture/adr-0003-react-threejs-integration.md) — React / Three.js Integration
-- [ADR-0004](../../docs/architecture/adr-0004-rng-determinism.md) — RNG & Determinism Strategy (`src/Utils/Math.ts`)
+- [ADR-0004](../../docs/architecture/adr-0004-rng-determinism.md) — RNG & Determinism Strategy (`src/Utils/Math.ts`) — **Superseded by ADR-0010**
 - [ADR-0005](../../docs/architecture/adr-0005-event-scheduling.md) — Event Scheduling System
 - [ADR-0006](../../docs/architecture/adr-0006-round-timer-game-loop.md) — Round Timer / Game Loop
 - [ADR-0007](../../docs/architecture/adr-0007-effect-timing.md) — End-of-Round Effect Timing (Proposed — narrowed to non-stat delayed consequences by ADR-0008)
 - [ADR-0008](../../docs/architecture/adr-0008-timed-modifier-engine.md) — Timed Modifier Engine / Unified Effect System (Accepted 2026-06-15)
 - [ADR-0009](../../docs/architecture/adr-0009-coup-telegraphing-fairness.md) — Coup Telegraphing & Fairness (Accepted 2026-06-16)
+- [ADR-0010](../../docs/architecture/adr-0010-seeded-rng-commit-on-roll.md) — Seeded RNG & Commit-on-Roll / save-scum resistance (Accepted 2026-06-17, supersedes ADR-0004)
 
 ## Engine Specialists
 

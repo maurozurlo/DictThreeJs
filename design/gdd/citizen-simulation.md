@@ -1,8 +1,8 @@
 # Citizen Simulation
 
-> **Status**: Draft — all sections written; pending `/design-review`
+> **Status**: Draft — reviewed by systems-designer (Formulas) + qa-lead (Acceptance Criteria) 2026-06-17; review fixes applied
 > **Author**: Mauro Zurlo + Claude (design-system)
-> **Last Updated**: 2026-06-16
+> **Last Updated**: 2026-06-17
 > **Implements Pillar**: "A darkly comedic mirror of your decisions" — the city tells the truth even when your treasury report doesn't.
 
 ## Overview
@@ -47,12 +47,11 @@ The budget sliders and relation bars abstract your cruelty into numbers; the str
    - **people: always employed** — they *are* the civilian baseline, so they have nowhere to fall from.
 3. `displacement` = 2 if an army/business ped is unemployed this round, else 0 (the personal sting of losing your place, on top of the raw numbers).
 4. `happiness = clamp(5 + factionFortune + charismaTerm − displacement − volatility, 0, 10)` — terms defined in Formulas §4.
-5. **Role assignment (the education fork):**
+5. **Role assignment (the education fork)** — band-accurate; happiness is fractional, so bands are defined by exclusion (see §4.3 for the exact `elif` chain):
    - `happiness ≥ 6` → **content** (does their job, strolls)
-   - `happiness 4–5` → **neutral** (present, idle, no trouble)
-   - `happiness ≤ 3 AND education ≤ 4` → **thief** (disorganized desperation — policeable)
-   - `happiness ≤ 3 AND education ≥ 5` → **protestor** (organized, aimed at *you*)
-   - `happiness ≤ 1` → small chance **gone** (emigrate/die); otherwise thief/protestor per education.
+   - `4 ≤ happiness < 6` → **neutral** (present, idle, no trouble)
+   - `happiness ≤ 1` → small chance **gone** (emigrate/die) first; survivors fall through to the education fork below.
+   - otherwise (`1 < happiness < 4`, plus gone-roll survivors) → **unrest**: **thief** if `education ≤ 4` (disorganized desperation — policeable), else **protestor** (organized, aimed at *you*).
 6. **Death** (permanent; ped is removed for the rest of the run, never replaced):
    - **gone** — a ped whose role resolves to `gone` leaves the board (`alive = false`).
    - **starvation** — civilian-dependent peds (people-faction + *displaced* army/business) have a health-driven death chance when the health budget is low. Employed army/business peds are protected (their institution feeds them). Rates in Formulas §4.
@@ -122,7 +121,7 @@ happiness = clamp(5 + factionFortune + charismaTerm − displacement − volatil
 
 | Term | Formula | Range |
 |------|---------|-------|
-| `factionFortune` | `(rel / 10) * 3 + budgetSignal` | −4 … +4 |
+| `factionFortune` | `(rel / 10) * 3 + budgetSignal` | army −4 … +4; business/people **−4.5 … +4** (the −0.5 tax penalty lowers the floor) |
 | `charismaTerm` | `(charisma / 10) * 2` | −2 … +2 |
 | `displacement` | `2` if an army/business ped is unemployed this round, else `0` | 0 / 2 |
 | `volatility` | `min(2, abs(rel − lastRel) * 0.4)` | 0 … 2 |
@@ -135,7 +134,7 @@ happiness = clamp(5 + factionFortune + charismaTerm − displacement − volatil
 | business | `(infrastructure − 5) / 5` | `−0.5` if `businessTax > 45` |
 | people | `(health − 5) / 5` | `−0.5` if `peopleTax > 30` |
 
-Theoretical happiness range is `[5 − 4 − 2 − 2 − 2, 5 + 4 + 2] = [−5, 11]` before clamping → clamps to **0…10**, so both endpoints are reachable (a fully ruined ped hits 0, a fully favoured one hits 10).
+Theoretical happiness range (worst case is a taxed business/people ped): `[5 − 4.5 − 2 − 2 − 2, 5 + 4 + 2] = [−5.5, 11]` before clamping → clamps to **0…10**, so both endpoints are reachable (a fully ruined ped hits 0, a fully favoured one hits 10). Army's narrower `factionFortune` floor (−4) gives a raw min of −5; either way the clamp to 0 holds.
 
 ### 4.2 Employment
 
@@ -153,11 +152,13 @@ Recomputed before `displacement`:
 if happiness ≥ 6:            role = content
 elif happiness ≥ 4:          role = neutral
 elif happiness ≤ 1 AND rollChance(GONE_CHANCE):  role = gone
-elif education ≤ 4:          role = thief
-else:                        role = protestor      # education ≥ 5
+elif education ≤ 4:          role = thief         # catches happiness 2–3 AND ≤1 survivors of the gone roll
+else:                        role = protestor     # education ≥ 5; same happiness ranges as thief
 ```
 
-- `GONE_CHANCE = 0.15` — only evaluated when `happiness ≤ 1`. The single RNG call in the whole pipeline; routed through `rollChance()` in `src/Utils/Math.ts` (ADR-0004), never inline.
+> **Implementation note:** keep this as a single `elif` chain. The `education ≤ 4` branch is reached both by peds in `1 < happiness < 4` and by peds at `happiness ≤ 1` whose `gone` roll returned false (the `AND` short-circuits, so the chain falls through). Do **not** refactor the `gone` check into a nested `if`, or the happiness-≤1 survivors would skip the education fork.
+
+- `GONE_CHANCE = 0.15` — only evaluated when `happiness ≤ 1`. The single RNG call in the whole pipeline; routed through `rollChance()` in `src/Utils/Math.ts`, which draws from the seeded cursor (ADR-0010), never inline.
 - Education cut (`≤4` thief / `≥5` protestor) is the "too dumb to revolt" fork. It is checked **after** the `gone` roll, so a ped at happiness ≤ 1 who survives the roll still sorts to thief/protestor by education.
 
 ### 4.4 Death
@@ -174,7 +175,7 @@ starvationChance = health ≤ HEALTH_DEATH_THRESHOLD
 ped dies if rollChance(starvationChance)
 ```
 
-- `HEALTH_DEATH_THRESHOLD = 3`, `DEATH_RATE_MAX = 0.15` — reused from the retired `street-view.md` model for continuity. At `health = 0` → 15% per eligible ped per round; at `health = 3` → 0%. With ~18 eligible peds at `health = 0`, that's ~2–3 deaths/round — visible attrition, not a wipe.
+- `HEALTH_DEATH_THRESHOLD = 3`, `DEATH_RATE_MAX = 0.15` — reused from the retired `street-view.md` model for continuity. At `health = 0` → 15% per eligible ped per round; at `health = 3` → 0%. Eligible count is **11 (people, always) + any displaced army/business (0–14)** = 11–25. In the typical mid-decline case (~7 elites still employed/protected) that's ~18 eligible → ~2–3 deaths/round; in a full collapse (all elites demobilized) all 25 are eligible → ~3.75/round — visible attrition, not a wipe. Note: a people-faction ped at `happiness ≤ 1` faces the `gone` roll **and** starvation, so its expected lifespan at `health = 0` compresses to ~3–4 rounds (vs ~6–7 from the `gone` roll alone).
 
 ### 4.5 Body type (render input)
 
@@ -203,7 +204,7 @@ treasury       −= thiefCount * THIEF_SKIM
 ```
 
 - `PROTEST_DIVISOR = 3` — every ~3 protestors costs 1 point of standing with the People.
-- `PROTEST_FEEDBACK_CAP = 5` — safety rail. Uncapped, a full square of 25 protestors would be `floor(25/3) = 8` in one round. Capping at 5 keeps even the worst case from erasing standing in a single round: from a healthy `peopleRelation` of +10 the most one round can subtract is 5, so a protest spiral takes **at least 4 rounds** to drive relation to the −10 overthrow floor — readable pressure, never an instant-loss.
+- `PROTEST_FEEDBACK_CAP = 5` — safety rail. Uncapped, a full square of 25 protestors would be `floor(25/3) = 8` in one round. Capping at 5 prevents a single-round wipe: the most one round can subtract is 5, so the floor is reached in `ceil((startRelation + 10) / 5)` rounds. From a healthy `peopleRelation` of **+10** that's **4 rounds**; but protests only emerge when happiness (hence relation) is already low, so in realistic play relation is often `0…+5` at spiral onset, giving **2–3 rounds** to the −10 floor (e.g. from +2: +2→−3→−8→−10, three rounds). The cap guarantees "no instant-loss," **not** a fixed 4-round runway — tune `PROTEST_FEEDBACK_CAP` with the realistic onset relation in mind.
 - `THIEF_SKIM = 2` treasury per thief per round. With ~10 thieves that's ~20/round against difficulty treasuries in the hundreds — reads as texture, not punishment.
 - Result is clamped: `peopleRelation` re-clamped to ±10; `treasury` floored at 0.
 
@@ -214,7 +215,7 @@ treasury       −= thiefCount * THIEF_SKIM
 | Round | Action | sec | rel | char | employed | factionFortune | charismaTerm | displacement | volatility | happiness | role |
 |-------|--------|-----|-----|------|----------|----------------|--------------|--------------|------------|-----------|------|
 | 1 | funded army | 7 | +4 | +2 | yes | `1.2 + 0.4 = 1.6` | `0.4` | 0 | 0 | `5+1.6+0.4 = 7.0` | **content** |
-| 4 | gutted security | 2 | −1 | +2 | **no** | `−0.3 + (−0.6) = −0.9` | `0.4` | 2 | `min(2, 5·0.4)=2` | `5−0.9+0.4−2−2 = 0.5` | **thief** (edu ≤ 4) |
+| 4 | gutted security | 2 | −1 | +2 | **no** | `−0.3 + (−0.6) = −0.9` | `0.4` | 2 | `min(2, 5·0.4)=2` | `5−0.9+0.4−2−2 = 0.5` | **thief** (edu ≤ 4, *assuming the gone roll fails* — happiness 0.5 ≤ 1 makes him gone-eligible first, p=0.85 to survive and become a thief) |
 
 **Ana — faction people, educated, neglected (the protest fork):** `health = 2`, `peopleRel = −4`, `charisma = 0`, `education = 7`, stable rel (volatility 0). `budgetSignal = (2−5)/5 = −0.6`; `factionFortune = (−4/10)·3 + (−0.6) = −1.8`; people never displaced. `happiness = 5 − 1.8 + 0 − 0 − 0 = 3.2` → ≤3, education ≥ 5 → **protestor**. Had her education been ≤ 4 with identical misery, she'd be a **thief** instead — same suffering, different street.
 
@@ -240,12 +241,12 @@ displayedPopulation = round(aliveCount / TOTAL_CITIZENS * BASE_POPULATION)
 | 3 | **`gone` roll and starvation both eligible same round** | The role fork (§4.3) resolves first. If the ped rolls `gone`, it is removed and the starvation roll is **skipped**. At most **one** death per ped per round. |
 | 4 | **Displaced elite recovers** | `employed` is recomputed every round. An army/business ped demobilized in an earlier round is re-employed the moment `security`/`infrastructure`/`rel` cross back over the §4.2 thresholds, and the `displacement` penalty lifts that same round. |
 | 5 | **Education crosses the 4/5 boundary mid-game** | Roles are recomputed each round, so raising education flips existing **thieves into protestors** (and lowering it flips them back) on the next resolution. This is the intended lever: the player converts policeable petty crime into organized dissent by educating, or suppresses dissent by keeping people ignorant. |
-| 6 | **Protest spiral vs. people-coup tension** | A people-coup arms at *high* `peopleRelation`; protestors only appear at *low* happiness (which tracks low relation). The two cannot trigger together. The real risk from protest feedback is the −10 **overthrow floor**, reached in ≥4 rounds even at the cap (§4.6). Feedback is applied during round resolution, so the lowered `peopleRelation` is visible to the **next** round's coup check (ADR-0009 reads effective relations at round start). |
+| 6 | **Protest spiral vs. people-coup tension** | A people-coup arms at *high* `peopleRelation`; protestors only appear at *low* happiness (which tracks low relation). The two cannot trigger together. The real risk from protest feedback is the −10 **overthrow floor**, reached in `ceil((startRelation + 10) / 5)` rounds at the cap — 4 from +10, but 2–3 from a realistic low onset relation (§4.6). Feedback is applied during round resolution, so the lowered `peopleRelation` is visible to the **next** round's coup check (ADR-0009 reads effective relations at round start). |
 | 7 | **`treasury` would go negative from skim** | `treasury` is floored at 0 after `thiefCount * THIEF_SKIM`. The skim is part of the same atomic round-resolution `set` (ADR-0002), so any downstream bankruptcy check sees the post-skim value. |
 | 8 | **`peopleRelation` already at −10 when feedback fires** | The subtraction re-clamps to −10; no underflow. Whether −10 ends the run is the coup/overthrow system's decision, not the sim's. |
 | 9 | **Low-education society: many thieves, no protestors** | `peopleRelation` feedback is 0 (only protestors erode it); only the treasury skim applies. The "too dumb to revolt" society costs the dictator *standing* nothing — exactly the design thesis, made mechanical. |
 | 10 | **Stuck at happiness ≤ 1 but `gone` never rolls** | No guaranteed removal — the ped re-rolls `GONE_CHANCE` each round (expected lifespan ~6–7 rounds) and remains a visible thief/protestor until the roll fires or starvation takes them. Misery persists on screen rather than being tidied away. |
-| 11 | **Determinism / restart** | The 25 citizens are generated **once** at game start via the seeded RNG (ADR-0004); a given seed yields the same 25 names/skins/factions. Citizens are never added mid-run — population only shrinks. |
+| 11 | **Determinism / restart** | The 25 citizens are generated **once** at game start via the seeded RNG (ADR-0010); a given seed yields the same 25 names/skins/factions, and the saved cursor makes per-round rolls replay-stable across save/reload (anti-save-scum). Citizens are never added mid-run — population only shrinks. |
 
 ## Dependencies
 
@@ -257,7 +258,7 @@ displayedPopulation = round(aliveCount / TOTAL_CITIZENS * BASE_POPULATION)
 | Relations | each faction's **effective** relation (`rel`) | `game-concept.md §4`, ADR-0008 |
 | Charisma | effective `charisma` for `charismaTerm` | `game-concept.md §7` |
 | Modifier engine | resolves base + windowed modifiers into the effective relation/charisma the sim reads | ADR-0008 |
-| RNG / `Math.ts` | `rollChance()` for the `gone` and starvation rolls | ADR-0004 |
+| RNG / `Math.ts` | `rollChance()` for the `gone` and starvation rolls (seeded cursor; save-scum-safe) | ADR-0010 |
 | Round loop | hosts the pipeline as a late step in `nextRound()` resolution | ADR-0006 |
 
 **Downstream — systems this sim writes to or feeds:**
@@ -350,41 +351,56 @@ displayedPopulation = round(aliveCount / TOTAL_CITIZENS * BASE_POPULATION)
 
 ## Acceptance Criteria
 
-> *Note: `qa-lead` not consulted (agent credit limits this session) — recommend a QA review of these criteria before production.*
+> *Reviewed by `qa-lead` 2026-06-17 (verdict: was INCOMPLETE → gaps closed below). The seeded RNG harness the review flagged as a prerequisite now exists: `seedRng()` + mockable named draws in `src/Utils/Math.ts` (ADR-0010). Probabilistic ACs are pinned by `seedRng(fixed)` or by mocking `rollChance`/`rollFloat` — never by spying `Math.random`.*
+
+**Story-type legend:** **[L]** Logic (BLOCKING automated unit test) · **[I]** Integration (BLOCKING) · **[U]** UI (ADVISORY) · **[CI]** lint/grep gate. **[rng]** = needs the seeded/mock RNG harness.
 
 **Generation & identity**
-- [ ] AC-1: Exactly 25 citizens exist at game start, split **11 people / 7 army / 7 business**; the same RNG seed produces the same 25 (name/skin/faction).
-- [ ] AC-2: A citizen's `name`, `skin`, and `faction` are identical in round 1 and round N (never mutate).
+- [ ] AC-1a **[L]**: Exactly 25 citizens exist at game start, split **11 people / 7 army / 7 business**.
+- [ ] AC-1b **[L][rng]**: `seedRng(S)` then generating yields the identical 25 (name/skin/faction) for a given `S`; a different seed yields a different roster (ADR-0010).
+- [ ] AC-2 **[L]**: A citizen's `name`, `skin`, and `faction` are identical in round 1 and round N (never mutate), even under adversarial budget/relation inputs.
 
-**Happiness (§4.1)** — Logic, unit-testable against worked examples
-- [ ] AC-3: Given Marco R1 inputs (sec 7, rel +4, char +2, employed) `happiness == 7.0`; given Marco R4 inputs (sec 2, rel −1, char +2, displaced, prev rel +4) `happiness == 0.5`.
-- [ ] AC-4: Inputs that drive the raw expression below 0 or above 10 clamp to exactly 0 / 10.
+**Happiness (§4.1)** — Logic, unit-testable against worked examples (happiness itself is RNG-free)
+- [ ] AC-3 **[L]**: Given Marco R1 inputs (sec 7, rel +4, char +2, employed) `happiness == 7.0`; given Marco R4 inputs (sec 2, rel −1, char +2, displaced, prev rel +4) `happiness == 0.5`. The R4 volatility term is pinned: `min(2, |−1 − 4|·0.4) == 2`.
+- [ ] AC-4 **[L]**: Inputs that drive the raw expression below 0 or above 10 clamp to exactly 0 / 10 (incl. the taxed-business floor `−5.5 → 0`).
 
 **Employment & displacement (§4.2)**
-- [ ] AC-5: An army ped is displaced iff `security < 4 OR rel < 0`; a business ped iff `rel < 0 OR infrastructure < 3`; a people ped is **never** displaced.
-- [ ] AC-6: A displaced army/business ped incurs `displacement = 2`; when its thresholds recover the same ped is employed and the penalty is 0 that same round.
+- [ ] AC-5 **[L]**: An army ped is displaced iff `security < 4 OR rel < 0`; a business ped iff `rel < 0 OR infrastructure < 3`; a people ped is **never** displaced. Boundary values tested explicitly: army employed at `security == 4, rel == 0`; displaced at `security == 3` or `rel == −1`.
+- [ ] AC-6 **[L]**: A displaced army/business ped incurs `displacement = 2`; when its thresholds recover the same ped is employed and the penalty is 0 that same round.
 
 **Role fork (§4.3)**
-- [ ] AC-7: Role bands resolve correctly: `≥6` content, `4–5` neutral, `≤3` unrest, `≤1` gone-eligible.
-- [ ] AC-8: At identical happiness `≤3`, `education ≤ 4` yields **thief** and `education ≥ 5` yields **protestor**.
+- [ ] AC-7a **[L]**: Role bands resolve by happiness — `≥6` content; `4 ≤ h < 6` neutral; `1 < h < 4` → education fork; `h ≤ 1` enters the gone roll. (Deterministic gate; assert the band/branch entered, not the roll outcome.)
+- [ ] AC-7b **[L][rng]**: At `h ≤ 1`, with the gone roll forced **true** (mock `rollChance`) role is `gone`; forced **false**, role falls through to thief/protestor per education.
+- [ ] AC-8 **[L]**: At identical happiness in `1 < h < 4` (e.g. `h == 3`, clear of the gone roll), `education ≤ 4` yields **thief** and `education ≥ 5` yields **protestor**; boundary `education == 4` vs `== 5` tested.
 
 **Death (§4.4)**
-- [ ] AC-9: A ped whose role resolves to `gone` has `alive == false` afterward and is absent for the rest of the run (never replaced).
-- [ ] AC-10: Starvation applies only to people-faction and *displaced* army/business peds; employed elites never starve. `starvationChance == 0` at `health ≥ 3` and `== 0.15` at `health == 0`.
-- [ ] AC-11: No ped dies twice in one round — a `gone` ped skips the starvation roll.
+- [ ] AC-9 **[L][rng]**: With the gone roll forced **true**, a ped whose role resolves to `gone` has `alive == false` afterward and is absent for the rest of the run (never replaced).
+- [ ] AC-10 **[L]**: Starvation applies only to people-faction and *displaced* army/business peds; employed elites never starve. Assert on the **computed `starvationChance`** (not a roll outcome): `== 0` at `health ≥ 3`, `== 0.15` at `health == 0`.
+- [ ] AC-11 **[L][rng]**: No ped dies twice in one round — with the gone roll forced **true**, the starvation roll is **not** evaluated for that ped (assert via mock call count or processing order).
 
 **Feedback (§4.6)**
-- [ ] AC-12: `peopleRelation` decreases by `min(floor(protestorCount/3), 5)` per round and never drops below −10.
-- [ ] AC-13: `treasury` decreases by `thiefCount * 2` per round and never goes below 0.
+- [ ] AC-12 **[I]**: `peopleRelation` decreases by `min(floor(protestorCount/3), 5)` per round and never drops below −10 (test `count==3 → −1`, `count==6 → −2`, `count==15 → −5`).
+- [ ] AC-13 **[I]**: `treasury` decreases by `thiefCount * 2` per round and never goes below 0.
 
 **Population (§4.8)**
-- [ ] AC-14: `displayedPopulation == round(aliveCount / 25 * 5_924_511)`; equals 5,924,511 at 25 alive and 0 at 0 alive.
+- [ ] AC-14 **[L]**: `displayedPopulation == round(aliveCount / 25 * 5_924_511)`; `== 5,924,511` at 25 alive, `== 0` at 0 alive, `== 2,843,765` at 12 alive (mid-range guards against formula inversion).
 
-**Determinism (ADR-0004)**
-- [ ] AC-15: The sim's only randomness (`gone` and starvation rolls) routes through `rollChance()` in `src/Utils/Math.ts` — no inline `Math.random()` in the pipeline.
+**Determinism (ADR-0010)**
+- [ ] AC-15 **[CI]**: No inline `Math.random()` in the citizen pipeline — verified by a CI grep (`rg 'Math\.random' src/Stores/CitizenHandler.ts` returns no matches); the `gone`/starvation rolls go through `rollChance()` (seeded cursor).
 
 **UI**
-- [ ] AC-16: Clicking an alive ped opens an inspector showing its `name`, `faction`, `employed`/role state, `happiness`, and `role`; `gone` peds are not clickable.
+- [ ] AC-16 **[U]**: Clicking an alive ped opens an inspector showing its `name`, `faction`, `employed`/role state, `happiness`, and `role`; `gone` peds are not clickable; the panel dismisses on click-elsewhere or an explicit close, and swaps contents when another ped is selected. (ADR-0003: the inspector is a plain React/CSS panel reading the store; it never imports `three`.)
+
+**Coverage gaps closed (qa-lead review 2026-06-17)**
+- [ ] AC-17 **[L]** (body-type lerp §4.5): At `health == 0`, `fatShare == 0.05` and `slimShare == 0.70`; at `health == 10`, `fatShare == 0.40` and `slimShare == 0.15`; `fitShare == 1 − fatShare − slimShare` at both ends. A ped with `bodySeed == 0.03` is `fat` at `health == 0` and `slim` at `health == 10`.
+- [ ] AC-18 **[L]** (volatility round-1, Edge 1): On round 1 every ped's `volatility` term is 0 regardless of its faction relation (`lastFactionRelation` is seeded to round-1 effective relation — no phantom whiplash).
+- [ ] AC-19 **[L]** (elite recovery arc, Edge 4): An army ped employed in R1 (`sec 7, rel +3`) → `employed == false, displacement == 2` in R2 (`sec 2`) → back to `employed == true, displacement == 0` in R3 once `sec ≥ 4, rel ≥ 0`.
+- [ ] AC-20 **[L]** (education flip, Edge 5 — the core lever): A ped at `happiness == 3, education == 4` (thief) flips to **protestor** the round `education` is raised to 5, all else equal; lowering 5→4 flips protestor→thief next round.
+- [ ] AC-21 **[L]** (empty-street feedback, Edge 2): When `protestorCount == 0` and `thiefCount == 0` (all content/neutral, or population collapsed), `peopleRelation` and `treasury` are unchanged by the feedback step.
+- [ ] AC-22 **[L][rng]** (gone+starvation ordering, Edge 3): A people ped at `happiness ≤ 1, health == 0` (both eligible): with the gone roll forced **true**, it dies via `gone`, starvation is not evaluated, and it is counted **once** in the dead population.
+- [ ] AC-23 **[L]** (protest cap fires): With `protestorCount == 25, peopleRelation == +5`, the round subtracts exactly 5 (not `floor(25/3) == 8`), ending at 0 — the `min(…, PROTEST_FEEDBACK_CAP)` is exercised.
+- [ ] AC-24 **[L][rng]** (population monotonicity §4.8): `displayedPopulation` at round N+1 is always `≤` round N; forcing one `gone` death makes round 2 strictly less than round 1; population never increases.
+- [ ] AC-25 **[L]** (starvation linearity §4.4): `starvationChance == 0.10` at `health == 1` and `== 0.05` at `health == 2` — the intermediate `DEATH_RATE_MAX·(1 − health/3)` values, asserted as computed probabilities.
 
 ## Open Questions
 

@@ -6,7 +6,7 @@
 import { Tabs } from "../types/Tabs";
 import { GAMESTATE, DIFFICULTY_TREASURY } from "../Constants/GameState";
 import type { Difficulty } from "../Constants/GameState";
-import { getRandomUniqueItem } from "../Utils/Math";
+import { getRandomUniqueItem, seedRng, setRngState } from "../Utils/Math";
 import { LAWS } from "../assets/laws";
 import { DEALS } from "../assets/deals";
 import type { GameState } from "../types/GameState";
@@ -20,6 +20,13 @@ import { migrateLegacyEffect } from "../assets/modifierContent";
 export function buildStartState(state: GameState, difficulty?: Difficulty): Partial<GameState> {
     const chosenDifficulty: Difficulty = difficulty ?? 'medium';
     const startingTreasury = DIFFICULTY_TREASURY[chosenDifficulty];
+
+    // Seed the run's PRNG from fresh entropy BEFORE any draw below, so the first
+    // law/deal/event and every later roll come from one reproducible stream
+    // (ADR-0010). The cursor is then saved/restored by SaveLoad — a reload resumes
+    // the exact stream, which makes risky outcomes un-save-scummable.
+    const rngSeed = (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
+    seedRng(rngSeed);
 
     const freshLaws = new Set<typeof LAWS[number]>();
     const freshDeals = new Set<typeof DEALS[number]>();
@@ -65,6 +72,7 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             meetCounts: { military: 0, business: 0, people: 0 },
             representativeStatuses: { military: 'active', business: 'active', people: 'active' },
             dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
+            rngSeed,
         },
         specialEnding: { ...state.specialEnding, available: false, faction: null, used: false, outcome: null },
         shop: { ...state.shop, frozenFactions: new Set<Power>(), advisorLevel: 0 as 0 | 1 | 2 | 3 },
@@ -106,6 +114,13 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
 /** Deserialize a save payload into a state patch (loadGame). */
 export function buildLoadedState(state: GameState, data: Record<string, unknown>): Partial<GameState> {
     const gm = data.gameManagement as Record<string, unknown> ?? {};
+
+    // Restore the PRNG cursor so rolls resume exactly where the save left off
+    // (ADR-0010). Pre-RNG saves omit `rngState` — leave the live cursor untouched.
+    if (typeof data.rngState === 'number') {
+        setRngState(data.rngState);
+    }
+
     const savedBudget = data.budget as Record<string, unknown> ?? {};
     const savedRelations = data.relations as Record<string, unknown> ?? {};
     const savedLaw = data.law as Record<string, unknown> ?? {};
@@ -151,6 +166,7 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
             coupWarningFaction: (gm.coupWarningFaction as Power | null) ?? null,
             representativeStatuses: (gm.representativeStatuses as Record<Power, 'active' | 'sick' | 'eliminated'>) ?? { military: 'active', business: 'active', people: 'active' },
             dumbScore: typeof gm.dumbScore === 'number' ? gm.dumbScore : educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
+            rngSeed: typeof gm.rngSeed === 'number' ? gm.rngSeed : state.gameManagement.rngSeed,
             timerStartedAt: Date.now(),
             timerPausedAt: null,
             charisma: {

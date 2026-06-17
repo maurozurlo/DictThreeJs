@@ -1,6 +1,7 @@
 import { DAILY_EVENTS } from "../assets/dailyEvents";
 import type { DailyEvent } from "../types/DailyEvent";
 import type { Power } from "../types/Power";
+import { rollFloat } from "../Utils/Math";
 
 /**
  * Gets a random daily event based on weighted probabilities
@@ -10,8 +11,8 @@ export function getRandomDailyEvent(): DailyEvent | null {
     // Calculate total probability weight
     const totalChance = DAILY_EVENTS.reduce((sum, event) => sum + event.chance, 0);
 
-    // Random number between 0 and total chance
-    const roll = Math.random() * totalChance;
+    // Random number between 0 and total chance (seeded cursor — ADR-0010)
+    const roll = rollFloat() * totalChance;
 
     // Select event based on weighted probability
     let cumulative = 0;
@@ -36,7 +37,7 @@ export function getRandomDailyEventForPower(power: Power): DailyEvent | null {
     if (powerEvents.length === 0) return null;
 
     const totalChance = powerEvents.reduce((sum, event) => sum + event.chance, 0);
-    const roll = Math.random() * totalChance;
+    const roll = rollFloat() * totalChance; // seeded cursor — ADR-0010
 
     let cumulative = 0;
     for (const event of powerEvents) {
