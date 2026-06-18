@@ -662,7 +662,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 newCoupArmedLastRound, newCoupWarningFaction, financials, newTreasury,
                 recurringGmFields, newRelations, newCharisma, newRepStatuses,
                 newSelectedPower, newDumbScore, newLog, newRound, modifiersAfterOnStart,
-                nextDailyEvent, bankruptcy, overthrown,
+                nextDailyEvent, newCitizenStates, newDisplayedPopulation, bankruptcy, overthrown,
             } = resolution;
 
             // Context for the cumulative stats update applied in each surviving branch.
@@ -677,6 +677,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
                     stats: buildRoundStats(s, statsCtx),
+                    citizenStates: newCitizenStates,
+                    displayedPopulation: newDisplayedPopulation,
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -703,6 +705,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
                     stats: buildRoundStats(s, statsCtx),
+                    citizenStates: newCitizenStates,
+                    displayedPopulation: newDisplayedPopulation,
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -729,6 +733,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     relations: { ...s.relations, current: newRelations },
                     log: newLog,
                     stats: buildRoundStats(s, statsCtx),
+                    citizenStates: newCitizenStates,
+                    displayedPopulation: newDisplayedPopulation,
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
@@ -795,6 +801,8 @@ export const INITIAL_STATE = ({ set, get }: {
                     meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: newSelectedPower },
                     law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                     deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
+                    citizenStates: newCitizenStates,
+                    displayedPopulation: newDisplayedPopulation,
                     tabs: {
                         ...s.tabs,
                         activeTab: Tabs.Log,
@@ -854,6 +862,8 @@ export const INITIAL_STATE = ({ set, get }: {
                 meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: newSelectedPower },
                 law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
                 deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
+                citizenStates: newCitizenStates,
+                displayedPopulation: newDisplayedPopulation,
                 gameManagement: {
                     ...s.gameManagement,
                     dayEnded: false,
@@ -1034,6 +1044,7 @@ export const INITIAL_STATE = ({ set, get }: {
     },
     citizens: [],
     citizenStates: [],
+    displayedPopulation: 0,
     relations: {
         current: GAMESTATE.RELATIONS.INITIAL,
         adjustRelations: (power: Power, amount: number) => {

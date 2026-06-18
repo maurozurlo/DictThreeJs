@@ -20,6 +20,8 @@ import { filterLawPool } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers } from "../Utils/Modifiers";
+import { resolveCitizenPipeline } from "./CitizenHandler";
+import type { CitizenState } from "../types/Citizen";
 import i18n from "../i18n";
 
 type CoupResult = ReturnType<typeof checkCoup>;
@@ -50,6 +52,8 @@ export type RoundResolution =
         newRound: number;
         modifiersAfterOnStart: Modifier[];
         nextDailyEvent: GameState['dailyEvent']['current'];
+        newCitizenStates: CitizenState[];
+        newDisplayedPopulation: number;
         bankruptcy: boolean;
         overthrown: Power | undefined;
     };
@@ -68,9 +72,10 @@ export function resolveRound(state: GameState): RoundResolution {
         business: getEffectiveRelation(state.relations.current.business, state.gameManagement.modifiers, 'business', coupRound),
         people: getEffectiveRelation(state.relations.current.people, state.gameManagement.modifiers, 'people', coupRound),
     };
+    const effectiveCharisma = getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers, coupRound);
     const coupResult = checkCoup(
         effectiveRelationsForCoup,
-        getEffectiveCharisma(state.gameManagement.charisma.current, state.gameManagement.modifiers, coupRound),
+        effectiveCharisma,
         state.gameManagement.coupArmedLastRound ?? false,
         state.budget.expenditures.security,
     );
@@ -86,7 +91,7 @@ export function resolveRound(state: GameState): RoundResolution {
     //        at the resolving round; ADR-0008 §5). All current recurring content is
     //        immediate+permanent, so the resolving round and round+1 are equivalent. ---
     const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, coupRound);
-    const newTreasury = state.budget.treasury + financials.netChange;
+    let newTreasury = state.budget.treasury + financials.netChange;
     const recurringGmFields = recurringFieldKeys(financials);
 
     // --- 2. Budget → relation effects ---
@@ -156,7 +161,35 @@ export function resolveRound(state: GameState): RoundResolution {
     const { modifiers: modifiersAfterOnStart } = fireOnStartModifiers(state.gameManagement.modifiers, newRound);
     const nextDailyEvent = getRandomDailyEvent();
 
-    // --- 7. End conditions (overthrow reads EFFECTIVE relations, ADR-0008 §6) ---
+    // --- 7. Citizen pipeline (employment → happiness → role → death → feedback, GDD §4, Story 7-3).
+    //        Runs AFTER financials/relations/modifiers resolve so inputs are final for this round.
+    //        Feedback may reduce newTreasury (thief skim) or newRelations.people (protest);
+    //        end conditions in step 8 read these post-citizen values. ---
+    let newCitizenStates: CitizenState[] = state.citizenStates;
+    let newDisplayedPopulation: number = state.displayedPopulation;
+    if (state.citizens.length > 0) {
+        const pipeline = resolveCitizenPipeline({
+            citizens: state.citizens,
+            citizenStates: state.citizenStates,
+            effectiveRelations: effectiveRelationsForCoup,
+            effectiveCharisma,
+            security: state.budget.expenditures.security,
+            infrastructure: state.budget.expenditures.infrastructure,
+            health: state.budget.expenditures.health,
+            education: state.budget.expenditures.education,
+            peopleTax: state.budget.taxes.peopleTaxes,
+            businessTax: state.budget.taxes.businessTaxes,
+            currentPeopleRel: newRelations.people,
+            currentTreasury: newTreasury,
+        });
+        newCitizenStates = pipeline.newCitizenStates;
+        newDisplayedPopulation = pipeline.newDisplayedPopulation;
+        newRelations.people = pipeline.peopleRelation;
+        newTreasury = pipeline.treasury;
+    }
+
+    // --- 8. End conditions (overthrow reads EFFECTIVE relations, ADR-0008 §6;
+    //        reads post-citizen newTreasury and newRelations.people) ---
     const bankruptcy = newTreasury <= 0;
     const overthrown = (Object.keys(newRelations) as Power[]).find(
         p => getEffectiveRelation(newRelations[p], state.gameManagement.modifiers, p, newRound) <= GAMESTATE.RELATIONS.MIN,
@@ -168,6 +201,7 @@ export function resolveRound(state: GameState): RoundResolution {
         financials, newTreasury, recurringGmFields,
         newRelations, newCharisma, newRepStatuses, newSelectedPower, newDumbScore,
         newLog, newRound, modifiersAfterOnStart, nextDailyEvent,
+        newCitizenStates, newDisplayedPopulation,
         bankruptcy, overthrown,
     };
 }

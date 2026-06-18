@@ -387,3 +387,18 @@ Task: Implemented — pending story-done
 - Tech debt logged: None (constants-location advisory noted in Completion Notes; Clamp→clamp rename deferred)
 - Key note: Power = typeof Power[number] from non-`as const` array resolves to `string` — `default: never` trick cannot be used; replaced with `default: throw` in both computeHappiness and computeEmployment
 - Next recommended: Story 7-3 — CitizenHandler P3 (role fork + death + feedback + nextRound() wiring) — production/stories/7-3-citizen-handler-p3.md
+
+## Session Extract — /dev-story 7-3 2026-06-18
+- Story: production/stories/7-3-citizen-handler-p3.md — CitizenHandler P3 (Role Fork + Death + Feedback + nextRound() Wiring)
+- Files changed:
+  - src/Stores/CitizenHandler.ts (added computeRole, computeFeedback, CitizenPipelineInputs, resolveCitizenPipeline; rollChance added to import)
+  - src/types/GameState.ts (added displayedPopulation: number)
+  - src/Stores/StateFactory.ts (added BASE_POPULATION import; displayedPopulation to buildStartState and buildLoadedState)
+  - src/Stores/RoundResolver.ts (added resolveCitizenPipeline/CitizenState imports; extracted effectiveCharisma var; const→let newTreasury; added step 7 citizen pipeline; extended RoundResolution with newCitizenStates/newDisplayedPopulation; moved end conditions to step 8)
+  - src/Stores/GameState.ts (added displayedPopulation:0 to INITIAL_STATE; newCitizenStates/newDisplayedPopulation to all 5 nextRound set() branches)
+- Test written: tests/integration/citizens/citizen_resolution.test.ts — 32 tests covering AC-7a/7b, AC-8, AC-9, AC-10, AC-11, AC-12, AC-13, AC-14, AC-20, AC-21, AC-22, AC-23, AC-24, AC-25
+- Suite: 551/551 passing (33 test files, 0 new failures)
+- Key decisions: citizen pipeline inserted as step 7 in resolveRound (before end conditions which moved to step 8); end conditions read post-citizen values; effectiveRelationsForCoup reused from step 0; effectiveCharisma extracted for reuse
+- Advisory: AC-15 `rg Math\.random` has 2 comment-only matches (pre-existing from P1 JSDoc + inline comment); no actual Math.random() calls in code
+- Blockers: None
+- Next: /code-review src/Stores/CitizenHandler.ts src/Stores/RoundResolver.ts then /story-done 7-3

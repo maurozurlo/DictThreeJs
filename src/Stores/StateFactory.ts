@@ -16,7 +16,7 @@ import { getRandomDailyEvent } from "./DailyEventHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { normalizeModifier } from "../Utils/Modifiers";
 import { migrateLegacyEffect } from "../assets/modifierContent";
-import { buildCitizenRoster } from "./CitizenHandler";
+import { buildCitizenRoster, BASE_POPULATION } from "./CitizenHandler";
 
 /** Full new-game reset patch (setPhase('start')). Draws the first law/deal. */
 export function buildStartState(state: GameState, difficulty?: Difficulty): Partial<GameState> {
@@ -117,6 +117,7 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
         },
         citizens,
         citizenStates,
+        displayedPopulation: BASE_POPULATION,
     };
 }
 
@@ -235,5 +236,6 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
         // Pre-citizen saves omit these fields — guard with [] so old saves load cleanly (Story 7-1).
         citizens: (data.citizens as Citizen[]) ?? [],
         citizenStates: (data.citizenStates as CitizenState[]) ?? [],
+        displayedPopulation: (data.displayedPopulation as number) ?? 0,
     };
 }

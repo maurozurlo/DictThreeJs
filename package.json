@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "coverage": "vitest run --coverage",
+    "test:coverage": "vitest run --coverage",
     "i18n:lint": "node -e \"const fs=require('fs'),path=require('path');const dir='public/locales';let fail=false;for(const lng of fs.readdirSync(dir)){for(const f of fs.readdirSync(path.join(dir,lng))){const file=path.join(dir,lng,f);const data=JSON.parse(fs.readFileSync(file,'utf8'));const empties=[];(function walk(o,prefix){for(const[k,v]of Object.entries(o)){const key=prefix?prefix+'.'+k:k;if(typeof v==='string'&&v==='')empties.push(key);else if(typeof v==='object'&&v)walk(v,key)}})(data,'');if(empties.length){console.error('Empty translations in '+file+':',empties.join(', '));fail=true;}}}if(fail)process.exit(1);else console.log('i18n lint passed');\""
   },
   "dependencies": {

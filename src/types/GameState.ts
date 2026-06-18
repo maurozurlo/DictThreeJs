@@ -283,4 +283,9 @@ export type GameState = {
      * the `nextRound()` set() call (ADR-0002).
      */
     citizenStates: CitizenState[];
+    /**
+     * Real-world population equivalent of the current alive citizen count (GDD §4.8, Story 7-3).
+     * Computed each round: `round(aliveCount / 25 * 5_924_511)`. Starts at `BASE_POPULATION`.
+     */
+    displayedPopulation: number;
 };

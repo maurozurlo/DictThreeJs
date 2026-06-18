@@ -18,7 +18,7 @@
 
 import type { Citizen, CitizenState } from '../types/Citizen';
 import type { Power } from '../types/Power';
-import { getRandomFromList, getRandomNumberInRange, rollFloat, Clamp } from '../Utils/Math';
+import { getRandomFromList, getRandomNumberInRange, rollFloat, rollChance, Clamp } from '../Utils/Math';
 
 // ---------------------------------------------------------------------------
 // Name tables (GDD §3.1 — Latin-American male names; women/children deferred per GDD §3.1)
@@ -313,4 +313,150 @@ export function computeBodyType(bodySeed: number, health: number): 'slim' | 'fit
     if (bodySeed < fatShare) return 'fat';
     if (bodySeed < fatShare + fitShare) return 'fit';
     return 'slim';
+}
+
+// ---------------------------------------------------------------------------
+// P3 — Role Fork + Death + Feedback (GDD §4.3–§4.6, Story 7-3)
+// ---------------------------------------------------------------------------
+
+/**
+ * Classify a citizen's street role for this round (GDD §4.3, Story 7-3).
+ *
+ * Flat elif chain — do NOT nest or collapse. `rollFn` is injected for deterministic
+ * testing; pass `rollChance` from `Utils/Math` in production (commits the RNG
+ * cursor — ADR-0010).
+ */
+export function computeRole(
+    faction: Power,
+    happiness: number,
+    education: number,
+    rollFn: (chance: number) => boolean,
+): CitizenState['role'] {
+    if (happiness >= CONTENT_THRESHOLD)                                         return 'content';
+    else if (happiness >= NEUTRAL_THRESHOLD)                                    return 'neutral';
+    else if (happiness <= GONE_HAPPINESS_THRESHOLD && rollFn(GONE_CHANCE))      return 'gone';
+    else if (faction !== 'people')                                              return 'thief';
+    else if (education <= 4)                                                    return 'thief';
+    else                                                                        return 'protestor';
+}
+
+/**
+ * Compute people-relation and treasury changes from this round's citizen roles (GDD §4.6, Story 7-3).
+ *
+ * `relDelta` is floor-divided and capped before subtraction; both outputs are
+ * guarded against going below −10 or 0 respectively.
+ */
+export function computeFeedback(
+    citizenStates: CitizenState[],
+    currentPeopleRel: number,
+    currentTreasury: number,
+): { peopleRelation: number; treasury: number } {
+    const protestorCount = citizenStates.filter(cs => cs.role === 'protestor').length;
+    const thiefCount = citizenStates.filter(cs => cs.role === 'thief').length;
+    const relDelta = Math.min(Math.floor(protestorCount / PROTEST_DIVISOR), PROTEST_FEEDBACK_CAP);
+    return {
+        peopleRelation: Math.max(currentPeopleRel - relDelta, -10),
+        treasury: Math.max(currentTreasury - thiefCount * THIEF_SKIM, 0),
+    };
+}
+
+/** All inputs to the per-round citizen simulation pipeline (GDD §4, Story 7-3). */
+export interface CitizenPipelineInputs {
+    citizens: Citizen[];
+    citizenStates: CitizenState[];
+    effectiveRelations: Record<Power, number>;
+    effectiveCharisma: number;
+    security: number;
+    infrastructure: number;
+    health: number;
+    /** Education budget (0–10), used by the people-faction protestor/thief fork (GDD §4.3). */
+    education: number;
+    peopleTax: number;
+    businessTax: number;
+    /** people-relation value AFTER budget effects and tax penalties have resolved this round. */
+    currentPeopleRel: number;
+    /** Treasury value AFTER financials have resolved this round. */
+    currentTreasury: number;
+    /** Injected for testing — defaults to `rollChance` from `Utils/Math` in production (ADR-0010). */
+    rollFn?: (chance: number) => boolean;
+}
+
+/**
+ * Run the full citizen simulation pipeline for one round (GDD §4, Story 7-3).
+ *
+ * Order: employment → happiness → role → death → feedback.
+ * `gone` and starvation death are mutually exclusive: a `gone` result exits early
+ * and skips the starvation roll entirely (AC-11).
+ *
+ * Returns updated citizen states, a scaled `displayedPopulation`, and the
+ * post-feedback `peopleRelation` and `treasury` for inclusion in the atomic set().
+ */
+export function resolveCitizenPipeline(inputs: CitizenPipelineInputs): {
+    newCitizenStates: CitizenState[];
+    newDisplayedPopulation: number;
+    peopleRelation: number;
+    treasury: number;
+} {
+    if (inputs.citizens.length === 0) {
+        return {
+            newCitizenStates: [],
+            newDisplayedPopulation: 0,
+            peopleRelation: inputs.currentPeopleRel,
+            treasury: inputs.currentTreasury,
+        };
+    }
+
+    const rollFn = inputs.rollFn ?? rollChance;
+
+    const newCitizenStates: CitizenState[] = inputs.citizenStates.map((cs, i) => {
+        if (!cs.alive) return cs;
+
+        const ped = inputs.citizens[i];
+        const effectiveRelation = inputs.effectiveRelations[ped.faction];
+
+        const employed = computeEmployment(
+            ped.faction, effectiveRelation, inputs.security, inputs.infrastructure,
+        );
+        const happiness = computeHappiness({
+            faction: ped.faction,
+            effectiveRelation,
+            lastFactionRelation: cs.lastFactionRelation,
+            effectiveCharisma: inputs.effectiveCharisma,
+            security: inputs.security,
+            infrastructure: inputs.infrastructure,
+            health: inputs.health,
+            peopleTax: inputs.peopleTax,
+            businessTax: inputs.businessTax,
+            employed,
+        });
+
+        const role = computeRole(ped.faction, happiness, inputs.education, rollFn);
+
+        // Gone: exits early — starvation roll never called for this ped (AC-11, AC-22).
+        if (role === 'gone') {
+            return { ...cs, employed, happiness, role, alive: false, lastFactionRelation: effectiveRelation };
+        }
+
+        // Starvation: people-faction or unemployed army/business (employed elites immune — AC-10).
+        let alive = cs.alive;
+        if (!employed || ped.faction === 'people') {
+            const starvationChance = inputs.health <= HEALTH_DEATH_THRESHOLD
+                ? DEATH_RATE_MAX * (1 - inputs.health / HEALTH_DEATH_THRESHOLD)
+                : 0;
+            if (rollFn(starvationChance)) alive = false;
+        }
+
+        return { ...cs, employed, happiness, role, alive, lastFactionRelation: effectiveRelation };
+    });
+
+    const feedback = computeFeedback(newCitizenStates, inputs.currentPeopleRel, inputs.currentTreasury);
+    const aliveCount = newCitizenStates.filter(cs => cs.alive).length;
+    const newDisplayedPopulation = Math.round(aliveCount / TOTAL_CITIZENS * BASE_POPULATION);
+
+    return {
+        newCitizenStates,
+        newDisplayedPopulation,
+        peopleRelation: feedback.peopleRelation,
+        treasury: feedback.treasury,
+    };
 }
