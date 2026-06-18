@@ -438,7 +438,7 @@ export function resolveCitizenPipeline(inputs: CitizenPipelineInputs): {
         }
 
         // Starvation: people-faction or unemployed army/business (employed elites immune — AC-10).
-        let alive = cs.alive;
+        let alive: boolean = cs.alive;
         if (!employed || ped.faction === 'people') {
             const starvationChance = inputs.health <= HEALTH_DEATH_THRESHOLD
                 ? DEATH_RATE_MAX * (1 - inputs.health / HEALTH_DEATH_THRESHOLD)
