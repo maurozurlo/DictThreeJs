@@ -95,10 +95,7 @@ export const STREET_LAYOUT: StreetLayout = {
         },
     ],
 
-    pedestrians: [
-        { id: 'ped-0', pathId: 'sidewalk-right', speed: 1.5 },
-        { id: 'ped-1', pathId: 'sidewalk-left',  speed: 1.5 },
-    ],
+    pedestrians: [],
 
     vehicles: [
         { id: 'car-0', pathId: 'road-loop-a', speed: 6.0 },
