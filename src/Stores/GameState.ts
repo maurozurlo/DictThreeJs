@@ -132,9 +132,10 @@ export const INITIAL_STATE = ({ set, get }: {
             } else if (tab === Tabs.Laws) {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
-                newCameraPos = new Vector3(0.312, 0.641, 0.046);
-                newCameraFov = 59;
-                newCameraRotation = [-0.256, 0.024];
+                // Overhead oblique view of the metric-scale street scene (art-bible §10.0)
+                newCameraPos = new Vector3(0, 18, 14);
+                newCameraFov = 50;
+                newCameraRotation = [-0.76, 0];
             } else if (tab === Tabs.Secret) {
                 const s = get();
                 // When a special ending is active, show the triggering faction's room;

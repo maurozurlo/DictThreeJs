@@ -1360,6 +1360,53 @@ export const ANIMATED_SPRITES: Record<string, {
 
 This section consolidates all technical production standards established across Sections 5–9 into a single reference. An outsourcing team should be able to follow this section without additional briefing.
 
+### 10.0 World Scale Convention
+
+**1 unit = 1 metre, everywhere in the scene.**
+
+This is the canonical scale for all Three.js world coordinates and all FBX asset production. Model at real-world proportions in 3ds Max with system units set to metres; export FBX with unit scale metres. Assets import at `scale={1}` with no correction factor in code.
+
+#### Reference Dimensions
+
+| Object | Real-world size | Three.js units |
+|--------|----------------|----------------|
+| Adult human height | 1.7–1.9 m | 1.7–1.9 |
+| Sidewalk curb height | 0.1 m | 0.1 |
+| Road lane width | 3.5 m | 3.5 |
+| Road total width (2 lanes) | 7 m | 7 |
+| Building height — low-rise | 8–12 m | 8–12 |
+| Building height — mid-rise | 12–18 m | 12–18 |
+| Plaza slab thickness | 0.2 m | 0.2 |
+| Pothole decal footprint | 0.3 × 0.4 m | 0.3 × 0.4 |
+| Streetlight height | 4–6 m | 4–6 |
+| Statue pedestal height | 0.8 m | 0.8 |
+| Car (W × H × L) | 2.0 × 1.4 × 4.5 m | 2.0 × 1.4 × 4.5 |
+| Pedestrian placeholder (W × H × D) | 0.6 × 1.8 × 0.6 m | 0.6 × 1.8 × 0.6 |
+
+#### Street Scene Extent
+
+| Axis | Range | Notes |
+|------|-------|-------|
+| X | −21 to +21 | 42 m total width; road centred at x=0 |
+| Z | +4 (south) to −20 (north) | 24 m depth |
+| Y | 0 = ground; geometry sits above 0 | plaza slab top at y=0.2 |
+
+Street tab camera: `pos [0, 18, 14]`, rotation.x `−0.76 rad` (~43° down), FOV 50°.
+
+#### 3ds Max Export Settings
+
+Set 3ds Max **system units to Metres** before modelling. In the FBX export dialog:
+
+| Setting | Value |
+|---------|-------|
+| Units | Metres |
+| Axis conversion | Y-up |
+| Scale factor | 1.0 |
+
+After import via `FBXLoader`, the asset renders at `scale={1}` with no correction. The existing governance room assets (`people.FBX`, `elite.FBX`, `police.FBX`, `main.FBX`) were authored at this scale and confirm it: characters appear ~1.0–1.4 m tall at `scale={1}`.
+
+---
+
 ### 10.1 File Formats and Delivery
 
 | Asset type | Format | Notes |
