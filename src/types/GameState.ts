@@ -8,6 +8,7 @@ import type { PeriodicEvent } from "./PeriodicEvent";
 import type { MiniChallenge } from "./MiniChallenge";
 import type { DailyEvent } from "./DailyEvent";
 import type { Difficulty } from "../Constants/GameState";
+import type { Citizen, CitizenState } from "./Citizen";
 
 export type RoundLogEntry = {
     date: string;
@@ -270,4 +271,16 @@ export type GameState = {
         activate: () => void;
         deactivate: () => void;
     };
+    /**
+     * Immutable citizen identities — generated once at game start via
+     * `buildCitizenRoster()` and restored as-is from save payload (Story 7-1).
+     * Parallel-indexed with `citizenStates`; never mutated after generation.
+     */
+    citizens: Citizen[];
+    /**
+     * Per-round mutable citizen state — recomputed by CitizenHandler P2/P3
+     * each round. Parallel-indexed with `citizens`. Updated atomically within
+     * the `nextRound()` set() call (ADR-0002).
+     */
+    citizenStates: CitizenState[];
 };

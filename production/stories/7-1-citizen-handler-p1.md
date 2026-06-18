@@ -1,7 +1,7 @@
 # Story 7-1: CitizenHandler P1 — Generation + Immutable Identity
 
 > **Epic**: Citizen Simulation
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: 1.0 days

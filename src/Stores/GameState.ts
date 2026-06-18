@@ -1032,6 +1032,8 @@ export const INITIAL_STATE = ({ set, get }: {
     dailyEvent: {
         current: null,
     },
+    citizens: [],
+    citizenStates: [],
     relations: {
         current: GAMESTATE.RELATIONS.INITIAL,
         adjustRelations: (power: Power, amount: number) => {

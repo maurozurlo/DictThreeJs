@@ -356,3 +356,12 @@ Task: Implemented — pending story-done
 - Registry: entities.yaml bumped v1→v2; registered ped_special_man_protestor + TOTAL_CITIZENS. systems-index.md updated (new row + street-view row reworded).
 - Agent note: systems-designer (Formulas) and qa-lead (AC) NOT spawned — both fail on "Usage credits required for 1M context". Authored directly; recommend qa-lead review before production.
 - NOT committed yet (awaiting user). Next: /design-review design/gdd/citizen-simulation.md → then /art-bible + /asset-spec → carve epics/stories.
+
+## Session Extract — /dev-story 7-1 2026-06-18
+- Story: production/stories/7-1-citizen-handler-p1.md — CitizenHandler P1 (Generation + Immutable Identity)
+- Files changed: src/types/Citizen.ts (new), src/Stores/CitizenHandler.ts (new), src/types/GameState.ts (citizens/citizenStates fields added), src/Stores/StateFactory.ts (buildStartState + buildLoadedState wired), src/Stores/GameState.ts (citizens/citizenStates: [] in INITIAL_STATE)
+- Test written: tests/unit/citizens/citizen_generation.test.ts — 10 tests, all pass
+- Key decision: Citizen.faction uses 'military' (not 'army') to match existing Power type — avoids translation seam in stories 7-2/7-3
+- Test results: 10/10 new; 478/479 suite (secret-room-rework.test.ts failure is pre-existing, not introduced)
+- Blockers: None
+- Next: /code-review src/Stores/CitizenHandler.ts src/types/Citizen.ts src/Stores/StateFactory.ts then /story-done 7-1

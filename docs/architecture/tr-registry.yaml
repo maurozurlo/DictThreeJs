@@ -24,8 +24,8 @@
 #
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
-version: 3
-last_updated: "2026-06-15"
+version: 4
+last_updated: "2026-06-18"
 
 requirements:
   # --- Platform ---

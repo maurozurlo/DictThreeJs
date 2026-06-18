@@ -22,7 +22,7 @@ stories:
     name: "CitizenHandler P1 — generation + immutable identity"
     file: "production/stories/7-1-citizen-handler-p1.md"
     priority: must-have
-    status: ready-for-dev
+    status: in-progress
     owner: ""
     estimate_days: 1.0
     blocker: ""

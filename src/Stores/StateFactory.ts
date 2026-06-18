@@ -10,11 +10,13 @@ import { getRandomUniqueItem, seedRng, setRngState } from "../Utils/Math";
 import { LAWS } from "../assets/laws";
 import { DEALS } from "../assets/deals";
 import type { GameState } from "../types/GameState";
+import type { Citizen, CitizenState } from "../types/Citizen";
 import type { Power } from "../types/Power";
 import { getRandomDailyEvent } from "./DailyEventHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { normalizeModifier } from "../Utils/Modifiers";
 import { migrateLegacyEffect } from "../assets/modifierContent";
+import { buildCitizenRoster } from "./CitizenHandler";
 
 /** Full new-game reset patch (setPhase('start')). Draws the first law/deal. */
 export function buildStartState(state: GameState, difficulty?: Difficulty): Partial<GameState> {
@@ -27,6 +29,11 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
     // the exact stream, which makes risky outcomes un-save-scummable.
     const rngSeed = (Date.now() ^ Math.floor(Math.random() * 0x100000000)) >>> 0;
     seedRng(rngSeed);
+
+    // Generate the 25-citizen roster immediately after seeding so citizens are
+    // part of the reproducible stream from the very first draw (ADR-0010, Story 7-1).
+    const initialRelations: Record<Power, number> = { ...GAMESTATE.RELATIONS.INITIAL };
+    const { citizens, citizenStates } = buildCitizenRoster(initialRelations);
 
     const freshLaws = new Set<typeof LAWS[number]>();
     const freshDeals = new Set<typeof DEALS[number]>();
@@ -108,6 +115,8 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             interactedWithLaws: freshLaws,
             lastLawOutcome: null,
         },
+        citizens,
+        citizenStates,
     };
 }
 
@@ -222,5 +231,9 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
             totalRecurringExpensesSpent: (savedStats.totalRecurringExpensesSpent as number) ?? 0,
             repealCount: (savedStats.repealCount as number) ?? 0,
         },
+        // Citizen identity is persisted as plain JSON; restore as-is (never re-derive on load).
+        // Pre-citizen saves omit these fields — guard with [] so old saves load cleanly (Story 7-1).
+        citizens: (data.citizens as Citizen[]) ?? [],
+        citizenStates: (data.citizenStates as CitizenState[]) ?? [],
     };
 }
