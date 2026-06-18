@@ -386,3 +386,53 @@ requirements:
     revised: ""
     adr: docs/architecture/adr-0008-timed-modifier-engine.md
     status: active
+
+  # --- Citizen Simulation (Sprint 7) ---
+  - id: TR-citizen-001
+    system: citizen
+    gdd: design/gdd/citizen-simulation.md
+    requirement: "25 persistent citizens generated once at game start via seeded RNG (ADR-0010); each has an immutable identity (name, skin, faction, bodySeed) drawn from the seeded cursor and never mutated post-generation; fixed split 11 people / 7 army / 7 business; roster and bodySeed stable across save/load"
+    created: 2026-06-18
+    revised: ""
+    adr: docs/architecture/adr-0010-seeded-rng-commit-on-roll.md
+    status: active
+  - id: TR-citizen-002
+    system: citizen
+    gdd: design/gdd/citizen-simulation.md
+    requirement: "Per-round pipeline (pure functions): employment (army: security≥4 AND rel≥0; business: rel≥0 AND infra≥3; people: always); happiness = clamp(5 + factionFortune + charismaTerm − displacement − volatility, 0, 10) reading effective relations (ADR-0008); body type via lerp(fatShare, slimShare) from health and per-citizen bodySeed"
+    created: 2026-06-18
+    revised: ""
+    adr: docs/architecture/adr-0008-timed-modifier-engine.md
+    status: active
+  - id: TR-citizen-003
+    system: citizen
+    gdd: design/gdd/citizen-simulation.md
+    requirement: "Role fork (content/neutral/thief/protestor/gone via happiness×education, faction gate for thief, rollChance for gone/starvation via ADR-0010); loop-closer feedback (peopleRelation −= min(floor(protestorCount/3),5); treasury −= thiefCount×THIEF_SKIM); displayedPopulation = round(aliveCount/25×BASE_POPULATION); pipeline wired as final step in nextRound() in a single atomic set (ADR-0002)"
+    created: 2026-06-18
+    revised: ""
+    adr: docs/architecture/adr-0002-state-management-pattern.md
+    status: active
+  - id: TR-citizen-004
+    system: citizen
+    gdd: design/gdd/citizen-simulation.md
+    requirement: "StreetView.tsx renders citizens by role/outfit/bodyType from Zustand store state; outfit precedence (thief→protestor→army uniform→business suit→civilian); protestor cluster grouped spatially; gone peds absent; no gameplay logic inline in 3D component (ADR-0003)"
+    created: 2026-06-18
+    revised: ""
+    adr: docs/architecture/adr-0003-react-threejs-integration.md
+    status: active
+  - id: TR-citizen-005
+    system: citizen
+    gdd: design/gdd/citizen-simulation.md
+    requirement: "Click-to-inspect citizen inspector panel: 3D Scene owns raycast → selectedPedId in store → plain React/CSS panel shows name, faction, employed/role state, happiness 0–10 bar, role label; gone peds not clickable; panel dismisses on click-elsewhere or second ped swaps contents; panel never imports from Three.js (ADR-0003)"
+    created: 2026-06-18
+    revised: ""
+    adr: docs/architecture/adr-0003-react-threejs-integration.md
+    status: active
+  - id: TR-citizen-006
+    system: citizen
+    gdd: design/gdd/citizen-simulation.md
+    requirement: "displayedPopulation displayed in the stat area with thousands-separator formatting (e.g. 5,924,511); recomputes every round; visibly decrements ~237k per citizen death; monotonically non-increasing; UI component does not import from Three.js"
+    created: 2026-06-18
+    revised: ""
+    adr: docs/architecture/adr-0003-react-threejs-integration.md
+    status: active
