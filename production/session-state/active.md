@@ -430,3 +430,15 @@ Task: Implemented — pending story-done
 - Key decisions: ActionPanel sidebar placement instead of floating overlay (user preference); no backdrop/dismiss needed; idle prompt shown when selectedPedId=null; StateFactory.ts unchanged (scene slice not reconstructed by buildStartState/buildLoadedState)
 - Blockers: None
 - Next: /code-review src/components/Tabs/CitizenInspector.tsx src/3d/StreetView.tsx then /story-done production/stories/7-5-citizen-inspector-ui.md
+
+## Session Extract — /dev-story 7-6 2026-06-18
+- Story: production/stories/7-6-population-hud.md — Population HUD Readout
+- Files changed:
+  - src/components/ActionPanel/ActionPanel.tsx (added displayedPopulation selector + third budget row)
+  - public/locales/en/menu.json (added stat.population = "Population")
+  - public/locales/es/menu.json (added stat.population = "Población")
+- Test written: None — UI story; evidence doc required at production/qa/evidence/7-6-population-hud-evidence.md
+- Suite: 551/551 passing, tsc clean
+- Key decisions: toLocaleString('en-US') for thousands formatting; sat alongside existing treasury/month rows in .budget CSS column; top-level store selector s.displayedPopulation
+- Blockers: None
+- Next: /code-review src/components/ActionPanel/ActionPanel.tsx then /story-done production/stories/7-6-population-hud.md

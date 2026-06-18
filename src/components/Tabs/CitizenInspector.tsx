@@ -57,7 +57,7 @@ const CitizenInspector = () => {
 
             <div className={styles.row}>
                 <span className={styles.label}>{t('citizen.inspector.happiness')}</span>
-                <span>{cs.happiness}/10 — {t(`citizen.inspector.mood.${happinessMoodKey}`)}</span>
+                <span>{Math.round(cs.happiness)}/10 — {t(`citizen.inspector.mood.${happinessMoodKey}`)}</span>
             </div>
 
             <div className={styles.happinessBar}>
