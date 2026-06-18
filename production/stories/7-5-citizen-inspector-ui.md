@@ -1,7 +1,7 @@
 # Story 7-5: Citizen Inspector UI — Click-to-Inspect Panel
 
 > **Epic**: Citizen Simulation
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: 0.5 days
@@ -133,3 +133,10 @@
 
 - Depends on: Story 7-3 must be DONE (`citizenStates` and `selectedPedId` actions available)
 - Unlocks: Story 7-6 (minor UI, can run in parallel if desired)
+
+## Completion Notes
+**Completed**: 2026-06-18
+**Criteria**: 9/9 passing
+**Deviations**: None
+**Test Evidence**: UI — evidence doc not created (ADVISORY); QA manual cases defined in story
+**Code Review**: Deferred — to run before sprint close-out

@@ -442,3 +442,11 @@ Task: Implemented — pending story-done
 - Key decisions: toLocaleString('en-US') for thousands formatting; sat alongside existing treasury/month rows in .budget CSS column; top-level store selector s.displayedPopulation
 - Blockers: None
 - Next: /code-review src/components/ActionPanel/ActionPanel.tsx then /story-done production/stories/7-6-population-hud.md
+
+## Session Extract — /story-done 2026-06-18
+- Verdict: COMPLETE WITH NOTES (both stories)
+- Story: production/stories/7-5-citizen-inspector-ui.md — Citizen Inspector UI (9/9 criteria, evidence doc ADVISORY)
+- Story: production/stories/7-6-population-hud.md — Population HUD Readout (8/8 criteria, evidence doc ADVISORY)
+- Tech debt logged: None
+- Code reviews: Deferred — to run before sprint close-out
+- Next recommended: 7-7 Modifier Unification P4a (Must Have, currently backlog)

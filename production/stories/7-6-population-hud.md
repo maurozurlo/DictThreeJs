@@ -1,7 +1,7 @@
 # Story 7-6: Population HUD Readout
 
 > **Epic**: Citizen Simulation
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: 0.25 days
@@ -110,3 +110,10 @@ const displayedPopulation = useGameStore(s => s.gameManagement.displayedPopulati
 
 - Depends on: Story 7-3 must be DONE (`displayedPopulation` stored in state after each `nextRound()`)
 - Unlocks: nothing (sprint close-out can begin after this)
+
+## Completion Notes
+**Completed**: 2026-06-18
+**Criteria**: 8/8 passing
+**Deviations**: None (selector path used top-level `s.displayedPopulation` — correct per actual store shape)
+**Test Evidence**: UI — evidence doc not created (ADVISORY)
+**Code Review**: Deferred — to run before sprint close-out

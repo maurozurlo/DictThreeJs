@@ -84,22 +84,22 @@ stories:
     name: "Citizen Inspector UI (click-to-inspect panel)"
     file: "production/stories/7-5-citizen-inspector-ui.md"
     priority: should-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-18"
 
   # ── Nice to Have ────────────────────────────────────────────────────────
   - id: "7-6"
     name: "Population HUD readout — displayedPopulation to stat area"
     file: "production/stories/7-6-population-hud.md"
     priority: nice-to-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-06-18"
 
   - id: "5-8"
     name: "External playtest — non-developer Medium difficulty session (carryover)"
