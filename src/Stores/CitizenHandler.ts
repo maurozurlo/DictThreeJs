@@ -18,7 +18,7 @@
 
 import type { Citizen, CitizenState } from '../types/Citizen';
 import type { Power } from '../types/Power';
-import { getRandomFromList, getRandomUniqueItem, getRandomNumberInRange, rollFloat, rollChance, Clamp } from '../Utils/Math';
+import { getRandomUniqueItem, getRandomNumberInRange, rollFloat, rollChance, Clamp } from '../Utils/Math';
 
 // ---------------------------------------------------------------------------
 // Name tables (GDD §3.1 — Latin-American male names; women/children deferred per GDD §3.1)

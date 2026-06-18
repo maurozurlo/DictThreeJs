@@ -95,7 +95,7 @@ stories:
     name: "Population HUD readout — displayedPopulation to stat area"
     file: "production/stories/7-6-population-hud.md"
     priority: nice-to-have
-    status: backlog
+    status: in-progress
     owner: ""
     estimate_days: 0.25
     blocker: ""

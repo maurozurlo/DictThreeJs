@@ -192,5 +192,8 @@
                 "desperate": "Desesperado"
             }
         }
+    },
+    "stat": {
+        "population": "Población"
     }
 }

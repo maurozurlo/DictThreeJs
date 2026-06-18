@@ -1,7 +1,7 @@
 # Story 7-6: Population HUD Readout
 
 > **Epic**: Citizen Simulation
-> **Status**: Not Started
+> **Status**: In Progress
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: 0.25 days

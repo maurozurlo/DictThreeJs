@@ -21,6 +21,7 @@ const ActionPanel = () => {
     const activeTab = useGameStore((s) => s.tabs.activeTab)
     const relations = useGameStore((s) => s.relations.current)
     const money = useGameStore((s) => s.budget.treasury)
+    const displayedPopulation = useGameStore((s) => s.displayedPopulation)
     const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
     const round = useGameStore(s => s.gameManagement.round)
     const { displayTime, progress } = useRoundTimer()
@@ -42,6 +43,7 @@ const ActionPanel = () => {
                 <div className={styles.budget}>
                     <Typography variant={'caption'}>{t('nav.month')} {round}/{GAMESTATE.ROUNDS.MAX}</Typography>
                     <Typography variant={'caption'}>{MoneyNumberFormatter(money)}</Typography>
+                    <Typography variant={'caption'}>{t('stat.population')}: {displayedPopulation.toLocaleString('en-US')}</Typography>
                 </div>
             </div>
 
