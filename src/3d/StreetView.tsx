@@ -7,6 +7,9 @@ import { Tabs } from '../types/Tabs';
 import { STREET_LAYOUT } from '../assets/streetLayout';
 import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
 import { getVisibleModifiers } from '../Utils/Modifiers';
+import type { CitizenState } from '../types/Citizen';
+import type { Citizen } from '../types/Citizen';
+import { computeBodyType } from '../Stores/CitizenHandler';
 
 const BUILDING_COLOR   = '#7a6e62';
 const PLAZA_COLOR      = '#b8a98a';
@@ -19,6 +22,53 @@ const VEHICLE_COLOR    = '#d94a4a';
 const PED_HALF_HEIGHT   = 0.9;  // half of 1.8 m person
 const CAR_HALF_HEIGHT   = 0.7;  // half of 1.4 m car
 const DEBUG_ARROW_Y     = 2.0;  // height above ground for debug waypoint arrows
+
+/** Outfit precedence chain — first matching rule wins (GDD §3.2). Returns a hex color for the ped mesh. */
+function getOutfit(
+    role: CitizenState['role'],
+    employed: boolean,
+    faction: Citizen['faction'],
+): string {
+    if (role === 'thief')    return '#444444';
+    // TODO: swap to ped_special_man_protestor when asset is created
+    if (role === 'protestor') return '#c0392b';
+    if (employed && faction === 'military')  return '#3d6b3d';
+    if (employed && faction === 'business')  return '#1e3a5f';
+    return '#c8a882';
+}
+
+/** Box geometry dimensions [width, height, depth] by body type. */
+function getPedDimensions(bodyType: 'slim' | 'fit' | 'fat'): [number, number, number] {
+    switch (bodyType) {
+        case 'fat':  return [0.8, 1.5, 0.8];
+        case 'slim': return [0.4, 1.6, 0.4];
+        case 'fit':  return [0.6, 1.8, 0.6];
+    }
+}
+
+/** Default world positions for all 25 citizens by roster index. */
+const CITIZEN_BASE_POSITIONS: readonly [number, number, number][] = [
+    // People — left sidewalk (0–5)
+    [-5.5, 0, 3], [-5.5, 0, 0.5], [-5.5, 0, -2], [-5.5, 0, -4.5], [-5.5, 0, -7], [-5.5, 0, -9.5],
+    // People — right sidewalk overflow (6–10)
+    [5.5, 0, 3], [5.5, 0, 0.5], [5.5, 0, -2], [5.5, 0, -4.5], [5.5, 0, -7],
+    // Military — central/back area (11–17)
+    [-3, 0, -13], [-1, 0, -13], [1, 0, -13], [3, 0, -13], [-2, 0, -15], [0, 0, -15], [2, 0, -15],
+    // Business — right cluster (18–24)
+    [5.5, 0, -9.5], [5.5, 0, -12], [7, 0, -10], [7, 0, -12], [7, 0, -7], [8, 0, -5], [8, 0, -3],
+];
+
+/** Protestors cluster at plaza positions (cycles if > 8 protestors). */
+const PROTESTOR_POSITIONS: readonly [number, number, number][] = [
+    [-2, 0, -7], [-1, 0, -8], [0, 0, -7], [1, 0, -8], [2, 0, -7],
+    [-2, 0, -10], [0, 0, -10], [2, 0, -10],
+];
+
+/** Thieves skulk at building shopfronts (cycles if > 6 thieves). */
+const THIEF_POSITIONS: readonly [number, number, number][] = [
+    [-9, 0, -1], [9, 0, -1], [-15, 0, -1], [15, 0, -1],
+    [-9, 0, 2], [9, 0, 2],
+];
 
 interface PedWalkerProps {
     ped: PedestrianConfig;
@@ -151,6 +201,9 @@ function StreetView() {
     // avoid allocating a new array on every store update; useMemo recomputes only when
     // modifiers ref or round number actually changes.
     const visibleModifiers = useMemo(() => getVisibleModifiers(modifiers, round), [modifiers, round]);
+    const citizens      = useGameStore((s) => s.citizens);
+    const citizenStates = useGameStore((s) => s.citizenStates);
+    const health        = useGameStore((s) => s.budget.expenditures.health);
     const [selection, setSelection] = useState<DebugSelection | null>(null);
 
     if (activeTab !== Tabs.Street) return null;
@@ -207,6 +260,41 @@ function StreetView() {
                 if (!path) return null;
                 return <CarWalker key={v.id} vehicle={v} path={path} debugEnabled={debugEnabled} />;
             })}
+
+            {/* Citizens — simulation entities rendered by role/outfit/bodyType (Story 7-4) */}
+            {citizens.length > 0 && (() => {
+                let protestorSlot = 0;
+                let thiefSlot = 0;
+
+                return citizenStates.map((cs, i) => {
+                    if (!cs.alive) return null;
+
+                    const citizen = citizens[i];
+                    if (!citizen) return null;
+
+                    const bodyType    = computeBodyType(citizen.bodySeed, health);
+                    const outfitColor = getOutfit(cs.role, cs.employed, citizen.faction);
+                    const [w, h, d]   = getPedDimensions(bodyType);
+
+                    let pos: [number, number, number];
+                    if (cs.role === 'protestor') {
+                        pos = [...PROTESTOR_POSITIONS[protestorSlot % PROTESTOR_POSITIONS.length]] as [number, number, number];
+                        protestorSlot++;
+                    } else if (cs.role === 'thief') {
+                        pos = [...THIEF_POSITIONS[thiefSlot % THIEF_POSITIONS.length]] as [number, number, number];
+                        thiefSlot++;
+                    } else {
+                        pos = [...(CITIZEN_BASE_POSITIONS[i] ?? [0, 0, 0])] as [number, number, number];
+                    }
+
+                    return (
+                        <mesh key={citizen.id} position={[pos[0], pos[1] + h / 2, pos[2]]}>
+                            <boxGeometry args={[w, h, d]} />
+                            <meshStandardMaterial color={outfitColor} />
+                        </mesh>
+                    );
+                });
+            })()}
 
             {/* Debug: click-to-inspect building position/size */}
             {debugEnabled && selection && (

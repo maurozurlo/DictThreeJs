@@ -74,11 +74,11 @@ stories:
     name: "Street View — citizen rendering by role/outfit/bodyType"
     file: "production/stories/7-4-street-view-citizens.md"
     priority: should-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-18"
 
   - id: "7-5"
     name: "Citizen Inspector UI (click-to-inspect panel)"

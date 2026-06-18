@@ -40,7 +40,7 @@
   - `happiness` — 0–10 bar with a one-word mood label
   - `role` — content / neutral / thief / protestor
 - [ ] **`gone` peds are not clickable** — the 3D component does not register a click for dead peds.
-- [ ] Clicking elsewhere (anywhere outside the panel or on a non-ped) dismisses the panel.
+- [ ] Clicking a non-ped area of the street (no ped hit) sets `selectedPedId = null`; the panel returns to an idle "click a citizen" prompt.
 - [ ] Selecting a second ped while the panel is open **swaps contents** — no double-panel, no stale data.
 - [ ] **ADR-0003 boundary**: the inspector React component does NOT import from `three`, `@react-three/fiber`, or `@react-three/drei`.
 - [ ] `selectedPedId` (or null) lives in the Zustand store; the 3D Scene writes it; the inspector reads it.
@@ -62,12 +62,13 @@
 - Add `selectedPedId: number | null` to the `scene` slice (or a new `ui` slice).
 - Add `selectPed(id: number | null)` action.
 
-**Inspector component** (`src/components/CitizenInspector/CitizenInspector.tsx`):
+**Inspector component** (`src/components/Tabs/CitizenInspector.tsx`):
+- Follows the same pattern as `Meet.tsx` / `Laws.tsx` — mounted in `ActionPanel.tsx` via `{activeTab === Tabs.Street ? <CitizenInspector /> : null}`.
 - Reads `selectedPedId` and the matching `citizen` + `citizenState` from the store via selectors.
-- Returns `null` when `selectedPedId === null`.
-- Renders: name, faction icon + label (+ displaced note if applicable), employment role title, happiness bar (0–10), role label.
-- Dismiss: clicking outside (using a backdrop div or `useEffect` click-outside hook) sets `selectedPedId = null`.
-- Selecting another ped in the 3D layer updates `selectedPedId`; the panel re-renders with the new data.
+- When `selectedPedId === null`: shows a "click a citizen to inspect" idle prompt.
+- When a ped is selected: renders name, faction icon + label (+ displaced note if applicable), employment role title, happiness bar (0–10), role label.
+- No backdrop or click-outside dismiss needed — it is a sidebar panel, not a floating overlay.
+- Selecting another ped in the 3D layer updates `selectedPedId`; the panel re-renders automatically.
 
 **i18n keys to add** (e.g., in `menu.json` under a `citizen` namespace):
 - `citizen.inspector.title`, faction labels, role labels, employment labels, happiness mood labels

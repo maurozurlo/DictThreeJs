@@ -1,7 +1,7 @@
 # Story 7-4: Street View — Citizen Rendering by Role/Outfit/BodyType
 
 > **Epic**: Citizen Simulation
-> **Status**: Not Started
+> **Status**: Complete
 > **Layer**: Presentation
 > **Type**: Visual/Feel
 > **Estimate**: 0.5 days

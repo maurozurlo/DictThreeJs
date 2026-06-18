@@ -402,3 +402,14 @@ Task: Implemented — pending story-done
 - Advisory: AC-15 `rg Math\.random` has 2 comment-only matches (pre-existing from P1 JSDoc + inline comment); no actual Math.random() calls in code
 - Blockers: None
 - Next: /code-review src/Stores/CitizenHandler.ts src/Stores/RoundResolver.ts then /story-done 7-3
+
+## Session Extract — /dev-story 7-4 2026-06-18
+- Story: production/stories/7-4-street-view-citizens.md — Street View: Citizen Rendering by Role/Outfit/BodyType
+- Files changed:
+  - src/3d/StreetView.tsx (added imports for CitizenState/Citizen/computeBodyType; added getOutfit/getPedDimensions pure functions; added CITIZEN_BASE_POSITIONS/PROTESTOR_POSITIONS/THIEF_POSITIONS constants; added citizens/citizenStates/health selectors; added citizen rendering block after Vehicles section)
+- Test written: None — Visual/Feel story; evidence doc required at production/qa/evidence/7-4-street-view-citizens-evidence.md
+- Suite: 551/551 passing (33 test files, 0 new failures)
+- Key decisions: citizens rendered as separate layer alongside existing PedWalker atmosphere peds; protestors cluster at plaza (PROTESTOR_POSITIONS); thieves at shopfronts (THIEF_POSITIONS); others at CITIZEN_BASE_POSITIONS[i]; gone peds filtered by cs.alive guard; computeBodyType imported as pure function — no gameplay logic inline
+- Placeholder: ped_special_man_protestor not yet created — using color #c0392b (red) with TODO comment
+- Blockers: None
+- Next: /code-review src/3d/StreetView.tsx then /story-done production/stories/7-4-street-view-citizens.md (requires evidence doc with screenshots before full sign-off)
