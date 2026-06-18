@@ -21,15 +21,22 @@ export type AdvisorLevel = 0 | 1 | 2 | 3;
 export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | 'military_coup' | 'business_coup' | 'people_coup' | null;
 
 /**
- * Read-through stats a modifier can influence (ADR-0008 §4). Charisma and the
- * three relations sum on read and are re-clamped to ±10; roundIncome/roundExpense
- * feed per-round economics (replaces ActiveRecurringEffect in P2). One-shot
- * treasury/risk/budget deltas are NOT modeled here — they stay base mutations.
+ * Read-through stats a modifier can influence (ADR-0008 §4 + Amendment 2026-06-18).
+ * Charisma and the three relations sum on read and are re-clamped to ±10;
+ * roundIncome/roundExpense feed per-round economics (replaces ActiveRecurringEffect
+ * in P2). The Amendment 2026-06-18 adds `treasury` (summed in nextRound() — not
+ * read-through) and the six budget-slider stats (read-through effective, clamped
+ * to their slider range via getEffectiveBudgetStat) so all law/deal content can be
+ * expressed uniformly as ModifierSpec[]. `risk` is NOT a ModifierStat — it stays a
+ * separate probability field on Deal (handled by EffectHandler).
  */
 export type ModifierStat =
     | 'charisma'
     | 'military' | 'business' | 'people'
-    | 'roundIncome' | 'roundExpense';
+    | 'roundIncome' | 'roundExpense'
+    | 'treasury'
+    | 'businessTaxes' | 'peopleTaxes'
+    | 'securitySpend' | 'educationSpend' | 'healthSpend' | 'infrastructureSpend';
 
 /**
  * Discriminator for cheap filter/findIndex (ADR-0008 §4). Drives the weird-law
@@ -59,6 +66,19 @@ export interface ResolvedStatMod {
     stat: ModifierStat;
     amount: number;
     window: ResolvedWindow;
+}
+
+/**
+ * Authoring-time stat contribution (ADR-0008 Amendment 2026-06-18). Lives in the
+ * content assets (laws.ts, deals.ts, weirdLaws.ts) as `acceptMods`/`rejectMods`.
+ * `time` is a TimeModifier id (0 = immediate+permanent, 1 = now+one round, …),
+ * resolved to a concrete ResolvedStatMod window at acquisition via resolveWindow().
+ * Never persisted — only the resolved instance is.
+ */
+export interface ModifierSpec {
+    stat: ModifierStat;
+    amount: number;
+    time: number;
 }
 
 /**

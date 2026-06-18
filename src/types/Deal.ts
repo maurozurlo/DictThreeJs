@@ -1,20 +1,30 @@
 import type { Power } from "./Power";
-import type { RecurringEffect } from "./Law";
+import type { ModifierSpec } from "./GameState";
 
-export type DealEffect = Partial<Record<Power | 'treasury' | 'risk', number>>
-
+/**
+ * A deal. All stat/economic effects are expressed as `ModifierSpec[]`
+ * (`acceptMods`/`rejectMods`) per ADR-0008 Amendment 2026-06-18 — see Law for the
+ * timing convention. `DealEffect`/`RecurringEffect` are gone.
+ *
+ * `risk` is a coup-risk probability, NOT a ModifierStat: it is rolled separately by
+ * EffectHandler. It is kept per-path (`acceptRisk`/`rejectRisk`) because the
+ * mechanical penalty fires only on the reject path while the flavour `riskText`
+ * can fire on either — collapsing to one field would change which deals can punish.
+ */
 export interface Deal {
     id: number;
     text: string;
     acceptText: string;
     rejectText: string;
-    acceptEffect: DealEffect;
-    rejectEffect: DealEffect;
+    acceptMods: ModifierSpec[];
+    rejectMods: ModifierSpec[];
     riskText?: string;
-    /** Proposing faction. REQUIRED on deals with a recurringEffect (repeal penalty target). */
+    /** Probability the risk roll fires when this deal is accepted (flavour only — no penalty on accept). */
+    acceptRisk?: number;
+    /** Probability the risk roll fires when this deal is rejected (drives the random-faction penalty). */
+    rejectRisk?: number;
+    /** Proposing faction. REQUIRED on deals that leave a repealable recurring modifier (repeal penalty target). */
     power?: Power;
-    /** Optional recurring effect — present only on lasting-effect deals. */
-    recurringEffect?: RecurringEffect;
-    /** Direct charisma delta applied on accept — used for prestige deals (e.g. Deal 20). */
-    charismaEffect?: number;
+    /** i18n key for the Active-Legislation / repeal list — present only on lasting-effect deals. */
+    label?: string;
 }
