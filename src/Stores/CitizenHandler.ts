@@ -18,7 +18,7 @@
 
 import type { Citizen, CitizenState } from '../types/Citizen';
 import type { Power } from '../types/Power';
-import { getRandomFromList, getRandomNumberInRange, rollFloat, rollChance, Clamp } from '../Utils/Math';
+import { getRandomFromList, getRandomUniqueItem, getRandomNumberInRange, rollFloat, rollChance, Clamp } from '../Utils/Math';
 
 // ---------------------------------------------------------------------------
 // Name tables (GDD §3.1 — Latin-American male names; women/children deferred per GDD §3.1)
@@ -181,11 +181,15 @@ export function buildCitizenRoster(
 ): { citizens: Citizen[]; citizenStates: CitizenState[] } {
     const citizens: Citizen[] = [];
     const citizenStates: CitizenState[] = [];
+    const usedFirstNames = new Set<string>();
+    const usedLastNames  = new Set<string>();
 
     for (let i = 0; i < TOTAL_CITIZENS; i++) {
         const faction = factionForIndex(i);
-        const firstName = getRandomFromList(FIRST_NAMES);
-        const lastName = getRandomFromList(LAST_NAMES);
+        const firstName = getRandomUniqueItem(FIRST_NAMES, usedFirstNames) ?? FIRST_NAMES[i];
+        usedFirstNames.add(firstName);
+        const lastName  = getRandomUniqueItem(LAST_NAMES, usedLastNames) ?? LAST_NAMES[i];
+        usedLastNames.add(lastName);
         const skin = getRandomNumberInRange(0, 4) as 0 | 1 | 2 | 3 | 4;
         // bodySeed drawn from rollFloat() — seeded cursor, not Math.random()
         const bodySeed = rollFloat();
