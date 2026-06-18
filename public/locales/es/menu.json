@@ -159,5 +159,38 @@
         "coup_detail_armed": "{{faction}}: {{relation}} / {{threshold}} — ¡armado, actúa ya!",
         "coup_detail_imminent": "{{faction}}: {{relation}} / {{threshold}} — GOLPE EN PRÓXIMA RONDA",
         "advance_ready": "¡Listo!"
+    },
+    "citizen": {
+        "inspector": {
+            "idle": "Haz clic en un ciudadano para inspeccionar",
+            "faction": "Facción",
+            "status": "Estado",
+            "role": "Rol",
+            "happiness": "Felicidad",
+            "employed": {
+                "military": "Soldado",
+                "business": "Empresario",
+                "people": "Ciudadano"
+            },
+            "displaced": {
+                "military": "Desmovilizado",
+                "business": "Arruinado",
+                "people": "Ciudadano"
+            },
+            "roles": {
+                "content": "Contento",
+                "neutral": "Neutral",
+                "thief": "Ladrón",
+                "protestor": "Manifestante",
+                "gone": "Ausente"
+            },
+            "mood": {
+                "content": "Contento",
+                "satisfied": "Satisfecho",
+                "neutral": "Neutral",
+                "worried": "Preocupado",
+                "desperate": "Desesperado"
+            }
+        }
     }
 }

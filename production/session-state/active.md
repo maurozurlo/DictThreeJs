@@ -413,3 +413,20 @@ Task: Implemented — pending story-done
 - Placeholder: ped_special_man_protestor not yet created — using color #c0392b (red) with TODO comment
 - Blockers: None
 - Next: /code-review src/3d/StreetView.tsx then /story-done production/stories/7-4-street-view-citizens.md (requires evidence doc with screenshots before full sign-off)
+
+## Session Extract — /dev-story 7-5 2026-06-18
+- Story: production/stories/7-5-citizen-inspector-ui.md — Citizen Inspector UI (ActionPanel sidebar)
+- Files changed:
+  - src/types/GameState.ts (added selectedPedId/selectPed to scene slice type)
+  - src/Stores/GameState.ts (added selectedPedId:null + selectPed action to INITIAL_STATE scene object)
+  - src/3d/StreetView.tsx (added selectPed selector; onClick on ground plane for deselect; onClick+stopPropagation on alive ped meshes)
+  - src/components/Tabs/CitizenInspector.tsx (new — sidebar panel component)
+  - src/components/Tabs/CitizenInspector.module.css (new — styles)
+  - src/components/ActionPanel/ActionPanel.tsx (added CitizenInspector import + Street tab branch)
+  - public/locales/en/menu.json (added citizen.inspector block)
+  - public/locales/es/menu.json (added citizen.inspector block in ES)
+- Test written: None — UI story; evidence doc required at production/qa/evidence/7-5-citizen-inspector-evidence.md
+- Suite: 551/551 passing (33 test files, 0 new failures); tsc clean
+- Key decisions: ActionPanel sidebar placement instead of floating overlay (user preference); no backdrop/dismiss needed; idle prompt shown when selectedPedId=null; StateFactory.ts unchanged (scene slice not reconstructed by buildStartState/buildLoadedState)
+- Blockers: None
+- Next: /code-review src/components/Tabs/CitizenInspector.tsx src/3d/StreetView.tsx then /story-done production/stories/7-5-citizen-inspector-ui.md

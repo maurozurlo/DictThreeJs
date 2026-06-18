@@ -84,7 +84,7 @@ stories:
     name: "Citizen Inspector UI (click-to-inspect panel)"
     file: "production/stories/7-5-citizen-inspector-ui.md"
     priority: should-have
-    status: backlog
+    status: in-progress
     owner: ""
     estimate_days: 0.5
     blocker: ""

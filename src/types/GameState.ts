@@ -137,6 +137,8 @@ export type GameState = {
     },
     scene: {
         camera: CameraState;
+        selectedPedId: number | null;
+        selectPed: (id: number | null) => void;
     };
     tabs: {
         activeTab: Tabs;

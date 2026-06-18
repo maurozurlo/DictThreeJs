@@ -1,7 +1,7 @@
 # Story 7-5: Citizen Inspector UI — Click-to-Inspect Panel
 
 > **Epic**: Citizen Simulation
-> **Status**: Not Started
+> **Status**: In Progress
 > **Layer**: Presentation
 > **Type**: UI
 > **Estimate**: 0.5 days

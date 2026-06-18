@@ -46,40 +46,35 @@ function getPedDimensions(bodyType: 'slim' | 'fit' | 'fat'): [number, number, nu
     }
 }
 
-/** Default world positions for all 25 citizens by roster index. */
-const CITIZEN_BASE_POSITIONS: readonly [number, number, number][] = [
-    // People — left sidewalk (0–5)
-    [-5.5, 0, 3], [-5.5, 0, 0.5], [-5.5, 0, -2], [-5.5, 0, -4.5], [-5.5, 0, -7], [-5.5, 0, -9.5],
-    // People — right sidewalk overflow (6–10)
-    [5.5, 0, 3], [5.5, 0, 0.5], [5.5, 0, -2], [5.5, 0, -4.5], [5.5, 0, -7],
-    // Military — central/back area (11–17)
-    [-3, 0, -13], [-1, 0, -13], [1, 0, -13], [3, 0, -13], [-2, 0, -15], [0, 0, -15], [2, 0, -15],
-    // Business — right cluster (18–24)
-    [5.5, 0, -9.5], [5.5, 0, -12], [7, 0, -10], [7, 0, -12], [7, 0, -7], [8, 0, -5], [8, 0, -3],
-];
-
 /** Protestors cluster at plaza positions (cycles if > 8 protestors). */
 const PROTESTOR_POSITIONS: readonly [number, number, number][] = [
     [-2, 0, -7], [-1, 0, -8], [0, 0, -7], [1, 0, -8], [2, 0, -7],
     [-2, 0, -10], [0, 0, -10], [2, 0, -10],
 ];
 
-/** Thieves skulk at building shopfronts (cycles if > 6 thieves). */
-const THIEF_POSITIONS: readonly [number, number, number][] = [
-    [-9, 0, -1], [9, 0, -1], [-15, 0, -1], [15, 0, -1],
-    [-9, 0, 2], [9, 0, 2],
-];
 
 interface PedWalkerProps {
     ped: PedestrianConfig;
     path: WaypointPath;
     debugEnabled: boolean;
+    /** Override mesh color — defaults to PEDESTRIAN_COLOR for atmospheric peds. */
+    color?: string;
+    /** Override box dimensions [w, h, d] — defaults to [0.6, 1.8, 0.6]. */
+    dimensions?: [number, number, number];
+    /** Start at this waypoint index instead of 0, to spread citizens around the loop. */
+    startWaypointIndex?: number;
+    onClick?: (e: import('@react-three/fiber').ThreeEvent<MouseEvent>) => void;
 }
 
-function PedWalker({ ped, path, debugEnabled }: PedWalkerProps) {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const pos     = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
-    const nextIdx = useRef(1 % path.waypoints.length);
+function PedWalker({ ped, path, debugEnabled, color, dimensions, startWaypointIndex, onClick }: PedWalkerProps) {
+    const meshRef  = useRef<THREE.Mesh>(null);
+    const startIdx = startWaypointIndex ?? 0;
+    const pos      = useRef(new THREE.Vector3(path.waypoints[startIdx].x, path.waypoints[startIdx].y, path.waypoints[startIdx].z));
+    const nextIdx  = useRef((startIdx + 1) % path.waypoints.length);
+
+    const meshColor = color ?? PEDESTRIAN_COLOR;
+    const [w, h, d] = dimensions ?? [0.6, 1.8, 0.6];
+    const halfH     = h / 2;
 
     useFrame((_, delta) => {
         const target    = path.waypoints[nextIdx.current];
@@ -97,19 +92,19 @@ function PedWalker({ ped, path, debugEnabled }: PedWalkerProps) {
         }
 
         if (meshRef.current) {
-            meshRef.current.position.set(pos.current.x, pos.current.y + PED_HALF_HEIGHT, pos.current.z);
+            meshRef.current.position.set(pos.current.x, pos.current.y + halfH, pos.current.z);
             const fromIdx  = (nextIdx.current - 1 + path.waypoints.length) % path.waypoints.length;
             meshRef.current.rotation.y = path.waypoints[fromIdx].ry ?? 0;
         }
     });
 
-    const start = path.waypoints[0];
+    const start = path.waypoints[startIdx];
 
     return (
         <>
-            <mesh ref={meshRef} position={[start.x, start.y + PED_HALF_HEIGHT, start.z]}>
-                <boxGeometry args={[0.6, 1.8, 0.6]} />
-                <meshStandardMaterial color={PEDESTRIAN_COLOR} />
+            <mesh ref={meshRef} position={[start.x, start.y + halfH, start.z]} onClick={onClick}>
+                <boxGeometry args={[w, h, d]} />
+                <meshStandardMaterial color={meshColor} />
             </mesh>
 
             {debugEnabled && path.waypoints.map((wp, i) => (
@@ -204,6 +199,7 @@ function StreetView() {
     const citizens      = useGameStore((s) => s.citizens);
     const citizenStates = useGameStore((s) => s.citizenStates);
     const health        = useGameStore((s) => s.budget.expenditures.health);
+    const selectPed     = useGameStore((s) => s.scene.selectPed);
     const [selection, setSelection] = useState<DebugSelection | null>(null);
 
     if (activeTab !== Tabs.Street) return null;
@@ -215,7 +211,7 @@ function StreetView() {
     return (
         <group position={[0, 0, 0]}>
             {/* Ground */}
-            <mesh position={[0, -0.05, -8]} rotation={[-Math.PI / 2, 0, 0]}>
+            <mesh position={[0, -0.05, -8]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => selectPed(null)}>
                 <planeGeometry args={[42, 28]} />
                 <meshStandardMaterial color={GROUND_COLOR} />
             </mesh>
@@ -261,10 +257,10 @@ function StreetView() {
                 return <CarWalker key={v.id} vehicle={v} path={path} debugEnabled={debugEnabled} />;
             })}
 
-            {/* Citizens — simulation entities rendered by role/outfit/bodyType (Story 7-4) */}
+            {/* Citizens — simulation entities rendered by role/outfit/bodyType (Story 7-4/7-5) */}
             {citizens.length > 0 && (() => {
                 let protestorSlot = 0;
-                let thiefSlot = 0;
+                const { pedestrianPaths: cpaths } = STREET_LAYOUT;
 
                 return citizenStates.map((cs, i) => {
                     if (!cs.alive) return null;
@@ -274,24 +270,42 @@ function StreetView() {
 
                     const bodyType    = computeBodyType(citizen.bodySeed, health);
                     const outfitColor = getOutfit(cs.role, cs.employed, citizen.faction);
-                    const [w, h, d]   = getPedDimensions(bodyType);
+                    const dims        = getPedDimensions(bodyType);
+                    const handleClick = (e: import('@react-three/fiber').ThreeEvent<MouseEvent>) => {
+                        e.stopPropagation();
+                        selectPed(citizen.id);
+                    };
 
-                    let pos: [number, number, number];
+                    // Protestors cluster statically at the plaza — they're not walking
                     if (cs.role === 'protestor') {
-                        pos = [...PROTESTOR_POSITIONS[protestorSlot % PROTESTOR_POSITIONS.length]] as [number, number, number];
+                        const pos = PROTESTOR_POSITIONS[protestorSlot % PROTESTOR_POSITIONS.length];
                         protestorSlot++;
-                    } else if (cs.role === 'thief') {
-                        pos = [...THIEF_POSITIONS[thiefSlot % THIEF_POSITIONS.length]] as [number, number, number];
-                        thiefSlot++;
-                    } else {
-                        pos = [...(CITIZEN_BASE_POSITIONS[i] ?? [0, 0, 0])] as [number, number, number];
+                        const [w, h, d] = dims;
+                        return (
+                            <mesh key={citizen.id} position={[pos[0], pos[1] + h / 2, pos[2]]} onClick={handleClick}>
+                                <boxGeometry args={[w, h, d]} />
+                                <meshStandardMaterial color={outfitColor} />
+                            </mesh>
+                        );
                     }
 
+                    // All other alive citizens (content, neutral, thief) walk a path
+                    const path = cpaths[citizen.id % cpaths.length];
+                    const speed = 1.1 + (citizen.id * 0.07) % 0.6;
+                    const startWaypointIndex = citizen.id % path.waypoints.length;
+                    const fakePed: PedestrianConfig = { id: `citizen-${citizen.id}`, pathId: path.id, speed };
+
                     return (
-                        <mesh key={citizen.id} position={[pos[0], pos[1] + h / 2, pos[2]]}>
-                            <boxGeometry args={[w, h, d]} />
-                            <meshStandardMaterial color={outfitColor} />
-                        </mesh>
+                        <PedWalker
+                            key={citizen.id}
+                            ped={fakePed}
+                            path={path}
+                            debugEnabled={false}
+                            color={outfitColor}
+                            dimensions={dims}
+                            startWaypointIndex={startWaypointIndex}
+                            onClick={handleClick}
+                        />
                     );
                 });
             })()}

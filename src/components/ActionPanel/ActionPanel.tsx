@@ -4,6 +4,7 @@ import Typography from '../Typography/Typography'
 import Meet from '../Tabs/Meet'
 import Laws from '../Tabs/Laws'
 import SecretPanel from './SecretPanel'
+import CitizenInspector from '../Tabs/CitizenInspector'
 import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
@@ -77,6 +78,7 @@ const ActionPanel = () => {
                     {activeTab === Tabs.Meet ? <Meet /> : null}
                     {activeTab === Tabs.Laws ? <Laws /> : null}
                     {activeTab === Tabs.Secret ? <SecretPanel /> : null}
+                    {activeTab === Tabs.Street ? <CitizenInspector /> : null}
                 </div>
             </div>
         </div>

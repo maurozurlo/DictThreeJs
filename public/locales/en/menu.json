@@ -159,5 +159,38 @@
     "coup_detail_armed": "{{faction}}: {{relation}} / {{threshold}} — armed, act now!",
     "coup_detail_imminent": "{{faction}}: {{relation}} / {{threshold}} — COUP FIRES NEXT ROUND",
     "advance_ready": "All done!"
+  },
+  "citizen": {
+    "inspector": {
+      "idle": "Click a citizen to inspect",
+      "faction": "Faction",
+      "status": "Status",
+      "role": "Role",
+      "happiness": "Happiness",
+      "employed": {
+        "military": "Soldier",
+        "business": "Business owner",
+        "people": "Citizen"
+      },
+      "displaced": {
+        "military": "Demobilized",
+        "business": "Ruined",
+        "people": "Citizen"
+      },
+      "roles": {
+        "content": "Content",
+        "neutral": "Neutral",
+        "thief": "Thief",
+        "protestor": "Protestor",
+        "gone": "Gone"
+      },
+      "mood": {
+        "content": "Content",
+        "satisfied": "Satisfied",
+        "neutral": "Neutral",
+        "worried": "Worried",
+        "desperate": "Desperate"
+      }
+    }
   }
 }

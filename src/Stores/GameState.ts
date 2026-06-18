@@ -112,6 +112,8 @@ export const INITIAL_STATE = ({ set, get }: {
                 }));
             },
         },
+        selectedPedId: null,
+        selectPed: (id) => set((s) => ({ scene: { ...s.scene, selectedPedId: id } })),
     },
     tabs: {
         activeTab: GAMESTATE.TABS.START_TAB,
