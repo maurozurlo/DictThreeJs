@@ -1,7 +1,7 @@
 # Story 7-3: CitizenHandler P3 — Role Fork + Death + Feedback + nextRound() Wiring
 
 > **Epic**: Citizen Simulation
-> **Status**: Not Started
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 2.0 days
@@ -202,6 +202,15 @@ const displayedPopulation = Math.round(aliveCount / TOTAL_CITIZENS * BASE_POPULA
 **Required evidence**: `tests/integration/citizens/citizen_resolution.test.ts` — must exist and all tests must pass
 **CI gate**: `rg 'Math\.random' src/Stores/CitizenHandler.ts` must return 0 matches
 **Status**: [ ] Not yet created
+
+---
+
+## Completion Notes
+**Completed**: 2026-06-18
+**Criteria**: 15/15 passing (AC-7a, 7b, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23, 24, 25 all covered by 46 integration tests)
+**Test Evidence**: `tests/integration/citizens/citizen_resolution.test.ts` — 46 tests, all passing. Suite: 550/551 (1 pre-existing `secret-room-rework.test.ts` failure, unrelated).
+**Code Review**: APPROVED WITH SUGGESTIONS — `resolveCitizenPipeline` (68 lines) exceeds 40-line guideline; advisory to extract `resolveOnePed` helper in a follow-up.
+**Deviations**: None from ADR-0002 or ADR-0010.
 
 ---
 

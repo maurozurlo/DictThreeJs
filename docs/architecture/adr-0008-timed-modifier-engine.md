@@ -8,6 +8,13 @@ record of accepted/rejected recurring & windowed effects across laws, weird-laws
 opportunities, mini-challenges, and buyable structures. Implemented in phases (P1–P3).
 P1 may begin immediately. Supersedes the stat-effect portion of ADR-0007 (see ADR Dependencies).
 
+**Amendment 2026-06-18**: `ModifierStat` expanded to include `treasury` and all six
+budget-slider stats (`businessTaxes`, `peopleTaxes`, `securitySpend`, `educationSpend`,
+`healthSpend`, `infrastructureSpend`). Law/Deal/WeirdLaw content types unified: all effects
+(immediate, recurring, delayed) are now expressed as `ModifierSpec[]` directly in the content
+asset — the `LawEffect`, `DealEffect`, and `RecurringEffect` authoring types are removed. The
+`buildRecurringModifier()` conversion bridge is also removed. See §9 and P4 in Migration Plan.
+
 ## Date
 
 2026-06-15
@@ -31,9 +38,14 @@ old per-system tracking and `ActiveRecurringEffect`). Each contribution carries 
 resolved to concrete rounds **at acquisition**; nothing is recomputed later. Reads sum
 in-window contributions in real time; a small set of beginning-of-round steps tick the rest.
 
-One-shot, immediate deltas (the treasury/relation hit you see the instant you accept/reject),
-probability/risk rolls, and budget-slider nudges remain **base mutations applied at decision
-time** — they are not modeled as modifiers.
+Treasury deltas, budget-slider nudges, and all recurring economics from laws/deals are now
+modeled as `ModifierSpec[]` in content assets and applied through the modifier engine.
+Probability/risk rolls remain base mutations. Relation and charisma deltas from law/deal
+decisions are also expressed as `ModifierSpec[]` — accept-effect relation specs become
+permanent modifiers (contributing to effective relation until the law is repealed); reject-effect
+relation specs use `time: 1` (one-round contribution, equivalent to the former one-time base
+mutation). This is a deliberate design improvement: players can see in the Active-Legislation
+list *why* their relations are elevated, and repealing a law removes the bonus cleanly.
 
 ## Engine Compatibility
 
@@ -126,11 +138,18 @@ const TIME_MODIFIERS: TimeModifier[] = [
   // …append-only…
 ];
 
-// READ-THROUGH stats only. One-shot treasury/risk/budget keys are NOT here.
+// Stat contributions a modifier can carry (Amendment 2026-06-18).
+// Relations/charisma: read-through effective; base still erodes; sum re-clamped ±10.
+// roundIncome/roundExpense: per-round treasury accumulation (replaces ActiveRecurringEffect).
+// treasury: direct mutation — summed in nextRound() alongside roundIncome; NOT read-through.
+// Budget-slider stats: effective = base + Σactive-mods at every read site (re-clamped 0–10).
 type ModifierStat =
   | 'charisma'
-  | 'military' | 'business' | 'people' // relations — windowed read-through; base still erodes; sum re-clamped ±10
-  | 'roundIncome' | 'roundExpense';    // per-round economics (replaces ActiveRecurringEffect)
+  | 'military' | 'business' | 'people'
+  | 'roundIncome' | 'roundExpense'
+  | 'treasury'
+  | 'businessTaxes' | 'peopleTaxes'
+  | 'securitySpend' | 'educationSpend' | 'healthSpend' | 'infrastructureSpend';
 
 // Discriminator for cheap filter/findIndex. Drives the weird-law slot + law-pool exclusion + repeal list.
 type ModifierType =
@@ -158,6 +177,20 @@ interface Modifier {
 // No content/display fields. The label and headline key live on the content asset
 // (Deal/Law/structure) and are looked up by `id` when rendering or firing.
 ```
+
+// AUTHORING-TIME type (lives in content assets: laws.ts, deals.ts). Resolved to
+// ResolvedStatMod at acquisition via resolveWindow(time, round). Never persisted.
+interface ModifierSpec {
+  stat: ModifierStat;
+  amount: number;
+  time: number; // TimeModifier id — 0 = immediate+permanent, 1 = now+one round, 2 = delayed+permanent, …
+}
+
+// Content item shape (Amendment 2026-06-18). LawEffect/DealEffect/RecurringEffect removed.
+// ALL effects — immediate, recurring, delayed — expressed as ModifierSpec[]:
+//   acceptMods: ModifierSpec[];  // accept-path: relation specs permanent (time:0); treasury time:1; income time:0
+//   rejectMods: ModifierSpec[];  // reject-path: all specs time:1 (one-round equivalent to old base mutation)
+// actUponLaw / actUponDeal creates one Modifier from the chosen mods[] at decision time.
 
 - **`id`** is namespaced (`'deals.1'` vs `'laws.1'`) to avoid cross-pool clashes and is the **dedup key** — re-encountering the same content no-ops (preserving today's unique-pool behaviour).
 - **`state`**: `'active'` = contributing; `'rejected'` = declined/repealed, retained as ledger history, **not summed**. There is no `'expired'`: a contribution stops counting automatically when `round` leaves its window.
@@ -249,6 +282,54 @@ The faction (`people`), label, and headline key all stay in the asset and are lo
 - **Repeal tier (cost):** **open balance item — owned by economy-designer.** Structurally, tier derives from the economic magnitude of the modifier's mods (e.g. `Σ|amount|` over `roundIncome`/`roundExpense`), frozen at acquisition; the *numbers/curve* need a balance pass before P2 ships repeal.
 - **Active-Legislation / repeal UI:** renders from `modifiers.filter(state==='active' && repealable)` — one source for laws + deals + structures.
 
+### 9. Budget-stat modifiers & content unification (Amendment 2026-06-18)
+
+**New `ModifierStat` values and their application semantics:**
+
+| Stat | Application | Read sites |
+|------|-------------|------------|
+| `treasury` | Direct mutation — summed in `nextRound()` step 1 alongside `roundIncome`; `newTreasury += sumModifiers(mods, 'treasury', round)`. With `delay: 0` (TIME_MODIFIER id 1), active from acquisition round — applied in that same round's `nextRound()`. | `nextRound()` only |
+| `businessTaxes` `peopleTaxes` | Read-through effective — `effectiveTax = base + sumModifiers(mods, stat, round)`, clamped 0–100. | Tax-penalty check in `RoundResolver`; Advisor verdict; UI display |
+| `securitySpend` `educationSpend` `healthSpend` `infrastructureSpend` | Read-through effective — `effectiveSpend = base + sumModifiers(mods, stat, round)`, clamped 0–10. | Employment check (`CitizenHandler`); happiness formula (`CitizenHandler`); body-type; `applyBudgetEffects`; Advisor |
+
+**Content unification — Law/Deal/WeirdLaw type shape:**
+
+```ts
+// NEW — replaces acceptEffect/rejectEffect/recurringEffect
+export interface Law {
+  id: number;
+  type?: 'normal' | 'weird';
+  power: Power;
+  acceptMods: ModifierSpec[];
+  rejectMods: ModifierSpec[];
+}
+export interface Deal {
+  id: number;
+  text: string; acceptText: string; rejectText: string;
+  acceptMods: ModifierSpec[];
+  rejectMods: ModifierSpec[];
+  power?: Power;
+  riskText?: string;
+}
+```
+
+`charismaEffect` is folded into `acceptMods` as `{ stat: 'charisma', amount: N, time: 0 }`.
+
+**Migration convention for content authoring:**
+
+| Former effect field | New `ModifierSpec` equivalent | Rationale |
+|---------------------|-------------------------------|-----------|
+| `acceptEffect.military: +2` | `{ stat:'military', amount:2, time:0 }` | Permanent modifier (visible in Active-Legislation; removed on repeal) |
+| `rejectEffect.military: -1` | `{ stat:'military', amount:-1, time:1 }` | One-round contribution — equivalent to former one-time base mutation; can't repeal a rejection |
+| `acceptEffect.treasury: -50` | `{ stat:'treasury', amount:-50, time:1 }` | Applied in the accepting round's `nextRound()` |
+| `acceptEffect.security: +1` | `{ stat:'securitySpend', amount:1, time:0 }` | Permanent slider modifier (visible in Active-Legislation) |
+| `recurringEffect.incomeBonus: 5` | `{ stat:'roundIncome', amount:5, time:0 }` | Unchanged — already modifier-based |
+| `charismaEffect: 1` | `{ stat:'charisma', amount:1, time:0 }` | Folded into acceptMods |
+
+**`actUponLaw` / `actUponDeal` change:** read `acceptMods` or `rejectMods`, call `resolveWindow` per spec, build one `Modifier`, push to `modifiers`. Immediate treasury is NOT applied in the `set()` call — it is applied in `nextRound()` via `sumModifiers('treasury', round)`. This changes UX timing: treasury delta is visible after advancing the round, not at the instant of accepting/rejecting (intentional — the effect belongs to the round that resolves it).
+
+**`getEffectiveBudgetStat(budget, modifiers, stat, round)` helper** added to `src/Utils/Modifiers.ts` — used at every read site that formerly read `state.budget.taxes.*` or `state.budget.expenditures.*` directly.
+
 ## Alternatives Considered
 
 - **Persist the timing id, re-resolve on load** — rejected: a registry rebalance would retroactively change live saves (silent determinism break). We persist resolved windows.
@@ -276,7 +357,8 @@ The faction (`people`), label, and headline key all stay in the asset and are lo
 ### Neutral
 
 - Relations gain a base/effective split mirroring charisma; base erosion unchanged.
-- One-shot deltas, risk rolls, budget-slider effects remain base mutations in the Handlers.
+- Probability/risk rolls remain base mutations in the Handlers.
+- `LawEffect`, `DealEffect`, `RecurringEffect` types removed; `buildRecurringModifier()` removed. All content migrated to `ModifierSpec[]` (P4).
 
 ## Risks
 
@@ -310,6 +392,7 @@ The faction (`people`), label, and headline key all stay in the asset and are lo
   6. Save/load: rehydrate `?? []`, default missing windows to permanent.
 - **P2 — Replace `ActiveRecurringEffect`.** Migrate deal/law recurring income/expense to `roundIncome`/`roundExpense` modifiers; `nextRound()` computes `roundIncome = sumModifiers(mods,'roundIncome',resolvingRound)`, banks it into treasury, writes `lastRoundRecurringIncome`, accumulates `stats.totalRecurringIncomeEarned` (replacing `sumRecurringEffects`); weird-law slot via `findIndex`; `filterLawPool` via filter; repeal flips `state` (tier numbers from economy-designer); Active-Legislation UI from the array.
 - **P3 — Consumers + remaining content.** Opportunities/mini-challenges/structures onto modifiers; Street View + Advisor read `getVisibleModifiers`; finalise coup-reads-effective with ADR-0009; update ADR-0007 to non-stat-only.
+- **P4 — Content unification (Amendment 2026-06-18).** Expand `ModifierStat` to include `treasury`, `businessTaxes`, `peopleTaxes`, `securitySpend`, `educationSpend`, `healthSpend`, `infrastructureSpend`. Rewrite `Law`/`Deal` content types: replace `acceptEffect`/`rejectEffect`/`recurringEffect` with `acceptMods: ModifierSpec[]` / `rejectMods: ModifierSpec[]`. Migrate all content in `laws.ts`, `deals.ts`, `weirdLaws.ts`. Remove `LawEffect`, `DealEffect`, `RecurringEffect` types. Remove `buildRecurringModifier()`. Update `actUponLaw`/`actUponDeal` in `GameState.ts` to create modifiers from specs. Add `getEffectiveBudgetStat()` helper and switch all budget read sites. Update `Advisor.ts` verdict functions. Add integration tests verifying accept/reject paths for treasury, budget, and relation specs.
 
 **Rollback:** P1 is additive; revert by removing timing fields (statue → permanent). Windowed saves degrade gracefully.
 

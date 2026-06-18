@@ -15,6 +15,7 @@ start: "2026-06-17"
 end: "2026-06-24"
 generated: "2026-06-17"
 updated: "2026-06-18"
+goal_amendment: "Scope expanded 2026-06-18: Modifier unification (P4a + P4b) added as Must Have — LawEffect/DealEffect/RecurringEffect conversion layer must be removed before further content work."
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
@@ -42,10 +43,30 @@ stories:
     name: "CitizenHandler P3 — role fork + death + feedback + nextRound() wiring"
     file: "production/stories/7-3-citizen-handler-p3.md"
     priority: must-have
-    status: backlog
+    status: done
     owner: ""
     estimate_days: 2.0
     blocker: ""
+    completed: "2026-06-18"
+
+  - id: "7-7"
+    name: "Modifier Unification P4a — type contracts & content migration"
+    file: "production/stories/7-7-modifier-unification-p4a.md"
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 1.5
+    blocker: ""
+    completed: ""
+
+  - id: "7-8"
+    name: "Modifier Unification P4b — engine wiring & read sites"
+    file: "production/stories/7-8-modifier-unification-p4b.md"
+    priority: must-have
+    status: backlog
+    owner: ""
+    estimate_days: 2.0
+    blocker: "7-7"
     completed: ""
 
   # ── Should Have ─────────────────────────────────────────────────────────
