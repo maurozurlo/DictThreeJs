@@ -3,11 +3,11 @@
 ## Header
 - **Story ID**: 6-7
 - **Sprint**: 6
-- **Status**: In Progress
+- **Status**: Complete
 - **Type**: UI
 - **Layer**: Presentation
 - **TR-ID**: TR-coup-002
-- **Governing ADR**: docs/architecture/adr-0009-coup-telegraphing-fairness.md (Planned — blocked on 6-5)
+- **Governing ADR**: docs/architecture/adr-0009-coup-telegraphing-fairness.md (Accepted 2026-06-16)
 - **Manifest Version**: 2026-06-13
 - **Estimate**: 1.0 days
 - **Last Updated**: 2026-06-17
@@ -100,3 +100,12 @@ from ADR-0009 §1/§4 before implementing the UI.
 
 - Depends on: 6-5 (ADR-0009 must be Accepted before implementation; effective relations land in 6-1 which is independent)
 - Unlocks: None
+
+## Completion Notes
+**Completed**: 2026-06-17
+**Criteria**: 9/9 passing (0 deferred)
+**Deviations**:
+- ADVISORY: Manual evidence file `production/qa/evidence/6-7-coup-ui-evidence.md` not created. Unit tests (14/14) satisfy the UI story OR requirement; evidence doc recommended before sprint close-out.
+- ADVISORY: `±1` security-spend threshold adjustment in `src/Utils/CoupRisk.ts:55-56` is an inline literal; could be `COUP.SECURITY_THRESHOLD_DELTA` for convention parity. Non-blocking.
+**Test Evidence**: UI — unit tests at `tests/unit/coup/coup_risk_readout.test.ts` (14/14 pass); manual walkthrough doc not yet created (ADVISORY).
+**Code Review**: Skipped (lean mode).

@@ -1,5 +1,11 @@
 # Session State
 
+## Session Extract — /story-done 6-7 2026-06-17
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/6-7-coup-fairness-ui.md — Coup Fairness UI — Telegraphing Readout
+- Tech debt logged: None (advisories noted in story file only)
+- Next recommended: Sprint 6 close-out — all Must Have + Should Have done. Run /smoke-check sprint → /team-qa sprint → /retrospective → /sprint-plan new
+
 ## Session Extract — /dev-story 6-3 2026-06-17
 - Story: production/stories/6-3-modifier-engine-p3.md — ADR-0008 P3: Remaining Content + Street View/Advisor Consumers
 - Files changed: src/Utils/Modifiers.ts (added getVisibleModifiers export), src/3d/StreetView.tsx (wired getVisibleModifiers selector; debug overlay shows active effect count), src/components/Advisor/AdvisorButton.tsx (wired getVisibleModifiers selector; included in useMemo deps)
