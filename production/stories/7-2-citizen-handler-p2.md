@@ -1,7 +1,7 @@
 # Story 7-2: CitizenHandler P2 — Employment + Happiness + Body-Type
 
 > **Epic**: Citizen Simulation
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 1.5 days
@@ -190,3 +190,12 @@ All three are pure functions exported from `src/Stores/CitizenHandler.ts`.
 
 - Depends on: Story 7-1 must be DONE (Citizen and CitizenState types; citizens slice in store)
 - Unlocks: Story 7-3 (role fork reads happiness; death reads employment)
+
+---
+
+## Completion Notes
+**Completed**: 2026-06-18
+**Criteria**: 8/8 passing (all ACs auto-verified via test suite)
+**Deviations**: ADVISORY — constants exported from `CitizenHandler.ts` rather than `src/Constants/Citizens.ts` as AC specified. Intentional co-location; all values are named exports with GDD section references. No magic numbers inline in formulas.
+**Test Evidence**: Logic — `tests/unit/citizens/citizen_employment_happiness.test.ts` — 26 tests, 505/505 full suite passing; tsc clean
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS (S1 exhaustive throw, S2 fitShare guard, S6 mid-range body test — all applied; S3 Clamp→clamp deferred as tech debt)

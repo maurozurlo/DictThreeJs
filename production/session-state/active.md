@@ -380,3 +380,10 @@ Task: Implemented — pending story-done
 - Key decisions: computeEmployment takes faction:Power (not Citizen) for cleaner tests; effectiveRelation pre-computed by caller per ADR-0008; no lerp utility needed (inlined)
 - Blockers: None
 - Next: /code-review src/Stores/CitizenHandler.ts then /story-done 7-2
+
+## Session Extract — /story-done 7-2 2026-06-18
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/7-2-citizen-handler-p2.md — CitizenHandler P2 (Employment + Happiness + Body-Type)
+- Tech debt logged: None (constants-location advisory noted in Completion Notes; Clamp→clamp rename deferred)
+- Key note: Power = typeof Power[number] from non-`as const` array resolves to `string` — `default: never` trick cannot be used; replaced with `default: throw` in both computeHappiness and computeEmployment
+- Next recommended: Story 7-3 — CitizenHandler P3 (role fork + death + feedback + nextRound() wiring) — production/stories/7-3-citizen-handler-p3.md

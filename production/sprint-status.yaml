@@ -32,11 +32,11 @@ stories:
     name: "CitizenHandler P2 — employment + happiness + body-type"
     file: "production/stories/7-2-citizen-handler-p2.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: ""
+    completed: "2026-06-18"
 
   - id: "7-3"
     name: "CitizenHandler P3 — role fork + death + feedback + nextRound() wiring"

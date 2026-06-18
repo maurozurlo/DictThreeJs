@@ -216,6 +216,12 @@ describe('computeBodyType — AC-17 lerp boundary values', () => {
         expect(computeBodyType(0.20, 10)).toBe('fat');  // 0.20 < 0.40 (was fit at health=0)
         expect(computeBodyType(0.90, 10)).toBe('slim'); // 0.90 ≥ 0.85
     });
+
+    it('health=3 (mid-range): bodySeed=0.20 is still fit (fatShare≈0.155, fitShare≈0.305)', () => {
+        // fatShare = 0.05 + 0.35*0.3 = 0.155; slimShare = 0.70 - 0.55*0.3 = 0.535; fitShare = 0.31
+        // 0.20 > 0.155 (not fat) and 0.20 < 0.155 + 0.31 = 0.465 (fit)
+        expect(computeBodyType(0.20, 3)).toBe('fit');
+    });
 });
 
 // ---------------------------------------------------------------------------

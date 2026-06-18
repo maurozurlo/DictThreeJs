@@ -231,6 +231,8 @@ export function computeEmployment(
             return effectiveRelation >= 0 && infrastructure >= BUSINESS_INFRA_THRESHOLD;
         case 'people':
             return true;
+        default:
+            throw new Error(`computeEmployment: unhandled faction ${faction}`);
     }
 }
 
@@ -278,6 +280,8 @@ export function computeHappiness(inputs: HappinessInputs): number {
             budgetSignal = (health - 5) / FACTION_FORTUNE_BUDGET_DIVISOR
                 + (peopleTax > PEOPLE_TAX_PENALTY_THRESHOLD ? -TAX_PENALTY_AMOUNT : 0);
             break;
+        default:
+            throw new Error(`computeHappiness: unhandled faction ${faction}`);
     }
 
     const factionFortune = (effectiveRelation / 10) * FACTION_FORTUNE_REL_WEIGHT + budgetSignal;
@@ -304,7 +308,7 @@ export function computeBodyType(bodySeed: number, health: number): 'slim' | 'fit
     const t = health / 10;
     const fatShare  = FAT_AT_ZERO  + (FAT_AT_MAX  - FAT_AT_ZERO)  * t;
     const slimShare = SLIM_AT_ZERO + (SLIM_AT_MAX - SLIM_AT_ZERO) * t;
-    const fitShare  = 1 - fatShare - slimShare;
+    const fitShare  = Math.max(0, 1 - fatShare - slimShare);
 
     if (bodySeed < fatShare) return 'fat';
     if (bodySeed < fatShare + fitShare) return 'fit';
