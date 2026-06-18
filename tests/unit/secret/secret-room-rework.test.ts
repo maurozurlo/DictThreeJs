@@ -23,7 +23,29 @@ vi.mock('../../../src/i18n', () => ({
 // ---------------------------------------------------------------------------
 
 function resetStore(): void {
-    useGameStore.getState().gameManagement.setPhase('start');
+    useGameStore.setState((s) => ({
+        gameManagement: {
+            ...s.gameManagement,
+            phase: 'start',
+            round: 0,
+            charisma: { ...s.gameManagement.charisma, current: 0 },
+        },
+        specialEnding: {
+            ...s.specialEnding,
+            available: false,
+            faction: null,
+            outcome: null,
+            used: false
+        },
+        tabs: {
+            ...s.tabs,
+            secretRoomIndex: 0
+        },
+        relations: {
+            ...s.relations,
+            current: { military: 0, business: 0, people: 0 }
+        }
+    }));
 }
 
 /**
