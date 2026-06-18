@@ -3,14 +3,14 @@
 ## Header
 - **Story ID**: 6-7
 - **Sprint**: 6
-- **Status**: Ready
+- **Status**: In Progress
 - **Type**: UI
 - **Layer**: Presentation
 - **TR-ID**: TR-coup-002
 - **Governing ADR**: docs/architecture/adr-0009-coup-telegraphing-fairness.md (Planned — blocked on 6-5)
 - **Manifest Version**: 2026-06-13
 - **Estimate**: 1.0 days
-- **Last Updated**: 2026-06-15
+- **Last Updated**: 2026-06-17
 
 ## Summary
 

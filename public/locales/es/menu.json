@@ -155,6 +155,9 @@
     "hud": {
         "coup_warning": "{{faction}} se inquieta",
         "coup_danger": "{{faction}} está armado",
+        "coup_detail": "{{faction}}: {{relation}} / {{threshold}} — {{distance}} del límite",
+        "coup_detail_armed": "{{faction}}: {{relation}} / {{threshold}} — ¡armado, actúa ya!",
+        "coup_detail_imminent": "{{faction}}: {{relation}} / {{threshold}} — GOLPE EN PRÓXIMA RONDA",
         "advance_ready": "¡Listo!"
     }
 }

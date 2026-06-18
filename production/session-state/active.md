@@ -17,6 +17,14 @@
 - 455/455 tests pass; tsc clean
 - Next recommended: /sprint-plan new (Sprint 7 planning, which was the original goal before 6-3 was found incomplete)
 
+## Session Extract — /dev-story 6-7 2026-06-17
+- Story: production/stories/6-7-coup-fairness-ui.md — Coup Fairness UI — Telegraphing Readout
+- Files changed: src/Utils/CoupRisk.ts (new — selectCoupRisk pure function), src/components/CoupRiskReadout/CoupRiskReadout.tsx (new — readout component), src/components/CoupRiskReadout/CoupRiskReadout.module.css (new), src/components/Navbar/Navbar.tsx (replaced inline badge with CoupRiskReadout), src/components/Navbar/Navbar.module.css (removed dead coup badge styles), public/locales/en/menu.json (3 new hud keys), public/locales/es/menu.json (3 new hud keys)
+- Test written: tests/unit/coup/coup_risk_readout.test.ts (14 tests — safe state, yellow/red tier, faction selection tiebreak, modifier-driven relations, security spend)
+- Pre-existing issue: secret-room-rework.test.ts fails in full suite (store state leak) but passes in isolation — unrelated to 6-7
+- Tests: 14/14 new pass; 468/469 suite (1 pre-existing); tsc clean
+- Next: /code-review src/Utils/CoupRisk.ts src/components/CoupRiskReadout/CoupRiskReadout.tsx src/components/Navbar/Navbar.tsx then /story-done production/stories/6-7-coup-fairness-ui.md
+
 ## Session Extract — Seeded RNG + Commit-on-Roll (ADR-0010) 2026-06-17
 - TRIGGER: citizen-sim GDD review (retried systems-designer + qa-lead agents — credit error cleared, both ran). Then owner chose to add seeded RNG for anti-save-scum ("live with it" pillar enforcement), not just reproducibility.
 - KEY INSIGHT (owner): seed alone ≠ anti-save-scum. Need seed + persisted PRNG cursor (resume mid-stream on reload) + commit-on-roll (outcome written to state at commit instant). Audit confirmed commit-on-roll ALREADY HOLDS via ADR-0002 atomic set() — every roll (Meet/accept/round-resolution) resolves inside one set, no mid-save gap. So no refactor of timing needed; ADR-0010 formalizes existing invariant + adds seed.

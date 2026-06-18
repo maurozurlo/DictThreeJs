@@ -4,7 +4,8 @@ import Button from '../Button/Button'
 import { Icon, type IconType } from '../Icon/Icon'
 import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next'
+import CoupRiskReadout from '../CoupRiskReadout/CoupRiskReadout';
 
 interface NavbarProps {
     /** Triggers a fade-to-black transition before switching to the given tab. */
@@ -24,8 +25,6 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
     const meetTaken = useGameStore(s => s.meet.actionTaken.taken)
     const requestAdvanceRound = useGameStore(s => s.gameManagement.requestAdvanceRound)
     const miniChallengePending = useGameStore(s => s.miniChallenge.current !== null && !s.miniChallenge.decided)
-    const coupWarningFaction = useGameStore(s => s.gameManagement.coupWarningFaction)
-    const coupArmedLastRound = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const { t } = useTranslation();
 
     const pending = new Set<Tabs>()
@@ -80,16 +79,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
             )}
 
             <div className={styles.navRight}>
-                {displayTabs && coupWarningFaction && (
-                    <span className={clsx(styles.coupBadge, { [styles.coupBadgeDanger]: coupArmedLastRound })}>
-                        <Icon type={coupArmedLastRound ? 'danger' : 'warning'} />
-                        <span className={styles.coupTooltip}>
-                            {coupArmedLastRound
-                                ? t('hud.coup_danger', { faction: t(`power.${coupWarningFaction}`) })
-                                : t('hud.coup_warning', { faction: t(`power.${coupWarningFaction}`) })}
-                        </span>
-                    </span>
-                )}
+                {displayTabs && <CoupRiskReadout />}
                 {displayTabs && phase === 'start' && !dayEnded && (
                     <div className={clsx(styles.advanceWrapper, { [styles.glowing]: allActionsDone })}>
                         <div className={styles.advanceRing} />

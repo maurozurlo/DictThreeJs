@@ -1,0 +1,43 @@
+.badge {
+    position: relative;
+    font-size: 1rem;
+    cursor: default;
+    animation: warnPulse 2s ease-in-out infinite;
+    background: rgba(1, 1, 1, .5);
+    padding: .5rem;
+}
+
+.badgeDanger {
+    animation: dangerPulse 0.8s ease-in-out infinite;
+}
+
+.tooltip {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: #111;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    color: var(--text-color);
+    pointer-events: none;
+    z-index: 200;
+    letter-spacing: 0.03em;
+}
+
+.badge:hover .tooltip {
+    display: block;
+}
+
+@keyframes warnPulse {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
+}
+
+@keyframes dangerPulse {
+    0%, 100% { opacity: 0.7; }
+    50%       { opacity: 1; }
+}
