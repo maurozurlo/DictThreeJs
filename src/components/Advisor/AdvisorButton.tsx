@@ -6,6 +6,7 @@ import { getAdvisorLine, ADVISOR_NAMES } from '../../Utils/Advisor';
 import AdvisorModal from './AdvisorModal';
 import styles from './AdvisorButton.module.css';
 import { Icon } from '../Icon/Icon';
+import { getVisibleModifiers } from '../../Utils/Modifiers';
 
 interface Props {
     category: AdvisorCategory;
@@ -18,11 +19,14 @@ interface Props {
 const AdvisorButton = ({ category, verdict, trigger, position = 'top' }: Props) => {
     const [open, setOpen] = useState(false);
     const advisorLevel = useGameStore(s => s.shop.advisorLevel);
+    const modifiers = useGameStore(s => s.gameManagement.modifiers);
+    const round = useGameStore(s => s.gameManagement.round);
+    const visibleModifiers = useMemo(() => getVisibleModifiers(modifiers, round), [modifiers, round]);
     const { t } = useTranslation('advisor');
 
     const key = useMemo(
-        () => getAdvisorLine({ category, verdict, level: advisorLevel, trigger }),
-        [category, verdict, advisorLevel, trigger]
+        () => getAdvisorLine({ category, verdict, level: advisorLevel, trigger, visibleModifiers }),
+        [category, verdict, advisorLevel, trigger, visibleModifiers]
     );
     const text = key === 'No advice available.' ? key : t(key);
 

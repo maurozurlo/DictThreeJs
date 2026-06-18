@@ -3,7 +3,7 @@
 ## Header
 - **Story ID**: 1-2
 - **Sprint**: 1
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Config/Data
 - **Layer**: Foundation
 - **TR-ID**: TR-events-001

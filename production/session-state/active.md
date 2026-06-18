@@ -1,5 +1,22 @@
 # Session State
 
+## Session Extract — /dev-story 6-3 2026-06-17
+- Story: production/stories/6-3-modifier-engine-p3.md — ADR-0008 P3: Remaining Content + Street View/Advisor Consumers
+- Files changed: src/Utils/Modifiers.ts (added getVisibleModifiers export), src/3d/StreetView.tsx (wired getVisibleModifiers selector; debug overlay shows active effect count), src/components/Advisor/AdvisorButton.tsx (wired getVisibleModifiers selector; included in useMemo deps)
+- Test written: tests/integration/modifiers/content_migration.test.ts (16 tests — getVisibleModifiers projection, class-A content, statue regression, isWindowActive boundary)
+- Key decision: Periodic events and mini-challenges are all ADR-0008 class A (immediate one-shot deltas) — no modifier emitted; documented via test. Statues already emit modifiers via buildShopModifier (regression-guarded). getVisibleModifiers filters active modifiers with at least one in-window StatMod; empty-mods entries (weird-law slot) are correctly excluded.
+- Pre-existing issue: secret-room-rework.test.ts fails when run in the full suite (store state leak from test ordering) but passes in isolation — unrelated to P3 changes.
+- Tests: 16/16 new pass; tsc clean; vite build not yet run.
+- Next: /code-review src/Utils/Modifiers.ts src/3d/StreetView.tsx src/components/Advisor/AdvisorButton.tsx then /story-done production/stories/6-3-modifier-engine-p3.md
+
+## Session Extract — /story-done 2026-06-17
+- Verdict: COMPLETE
+- Story: production/stories/6-3-modifier-engine-p3.md — ADR-0008 P3: Remaining Content + Street View/Advisor Consumers
+- Tech debt logged: None
+- Code review suggestions applied: S1 (visibleModifiers as load-bearing AdvisorContext dep); S2 (stable primitive selectors + useMemo in StreetView + AdvisorButton)
+- 455/455 tests pass; tsc clean
+- Next recommended: /sprint-plan new (Sprint 7 planning, which was the original goal before 6-3 was found incomplete)
+
 ## Session Extract — Seeded RNG + Commit-on-Roll (ADR-0010) 2026-06-17
 - TRIGGER: citizen-sim GDD review (retried systems-designer + qa-lead agents — credit error cleared, both ran). Then owner chose to add seeded RNG for anti-save-scum ("live with it" pillar enforcement), not just reproducibility.
 - KEY INSIGHT (owner): seed alone ≠ anti-save-scum. Need seed + persisted PRNG cursor (resume mid-stream on reload) + commit-on-roll (outcome written to state at commit instant). Audit confirmed commit-on-roll ALREADY HOLDS via ADR-0002 atomic set() — every roll (Meet/accept/round-resolution) resolves inside one set, no mid-save gap. So no refactor of timing needed; ADR-0010 formalizes existing invariant + adds seed.

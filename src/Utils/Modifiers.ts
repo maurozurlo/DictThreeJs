@@ -177,6 +177,20 @@ export function fireOnStartModifiers(modifiers: Modifier[], round: number): OnSt
 }
 
 /**
+ * Active-modifier projection for Street View and Advisor (ADR-0008 §8 / TR-street-001).
+ * Returns only active modifiers that have at least one stat contribution in-window at
+ * `round`. Modifiers whose every contribution is still future (or that carry no mods,
+ * e.g. the weird-law slot entry) are excluded — they have nothing to project yet.
+ * Rejected modifiers are always excluded. Label text is looked up from content assets
+ * by `id` at render time — the engine stores no display data.
+ */
+export function getVisibleModifiers(modifiers: Modifier[], round: number): Modifier[] {
+    return modifiers.filter(m =>
+        m.state === 'active' && m.mods.some(sm => isWindowActive(sm.window, round))
+    );
+}
+
+/**
  * Normalize a possibly-legacy persisted modifier into the current schema
  * (ADR-0008 P1 save hygiene). Pre-engine saves stored statues as
  * `{ type:'statue', mods:[{stat,amount}] }` with no id/state/window. Default a

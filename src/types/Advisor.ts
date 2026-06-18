@@ -1,3 +1,5 @@
+import type { Modifier } from './GameState';
+
 export type AdvisorCategory = 'law' | 'deal' | 'budget' | 'dayended';
 export type AdvisorVerdict = 'approve' | 'reject' | 'warn' | 'ok';
 export type AdvisorLevel = 0 | 1 | 2 | 3;
@@ -27,4 +29,6 @@ export interface AdvisorContext {
     verdict: AdvisorVerdict;
     level: AdvisorLevel;
     trigger?: AdvisorOverrideTrigger;
+    /** Active-effect projection (ADR-0008 §8). Reserved for future advisor reactions to active modifiers. */
+    visibleModifiers?: Modifier[];
 }

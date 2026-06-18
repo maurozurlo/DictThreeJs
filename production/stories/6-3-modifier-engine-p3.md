@@ -3,14 +3,14 @@
 ## Header
 - **Story ID**: 6-3
 - **Sprint**: 6
-- **Status**: Ready
+- **Status**: Complete
 - **Type**: Integration
 - **Layer**: Feature
 - **TR-ID**: TR-mod-001, TR-street-001
 - **Governing ADR**: docs/architecture/adr-0008-timed-modifier-engine.md
 - **Manifest Version**: 2026-06-13
 - **Estimate**: 1.5 days
-- **Last Updated**: 2026-06-15
+- **Last Updated**: 2026-06-17
 
 ## Summary
 
@@ -95,10 +95,17 @@ engine and switching consumers to the one list (ADR-0003 projection boundary).
 ## Test Evidence
 
 - **Story Type**: Integration
-- **Required evidence**: `tests/integration/modifiers/content_migration_test.ts` — must exist and pass; full suite green
-- **Status**: [ ] Not yet created
+- **Required evidence**: `tests/integration/modifiers/content_migration.test.ts` — must exist and pass; full suite green
+- **Status**: [x] Created — 16 tests, all pass (455/455 suite green)
 
 ## Dependencies
 
 - Depends on: 6-2 (P2 must be DONE — recurring engine must be live before migrating remaining content)
 - Unlocks: None (P3 is the final modifier engine phase)
+
+## Completion Notes
+**Completed**: 2026-06-17
+**Criteria**: 10/10 passing
+**Deviations**: None — ADR-0008 §8 followed; ADR-0003 boundary clean; manifest v2026-06-13 matches
+**Test Evidence**: Integration test at `tests/integration/modifiers/content_migration.test.ts` — 16 tests pass (filename in QA plan had `_test.ts` suffix; corrected to `.test.ts` for Vitest compatibility)
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS; both suggestions applied (S1: visibleModifiers as load-bearing AdvisorContext dep; S2: stable primitive selectors + useMemo in StreetView and AdvisorButton)

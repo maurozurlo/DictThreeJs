@@ -14,7 +14,7 @@ goal: "Pay down effect-system tech debt by implementing ADR-0008 (Timed Modifier
 start: "2026-06-22"
 end: "2026-06-28"
 generated: "2026-06-15"
-updated: "2026-06-16"
+updated: "2026-06-17"
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
@@ -53,11 +53,11 @@ stories:
     name: "ADR-0008 P3 — remaining content + Street View/Advisor consumers"
     file: "production/stories/6-3-modifier-engine-p3.md"
     priority: should-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.5
     blocker: "6-2"
-    completed: ""
+    completed: "2026-06-17"
 
   - id: "6-5"
     name: "Author ADR-0009 — Coup Telegraphing & Fairness"

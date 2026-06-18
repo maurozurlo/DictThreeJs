@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -6,6 +6,7 @@ import { useGameStore } from '../Stores/GameState';
 import { Tabs } from '../types/Tabs';
 import { STREET_LAYOUT } from '../assets/streetLayout';
 import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
+import { getVisibleModifiers } from '../Utils/Modifiers';
 
 const BUILDING_COLOR   = '#7a6e62';
 const PLAZA_COLOR      = '#b8a98a';
@@ -142,8 +143,14 @@ interface DebugSelection {
 }
 
 function StreetView() {
-    const activeTab    = useGameStore((s) => s.tabs.activeTab);
-    const debugEnabled = useGameStore((s) => s.debug.enabled);
+    const activeTab       = useGameStore((s) => s.tabs.activeTab);
+    const debugEnabled    = useGameStore((s) => s.debug.enabled);
+    const modifiers = useGameStore((s) => s.gameManagement.modifiers);
+    const round = useGameStore((s) => s.gameManagement.round);
+    // Active-effect projection (ADR-0008 §8 / TR-street-001). Stable primitive selectors
+    // avoid allocating a new array on every store update; useMemo recomputes only when
+    // modifiers ref or round number actually changes.
+    const visibleModifiers = useMemo(() => getVisibleModifiers(modifiers, round), [modifiers, round]);
     const [selection, setSelection] = useState<DebugSelection | null>(null);
 
     if (activeTab !== Tabs.Street) return null;
@@ -219,6 +226,7 @@ function StreetView() {
                         <div style={{ marginBottom: 3 }}><b>{selection.id}</b></div>
                         <div>pos  [{selection.worldPos.map(fmt).join(', ')}]</div>
                         <div>size [{selection.size.map(fmt).join(', ')}] m</div>
+                        <div>active effects: {visibleModifiers.length}</div>
                     </div>
                 </Html>
             )}
