@@ -18,10 +18,10 @@
 
 import type { Citizen, CitizenState } from '../types/Citizen';
 import type { Power } from '../types/Power';
-import { getRandomFromList, getRandomNumberInRange, rollFloat } from '../Utils/Math';
+import { getRandomFromList, getRandomNumberInRange, rollFloat, Clamp } from '../Utils/Math';
 
 // ---------------------------------------------------------------------------
-// Name tables (GDD §3.1 — diverse, Latin-American flavour)
+// Name tables (GDD §3.1 — Latin-American male names; women/children deferred per GDD §3.1)
 // ---------------------------------------------------------------------------
 
 const FIRST_NAMES: string[] = ["Juan",
@@ -115,6 +115,52 @@ export const PROTEST_FEEDBACK_CAP = 5;
 export const THIEF_SKIM = 2;
 
 // ---------------------------------------------------------------------------
+// P2 Tuning constants — Employment, Happiness, Body-type (GDD §4.1–4.5)
+// ---------------------------------------------------------------------------
+
+/** Relation weight in factionFortune: (rel/10) × FACTION_FORTUNE_REL_WEIGHT (GDD §4.1). */
+export const FACTION_FORTUNE_REL_WEIGHT = 3;
+
+/** Normalises a 0–10 budget to −1…+1: (budget − 5) / FACTION_FORTUNE_BUDGET_DIVISOR (GDD §4.1). */
+export const FACTION_FORTUNE_BUDGET_DIVISOR = 5;
+
+/** Charisma weight in charismaTerm: (charisma/10) × CHARISMA_TERM_WEIGHT (GDD §4.1). */
+export const CHARISMA_TERM_WEIGHT = 2;
+
+/** Happiness penalty applied to unemployed army/business peds each round (GDD §4.1). */
+export const DISPLACEMENT_PENALTY = 2;
+
+/** Scales relation swing to the volatility contribution (GDD §4.1). */
+export const VOLATILITY_COEFFICIENT = 0.4;
+
+/** Maximum volatility contribution per round — prevents runaway swings (GDD §4.1). */
+export const VOLATILITY_CAP = 2;
+
+/** businessTax percentage above which a −0.5 budgetSignal penalty fires (GDD §4.1). */
+export const BUSINESS_TAX_PENALTY_THRESHOLD = 45;
+
+/** peopleTax percentage above which a −0.5 budgetSignal penalty fires (GDD §4.1). */
+export const PEOPLE_TAX_PENALTY_THRESHOLD = 30;
+
+/** Amount subtracted from budgetSignal when the faction's tax threshold is exceeded (GDD §4.1). */
+export const TAX_PENALTY_AMOUNT = 0.5;
+
+/** Minimum security budget for army peds to remain employed (GDD §4.2). */
+export const ARMY_SECURITY_THRESHOLD = 4;
+
+/** Minimum infrastructure budget for business peds to remain employed (GDD §4.2). */
+export const BUSINESS_INFRA_THRESHOLD = 3;
+
+/** fatShare lerp lower bound at health = 0 (GDD §4.5). */
+export const FAT_AT_ZERO = 0.05;
+/** fatShare lerp upper bound at health = 10 (GDD §4.5). */
+export const FAT_AT_MAX = 0.40;
+/** slimShare lerp lower bound at health = 0 (GDD §4.5). */
+export const SLIM_AT_ZERO = 0.70;
+/** slimShare lerp upper bound at health = 10 (GDD §4.5). */
+export const SLIM_AT_MAX = 0.15;
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -162,4 +208,105 @@ export function buildCitizenRoster(
     }
 
     return { citizens, citizenStates };
+}
+
+/**
+ * Whether a ped holds their faction role this round (GDD §4.2, Story 7-2).
+ *
+ * Caller must pre-compute `effectiveRelation` via `getEffectiveRelation` (ADR-0008)
+ * before passing it here — this function is a pure threshold test.
+ *
+ * People are never displaced; they are the civilian baseline with nowhere to fall from.
+ */
+export function computeEmployment(
+    faction: Power,
+    effectiveRelation: number,
+    security: number,
+    infrastructure: number,
+): boolean {
+    switch (faction) {
+        case 'military':
+            return security >= ARMY_SECURITY_THRESHOLD && effectiveRelation >= 0;
+        case 'business':
+            return effectiveRelation >= 0 && infrastructure >= BUSINESS_INFRA_THRESHOLD;
+        case 'people':
+            return true;
+    }
+}
+
+/** All inputs to the per-ped happiness formula (GDD §4.1). Pass effective values — callers resolve via getEffectiveRelation / getEffectiveCharisma (ADR-0008). */
+export interface HappinessInputs {
+    faction: Power;
+    /** Effective faction relation this round (ADR-0008). */
+    effectiveRelation: number;
+    /** Carried from the previous round's `lastFactionRelation` — drives the volatility term. */
+    lastFactionRelation: number;
+    /** Effective dictator charisma this round (ADR-0008). */
+    effectiveCharisma: number;
+    security: number;
+    infrastructure: number;
+    health: number;
+    peopleTax: number;
+    businessTax: number;
+    /** Output of `computeEmployment` for this ped this round. */
+    employed: boolean;
+}
+
+/**
+ * Happiness for one ped this round (GDD §4.1, Story 7-2).
+ * Returns a value in [0, 10] (clamped).
+ *
+ * Formula: `clamp(5 + factionFortune + charismaTerm − displacement − volatility, 0, 10)`
+ * where displacement = DISPLACEMENT_PENALTY if army/business ped is unemployed, else 0.
+ */
+export function computeHappiness(inputs: HappinessInputs): number {
+    const {
+        faction, effectiveRelation, lastFactionRelation, effectiveCharisma,
+        security, infrastructure, health, peopleTax, businessTax, employed,
+    } = inputs;
+
+    let budgetSignal: number;
+    switch (faction) {
+        case 'military':
+            budgetSignal = (security - 5) / FACTION_FORTUNE_BUDGET_DIVISOR;
+            break;
+        case 'business':
+            budgetSignal = (infrastructure - 5) / FACTION_FORTUNE_BUDGET_DIVISOR
+                + (businessTax > BUSINESS_TAX_PENALTY_THRESHOLD ? -TAX_PENALTY_AMOUNT : 0);
+            break;
+        case 'people':
+            budgetSignal = (health - 5) / FACTION_FORTUNE_BUDGET_DIVISOR
+                + (peopleTax > PEOPLE_TAX_PENALTY_THRESHOLD ? -TAX_PENALTY_AMOUNT : 0);
+            break;
+    }
+
+    const factionFortune = (effectiveRelation / 10) * FACTION_FORTUNE_REL_WEIGHT + budgetSignal;
+    const charismaTerm = (effectiveCharisma / 10) * CHARISMA_TERM_WEIGHT;
+    // People are never displaced; displacement only applies to army/business peds (GDD §4.2)
+    const displacement = faction !== 'people' && !employed ? DISPLACEMENT_PENALTY : 0;
+    const volatility = Math.min(
+        VOLATILITY_CAP,
+        Math.abs(effectiveRelation - lastFactionRelation) * VOLATILITY_COEFFICIENT,
+    );
+
+    return Clamp(5 + factionFortune + charismaTerm - displacement - volatility, 0, 10);
+}
+
+/**
+ * Body-type classification from a ped's fixed `bodySeed` and the current health
+ * budget (GDD §4.5, Story 7-2).
+ *
+ * `bodySeed` is drawn once at generation via `rollFloat()` (ADR-0010) and never
+ * changes. A ped only changes body type when health crosses their individual
+ * threshold — identities stay visually stable while the crowd shifts over time.
+ */
+export function computeBodyType(bodySeed: number, health: number): 'slim' | 'fit' | 'fat' {
+    const t = health / 10;
+    const fatShare  = FAT_AT_ZERO  + (FAT_AT_MAX  - FAT_AT_ZERO)  * t;
+    const slimShare = SLIM_AT_ZERO + (SLIM_AT_MAX - SLIM_AT_ZERO) * t;
+    const fitShare  = 1 - fatShare - slimShare;
+
+    if (bodySeed < fatShare) return 'fat';
+    if (bodySeed < fatShare + fitShare) return 'fit';
+    return 'slim';
 }

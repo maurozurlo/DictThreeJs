@@ -1,7 +1,7 @@
 # Story 7-1: CitizenHandler P1 — Generation + Immutable Identity
 
 > **Epic**: Citizen Simulation
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Logic
 > **Estimate**: 1.0 days
@@ -135,7 +135,7 @@ export interface CitizenState {
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/citizens/citizen_generation.test.ts` — must exist and all tests must pass
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/citizens/citizen_generation.test.ts` — 10/10 passing
 
 ---
 
@@ -143,3 +143,15 @@ export interface CitizenState {
 
 - Depends on: ADR-0010 (Accepted and shipped — `rollFloat`, `seedRng`, `getRngState`, `setRngState` available in `src/Utils/Math.ts`)
 - Unlocks: Story 7-2 (employment/happiness reads from citizen identity)
+
+---
+
+## Completion Notes
+**Completed**: 2026-06-18
+**Criteria**: 7/8 passing (AC-2 identity-immutability deferred to Story 7-2 — computeHappiness not yet implemented)
+**Deviations** (advisory):
+- `Citizen.faction` uses `Power` (`'military'`) instead of spec's `'army'` — approved to align with existing codebase type, avoids translation seam in stories 7-2/7-3
+- `buildCitizenRoster` signature: `(initialRelations): { citizens, citizenStates }` instead of spec's `(seed?): Citizen[]` — returns both arrays together to co-locate CitizenState initialization; approved during dev
+- `SaveLoad.buildSavePayload` not modified — `stripFunctions(state)` auto-serializes plain-object citizen arrays; change was not needed
+**Test Evidence**: `tests/unit/citizens/citizen_generation.test.ts` — 10/10 passing
+**Code Review**: Complete — APPROVED WITH SUGGESTIONS (spy ordering + FIRST_NAMES comment fixed before close)

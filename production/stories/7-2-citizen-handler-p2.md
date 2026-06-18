@@ -1,7 +1,7 @@
 # Story 7-2: CitizenHandler P2 — Employment + Happiness + Body-Type
 
 > **Epic**: Citizen Simulation
-> **Status**: Not Started
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 1.5 days
@@ -182,7 +182,7 @@ All three are pure functions exported from `src/Stores/CitizenHandler.ts`.
 
 **Story Type**: Logic
 **Required evidence**: `tests/unit/citizens/citizen_employment_happiness.test.ts` — must exist and all tests must pass
-**Status**: [ ] Not yet created
+**Status**: [x] `tests/unit/citizens/citizen_employment_happiness.test.ts` — 25/25 passing
 
 ---
 

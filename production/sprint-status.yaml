@@ -14,7 +14,7 @@ goal: "Implement the Citizen Simulation — 25 persistent citizens whose fate tr
 start: "2026-06-17"
 end: "2026-06-24"
 generated: "2026-06-17"
-updated: "2026-06-17"
+updated: "2026-06-18"
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
@@ -22,17 +22,17 @@ stories:
     name: "CitizenHandler P1 — generation + immutable identity"
     file: "production/stories/7-1-citizen-handler-p1.md"
     priority: must-have
-    status: in-progress
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-06-18"
 
   - id: "7-2"
     name: "CitizenHandler P2 — employment + happiness + body-type"
     file: "production/stories/7-2-citizen-handler-p2.md"
     priority: must-have
-    status: backlog
+    status: in-progress
     owner: ""
     estimate_days: 1.5
     blocker: ""

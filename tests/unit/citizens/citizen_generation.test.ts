@@ -8,7 +8,7 @@
  * Implementation: src/Stores/CitizenHandler.ts
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { seedRng, getRngState, setRngState } from '../../../src/Utils/Math';
 import { buildCitizenRoster, TOTAL_CITIZENS } from '../../../src/Stores/CitizenHandler';
 import type { Power } from '../../../src/types/Power';
@@ -19,6 +19,10 @@ describe('CitizenHandler — generation', () => {
 
     beforeEach(() => {
         seedRng(42);
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     // -------------------------------------------------------------------------
@@ -108,10 +112,11 @@ describe('CitizenHandler — generation', () => {
     });
 
     it('advances the RNG cursor (bodySeed drawn from seeded cursor, not Math.random)', () => {
-        const mathRandomSpy = vi.spyOn(Math, 'random');
-        const cursorBefore = getRngState();
-
         seedRng(42);
+        const cursorBefore = getRngState();
+        // Install spy after reseed so it only covers the handler call (not seedRng itself)
+        const mathRandomSpy = vi.spyOn(Math, 'random');
+
         buildCitizenRoster(INITIAL_RELATIONS);
 
         const cursorAfter = getRngState();
@@ -120,31 +125,32 @@ describe('CitizenHandler — generation', () => {
         expect(mathRandomSpy).not.toHaveBeenCalled();
         // The seeded cursor must have advanced (draws happened)
         expect(cursorAfter).not.toBe(cursorBefore);
-
-        mathRandomSpy.mockRestore();
     });
 
     // -------------------------------------------------------------------------
     // Save/load determinism (Edge Case 11)
     // -------------------------------------------------------------------------
 
-    it('cursor-save / cursor-restore round trip: identical roster', () => {
+    it('cursor-save / cursor-restore round trip produces identical roster (Edge Case 11)', () => {
+        // Save cursor BEFORE generation, so restoring it replays the same stream
         seedRng(7);
-        const { citizens: original } = buildCitizenRoster(INITIAL_RELATIONS);
-        const savedCursor = getRngState();
+        const cursorBeforeGeneration = getRngState();
+        const { citizens: first } = buildCitizenRoster(INITIAL_RELATIONS);
 
-        // Simulate a different sequence of draws, then restore the saved cursor
+        // Exhaust entropy with a different seed to prove restoration works
         seedRng(99999);
-        buildCitizenRoster(INITIAL_RELATIONS); // exhaust some entropy
+        buildCitizenRoster(INITIAL_RELATIONS);
 
-        // Restore the saved cursor and re-generate from that position
-        setRngState(savedCursor);
-        // The cursor is mid-stream after generation; a second call would produce
-        // the *next* batch — not a re-run. The test here verifies the stored cursor
-        // is what allows save-scum resistance: the exact same cursor position in a
-        // round-trip yields the same subsequent draws.
-        const cursorRestored = getRngState();
-        expect(cursorRestored).toBe(savedCursor);
+        // Restore to the pre-generation position and re-generate
+        setRngState(cursorBeforeGeneration);
+        const { citizens: second } = buildCitizenRoster(INITIAL_RELATIONS);
+
+        // All 25 identity fields must be identical — this is the save-scum-resistance guarantee
+        for (let i = 0; i < TOTAL_CITIZENS; i++) {
+            expect(second[i].name, `citizen ${i} name`).toBe(first[i].name);
+            expect(second[i].skin, `citizen ${i} skin`).toBe(first[i].skin);
+            expect(second[i].bodySeed, `citizen ${i} bodySeed`).toBe(first[i].bodySeed);
+        }
     });
 
     it('boundary seeds (0 and MAX_SAFE_INTEGER) produce valid 25-citizen rosters', () => {
@@ -160,6 +166,10 @@ describe('CitizenHandler — generation', () => {
     // -------------------------------------------------------------------------
     // CitizenState initial values (Story 7-1 — P2/P3 recompute from round 1)
     // -------------------------------------------------------------------------
+
+    // AC-2 DEFERRED: Identity fields immutable after round resolution cannot be
+    // tested here because computeHappiness / nextRound() are implemented in
+    // Stories 7-2 and 7-3. Immutability test lives in citizen_employment_happiness.test.ts.
 
     it('initializes citizenStates with alive=true and lastFactionRelation matching initialRelations', () => {
         const rels: Record<Power, number> = { military: 3, business: -2, people: 1 };

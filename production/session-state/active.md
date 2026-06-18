@@ -365,3 +365,18 @@ Task: Implemented — pending story-done
 - Test results: 10/10 new; 478/479 suite (secret-room-rework.test.ts failure is pre-existing, not introduced)
 - Blockers: None
 - Next: /code-review src/Stores/CitizenHandler.ts src/types/Citizen.ts src/Stores/StateFactory.ts then /story-done 7-1
+
+## Session Extract — /story-done 7-1 2026-06-18
+- Verdict: COMPLETE WITH NOTES
+- Story: production/stories/7-1-citizen-handler-p1.md — CitizenHandler P1 (Generation + Immutable Identity)
+- Tech debt logged: None
+- Next recommended: Story 7-2 — CitizenHandler P2 (employment + happiness + body-type) — production/stories/7-2-citizen-handler-p2.md
+
+## Session Extract — /dev-story 7-2 2026-06-18
+- Story: production/stories/7-2-citizen-handler-p2.md — CitizenHandler P2 (Employment + Happiness + Body-Type)
+- Files changed: src/Stores/CitizenHandler.ts (3 new exported functions + HappinessInputs interface + 16 P2 constants)
+- Test written: tests/unit/citizens/citizen_employment_happiness.test.ts — 25 tests, all pass
+- Suite: 504/504 (clean — prior 1-test failure also resolved)
+- Key decisions: computeEmployment takes faction:Power (not Citizen) for cleaner tests; effectiveRelation pre-computed by caller per ADR-0008; no lerp utility needed (inlined)
+- Blockers: None
+- Next: /code-review src/Stores/CitizenHandler.ts then /story-done 7-2
