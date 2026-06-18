@@ -1,4 +1,16 @@
 # Session State
+<!-- QA-PLAN: 2026-06-17 | System: sprint-7 | Plan written: production/qa/qa-plan-sprint-7-2026-06-17.md -->
+
+## Session Extract — /sprint-plan new Sprint 7 2026-06-17
+- Sprint 7 plan written: production/sprints/sprint-7.md
+- sprint-status.yaml reset to Sprint 7 (8 stories: 7-1..7-6, 5-8 carryover, 5-9 carryover)
+- Goal: Citizen Simulation implementation (CitizenHandler P1/P2/P3 + Street View rendering + Inspector UI)
+- Must Have: 7-1 (1d generation), 7-2 (1.5d employment/happiness), 7-3 (2d role fork/death/feedback/integration)
+- Should Have: 7-4 (Street View rendering), 7-5 (Inspector UI)
+- Nice to Have: 7-6 (Population HUD), 5-8, 5-9 carryovers
+- New TR-IDs needed: TR-citizen-001..003 (not yet in tr-registry.yaml — register during /create-stories or /story-readiness)
+- Story files (7-1..7-6) not yet created — run /create-stories or /qa-plan sprint next
+- QA plan: user chose to run /qa-plan sprint before implementation begins
 
 ## Session Extract — /story-done 6-7 2026-06-17
 - Verdict: COMPLETE WITH NOTES

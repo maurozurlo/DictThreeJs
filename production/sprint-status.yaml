@@ -9,77 +9,77 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 6
-goal: "Pay down effect-system tech debt by implementing ADR-0008 (Timed Modifier Engine) — one data-driven engine for laws/deals/weird-laws/structures so effect math is uniform and new content is trivial to add"
-start: "2026-06-22"
-end: "2026-06-28"
-generated: "2026-06-15"
+sprint: 7
+goal: "Implement the Citizen Simulation — 25 persistent citizens whose fate tracks your rule"
+start: "2026-06-17"
+end: "2026-06-24"
+generated: "2026-06-17"
 updated: "2026-06-17"
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
-  - id: "6-1"
-    name: "ADR-0008 P1 — modifier schema + charisma/relations windowing"
-    file: "production/stories/6-1-modifier-engine-p1.md"
+  - id: "7-1"
+    name: "CitizenHandler P1 — generation + immutable identity"
+    file: "production/stories/7-1-citizen-handler-p1.md"
     priority: must-have
-    status: done
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+
+  - id: "7-2"
+    name: "CitizenHandler P2 — employment + happiness + body-type"
+    file: "production/stories/7-2-citizen-handler-p2.md"
+    priority: must-have
+    status: backlog
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: "2026-06-15"
+    completed: ""
 
-  - id: "6-4"
-    name: "Repeal-tier balance pass (generic modifier economic magnitude)"
-    file: "production/stories/6-4-repeal-tier-balance.md"
+  - id: "7-3"
+    name: "CitizenHandler P3 — role fork + death + feedback + nextRound() wiring"
+    file: "production/stories/7-3-citizen-handler-p3.md"
     priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-15"
-
-  - id: "6-2"
-    name: "ADR-0008 P2 — replace ActiveRecurringEffect with modifiers"
-    file: "production/stories/6-2-modifier-engine-p2.md"
-    priority: must-have
-    status: done
+    status: backlog
     owner: ""
     estimate_days: 2.0
-    blocker: "6-1, 6-4"
-    completed: "2026-06-16"
+    blocker: ""
+    completed: ""
 
   # ── Should Have ─────────────────────────────────────────────────────────
-  - id: "6-3"
-    name: "ADR-0008 P3 — remaining content + Street View/Advisor consumers"
-    file: "production/stories/6-3-modifier-engine-p3.md"
+  - id: "7-4"
+    name: "Street View — citizen rendering by role/outfit/bodyType"
+    file: "production/stories/7-4-street-view-citizens.md"
     priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 1.5
-    blocker: "6-2"
-    completed: "2026-06-17"
-
-  - id: "6-5"
-    name: "Author ADR-0009 — Coup Telegraphing & Fairness"
-    file: "production/stories/6-5-coup-fairness-adr.md"
-    priority: should-have
-    status: done
+    status: backlog
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-06-16"
+    completed: ""
 
-  - id: "6-6"
-    name: "Modifier authoring guide (expandability doc)"
-    file: "production/stories/6-6-modifier-authoring-guide.md"
+  - id: "7-5"
+    name: "Citizen Inspector UI (click-to-inspect panel)"
+    file: "production/stories/7-5-citizen-inspector-ui.md"
     priority: should-have
-    status: done
+    status: backlog
     owner: ""
     estimate_days: 0.5
-    blocker: "6-1"
-    completed: "2026-06-16"
+    blocker: ""
+    completed: ""
 
   # ── Nice to Have ────────────────────────────────────────────────────────
+  - id: "7-6"
+    name: "Population HUD readout — displayedPopulation to stat area"
+    file: "production/stories/7-6-population-hud.md"
+    priority: nice-to-have
+    status: backlog
+    owner: ""
+    estimate_days: 0.25
+    blocker: ""
+    completed: ""
+
   - id: "5-8"
     name: "External playtest — non-developer Medium difficulty session (carryover)"
     file: "production/stories/5-8-external-playtest.md"
@@ -99,14 +99,3 @@ stories:
     estimate_days: 0.25
     blocker: ""
     completed: ""
-
-  - id: "6-7"
-    name: "Coup fairness UI — telegraphing readout"
-    file: "production/stories/6-7-coup-fairness-ui.md"
-    priority: nice-to-have
-    status: done
-    owner: ""
-    estimate_days: 1.0
-    blocker: ""
-    completed: "2026-06-17"
-    notes: "ADR-0009 ratified; deterministic-grace LOGIC slice shipped + tested. Remaining: UI readout only."
