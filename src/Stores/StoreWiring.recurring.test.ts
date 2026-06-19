@@ -17,14 +17,17 @@ vi.mock('../i18n', () => ({
     default: { t: (key: string) => key }
 }));
 
-/** Factory: a law carrying a recurring income effect. */
+/** Factory: a law carrying a relation bump + a recurring income mod. */
 function makeRecurringLaw(overrides: Partial<Law> = {}): Law {
     return {
         id: 9001,
         power: 'business',
-        acceptEffect: { business: 1 },
-        rejectEffect: {},
-        recurringEffect: { incomeBonus: 25, label: 'laws.recurring.test_income' },
+        acceptMods: [
+            { stat: 'business', amount: 1, time: 0 },
+            { stat: 'roundIncome', amount: 25, time: 0 },
+        ],
+        rejectMods: [],
+        label: 'laws.recurring.test_income',
         ...overrides,
     };
 }
@@ -60,6 +63,7 @@ describe('recurring effect store wiring', () => {
                 state: 'active',
             });
             expect(mods[0].mods).toEqual([
+                { stat: 'business', amount: 1, window: { startRound: mods[0].acquiredRound, endRound: null } },
                 { stat: 'roundIncome', amount: 25, window: { startRound: mods[0].acquiredRound, endRound: null } },
             ]);
         });
@@ -78,13 +82,17 @@ describe('recurring effect store wiring', () => {
             expect(activeMods()).toHaveLength(0);
         });
 
-        it('accepting a law without recurringEffect adds nothing', () => {
-            decideLaw(makeRecurringLaw({ recurringEffect: undefined }), true);
+        it('accepting a plain relation law still creates its (non-recurring) modifier', () => {
+            decideLaw(makeRecurringLaw({ acceptMods: [{ stat: 'business', amount: 1, time: 0 }], label: undefined }), true);
 
-            expect(activeMods()).toHaveLength(0);
+            const mods = activeMods();
+            expect(mods).toHaveLength(1);
+            expect(mods[0].mods).toEqual([
+                { stat: 'business', amount: 1, window: { startRound: mods[0].acquiredRound, endRound: null } },
+            ]);
         });
 
-        it('accepting a deal with recurringEffect adds a deal modifier', () => {
+        it('accepting a deal with a recurring mod adds a deal modifier', () => {
             useGameStore.setState((s) => ({
                 deals: {
                     ...s.deals,
@@ -93,10 +101,13 @@ describe('recurring effect store wiring', () => {
                         text: 'test',
                         acceptText: 'ok',
                         rejectText: 'no',
-                        acceptEffect: { treasury: 40 },
-                        rejectEffect: {},
+                        acceptMods: [
+                            { stat: 'treasury', amount: 40, time: 1 },
+                            { stat: 'roundExpense', amount: 15, time: 0 },
+                        ],
+                        rejectMods: [],
                         power: 'military',
-                        recurringEffect: { expenseBonus: 15, label: 'deals.recurring.test_expense' },
+                        label: 'deals.recurring.test_expense',
                     },
                     dealDecided: false,
                 },
@@ -107,6 +118,7 @@ describe('recurring effect store wiring', () => {
             expect(mods).toHaveLength(1);
             expect(mods[0]).toMatchObject({ id: 'deals.9002', type: 'deal' });
             expect(mods[0].mods).toEqual([
+                { stat: 'treasury', amount: 40, window: { startRound: mods[0].acquiredRound, endRound: mods[0].acquiredRound + 1 } },
                 { stat: 'roundExpense', amount: 15, window: { startRound: mods[0].acquiredRound, endRound: null } },
             ]);
         });

@@ -1,7 +1,12 @@
-import type { Modifier, ModifierStat, ModifierType, ResolvedStatMod, ResolvedWindow } from '../types/GameState';
+import type { GameState, Modifier, ModifierStat, ModifierType, ResolvedStatMod, ResolvedWindow } from '../types/GameState';
 import type { Power } from '../types/Power';
 import { GAMESTATE } from '../Constants/GameState';
 import { Clamp } from './Math';
+
+/** Budget-slider stats whose effective value is read through getEffectiveBudgetStat. */
+export type BudgetModifierStat =
+    | 'businessTaxes' | 'peopleTaxes'
+    | 'securitySpend' | 'educationSpend' | 'healthSpend' | 'infrastructureSpend';
 
 /**
  * Authoring-time timing registry (ADR-0008 §2). Content references a timing by
@@ -96,6 +101,29 @@ export function getEffectiveRelation(
         GAMESTATE.RELATIONS.MIN,
         GAMESTATE.RELATIONS.MAX,
     );
+}
+
+/**
+ * Effective budget-slider value (ADR-0008 Amendment 2026-06-18 §9): base slider
+ * value plus in-window modifier contributions to that stat, re-clamped to the
+ * slider's range (0–100 for tax rates, 0–10 for expenditures). Every gameplay
+ * site that formerly read `budget.taxes.*` / `budget.expenditures.*` directly
+ * (tax penalty, citizen happiness/employment, applyBudgetEffects, health rep
+ * check) reads through here so law/deal budget modifiers take effect.
+ */
+export function getEffectiveBudgetStat(
+    budget: GameState['budget'],
+    modifiers: Modifier[],
+    stat: BudgetModifierStat,
+    round: number,
+): number {
+    const isTax = stat === 'businessTaxes' || stat === 'peopleTaxes';
+    const base = isTax
+        ? budget.taxes[stat]
+        : budget.expenditures[stat.slice(0, -'Spend'.length) as keyof GameState['budget']['expenditures']];
+    const delta = sumModifiers(modifiers, stat, round);
+    const bounds = isTax ? GAMESTATE.BUDGET.BOUNDS.TAX : GAMESTATE.BUDGET.BOUNDS.EXPENDITURE;
+    return Clamp(base + delta, bounds.MIN, bounds.MAX);
 }
 
 /**

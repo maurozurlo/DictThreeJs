@@ -15,11 +15,8 @@ import { LAWS } from './laws';
 import { DEALS } from './deals';
 import { WEIRD_LAWS } from './weirdLaws';
 import { resolveWindow } from '../Utils/Modifiers';
-import type { Modifier, ModifierType, ResolvedStatMod } from '../types/GameState';
+import type { Modifier, ModifierSpec, ModifierType, ResolvedStatMod } from '../types/GameState';
 import type { Power } from '../types/Power';
-
-/** Immediate + permanent — TIME_MODIFIERS[0] — the only timing recurring law/deal income uses today. */
-const PERMANENT_TIME_ID = 0;
 
 /** Modifier types that appear in the Active-Legislation / repeal list (laws + deals + weird laws). */
 const REPEALABLE_TYPES: ModifierType[] = ['law-recurring', 'deal', 'weird-law'];
@@ -45,29 +42,25 @@ export function weirdLawModifierId(lawId: number): string {
 }
 
 /**
- * Build a recurring-income/expense Modifier from a law or deal at acceptance.
- * Returns null when the item carries no recurringEffect (nothing to model). Income
- * and expense each become a permanent roundIncome/roundExpense StatMod.
+ * Build a Modifier instance from a content item's `acceptMods`/`rejectMods`
+ * (ADR-0008 Amendment 2026-06-18). Each authoring ModifierSpec's `time` is
+ * resolved to a concrete window at acquisition. Replaces the old
+ * `buildRecurringModifier` bridge — laws (relations + recurring + treasury) and
+ * deals now produce one modifier carrying all their contributions.
  */
-export function buildRecurringModifier(
-    item: { id: number; recurringEffect?: { incomeBonus?: number; expenseBonus?: number } },
-    kind: 'law' | 'deal',
+export function buildContentModifier(
+    id: string,
+    type: ModifierType,
+    specs: ModifierSpec[],
     round: number,
-): Modifier | null {
-    if (!item.recurringEffect) return null;
-    const window = resolveWindow(PERMANENT_TIME_ID, round);
-    const mods: ResolvedStatMod[] = [];
-    const income = item.recurringEffect.incomeBonus ?? 0;
-    const expense = item.recurringEffect.expenseBonus ?? 0;
-    if (income > 0) mods.push({ stat: 'roundIncome', amount: income, window });
-    if (expense > 0) mods.push({ stat: 'roundExpense', amount: expense, window });
-    return {
-        id: kind === 'law' ? lawModifierId(item.id) : dealModifierId(item.id),
-        type: kind === 'law' ? 'law-recurring' : 'deal',
-        state: 'active',
-        acquiredRound: round,
-        mods,
-    };
+    state: 'active' | 'rejected' = 'active',
+): Modifier {
+    const mods: ResolvedStatMod[] = specs.map(s => ({
+        stat: s.stat,
+        amount: s.amount,
+        window: resolveWindow(s.time, round),
+    }));
+    return { id, type, state, acquiredRound: round, mods };
 }
 
 /**
@@ -108,13 +101,13 @@ export function getModifierContent(id: string): ModifierContent | undefined {
 
     if (ns === 'laws') {
         const law = LAWS.find(l => l.id === numId);
-        if (!law?.recurringEffect) return undefined;
-        return { label: law.recurringEffect.label, faction: law.power };
+        if (!law?.label) return undefined;
+        return { label: law.label, faction: law.power };
     }
     if (ns === 'deals') {
         const deal = DEALS.find(d => d.id === numId);
-        if (!deal?.recurringEffect) return undefined;
-        return { label: deal.recurringEffect.label, faction: deal.power ?? null };
+        if (!deal?.label) return undefined;
+        return { label: deal.label, faction: deal.power ?? null };
     }
     if (ns === 'weird') {
         const law = WEIRD_LAWS.find(l => l.id === numId);

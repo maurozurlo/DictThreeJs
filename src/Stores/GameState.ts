@@ -219,22 +219,26 @@ export const INITIAL_STATE = ({ set, get }: {
             // Weird law path — one-time effects, no faction penalty on reject, slot tracking
             if (current.type === 'weird') {
                 if (hasAccepted) {
-                    const effect = current.acceptEffect;
-                    const newTreasury = state.budget.treasury + (effect.treasury ?? 0);
-                    const newRelations = { ...state.relations.current };
                     const round = state.gameManagement.round;
-                    PowerList.forEach((key) => {
-                        const delta = effect[key];
-                        if (typeof delta === 'number') {
-                            newRelations[key] = handleRelations({
-                                power: key,
-                                amount: delta,
-                                current: newRelations[key],
+                    const newRelations = { ...state.relations.current };
+                    let newTreasury = state.budget.treasury;
+                    let charismaDelta = 0;
+                    // Weird-law effects are ADR-0008 class A — applied as immediate base
+                    // mutations (the weird modifier below carries no contributions).
+                    for (const spec of current.acceptMods) {
+                        if (spec.stat === 'treasury') {
+                            newTreasury += spec.amount;
+                        } else if (spec.stat === 'military' || spec.stat === 'business' || spec.stat === 'people') {
+                            newRelations[spec.stat] = handleRelations({
+                                power: spec.stat,
+                                amount: spec.amount,
+                                current: newRelations[spec.stat],
                                 round,
                             });
+                        } else if (spec.stat === 'charisma') {
+                            charismaDelta += spec.amount;
                         }
-                    });
-                    const charismaDelta = current.charismaEffect ?? 0;
+                    }
                     const newCharisma = Clamp(
                         state.gameManagement.charisma.current + charismaDelta,
                         GAMESTATE.CHARISMA.MIN,
@@ -304,8 +308,11 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const current = state.deals.current;
             if (!current) return;
-            const effect = hasAccepted ? current.acceptEffect : current.rejectEffect;
-            const delta = effect.treasury ?? 0;
+            // Treasury delta for the round's extra-income/expense readout (DayEnded +
+            // totalExtras stats). The treasury itself is applied via the modifier in
+            // nextRound (accept) or as a base mutation in handleDecision (reject).
+            const chosenMods = hasAccepted ? current.acceptMods : current.rejectMods;
+            const delta = chosenMods.reduce((sum, s) => (s.stat === 'treasury' ? sum + s.amount : sum), 0);
             handleDecision({ type: "deal", item: current, hasAccepted, get, set });
             set((s) => ({
                 stats: {

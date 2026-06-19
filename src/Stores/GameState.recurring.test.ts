@@ -1,27 +1,25 @@
 import { describe, it, expect } from 'vitest';
 import type { Law } from '../types/Law';
 import type { Deal } from '../types/Deal';
-import { buildRecurringModifier, buildWeirdLawModifier } from '../assets/modifierContent';
+import { buildContentModifier, buildWeirdLawModifier } from '../assets/modifierContent';
 
 /**
- * Recurring-effect data model (ADR-0008 P2 — formerly Story 2-1's ActiveRecurringEffect).
+ * Modifier construction (ADR-0008 Amendment 2026-06-18 — formerly buildRecurringModifier).
  *
  * Verifies:
- *  - recurring law/deal effects build correctly shaped roundIncome/roundExpense modifiers
- *  - Law and Deal types accept an optional recurringEffect field
+ *  - buildContentModifier resolves a ModifierSpec[]'s windows correctly per `time`
+ *  - Law and Deal types carry acceptMods/rejectMods + an optional `label`
  *  - weird-law modifiers are ledger/slot markers (no economic mods)
  */
 
-describe('buildRecurringModifier — modifier shape', () => {
-    it('income law → permanent roundIncome modifier with namespaced id', () => {
-        const law: Law = {
-            id: 39,
-            power: 'business',
-            acceptEffect: {},
-            rejectEffect: {},
-            recurringEffect: { incomeBonus: 25, label: 'laws.recurring.gambling_income' },
-        };
-        const mod = buildRecurringModifier(law, 'law', 4)!;
+describe('buildContentModifier — modifier shape', () => {
+    it('income law spec → permanent roundIncome modifier with namespaced id', () => {
+        const mod = buildContentModifier(
+            'laws.39',
+            'law-recurring',
+            [{ stat: 'roundIncome', amount: 25, time: 0 }],
+            4,
+        );
 
         expect(mod.id).toBe('laws.39');
         expect(mod.type).toBe('law-recurring');
@@ -32,26 +30,26 @@ describe('buildRecurringModifier — modifier shape', () => {
         ]);
     });
 
-    it('expense deal → permanent roundExpense modifier under the deals namespace', () => {
-        const deal: Deal = {
-            id: 17,
-            text: 'x', acceptText: 'x', rejectText: 'x',
-            acceptEffect: {}, rejectEffect: {},
-            power: 'military',
-            recurringEffect: { expenseBonus: 15, label: 'deals.recurring.arms_cost' },
-        };
-        const mod = buildRecurringModifier(deal, 'deal', 2)!;
+    it('one-shot treasury spec (time:1) → single-round window', () => {
+        const mod = buildContentModifier(
+            'deals.17',
+            'deal',
+            [{ stat: 'treasury', amount: -30, time: 1 }, { stat: 'roundExpense', amount: 15, time: 0 }],
+            2,
+        );
 
         expect(mod.id).toBe('deals.17');
         expect(mod.type).toBe('deal');
         expect(mod.mods).toEqual([
+            { stat: 'treasury', amount: -30, window: { startRound: 2, endRound: 3 } },
             { stat: 'roundExpense', amount: 15, window: { startRound: 2, endRound: null } },
         ]);
     });
 
-    it('returns null when the item carries no recurringEffect', () => {
-        const law: Law = { id: 1, power: 'military', acceptEffect: {}, rejectEffect: {} };
-        expect(buildRecurringModifier(law, 'law', 1)).toBeNull();
+    it('honours an explicit rejected state', () => {
+        const mod = buildContentModifier('laws.1', 'law-recurring', [], 1, 'rejected');
+        expect(mod.state).toBe('rejected');
+        expect(mod.mods).toEqual([]);
     });
 });
 
@@ -66,43 +64,51 @@ describe('buildWeirdLawModifier — ledger/slot marker', () => {
     });
 });
 
-describe('Law type — recurringEffect field (AC-1)', () => {
-    it('accepts a law without recurringEffect (optional field)', () => {
+describe('Law type — acceptMods/rejectMods + label', () => {
+    it('accepts a law without a label (optional field)', () => {
         const law: Law = {
             id: 1,
             power: 'military',
-            acceptEffect: { military: 1 },
-            rejectEffect: { military: -1 },
+            acceptMods: [{ stat: 'military', amount: 1, time: 0 }],
+            rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
         };
-        expect(law.recurringEffect).toBeUndefined();
+        expect(law.label).toBeUndefined();
     });
 
-    it('accepts a law with recurringEffect — income', () => {
+    it('accepts a law with a recurring income mod + label', () => {
         const law: Law = {
             id: 15,
             power: 'business',
-            acceptEffect: { business: 1, people: -2 },
-            rejectEffect: {},
-            recurringEffect: { incomeBonus: 25, label: 'laws.recurring.gambling_income' },
+            acceptMods: [
+                { stat: 'business', amount: 1, time: 0 },
+                { stat: 'people', amount: -2, time: 0 },
+                { stat: 'roundIncome', amount: 25, time: 0 },
+            ],
+            rejectMods: [],
+            label: 'laws.recurring.gambling_income',
         };
-        expect(law.recurringEffect?.incomeBonus).toBe(25);
-        expect(law.recurringEffect?.expenseBonus).toBeUndefined();
+        expect(law.acceptMods.find(m => m.stat === 'roundIncome')?.amount).toBe(25);
+        expect(law.label).toBe('laws.recurring.gambling_income');
     });
 });
 
-describe('Deal type — recurringEffect field (AC-1)', () => {
-    it('accepts a deal with recurringEffect', () => {
+describe('Deal type — acceptMods/rejectMods + label', () => {
+    it('accepts a deal with a recurring mod + label + power', () => {
         const deal: Deal = {
             id: 9,
             text: 'deal.text',
             acceptText: 'deal.accept',
             rejectText: 'deal.reject',
-            acceptEffect: { treasury: 40, business: 1 },
-            rejectEffect: {},
+            acceptMods: [
+                { stat: 'treasury', amount: 40, time: 1 },
+                { stat: 'business', amount: 1, time: 0 },
+                { stat: 'roundIncome', amount: 15, time: 0 },
+            ],
+            rejectMods: [],
             power: 'business',
-            recurringEffect: { incomeBonus: 15, label: 'deals.recurring.foreign_investment' },
+            label: 'deals.recurring.foreign_investment',
         };
-        expect(deal.recurringEffect?.incomeBonus).toBe(15);
-        expect(deal.recurringEffect?.label).toBe('deals.recurring.foreign_investment');
+        expect(deal.acceptMods.find(m => m.stat === 'roundIncome')?.amount).toBe(15);
+        expect(deal.label).toBe('deals.recurring.foreign_investment');
     });
 });

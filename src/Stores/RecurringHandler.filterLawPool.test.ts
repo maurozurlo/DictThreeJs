@@ -15,8 +15,8 @@ function makeLaw(overrides: Partial<Law> = {}): Law {
     return {
         id: 0,
         power: 'business',
-        acceptEffect: {},
-        rejectEffect: {},
+        acceptMods: [],
+        rejectMods: [],
         ...overrides,
     };
 }
@@ -31,8 +31,8 @@ function makeMod(id: string, opts: { income?: number; expense?: number; type?: M
 }
 
 const plainLaw = makeLaw({ id: 1 });
-const incomeLaw = makeLaw({ id: 2, recurringEffect: { incomeBonus: 15, label: 'laws.recurring.a' } });
-const expenseLaw = makeLaw({ id: 3, recurringEffect: { expenseBonus: 15, label: 'laws.recurring.b' } });
+const incomeLaw = makeLaw({ id: 2, acceptMods: [{ stat: 'roundIncome', amount: 15, time: 0 }], label: 'laws.recurring.a' });
+const expenseLaw = makeLaw({ id: 3, acceptMods: [{ stat: 'roundExpense', amount: 15, time: 0 }], label: 'laws.recurring.b' });
 const pool = [plainLaw, incomeLaw, expenseLaw];
 
 /** N active lasting-income law modifiers with ids that don't collide with the pool. */

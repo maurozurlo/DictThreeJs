@@ -68,24 +68,24 @@ describe('getAdvisorLine', () => {
 describe('computeLawVerdict', () => {
     it('test_law_verdict_approve_when_accept_net_greater', () => {
         const verdict = computeLawVerdict({
-            acceptEffect: { treasury: 100 },
-            rejectEffect: { treasury: 50 },
+            acceptMods: [{ stat: 'treasury', amount: 100, time: 1 }],
+            rejectMods: [{ stat: 'treasury', amount: 50, time: 1 }],
         });
         expect(verdict).toBe('approve');
     });
 
     it('test_law_verdict_reject_when_reject_net_greater', () => {
         const verdict = computeLawVerdict({
-            acceptEffect: { treasury: -50 },
-            rejectEffect: { treasury: 100 },
+            acceptMods: [{ stat: 'treasury', amount: -50, time: 1 }],
+            rejectMods: [{ stat: 'treasury', amount: 100, time: 1 }],
         });
         expect(verdict).toBe('reject');
     });
 
     it('test_law_verdict_approve_when_sums_are_equal', () => {
         const verdict = computeLawVerdict({
-            acceptEffect: { treasury: 20 },
-            rejectEffect: { treasury: 20 },
+            acceptMods: [{ stat: 'treasury', amount: 20, time: 1 }],
+            rejectMods: [{ stat: 'treasury', amount: 20, time: 1 }],
         });
         expect(verdict).toBe('approve');
     });
@@ -95,17 +95,17 @@ describe('computeLawVerdict', () => {
 
 describe('computeLawTrigger', () => {
     it('test_law_trigger_income_bonus_returns_recurring_income', () => {
-        const trigger = computeLawTrigger({ recurringEffect: { incomeBonus: 10, label: 'test' } });
+        const trigger = computeLawTrigger({ acceptMods: [{ stat: 'roundIncome', amount: 10, time: 0 }] });
         expect(trigger).toBe('law_recurring_income');
     });
 
     it('test_law_trigger_expense_bonus_returns_recurring_expense', () => {
-        const trigger = computeLawTrigger({ recurringEffect: { expenseBonus: 5, label: 'test' } });
+        const trigger = computeLawTrigger({ acceptMods: [{ stat: 'roundExpense', amount: 5, time: 0 }] });
         expect(trigger).toBe('law_recurring_expense');
     });
 
     it('test_law_trigger_no_recurring_returns_undefined', () => {
-        const trigger = computeLawTrigger({});
+        const trigger = computeLawTrigger({ acceptMods: [] });
         expect(trigger).toBeUndefined();
     });
 });
@@ -115,16 +115,16 @@ describe('computeLawTrigger', () => {
 describe('computeDealVerdict', () => {
     it('test_deal_verdict_approve_when_accept_net_greater', () => {
         const verdict = computeDealVerdict({
-            acceptEffect: { treasury: 200 },
-            rejectEffect: { treasury: 10 },
+            acceptMods: [{ stat: 'treasury', amount: 200, time: 1 }],
+            rejectMods: [{ stat: 'treasury', amount: 10, time: 1 }],
         });
         expect(verdict).toBe('approve');
     });
 
     it('test_deal_verdict_reject_when_reject_net_greater', () => {
         const verdict = computeDealVerdict({
-            acceptEffect: { treasury: -20 },
-            rejectEffect: { treasury: 80 },
+            acceptMods: [{ stat: 'treasury', amount: -20, time: 1 }],
+            rejectMods: [{ stat: 'treasury', amount: 80, time: 1 }],
         });
         expect(verdict).toBe('reject');
     });

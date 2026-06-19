@@ -3,7 +3,8 @@ import { RECURRING } from "../Constants/Costs";
 
 // Effects are ModifierSpec[] (ADR-0008 Amendment 2026-06-18) — same timing
 // convention as laws (see laws.ts). `risk` stays a separate per-path probability
-// field (acceptRisk / rejectRisk); `charismaEffect` folds into acceptMods.
+// field (acceptRisk / rejectRisk); a former direct charisma delta becomes a
+// { stat: 'charisma' } spec inside acceptMods (see deal 20).
 export const DEALS: Deal[] = [
     {
         id: 1,

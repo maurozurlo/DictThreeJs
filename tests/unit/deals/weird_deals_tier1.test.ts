@@ -1,16 +1,19 @@
 /**
- * Story 5-3: Weird Deals Tier 1 — unit tests
+ * Story 5-3: Weird Deals Tier 1 — unit tests (updated for ADR-0008 Amendment 2026-06-18)
  *
- * Covers: deals 19-22 asset data, RECURRING.TINY constant, accept/reject effects,
- * charismaEffect on deal 20, recurring entry for deal 19, visual stubs,
- * and store integration via actUponDeal.
+ * Covers: deals 19-22 asset data (now ModifierSpec[]), RECURRING.TINY, accept/reject
+ * mods, charisma mod on deal 20, recurring entry for deal 19, visual stubs, and store
+ * integration via actUponDeal (accept builds a read-through modifier; treasury is
+ * banked in nextRound; reject mutates base).
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore } from '../../../src/Stores/GameState';
 import { DEALS } from '../../../src/assets/deals';
 import { RECURRING } from '../../../src/Constants/Costs';
+import { getEffectiveCharisma } from '../../../src/Utils/Modifiers';
 import { VISUAL_CONSEQUENCES } from '../../../src/assets/visualConsequences';
+import type { ModifierSpec } from '../../../src/types/GameState';
 
 vi.mock('../../../src/i18n', () => ({
     default: { t: (key: string) => key }
@@ -25,6 +28,10 @@ function getDeal(id: number) {
     if (!deal) throw new Error(`Deal ${id} not found in DEALS`);
     return deal;
 }
+
+/** Amount of the first spec matching `stat` (undefined if none). */
+const amountOf = (mods: ModifierSpec[], stat: ModifierSpec['stat']): number | undefined =>
+    mods.find(m => m.stat === stat)?.amount;
 
 // ---------------------------------------------------------------------------
 // Asset pool — deals 19-22 exist
@@ -64,33 +71,32 @@ describe('RECURRING.TINY constant (Story 5-3)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Deal 19 — Dog-Sized Cow Initiative (Story 5-3)', () => {
-    it('test_deal19_accept_effect_treasury_plus_15', () => {
-        expect(getDeal(19).acceptEffect.treasury).toBe(15);
+    it('test_deal19_accept_mod_treasury_plus_15', () => {
+        expect(amountOf(getDeal(19).acceptMods, 'treasury')).toBe(15);
     });
 
-    it('test_deal19_accept_effect_people_minus_1', () => {
-        expect(getDeal(19).acceptEffect.people).toBe(-1);
+    it('test_deal19_accept_mod_people_minus_1', () => {
+        expect(amountOf(getDeal(19).acceptMods, 'people')).toBe(-1);
     });
 
-    it('test_deal19_reject_effect_is_empty', () => {
-        expect(Object.keys(getDeal(19).rejectEffect)).toHaveLength(0);
+    it('test_deal19_reject_mods_are_empty', () => {
+        expect(getDeal(19).rejectMods).toHaveLength(0);
     });
 
     it('test_deal19_has_recurring_income_of_tiny', () => {
-        const deal = getDeal(19);
-        expect(deal.recurringEffect?.incomeBonus).toBe(RECURRING.TINY);
+        expect(amountOf(getDeal(19).acceptMods, 'roundIncome')).toBe(RECURRING.TINY);
     });
 
-    it('test_deal19_recurring_label_is_cow_income', () => {
-        expect(getDeal(19).recurringEffect?.label).toBe('deals.recurring.cow_income');
+    it('test_deal19_label_is_cow_income', () => {
+        expect(getDeal(19).label).toBe('deals.recurring.cow_income');
     });
 
     it('test_deal19_power_is_people', () => {
         expect(getDeal(19).power).toBe('people');
     });
 
-    it('test_deal19_has_no_charisma_effect', () => {
-        expect(getDeal(19).charismaEffect).toBeUndefined();
+    it('test_deal19_has_no_charisma_mod', () => {
+        expect(amountOf(getDeal(19).acceptMods, 'charisma')).toBeUndefined();
     });
 });
 
@@ -99,20 +105,21 @@ describe('Deal 19 — Dog-Sized Cow Initiative (Story 5-3)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Deal 20 — Giant National Computer Mouse (Story 5-3)', () => {
-    it('test_deal20_accept_effect_treasury_minus_50', () => {
-        expect(getDeal(20).acceptEffect.treasury).toBe(-50);
+    it('test_deal20_accept_mod_treasury_minus_50', () => {
+        expect(amountOf(getDeal(20).acceptMods, 'treasury')).toBe(-50);
     });
 
-    it('test_deal20_reject_effect_is_empty', () => {
-        expect(Object.keys(getDeal(20).rejectEffect)).toHaveLength(0);
+    it('test_deal20_reject_mods_are_empty', () => {
+        expect(getDeal(20).rejectMods).toHaveLength(0);
     });
 
-    it('test_deal20_charisma_effect_is_2', () => {
-        expect(getDeal(20).charismaEffect).toBe(2);
+    it('test_deal20_charisma_mod_is_2', () => {
+        expect(amountOf(getDeal(20).acceptMods, 'charisma')).toBe(2);
     });
 
-    it('test_deal20_has_no_recurring_effect', () => {
-        expect(getDeal(20).recurringEffect).toBeUndefined();
+    it('test_deal20_has_no_recurring_mod', () => {
+        expect(amountOf(getDeal(20).acceptMods, 'roundIncome')).toBeUndefined();
+        expect(amountOf(getDeal(20).acceptMods, 'roundExpense')).toBeUndefined();
     });
 
     it('test_deal20_has_no_power', () => {
@@ -125,20 +132,21 @@ describe('Deal 20 — Giant National Computer Mouse (Story 5-3)', () => {
 // ---------------------------------------------------------------------------
 
 describe('Deal 21 — Strategic Pigeon Surveillance Program (Story 5-3)', () => {
-    it('test_deal21_accept_effect_military_plus_1', () => {
-        expect(getDeal(21).acceptEffect.military).toBe(1);
+    it('test_deal21_accept_mod_military_plus_1', () => {
+        expect(amountOf(getDeal(21).acceptMods, 'military')).toBe(1);
     });
 
-    it('test_deal21_accept_effect_people_minus_1', () => {
-        expect(getDeal(21).acceptEffect.people).toBe(-1);
+    it('test_deal21_accept_mod_people_minus_1', () => {
+        expect(amountOf(getDeal(21).acceptMods, 'people')).toBe(-1);
     });
 
-    it('test_deal21_reject_effect_is_empty', () => {
-        expect(Object.keys(getDeal(21).rejectEffect)).toHaveLength(0);
+    it('test_deal21_reject_mods_are_empty', () => {
+        expect(getDeal(21).rejectMods).toHaveLength(0);
     });
 
-    it('test_deal21_has_no_recurring_effect', () => {
-        expect(getDeal(21).recurringEffect).toBeUndefined();
+    it('test_deal21_has_no_recurring_mod', () => {
+        expect(amountOf(getDeal(21).acceptMods, 'roundIncome')).toBeUndefined();
+        expect(amountOf(getDeal(21).acceptMods, 'roundExpense')).toBeUndefined();
     });
 
     it('test_deal21_power_is_military', () => {
@@ -151,28 +159,29 @@ describe('Deal 21 — Strategic Pigeon Surveillance Program (Story 5-3)', () => 
 // ---------------------------------------------------------------------------
 
 describe('Deal 22 — Swiss Hostage Diplomacy (Story 5-3)', () => {
-    it('test_deal22_accept_effect_military_minus_1', () => {
-        expect(getDeal(22).acceptEffect.military).toBe(-1);
+    it('test_deal22_accept_mod_military_minus_1', () => {
+        expect(amountOf(getDeal(22).acceptMods, 'military')).toBe(-1);
     });
 
-    it('test_deal22_accept_effect_people_plus_1', () => {
-        expect(getDeal(22).acceptEffect.people).toBe(1);
+    it('test_deal22_accept_mod_people_plus_1', () => {
+        expect(amountOf(getDeal(22).acceptMods, 'people')).toBe(1);
     });
 
-    it('test_deal22_reject_effect_military_plus_1', () => {
-        expect(getDeal(22).rejectEffect.military).toBe(1);
+    it('test_deal22_reject_mod_military_plus_1', () => {
+        expect(amountOf(getDeal(22).rejectMods, 'military')).toBe(1);
     });
 
-    it('test_deal22_reject_effect_treasury_minus_20', () => {
-        expect(getDeal(22).rejectEffect.treasury).toBe(-20);
+    it('test_deal22_reject_mod_treasury_minus_20', () => {
+        expect(amountOf(getDeal(22).rejectMods, 'treasury')).toBe(-20);
     });
 
     it('test_deal22_power_is_people', () => {
         expect(getDeal(22).power).toBe('people');
     });
 
-    it('test_deal22_has_no_recurring_effect', () => {
-        expect(getDeal(22).recurringEffect).toBeUndefined();
+    it('test_deal22_has_no_recurring_mod', () => {
+        expect(amountOf(getDeal(22).acceptMods, 'roundIncome')).toBeUndefined();
+        expect(amountOf(getDeal(22).acceptMods, 'roundExpense')).toBeUndefined();
     });
 });
 
@@ -209,7 +218,7 @@ describe('actUponDeal store integration (Story 5-3)', () => {
         useGameStore.getState().gameManagement.setPhase('start');
     });
 
-    it('test_accepting_deal20_applies_charisma_effect', () => {
+    it('test_accepting_deal20_applies_charisma_as_effective_modifier', () => {
         const deal20 = getDeal(20);
 
         useGameStore.setState(s => ({
@@ -223,7 +232,10 @@ describe('actUponDeal store integration (Story 5-3)', () => {
 
         useGameStore.getState().deals.actUponDeal(true);
 
-        expect(useGameStore.getState().gameManagement.charisma.current).toBe(7);
+        // Charisma +2 is now a read-through modifier (base unchanged; effective = 7).
+        const { charisma, modifiers, round } = useGameStore.getState().gameManagement;
+        expect(charisma.current).toBe(5);
+        expect(getEffectiveCharisma(charisma.current, modifiers, round)).toBe(7);
     });
 
     it('test_rejecting_deal20_does_not_apply_charisma_effect', () => {
@@ -239,7 +251,8 @@ describe('actUponDeal store integration (Story 5-3)', () => {
 
         useGameStore.getState().deals.actUponDeal(false);
 
-        expect(useGameStore.getState().gameManagement.charisma.current).toBe(5);
+        const { charisma, modifiers, round } = useGameStore.getState().gameManagement;
+        expect(getEffectiveCharisma(charisma.current, modifiers, round)).toBe(5);
     });
 
     it('test_accepting_deal19_adds_recurring_modifier', () => {
@@ -260,7 +273,7 @@ describe('actUponDeal store integration (Story 5-3)', () => {
         );
     });
 
-    it('test_accepting_deal19_applies_treasury_and_people_effects', () => {
+    it('test_accepting_deal19_defers_treasury_and_carries_people_on_the_modifier', () => {
         const deal19 = getDeal(19);
 
         useGameStore.setState(s => ({
@@ -271,12 +284,16 @@ describe('actUponDeal store integration (Story 5-3)', () => {
 
         useGameStore.getState().deals.actUponDeal(true);
 
-        expect(useGameStore.getState().budget.treasury).toBe(115);
-        // people: -1 but grace dampening may soften it in early rounds — just check it's ≤ 0
-        expect(useGameStore.getState().relations.current.people).toBeLessThanOrEqual(0);
+        // Treasury is banked in nextRound (time:1) — base treasury unchanged at accept time.
+        expect(useGameStore.getState().budget.treasury).toBe(100);
+        // Base people relation untouched; the −1 lives on the modifier.
+        expect(useGameStore.getState().relations.current.people).toBe(0);
+        const mod = useGameStore.getState().gameManagement.modifiers.find(m => m.id === 'deals.19')!;
+        expect(mod.mods).toContainEqual(expect.objectContaining({ stat: 'treasury', amount: 15 }));
+        expect(mod.mods).toContainEqual(expect.objectContaining({ stat: 'people', amount: -1 }));
     });
 
-    it('test_accepting_deal22_applies_accept_effects', () => {
+    it('test_accepting_deal22_does_not_change_base_treasury', () => {
         const deal22 = getDeal(22);
 
         useGameStore.setState(s => ({
@@ -287,11 +304,11 @@ describe('actUponDeal store integration (Story 5-3)', () => {
 
         useGameStore.getState().deals.actUponDeal(true);
 
-        // military -1 → clamped or dampened; check budget unchanged beyond treasury
+        // Deal 22 accept carries no treasury spec.
         expect(useGameStore.getState().budget.treasury).toBe(100);
     });
 
-    it('test_rejecting_deal22_deducts_treasury', () => {
+    it('test_rejecting_deal22_deducts_treasury_immediately', () => {
         const deal22 = getDeal(22);
 
         useGameStore.setState(s => ({
@@ -301,6 +318,7 @@ describe('actUponDeal store integration (Story 5-3)', () => {
 
         useGameStore.getState().deals.actUponDeal(false);
 
+        // Reject treasury spec (time:1) is applied as an immediate base mutation.
         expect(useGameStore.getState().budget.treasury).toBe(80);
     });
 });

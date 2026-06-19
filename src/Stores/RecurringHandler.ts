@@ -28,7 +28,7 @@ export function filterLawPool(
 
     const underCap = activeIncomeLaws < maxIncomeLaws
         ? laws
-        : laws.filter(law => (law.recurringEffect?.incomeBonus ?? 0) <= 0);
+        : laws.filter(law => !law.acceptMods.some(s => s.stat === 'roundIncome' && s.amount > 0));
 
     return underCap.filter(law => !activeLawIds.has(lawModifierId(law.id)));
 }

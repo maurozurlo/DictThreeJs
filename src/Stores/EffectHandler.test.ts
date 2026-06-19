@@ -174,6 +174,14 @@ describe('handleDecision', () => {
     let mockGet: () => GameState;
     let mockSet: (p: Partial<GameState>) => void;
 
+    // Resolve the partial passed to the single set() call.
+    const lastSetArg = () => (mockSet as any).mock.calls[0][0];
+    // Amount of a stat on a built modifier's resolved mods.
+    const modAmount = (mod: any, stat: string): number | undefined =>
+        mod.mods.find((m: any) => m.stat === stat)?.amount;
+    const findMod = (arg: any, id: string) =>
+        arg.gameManagement.modifiers.find((m: any) => m.id === id);
+
     beforeEach(() => {
         mockState = {
             budget: {
@@ -185,7 +193,9 @@ describe('handleDecision', () => {
                 current: { military: 0, business: 0, people: 0 }
             },
             gameManagement: {
-                charisma: { current: 0 }
+                charisma: { current: 0 },
+                modifiers: [],
+                round: 3, // past the grace window — reject base mutations are un-dampened
             },
             deals: {
                 dealDecided: false,
@@ -204,102 +214,95 @@ describe('handleDecision', () => {
         mockSet = vi.fn((_: Partial<GameState>) => { });
     });
 
+    // ADR-0008 Amendment 2026-06-18: accept builds ONE read-through modifier from
+    // acceptMods (base treasury/relations untouched); reject applies rejectMods as
+    // base mutations (no modifier). Effective relations/treasury are summed on read
+    // or in nextRound — covered by timed_modifiers + the modifier_application suite.
     describe('Law decisions', () => {
-        it('should accept a law and apply effects', () => {
+        it('accept builds a law-recurring modifier from acceptMods; base untouched', () => {
             const law: Law = {
                 id: 1,
-
                 power: 'military',
-                acceptEffect: { treasury: -50, military: 2, business: -1 },
-                rejectEffect: { military: -1 }
+                acceptMods: [
+                    { stat: 'treasury', amount: -50, time: 1 },
+                    { stat: 'military', amount: 2, time: 0 },
+                    { stat: 'business', amount: -1, time: 0 },
+                ],
+                rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
 
-            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-                budget: expect.objectContaining({ treasury: 50 }),
-                relations: {
-                    current: { military: 2, business: -1, people: 0 }
-                },
-                law: {
-                    lawDecided: true,
-                    lastLawOutcome: true,
-                    interactedWithLaws: expect.any(Set)
-                }
-            }));
+            const arg = lastSetArg();
+            // Treasury + relations are NOT mutated on accept — they live in the modifier.
+            expect(arg.budget.treasury).toBe(100);
+            expect(arg.relations.current).toEqual({ military: 0, business: 0, people: 0 });
+            const mod = findMod(arg, 'laws.1');
+            expect(mod.type).toBe('law-recurring');
+            expect(modAmount(mod, 'treasury')).toBe(-50);
+            expect(modAmount(mod, 'military')).toBe(2);
+            expect(modAmount(mod, 'business')).toBe(-1);
+            // Chose-better-option reward: accept relation sum (+1) > reject (-1) → +1 charisma.
+            expect(arg.gameManagement.charisma.current).toBe(1);
+            expect(arg.law.lastLawOutcome).toBe(true);
         });
 
-        it('should reject a law and apply reject effects', () => {
+        it('reject applies rejectMods as base mutations; no modifier created', () => {
             const law: Law = {
                 id: 1,
-
                 power: 'military',
-                acceptEffect: { treasury: -50, military: 2 },
-                rejectEffect: { military: -1, people: 1 }
+                acceptMods: [{ stat: 'treasury', amount: -50, time: 1 }, { stat: 'military', amount: 2, time: 0 }],
+                rejectMods: [{ stat: 'military', amount: -1, time: 1 }, { stat: 'people', amount: 1, time: 1 }],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: false,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
 
-            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-                budget: expect.objectContaining({ treasury: 100 }),
-                relations: {
-                    current: { military: -1, business: 0, people: 1 }
-                },
-                law: {
-                    lawDecided: true,
-                    lastLawOutcome: false,
-                    interactedWithLaws: expect.any(Set)
-                }
-            }));
+            const arg = lastSetArg();
+            expect(arg.budget.treasury).toBe(100);
+            expect(arg.relations.current).toEqual({ military: -1, business: 0, people: 1 });
+            expect(arg.gameManagement.modifiers).toHaveLength(0);
+            expect(arg.law.lastLawOutcome).toBe(false);
+        });
+
+        it('reject treasury spec is applied to base immediately', () => {
+            const law: Law = {
+                id: 7,
+                power: 'people',
+                acceptMods: [{ stat: 'people', amount: 1, time: 0 }],
+                rejectMods: [{ stat: 'treasury', amount: -20, time: 1 }],
+            };
+
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+
+            expect(lastSetArg().budget.treasury).toBe(80);
         });
     });
 
     describe('Deal decisions', () => {
-        it('should accept a deal with text outcome', () => {
+        it('accept deal builds a deal modifier; base untouched; text set', () => {
             const deal: Deal = {
                 id: 1,
                 text: 'Test deal',
                 acceptText: 'Deal accepted!',
                 rejectText: 'Deal rejected!',
-                acceptEffect: { treasury: 80, business: 2 },
-                rejectEffect: { business: -1 }
+                acceptMods: [{ stat: 'treasury', amount: 80, time: 1 }, { stat: 'business', amount: 2, time: 0 }],
+                rejectMods: [{ stat: 'business', amount: -1, time: 1 }],
             };
 
-            handleDecision({
-                type: 'deal',
-                item: deal,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'deal', item: deal, hasAccepted: true, get: mockGet, set: mockSet });
 
-            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-                budget: expect.objectContaining({ treasury: 180 }),
-                relations: {
-                    current: { military: 0, business: 2, people: 0 }
-                },
-                deals: expect.objectContaining({
-                    dealDecided: true,
-                    lastDealOutcome: ['Deal accepted!'],
-                    interactedWithDeals: expect.any(Set)
-                })
-            }));
+            const arg = lastSetArg();
+            expect(arg.budget.treasury).toBe(100);
+            expect(arg.relations.current).toEqual({ military: 0, business: 0, people: 0 });
+            const mod = findMod(arg, 'deals.1');
+            expect(mod.type).toBe('deal');
+            expect(modAmount(mod, 'treasury')).toBe(80);
+            expect(modAmount(mod, 'business')).toBe(2);
+            expect(arg.deals.lastDealOutcome).toEqual(['Deal accepted!']);
         });
 
-        it('should handle risky deal when risk triggers on rejection', () => {
-            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.1 < p); // rolled 0.1 → triggers 30% risk
+        it('reject risk triggers a random-faction penalty + riskText', () => {
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.1 < p); // rolled 0.1 → triggers
             vi.mocked(MathUtils.getRandomFromList).mockReturnValue('business');
 
             const deal: Deal = {
@@ -307,149 +310,108 @@ describe('handleDecision', () => {
                 text: 'Risky deal',
                 acceptText: 'Accepted',
                 rejectText: 'Rejected',
-                acceptEffect: { treasury: 100 },
-                rejectEffect: { risk: 0.3 },
-                riskText: 'Things went wrong!'
+                acceptMods: [{ stat: 'treasury', amount: 100, time: 1 }],
+                rejectMods: [],
+                rejectRisk: 0.3,
+                riskText: 'Things went wrong!',
             };
 
-            handleDecision({
-                type: 'deal',
-                item: deal,
-                hasAccepted: false,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'deal', item: deal, hasAccepted: false, get: mockGet, set: mockSet });
 
-            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-                budget: expect.objectContaining({ treasury: 100 }),
-                relations: {
-                    current: { military: 0, business: -2, people: 0 }
-                },
-                deals: expect.objectContaining({
-                    dealDecided: true,
-                    lastDealOutcome: ['Rejected', 'Things went wrong!'],
-                    interactedWithDeals: expect.any(Set)
-                })
-            }));
+            const arg = lastSetArg();
+            expect(arg.budget.treasury).toBe(100); // reject has no treasury spec
+            expect(arg.relations.current).toEqual({ military: 0, business: -2, people: 0 });
+            expect(arg.deals.lastDealOutcome).toEqual(['Rejected', 'Things went wrong!']);
 
             vi.restoreAllMocks();
         });
 
-        it('should not apply risk penalty when risk does not trigger', () => {
-            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.9 < p); // rolled 0.9 → won't trigger 30% risk
+        it('no risk penalty when reject risk does not trigger', () => {
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.9 < p); // rolled 0.9 → won't trigger
 
             const deal: Deal = {
                 id: 2,
                 text: 'Risky deal',
                 acceptText: 'Accepted',
                 rejectText: 'Rejected',
-                acceptEffect: { treasury: 100 },
-                rejectEffect: { risk: 0.3 },
-                riskText: 'Things went wrong!'
+                acceptMods: [{ stat: 'treasury', amount: 100, time: 1 }],
+                rejectMods: [],
+                rejectRisk: 0.3,
+                riskText: 'Things went wrong!',
             };
 
-            handleDecision({
-                type: 'deal',
-                item: deal,
-                hasAccepted: false,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'deal', item: deal, hasAccepted: false, get: mockGet, set: mockSet });
 
-            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-                budget: expect.objectContaining({ treasury: 100 }),
-                relations: {
-                    current: { military: 0, business: 0, people: 0 }
-                },
-                deals: expect.objectContaining({
-                    dealDecided: true,
-                    lastDealOutcome: ['Rejected'],
-                    interactedWithDeals: expect.any(Set)
-                })
-            }));
+            const arg = lastSetArg();
+            expect(arg.relations.current).toEqual({ military: 0, business: 0, people: 0 });
+            expect(arg.deals.lastDealOutcome).toEqual(['Rejected']);
 
             vi.restoreAllMocks();
         });
 
-        it('should not apply risk penalty on acceptance', () => {
-            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.1 < p); // rolled 0.1 → would trigger risk
+        it('accept-path risk shows riskText but never applies a penalty', () => {
+            vi.mocked(MathUtils.rollChance).mockImplementation((p: number) => 0.1 < p); // would trigger
 
             const deal: Deal = {
                 id: 2,
                 text: 'Risky deal',
                 acceptText: 'Accepted',
                 rejectText: 'Rejected',
-                acceptEffect: { treasury: 100, risk: 0.3 },
-                rejectEffect: {},
-                riskText: 'Things went wrong!'
+                acceptMods: [{ stat: 'treasury', amount: 100, time: 1 }],
+                rejectMods: [],
+                acceptRisk: 0.3,
+                riskText: 'Things went wrong!',
             };
 
-            handleDecision({
-                type: 'deal',
-                item: deal,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'deal', item: deal, hasAccepted: true, get: mockGet, set: mockSet });
 
-            // Should not have -2 penalty even though risk triggered
-            expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({
-                budget: expect.objectContaining({ treasury: 200 }),
-                relations: {
-                    current: { military: 0, business: 0, people: 0 }
-                },
-                deals: expect.objectContaining({
-                    dealDecided: true,
-                    lastDealOutcome: ['Accepted', 'Things went wrong!'],
-                    interactedWithDeals: expect.any(Set)
-                })
-            }));
+            const arg = lastSetArg();
+            // No -2 penalty even though risk rolled true; treasury stays base (it's in the modifier).
+            expect(arg.relations.current).toEqual({ military: 0, business: 0, people: 0 });
+            expect(arg.budget.treasury).toBe(100);
+            expect(modAmount(findMod(arg, 'deals.2'), 'treasury')).toBe(100);
+            expect(arg.deals.lastDealOutcome).toEqual(['Accepted', 'Things went wrong!']);
 
             vi.restoreAllMocks();
         });
     });
 
-    describe('Law budget effects (expenditures and taxes)', () => {
-        it('applies expenditure deltas from a law, clamped to bounds', () => {
+    describe('Law budget/tax effects land on the modifier (not base)', () => {
+        it('expenditure specs become securitySpend/educationSpend mods', () => {
             const law: Law = {
                 id: 3,
                 power: 'people',
-                acceptEffect: { education: 2, health: -5 },
-                rejectEffect: {}
+                acceptMods: [{ stat: 'educationSpend', amount: 2, time: 0 }, { stat: 'healthSpend', amount: -5, time: 0 }],
+                rejectMods: [],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
 
-            const calledWith = (mockSet as any).mock.calls[0][0];
-            expect(calledWith.budget.expenditures.education).toBe(3); // 1 + 2
-            expect(calledWith.budget.expenditures.health).toBe(1);    // 1 - 5 clamped to MIN 1
+            const arg = lastSetArg();
+            const mod = findMod(arg, 'laws.3');
+            expect(modAmount(mod, 'educationSpend')).toBe(2);
+            expect(modAmount(mod, 'healthSpend')).toBe(-5);
+            // Base sliders are not touched (effective value is read via getEffectiveBudgetStat).
+            expect(arg.budget.expenditures.education).toBe(1);
+            expect(arg.budget.expenditures.health).toBe(1);
         });
 
-        it('applies tax deltas from a law, clamped to bounds', () => {
+        it('tax specs become businessTaxes/peopleTaxes mods', () => {
             const law: Law = {
                 id: 4,
                 power: 'business',
-                acceptEffect: { peopleTaxes: 10, businessTaxes: 100 },
-                rejectEffect: {}
+                acceptMods: [{ stat: 'peopleTaxes', amount: 10, time: 0 }, { stat: 'businessTaxes', amount: 100, time: 0 }],
+                rejectMods: [],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
 
-            const calledWith = (mockSet as any).mock.calls[0][0];
-            expect(calledWith.budget.taxes.peopleTaxes).toBe(30);    // 20 + 10
-            expect(calledWith.budget.taxes.businessTaxes).toBe(50);  // 30 + 100 clamped to MAX 50
+            const arg = lastSetArg();
+            const mod = findMod(arg, 'laws.4');
+            expect(modAmount(mod, 'peopleTaxes')).toBe(10);
+            expect(modAmount(mod, 'businessTaxes')).toBe(100);
+            expect(arg.budget.taxes.peopleTaxes).toBe(20);
+            expect(arg.budget.taxes.businessTaxes).toBe(30);
         });
     });
 
@@ -458,88 +420,56 @@ describe('handleDecision', () => {
             const law: Law = {
                 id: 5,
                 power: 'military',
-                acceptEffect: { military: -2 },
-                rejectEffect: { military: 1 }
+                acceptMods: [{ stat: 'military', amount: -2, time: 0 }],
+                rejectMods: [{ stat: 'military', amount: 1, time: 1 }],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: false,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
 
-            const calledWith = (mockSet as any).mock.calls[0][0];
-            expect(calledWith.gameManagement.charisma.current).toBe(1);
+            expect(lastSetArg().gameManagement.charisma.current).toBe(1);
         });
 
         it('awards no charisma for rejecting when accept outcome was better', () => {
             const law: Law = {
                 id: 6,
                 power: 'military',
-                acceptEffect: { military: 2 },
-                rejectEffect: { military: -1 }
+                acceptMods: [{ stat: 'military', amount: 2, time: 0 }],
+                rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: false,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
 
-            const calledWith = (mockSet as any).mock.calls[0][0];
-            expect(calledWith.gameManagement.charisma.current).toBe(0);
+            expect(lastSetArg().gameManagement.charisma.current).toBe(0);
         });
     });
 
-    describe('Relation clamping', () => {
-        it('should clamp relations to maximum', () => {
+    describe('Reject-path base relation clamping', () => {
+        it('clamps a reject gain to the maximum', () => {
             mockState.relations!.current.military = 9;
-
             const law: Law = {
                 id: 1,
-
                 power: 'military',
-                acceptEffect: { military: 5 },
-                rejectEffect: {}
+                acceptMods: [],
+                rejectMods: [{ stat: 'military', amount: 5, time: 1 }],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
 
-            const calledWith = (mockSet as any).mock.calls[0][0];
-            expect(calledWith.relations.current.military).toBe(10);
+            expect(lastSetArg().relations.current.military).toBe(10);
         });
 
-        it('should clamp relations to minimum', () => {
+        it('clamps a reject penalty to the minimum', () => {
             mockState.relations!.current.people = -9;
-
             const law: Law = {
                 id: 1,
-
                 power: 'people',
-                acceptEffect: { people: -5 },
-                rejectEffect: {}
+                acceptMods: [],
+                rejectMods: [{ stat: 'people', amount: -5, time: 1 }],
             };
 
-            handleDecision({
-                type: 'law',
-                item: law,
-                hasAccepted: true,
-                get: mockGet,
-                set: mockSet
-            });
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
 
-            const calledWith = (mockSet as any).mock.calls[0][0];
-            expect(calledWith.relations.current.people).toBe(-10);
+            expect(lastSetArg().relations.current.people).toBe(-10);
         });
     });
 });

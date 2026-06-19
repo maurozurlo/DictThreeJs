@@ -32,9 +32,9 @@ const DebugRecurringOverlay = () => {
     const translateLabel = (label: string) =>
         t(label, { ns: label.startsWith('deals.') ? 'deals' : 'laws' })
 
-    const lawOfferTag = currentLaw?.recurringEffect
-        ? (currentLaw.recurringEffect.incomeBonus ?? 0) > 0 ? ' [RECURRING INCOME]' : ' [RECURRING EXPENSE]'
-        : ''
+    const lawOfferIncome = currentLaw?.acceptMods.some(s => s.stat === 'roundIncome' && s.amount > 0)
+    const lawOfferExpense = currentLaw?.acceptMods.some(s => s.stat === 'roundExpense' && s.amount > 0)
+    const lawOfferTag = lawOfferIncome ? ' [RECURRING INCOME]' : lawOfferExpense ? ' [RECURRING EXPENSE]' : ''
 
     return (
         <div className={styles.overlay}>

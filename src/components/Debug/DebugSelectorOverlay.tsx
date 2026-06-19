@@ -5,8 +5,9 @@ import { LAWS } from '../../assets/laws'
 import { WEIRD_LAWS } from '../../assets/weirdLaws'
 import { DEALS } from '../../assets/deals'
 import { DAILY_EVENTS } from '../../assets/dailyEvents'
-import type { Law, LawEffect } from '../../types/Law'
-import type { Deal, DealEffect } from '../../types/Deal'
+import type { Law } from '../../types/Law'
+import type { Deal } from '../../types/Deal'
+import type { ModifierSpec } from '../../types/GameState'
 import type { DailyEvent } from '../../types/DailyEvent'
 import styles from './DebugSelectorOverlay.module.css'
 
@@ -16,18 +17,12 @@ const ALL_LAWS = [...LAWS, ...WEIRD_LAWS].sort((a, b) => a.id - b.id)
 
 const sign = (n: number) => n > 0 ? `+${n}` : `${n}`
 
-/** Renders a one-line summary of non-zero fields in an effect object. */
-function effectSummary(effect: LawEffect | DealEffect): string {
-    const parts: string[] = []
-    const e = effect as Record<string, number | undefined>
-    const order = ['treasury', 'military', 'business', 'people', 'security', 'health', 'infrastructure', 'education', 'businessTaxes', 'peopleTaxes', 'risk']
-    for (const key of order) {
-        const val = e[key]
-        if (val !== undefined && val !== 0) {
-            parts.push(`${key.replace('Taxes', 'Tax').replace('infrastructure', 'infra')}:${sign(val)}`)
-        }
-    }
-    return parts.length > 0 ? parts.join('  ') : '—'
+/** Renders a one-line summary of a ModifierSpec[] (`stat:±amount`, `*` marks one-round). */
+function modSummary(specs: ModifierSpec[]): string {
+    if (specs.length === 0) return '—'
+    return specs
+        .map(s => `${s.stat.replace('Taxes', 'Tax').replace('infrastructure', 'infra').replace('Spend', 'Sp')}:${sign(s.amount)}${s.time === 1 ? '*' : ''}`)
+        .join('  ')
 }
 
 type Hovered = { key: string; y: number }
@@ -50,37 +45,19 @@ const Tooltip = ({ law, deal, event, y }: TooltipProps) => {
         <div className={styles.tooltip} style={{ top: clampedY }}>
             {law && <>
                 <div className={styles.ttAccept}>✓ ACCEPT</div>
-                <div className={styles.ttLine}>{effectSummary(law.acceptEffect)}</div>
-                {law.recurringEffect && (
-                    <div className={styles.ttRecurring}>
-                        rec: {law.recurringEffect.incomeBonus
-                            ? `+${law.recurringEffect.incomeBonus}/round`
-                            : `-${law.recurringEffect.expenseBonus}/round`}
-                    </div>
-                )}
-                {law.charismaEffect && (
-                    <div className={styles.ttCharisma}>charisma: {sign(law.charismaEffect)}</div>
-                )}
+                <div className={styles.ttLine}>{modSummary(law.acceptMods)}</div>
                 <div className={styles.ttReject}>✗ REJECT</div>
-                <div className={styles.ttLine}>{effectSummary(law.rejectEffect)}</div>
+                <div className={styles.ttLine}>{modSummary(law.rejectMods)}</div>
             </>}
 
             {deal && <>
                 <div className={styles.ttAccept}>✓ ACCEPT</div>
-                <div className={styles.ttLine}>{effectSummary(deal.acceptEffect)}</div>
-                {deal.recurringEffect && (
-                    <div className={styles.ttRecurring}>
-                        rec: {deal.recurringEffect.incomeBonus
-                            ? `+${deal.recurringEffect.incomeBonus}/round`
-                            : `-${deal.recurringEffect.expenseBonus}/round`}
-                    </div>
-                )}
-                {deal.charismaEffect && (
-                    <div className={styles.ttCharisma}>charisma: {sign(deal.charismaEffect)}</div>
-                )}
+                <div className={styles.ttLine}>{modSummary(deal.acceptMods)}</div>
                 <div className={styles.ttReject}>✗ REJECT</div>
-                <div className={styles.ttLine}>{effectSummary(deal.rejectEffect)}</div>
-                {deal.riskText && <div className={styles.ttRisk}>⚠ risk: {deal.acceptEffect.risk}</div>}
+                <div className={styles.ttLine}>{modSummary(deal.rejectMods)}</div>
+                {(deal.acceptRisk ?? deal.rejectRisk) !== undefined && (
+                    <div className={styles.ttRisk}>⚠ risk: {deal.acceptRisk ?? deal.rejectRisk}</div>
+                )}
             </>}
 
             {event && <>

@@ -222,7 +222,11 @@ const Log = ({ isActive }: TabProps) => {
 
                 {/* --- Active Legislation Section --- */}
                 {(() => {
-                    const repealable = modifiers.filter(m => m.state === 'active' && isRepealable(m))
+                    // Only surface modifiers that carry display content (a label): lasting
+                    // laws/deals + weird laws. After the Amendment every accepted law leaves a
+                    // 'law-recurring' modifier for its relation contribution, but unlabelled
+                    // ones (normal laws, plain relation deals) are not player-repealable.
+                    const repealable = modifiers.filter(m => m.state === 'active' && isRepealable(m) && getModifierContent(m.id) !== undefined)
                     if (repealable.length === 0) return null
                     return (
                         <section className={styles.activeLegislation}>

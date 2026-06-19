@@ -56,20 +56,20 @@ describe('WEIRD_LAWS asset pool (Story 5-2)', () => {
         expect(unique.size).toBe(ids.length);
     });
 
-    it('test_all_weird_laws_have_empty_reject_effect', () => {
+    it('test_all_weird_laws_have_empty_reject_mods', () => {
         WEIRD_LAWS.forEach(law => {
-            expect(Object.keys(law.rejectEffect)).toHaveLength(0);
+            expect(law.rejectMods).toHaveLength(0);
         });
     });
 
-    it('test_all_weird_laws_have_no_recurring_effect', () => {
+    it('test_all_weird_laws_have_no_recurring_mods', () => {
         WEIRD_LAWS.forEach(law => {
-            expect(law.recurringEffect).toBeUndefined();
+            expect(law.acceptMods.some(m => m.stat === 'roundIncome' || m.stat === 'roundExpense')).toBe(false);
         });
     });
 
     it('test_charisma_effect_laws_have_correct_ids', () => {
-        const charismaLaws = WEIRD_LAWS.filter(l => (l.charismaEffect ?? 0) > 0);
+        const charismaLaws = WEIRD_LAWS.filter(l => l.acceptMods.some(m => m.stat === 'charisma' && m.amount > 0));
         const charismaIds = charismaLaws.map(l => l.id);
         expect(charismaIds).toContain(1004); // Reverse Funeral
         expect(charismaIds).toContain(1012); // Excessive Statues

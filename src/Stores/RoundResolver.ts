@@ -19,7 +19,7 @@ import { getGameDate } from "../Utils/GameDate";
 import { filterLawPool } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
-import { getEffectiveCharisma, getEffectiveRelation, fireOnStartModifiers } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, getEffectiveBudgetStat, fireOnStartModifiers, sumModifiers } from "../Utils/Modifiers";
 import { resolveCitizenPipeline } from "./CitizenHandler";
 import type { CitizenState } from "../types/Citizen";
 import i18n from "../i18n";
@@ -91,21 +91,36 @@ export function resolveRound(state: GameState): RoundResolution {
     //        at the resolving round; ADR-0008 §5). All current recurring content is
     //        immediate+permanent, so the resolving round and round+1 are equivalent. ---
     const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, coupRound);
-    let newTreasury = state.budget.treasury + financials.netChange;
+    // One-shot treasury modifiers (accept-path treasury specs, time:1) bank in the
+    // resolving round (ADR-0008 §9 / Amendment 2026-06-18, AC-7).
+    const treasuryModDelta = sumModifiers(state.gameManagement.modifiers, 'treasury', coupRound);
+    let newTreasury = state.budget.treasury + financials.netChange + treasuryModDelta;
     const recurringGmFields = recurringFieldKeys(financials);
 
+    // Effective budget sliders (base + active law/deal modifier contributions,
+    // re-clamped to the slider range; ADR-0008 §9). All gameplay-effect reads below
+    // (budget→relation, tax penalty, rep-sick health roll, dumb score, citizen
+    // pipeline inputs) use these rather than the raw base sliders (AC-10/AC-11).
+    const mods = state.gameManagement.modifiers;
+    const effSecurity = getEffectiveBudgetStat(state.budget, mods, 'securitySpend', coupRound);
+    const effHealth = getEffectiveBudgetStat(state.budget, mods, 'healthSpend', coupRound);
+    const effInfrastructure = getEffectiveBudgetStat(state.budget, mods, 'infrastructureSpend', coupRound);
+    const effEducation = getEffectiveBudgetStat(state.budget, mods, 'educationSpend', coupRound);
+    const effPeopleTax = getEffectiveBudgetStat(state.budget, mods, 'peopleTaxes', coupRound);
+    const effBusinessTax = getEffectiveBudgetStat(state.budget, mods, 'businessTaxes', coupRound);
+
     // --- 2. Budget → relation effects ---
-    const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current);
+    const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current, mods, coupRound);
 
     // --- 3. Tax penalty + charisma corrosion (Plan G) ---
     const taxMessages: string[] = [];
     let newCharisma = state.gameManagement.charisma.current;
-    if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
+    if (effPeopleTax > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
         newRelations.people = Clamp(newRelations.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
         taxMessages.push(i18n.t('log.tax_penalty_people'));
     }
-    if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
+    if (effBusinessTax > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
         newRelations.business = Clamp(newRelations.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
         taxMessages.push(i18n.t('log.tax_penalty_business'));
@@ -114,7 +129,7 @@ export function resolveRound(state: GameState): RoundResolution {
     // --- 4. Representative status for next round ---
     const prevStatuses = state.gameManagement.representativeStatuses;
     const newRepStatuses: RepStatuses = { military: 'active', business: 'active', people: 'active' };
-    if (state.budget.expenditures.health < GAMESTATE.BUDGET_EFFECTS.HEALTH.LOW) {
+    if (effHealth < GAMESTATE.BUDGET_EFFECTS.HEALTH.LOW) {
         (['military', 'business', 'people'] as Power[])
             .forEach(p => { if (rollChance(0.5)) newRepStatuses[p] = 'sick'; });
     }
@@ -124,7 +139,7 @@ export function resolveRound(state: GameState): RoundResolution {
         newRepStatuses[state.meet.selectedPower] === 'active'
             ? state.meet.selectedPower
             : 'none';
-    const newDumbScore = educationToDumbScore(state.budget.expenditures.education);
+    const newDumbScore = educationToDumbScore(effEducation);
 
     // --- 5. Build log entry ---
     const logLines: string[] = [];
@@ -173,12 +188,12 @@ export function resolveRound(state: GameState): RoundResolution {
             citizenStates: state.citizenStates,
             effectiveRelations: effectiveRelationsForCoup,
             effectiveCharisma,
-            security: state.budget.expenditures.security,
-            infrastructure: state.budget.expenditures.infrastructure,
-            health: state.budget.expenditures.health,
-            education: state.budget.expenditures.education,
-            peopleTax: state.budget.taxes.peopleTaxes,
-            businessTax: state.budget.taxes.businessTaxes,
+            security: effSecurity,
+            infrastructure: effInfrastructure,
+            health: effHealth,
+            education: effEducation,
+            peopleTax: effPeopleTax,
+            businessTax: effBusinessTax,
             currentPeopleRel: newRelations.people,
             currentTreasury: newTreasury,
         });

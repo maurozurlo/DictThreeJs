@@ -1,12 +1,12 @@
-import type { GameState } from "../types/GameState";
+import type { GameState, Modifier, ModifierSpec, ModifierType } from "../types/GameState";
 import i18n from '../i18n';
 import type { Deal } from "../types/Deal";
 import type { Law } from "../types/Law";
 import { Clamp, getRandomFromList, rollChance } from "../Utils/Math";
 import { Power } from "../Constants/Power";
 import { GAMESTATE } from "../Constants/GameState";
-import type { Expenditures, Taxes } from "../types/Budget";
-import { buildRecurringModifier } from "../assets/modifierContent";
+import { buildContentModifier, dealModifierId, lawModifierId } from "../assets/modifierContent";
+import { getEffectiveBudgetStat } from "../Utils/Modifiers";
 import { applyGraceDampening } from "../Utils/GracePeriod";
 
 export type BudgetEffectResult = {
@@ -14,32 +14,47 @@ export type BudgetEffectResult = {
     logMessages: string[];
 };
 
+const RELATION_STATS: ModifierSpec['stat'][] = ['military', 'business', 'people'];
+
+/** Σ of a spec list's relation contributions — drives the law charisma "chose the better option" reward. */
+function sumRelationAmount(specs: ModifierSpec[]): number {
+    return specs.reduce((sum, s) => (RELATION_STATS.includes(s.stat) ? sum + s.amount : sum), 0);
+}
+
 /**
- * Applies end-of-round budget effects to faction relations.
- * Low/high spending thresholds penalise or reward specific factions.
+ * Applies end-of-round budget effects to faction relations. Low/high spending
+ * thresholds penalise or reward specific factions. Reads EFFECTIVE spend
+ * (base + active law/deal slider modifiers) via getEffectiveBudgetStat
+ * (ADR-0008 Amendment 2026-06-18, AC-11).
  */
 export function applyBudgetEffects(
     budget: GameState["budget"],
-    relations: GameState["relations"]["current"]
+    relations: GameState["relations"]["current"],
+    modifiers: Modifier[] = [],
+    round: number = 0,
 ): BudgetEffectResult {
     const { BUDGET_EFFECTS } = GAMESTATE;
     const cur = { ...relations };
     const logMessages: string[] = [];
 
+    const security = getEffectiveBudgetStat(budget, modifiers, 'securitySpend', round);
+    const health = getEffectiveBudgetStat(budget, modifiers, 'healthSpend', round);
+    const infrastructure = getEffectiveBudgetStat(budget, modifiers, 'infrastructureSpend', round);
+
     // Security budget effects — high spending rewards military loyalty
-    if (budget.expenditures.security > BUDGET_EFFECTS.SECURITY.HIGH) {
+    if (security > BUDGET_EFFECTS.SECURITY.HIGH) {
         cur.military = Clamp(cur.military + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         logMessages.push(i18n.t('log.budget_military_high'));
     }
 
     // Health budget effects — high spending rewards people loyalty
-    if (budget.expenditures.health > BUDGET_EFFECTS.HEALTH.HIGH) {
+    if (health > BUDGET_EFFECTS.HEALTH.HIGH) {
         cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         logMessages.push(i18n.t('log.budget_health_high'));
     }
 
     // Infrastructure budget effects — high spending rewards business and people
-    if (budget.expenditures.infrastructure > BUDGET_EFFECTS.INFRASTRUCTURE.HIGH) {
+    if (infrastructure > BUDGET_EFFECTS.INFRASTRUCTURE.HIGH) {
         cur.business = Clamp(cur.business + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         logMessages.push(i18n.t('log.budget_infra_high'));
@@ -50,6 +65,15 @@ export function applyBudgetEffects(
 
 
 
+/**
+ * Resolve a normal law or deal decision (ADR-0008 Amendment 2026-06-18).
+ * - Accept: build ONE modifier from `acceptMods` (relations/charisma/budget time:0
+ *   read-through, treasury time:1 applied in nextRound, recurring income/expense
+ *   time:0). No base mutation — effects are read through the modifier. Deduped by id.
+ * - Reject: apply `rejectMods` as direct base mutations now (one-round equivalents,
+ *   ADR-0008 Option B); no modifier stored (a rejection can't be repealed).
+ * Risk is rolled per path; the law charisma reward stays a base mutation.
+ */
 export function handleDecision({
     type,
     item,
@@ -64,54 +88,39 @@ export function handleDecision({
     set: (partial: Partial<GameState>) => void;
 }) {
     const state = get();
-    const effect = hasAccepted ? item.acceptEffect : item.rejectEffect;
-
-    // Apply treasury changes
-    const newTreasury = state.budget.treasury + (effect.treasury ?? 0);
-
-    // Apply relation changes
-    const newRelations = { ...state.relations.current };
     const round = state.gameManagement.round;
-    Power.forEach((key) => {
-        const delta = effect[key];
-        if (typeof delta === "number") {
-            newRelations[key] = handleRelations({
-                power: key,
-                amount: delta,
-                current: newRelations[key],
-                round,
-            });
-        }
-    });
 
-    // Apply budget expenditure / tax key effects from laws
-    const newExpenditures = { ...state.budget.expenditures };
-    const newTaxes = { ...state.budget.taxes };
-    const expenditureKeys: Expenditures[] = ["security", "health", "infrastructure", "education"];
-    const taxKeys: Taxes[] = ["businessTaxes", "peopleTaxes"];
-    expenditureKeys.forEach((key) => {
-        const delta = effect[key as keyof typeof effect];
-        if (typeof delta === "number") {
-            newExpenditures[key] = Clamp(
-                newExpenditures[key] + delta,
-                GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MIN,
-                GAMESTATE.BUDGET.BOUNDS.EXPENDITURE.MAX
-            );
-        }
-    });
-    taxKeys.forEach((key) => {
-        const delta = effect[key as keyof typeof effect];
-        if (typeof delta === "number") {
-            newTaxes[key] = Clamp(
-                newTaxes[key] + delta,
-                GAMESTATE.BUDGET.BOUNDS.TAX.MIN,
-                GAMESTATE.BUDGET.BOUNDS.TAX.MAX
-            );
-        }
-    });
+    const newRelations = { ...state.relations.current };
+    let newTreasury = state.budget.treasury;
+    let newModifiers = state.gameManagement.modifiers;
 
-    // Handle risk mechanics - random faction penalty on rejection
-    const riskTriggered = effect.risk && rollChance(effect.risk);
+    if (hasAccepted) {
+        const id = type === "law" ? lawModifierId(item.id) : dealModifierId(item.id);
+        const modType: ModifierType = type === "law" ? "law-recurring" : "deal";
+        const modifier = buildContentModifier(id, modType, item.acceptMods, round);
+        newModifiers = state.gameManagement.modifiers.some(m => m.id === modifier.id && m.state === 'active')
+            ? state.gameManagement.modifiers
+            : [...state.gameManagement.modifiers, modifier];
+    } else {
+        for (const spec of item.rejectMods) {
+            if (spec.stat === 'treasury') {
+                newTreasury += spec.amount;
+            } else if (spec.stat === 'military' || spec.stat === 'business' || spec.stat === 'people') {
+                newRelations[spec.stat] = handleRelations({
+                    power: spec.stat,
+                    amount: spec.amount,
+                    current: newRelations[spec.stat],
+                    round,
+                });
+            }
+            // Current content carries no budget/charisma/recurring specs on reject paths.
+        }
+    }
+
+    // Risk mechanics — per path (deals only). Accept-path risk is flavour (riskText);
+    // reject-path risk also fires the random-faction penalty.
+    const riskProb = hasAccepted ? (item as Deal).acceptRisk : (item as Deal).rejectRisk;
+    const riskTriggered = typeof riskProb === 'number' && rollChance(riskProb);
     if (riskTriggered && !hasAccepted) {
         const angryPower = getRandomFromList(Power);
         newRelations[angryPower] = handleRelations({
@@ -122,17 +131,14 @@ export function handleDecision({
         });
     }
 
-    // Charisma scoring for laws: +1 if the player chose the option with better Power outcome
+    // Charisma scoring for laws: +1 if the player chose the option with the better
+    // Power outcome (base mutation — a gameplay reward, not authored content).
     let charismaDelta = 0;
     if (type === "law") {
-        const acceptScore = Power.reduce((sum, p) => sum + ((item.acceptEffect[p] as number | undefined) ?? 0), 0);
-        const rejectScore = Power.reduce((sum, p) => sum + ((item.rejectEffect[p] as number | undefined) ?? 0), 0);
+        const acceptScore = sumRelationAmount(item.acceptMods);
+        const rejectScore = sumRelationAmount(item.rejectMods);
         if (hasAccepted && acceptScore > rejectScore) charismaDelta = 1;
         else if (!hasAccepted && rejectScore > acceptScore) charismaDelta = 1;
-    }
-    // Direct charisma effect declared on the item (deal 20, weird laws handled via actUponLaw)
-    if (hasAccepted) {
-        charismaDelta += (item as { charismaEffect?: number }).charismaEffect ?? 0;
     }
 
     const newCharisma = Clamp(
@@ -141,20 +147,9 @@ export function handleDecision({
         GAMESTATE.CHARISMA.MAX
     );
 
-    // Activate the item's recurring effect on acceptance as a roundIncome/roundExpense
-    // modifier (ADR-0008 §8). Deduped by id: re-encountering a law/deal whose modifier
-    // is already active no-ops (preserving the unique-pool behaviour).
-    const recurringMod = hasAccepted
-        ? buildRecurringModifier(item, type, state.gameManagement.round)
-        : null;
-    const newModifiers = recurringMod
-        && !state.gameManagement.modifiers.some(m => m.id === recurringMod.id && m.state === 'active')
-        ? [...state.gameManagement.modifiers, recurringMod]
-        : state.gameManagement.modifiers;
-
     // Shared state update
     const baseUpdate = {
-        budget: { ...state.budget, treasury: newTreasury, expenditures: newExpenditures, taxes: newTaxes },
+        budget: { ...state.budget, treasury: newTreasury },
         relations: { ...state.relations, current: newRelations },
         gameManagement: {
             ...state.gameManagement,

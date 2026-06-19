@@ -114,8 +114,9 @@ describe('Story 6-2 — recurring effects on the modifier engine', () => {
     it('re-accepting a deal whose modifier is active does not push a second entry', () => {
         const deal = {
             id: 16, text: 'x', acceptText: 'x', rejectText: 'x',
-            acceptEffect: {}, rejectEffect: {}, power: 'business' as const,
-            recurringEffect: { incomeBonus: 15, label: 'deals.recurring.investment_income' },
+            acceptMods: [{ stat: 'roundIncome' as const, amount: 15, time: 0 }], rejectMods: [],
+            power: 'business' as const,
+            label: 'deals.recurring.investment_income',
         };
         useGameStore.setState((s) => ({ deals: { ...s.deals, current: deal, dealDecided: false } }));
         useGameStore.getState().deals.actUponDeal(true);

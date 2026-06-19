@@ -1,6 +1,7 @@
 import type { AdvisorContext, AdvisorLevel, AdvisorOverrideTrigger, AdvisorVerdict } from '../types/Advisor';
 import type { Law } from '../types/Law';
 import type { Deal } from '../types/Deal';
+import type { ModifierSpec } from '../types/GameState';
 import type { Expenditures, Taxes } from '../types/Budget';
 import { ADVISOR_LINES } from '../assets/advisorDialogue';
 import { getRandomFromList } from './Math';
@@ -26,27 +27,33 @@ export function getAdvisorLine(ctx: AdvisorContext): string {
     return getRandomFromList(candidates).key;
 }
 
-export function computeLawVerdict(law: Pick<Law, 'acceptEffect' | 'rejectEffect'>): AdvisorVerdict {
-    const acceptNet = (Object.values(law.acceptEffect) as number[]).reduce((s, v) => s + v, 0);
-    const rejectNet = (Object.values(law.rejectEffect) as number[]).reduce((s, v) => s + v, 0);
-    return acceptNet >= rejectNet ? 'approve' : 'reject';
+/**
+ * Crude net-impact heuristic for advisor verdicts (ADR-0008 Amendment, AC-12):
+ * relations, treasury, recurring income, budget sliders and charisma count
+ * positively; recurring expense counts as a cost. Conflates units exactly as the
+ * pre-Amendment Object.values() sum did — it only needs to order accept vs reject.
+ */
+function netImpact(specs: ModifierSpec[]): number {
+    return specs.reduce((sum, s) => (s.stat === 'roundExpense' ? sum - s.amount : sum + s.amount), 0);
 }
 
-export function computeLawTrigger(law: Pick<Law, 'recurringEffect'>): AdvisorOverrideTrigger | undefined {
-    if ((law.recurringEffect?.incomeBonus ?? 0) > 0) return 'law_recurring_income';
-    if ((law.recurringEffect?.expenseBonus ?? 0) > 0) return 'law_recurring_expense';
+export function computeLawVerdict(law: Pick<Law, 'acceptMods' | 'rejectMods'>): AdvisorVerdict {
+    return netImpact(law.acceptMods) >= netImpact(law.rejectMods) ? 'approve' : 'reject';
+}
+
+export function computeLawTrigger(law: Pick<Law, 'acceptMods'>): AdvisorOverrideTrigger | undefined {
+    if (law.acceptMods.some(s => s.stat === 'roundIncome' && s.amount > 0)) return 'law_recurring_income';
+    if (law.acceptMods.some(s => s.stat === 'roundExpense' && s.amount > 0)) return 'law_recurring_expense';
     return undefined;
 }
 
-export function computeDealVerdict(deal: Pick<Deal, 'acceptEffect' | 'rejectEffect'>): AdvisorVerdict {
-    const acceptNet = (Object.values(deal.acceptEffect) as number[]).reduce((s, v) => s + v, 0);
-    const rejectNet = (Object.values(deal.rejectEffect) as number[]).reduce((s, v) => s + v, 0);
-    return acceptNet >= rejectNet ? 'approve' : 'reject';
+export function computeDealVerdict(deal: Pick<Deal, 'acceptMods' | 'rejectMods'>): AdvisorVerdict {
+    return netImpact(deal.acceptMods) >= netImpact(deal.rejectMods) ? 'approve' : 'reject';
 }
 
-export function computeDealTrigger(deal: Pick<Deal, 'recurringEffect'>): AdvisorOverrideTrigger | undefined {
-    if ((deal.recurringEffect?.incomeBonus ?? 0) > 0) return 'law_recurring_income';
-    if ((deal.recurringEffect?.expenseBonus ?? 0) > 0) return 'law_recurring_expense';
+export function computeDealTrigger(deal: Pick<Deal, 'acceptMods'>): AdvisorOverrideTrigger | undefined {
+    if (deal.acceptMods.some(s => s.stat === 'roundIncome' && s.amount > 0)) return 'law_recurring_income';
+    if (deal.acceptMods.some(s => s.stat === 'roundExpense' && s.amount > 0)) return 'law_recurring_expense';
     return undefined;
 }
 
