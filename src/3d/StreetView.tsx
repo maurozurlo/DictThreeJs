@@ -369,7 +369,7 @@ function StreetView() {
 
     if (activeTab !== Tabs.Street) return null;
 
-    const { buildings, plaza, pedestrians, pedestrianPaths, vehicles, vehiclePaths } = STREET_LAYOUT;
+    const { buildings, pedestrians, pedestrianPaths, vehicles, vehiclePaths } = STREET_LAYOUT;
     const fmt = (n: number) => n.toFixed(1);
 
     return (

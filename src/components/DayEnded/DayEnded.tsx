@@ -8,7 +8,7 @@ import { Modal, ModalCard } from '../Modal/Modal'
 import styles from './DayEnded.module.css'
 import AdvisorButton from '../Advisor/AdvisorButton'
 import { computeDayendedVerdict, computeDayendedTrigger } from '../../Utils/Advisor'
-import { getEffectiveCharisma } from '../../Utils/Modifiers'
+import { getEffectiveCharisma, getEffectiveRelation } from '../../Utils/Modifiers'
 import { Icon } from '../Icon/Icon'
 
 const DayEnded = () => {
@@ -27,15 +27,19 @@ const DayEnded = () => {
     // Clicking Continue calls nextRound() with graceTaken=true → certain coup.
     const coupArmed = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const coupWarningFaction = useGameStore(s => s.gameManagement.coupWarningFaction)
-    const currentRelations = useGameStore(s => s.relations.current)
     const currentCharisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
+    const effectiveRelations = useGameStore(s => ({
+        military: getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round),
+        business: getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round),
+        people:   getEffectiveRelation(s.relations.current.people,   s.gameManagement.modifiers, 'people',   s.gameManagement.round),
+    }))
     const nextRound = useGameStore(s => s.gameManagement.nextRound)
 
     // Re-evaluate whether the threat is still live at round-end.
     // If the player eliminated the faction this round, the warning is no longer valid.
     const coupStillActive = coupArmed
         && coupWarningFaction !== null
-        && currentRelations[coupWarningFaction] >= GAMESTATE.COUP.RELATION_THRESHOLD
+        && effectiveRelations[coupWarningFaction as keyof typeof effectiveRelations] >= GAMESTATE.COUP.RELATION_THRESHOLD
         && currentCharisma <= GAMESTATE.COUP.CHARISMA_THRESHOLD
 
     const treasury = useGameStore(s => s.budget.treasury)

@@ -6,13 +6,14 @@
  *  - AC-10: getEffectiveBudgetStat adds tax modifiers to the base (clamped 0–100)
  *  - AC-11: getEffectiveBudgetStat / applyBudgetEffects read effective expenditures
  *  - AC-12: Advisor verdict/trigger read acceptMods/rejectMods
+ *  - AC-13: getEffectiveRelation shows accepted relation mods; base stays immutable
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useGameStore } from '../../../src/Stores/GameState';
 import { applyBudgetEffects } from '../../../src/Stores/EffectHandler';
 import { buildContentModifier } from '../../../src/assets/modifierContent';
-import { getEffectiveBudgetStat } from '../../../src/Utils/Modifiers';
+import { getEffectiveBudgetStat, getEffectiveRelation } from '../../../src/Utils/Modifiers';
 import { computeLawVerdict, computeLawTrigger } from '../../../src/Utils/Advisor';
 import { GAMESTATE } from '../../../src/Constants/GameState';
 import type { GameState } from '../../../src/types/GameState';
@@ -136,6 +137,40 @@ describe('AC-11 — gameplay sites read effective expenditures', () => {
         const mods = [buildContentModifier('laws.1', 'law-recurring', [{ stat: 'securitySpend', amount: 5, time: 0 }], 1)];
         const boosted = applyBudgetEffects(budget, { military: 0, business: 0, people: 0 }, mods, 1);
         expect(boosted.newRelations.military).toBe(1);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// AC-13 — relation acceptMods visible via getEffectiveRelation after law accept
+// ---------------------------------------------------------------------------
+
+describe('AC-13 — relation acceptMods visible via getEffectiveRelation after law accept', () => {
+    beforeEach(() => {
+        useGameStore.getState().gameManagement.setPhase('start');
+        useGameStore.setState(() => ({ citizens: [], citizenStates: [] }));
+    });
+
+    it('effective military relation increases after accepting a relation law', () => {
+        const law: Law = {
+            id: 9200,
+            power: 'military',
+            acceptMods: [{ stat: 'military', amount: 2, time: 0 }],
+            rejectMods: [],
+        };
+
+        // Arrange: note the base relation before accepting
+        const baseMilitary = useGameStore.getState().relations.current.military;
+
+        // Act: accept the law
+        useGameStore.setState((s) => ({ law: { ...s.law, current: law, lawDecided: false } }));
+        useGameStore.getState().law.actUponLaw(true);
+
+        // Assert: base relation is unchanged (ADR-0008 — base is immutable for relation mods)
+        expect(useGameStore.getState().relations.current.military).toBe(baseMilitary);
+
+        // Assert: getEffectiveRelation reflects the modifier contribution
+        const { modifiers, round } = useGameStore.getState().gameManagement;
+        expect(getEffectiveRelation(baseMilitary, modifiers, 'military', round)).toBe(baseMilitary + 2);
     });
 });
 

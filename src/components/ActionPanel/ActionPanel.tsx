@@ -9,7 +9,7 @@ import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { getCharismaLeft } from '../../Utils/UI'
-import { getEffectiveCharisma } from '../../Utils/Modifiers'
+import { getEffectiveCharisma, getEffectiveRelation } from '../../Utils/Modifiers'
 import { useTranslation } from 'react-i18next'
 import { useRoundTimer } from '../../Hooks/useRoundTimer'
 import { useDebugControls } from '../../Hooks/useDebugControls'
@@ -19,7 +19,15 @@ const ActionPanel = () => {
     useDebugControls()
     const { t } = useTranslation()
     const activeTab = useGameStore((s) => s.tabs.activeTab)
-    const relations = useGameStore((s) => s.relations.current)
+    const militaryRelation = useGameStore((s) =>
+        getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round)
+    )
+    const businessRelation = useGameStore((s) =>
+        getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round)
+    )
+    const peopleRelation = useGameStore((s) =>
+        getEffectiveRelation(s.relations.current.people, s.gameManagement.modifiers, 'people', s.gameManagement.round)
+    )
     const money = useGameStore((s) => s.budget.treasury)
     const displayedPopulation = useGameStore((s) => s.displayedPopulation)
     const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
@@ -51,15 +59,15 @@ const ActionPanel = () => {
                 <div className={styles.respectPowers}>
                     <div className={styles.respectItem}>
                         <Icon type='business' />
-                        <span className={styles.respectNumber}>{relations.business}</span>
+                        <span className={styles.respectNumber}>{businessRelation}</span>
                     </div>
                     <div className={styles.respectItem}>
                         <Icon type='military' />
-                        <span className={styles.respectNumber}>{relations.military}</span>
+                        <span className={styles.respectNumber}>{militaryRelation}</span>
                     </div>
                     <div className={styles.respectItem}>
                         <Icon type='people' />
-                        <span className={styles.respectNumber}>{relations.people}</span>
+                        <span className={styles.respectNumber}>{peopleRelation}</span>
                     </div>
                 </div>
 

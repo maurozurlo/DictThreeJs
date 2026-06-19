@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { Modal, ModalCard } from '../Modal/Modal'
 import { recordGameEnd } from '../../Utils/MetaProgress'
-import { getEffectiveCharisma } from '../../Utils/Modifiers'
+import { getEffectiveCharisma, getEffectiveRelation } from '../../Utils/Modifiers'
 import type { EndingId, TierRank } from '../../types/MetaProgress'
 import { Icon } from '../Icon/Icon'
 
@@ -95,7 +95,11 @@ const EndScreen = () => {
     const endCause = useGameStore(s => s.gameManagement.endCause)
     const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
     const meetCounts = useGameStore(s => s.gameManagement.meetCounts)
-    const relations = useGameStore(s => s.relations.current)
+    const relations = useGameStore(s => ({
+        military: getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round),
+        business: getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round),
+        people:   getEffectiveRelation(s.relations.current.people,   s.gameManagement.modifiers, 'people',   s.gameManagement.round),
+    }))
     const treasury = useGameStore(s => s.budget.treasury)
     const stats = useGameStore(s => s.stats)
     const setPhase = useGameStore(s => s.gameManagement.setPhase)
@@ -162,7 +166,7 @@ const EndScreen = () => {
                             {(['military', 'business', 'people'] as Power[]).map(p => (
                                 <div key={p} className={styles.factionCol}>
                                     <span className={styles.factionName}>{menuT(`power.${p}`)}</span>
-                                    <span className={styles.factionFinal} style={{ color: relationColor(relations[p]) }}>{relations[p]}</span>
+                                    <span className={styles.factionFinal} style={{ color: relationColor(relations[p as keyof typeof relations]) }}>{relations[p as keyof typeof relations]}</span>
                                     <span className={styles.factionSub}>↑{factionPeakLow(stats.relationsHistory, p).peak} ↓{factionPeakLow(stats.relationsHistory, p).low}</span>
                                 </div>
                             ))}
