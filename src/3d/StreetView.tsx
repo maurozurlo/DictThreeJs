@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useFrame, useLoader } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
 import { Tabs } from '../types/Tabs';
 import { STREET_LAYOUT } from '../assets/streetLayout';
+import { useStreetLayout } from '../Hooks/useStreetLayout';
+import type { ResolvedPlacement } from '../types/WorldLayout';
 import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
 import { getVisibleModifiers } from '../Utils/Modifiers';
 import type { CitizenState } from '../types/Citizen';
@@ -276,6 +279,37 @@ function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
 }
 
 // ---------------------------------------------------------------------------
+// PlacedObject — renders one IDE/IPL instance from the world layout system
+// ---------------------------------------------------------------------------
+
+function PlacedObject({ placement }: { placement: ResolvedPlacement }) {
+    const { asset, pos, rot, scale } = placement;
+    const group = useLoader(OBJLoader, `/${asset}`);
+
+    const cloned = useMemo(() => {
+        const g = group.clone(true);
+        g.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+                child.material = new THREE.MeshStandardMaterial({
+                    color: PLAZA_COLOR,
+                    wireframe: true,
+                });
+            }
+        });
+        return g;
+    }, [group]);
+
+    const quaternion = useMemo(
+        () => new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]),
+        [rot],
+    );
+
+    return (
+        <primitive object={cloned} position={pos} quaternion={quaternion} scale={scale} />
+    );
+}
+
+// ---------------------------------------------------------------------------
 // StreetView
 // ---------------------------------------------------------------------------
 
@@ -297,6 +331,7 @@ function StreetView() {
     const modifiers       = useGameStore((s) => s.gameManagement.modifiers);
     const round           = useGameStore((s) => s.gameManagement.round);
     const visibleModifiers = useMemo(() => getVisibleModifiers(modifiers, round), [modifiers, round]);
+    const placements      = useStreetLayout();
     const citizens        = useGameStore((s) => s.citizens);
     const citizenStates   = useGameStore((s) => s.citizenStates);
     const health          = useGameStore((s) => s.budget.expenditures.health);
@@ -366,11 +401,14 @@ function StreetView() {
                 );
             })}
 
-            {/* Plaza slab */}
-            <mesh position={[plaza.position.x, plaza.scale.y / 2, plaza.position.z]}>
-                <boxGeometry args={[plaza.scale.x, plaza.scale.y, plaza.scale.z]} />
-                <meshStandardMaterial color={PLAZA_COLOR} />
-            </mesh>
+            {/* IDE/IPL placed objects — OBJ reference meshes rendered as wireframe */}
+            <Suspense fallback={null}>
+                {placements.map((p) =>
+                    p.asset !== null
+                        ? <PlacedObject key={p.instanceId} placement={p} />
+                        : null
+                )}
+            </Suspense>
 
             {/* Atmospheric pedestrians */}
             {pedestrians.map((ped) => {
