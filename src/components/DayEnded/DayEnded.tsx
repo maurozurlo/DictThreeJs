@@ -28,11 +28,17 @@ const DayEnded = () => {
     const coupArmed = useGameStore(s => s.gameManagement.coupArmedLastRound)
     const coupWarningFaction = useGameStore(s => s.gameManagement.coupWarningFaction)
     const currentCharisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
-    const effectiveRelations = useGameStore(s => ({
-        military: getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round),
-        business: getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round),
-        people:   getEffectiveRelation(s.relations.current.people,   s.gameManagement.modifiers, 'people',   s.gameManagement.round),
-    }))
+    // Select each relation as a primitive — a selector returning a fresh object
+    // literal breaks useSyncExternalStore's Object.is check and causes an infinite
+    // re-render loop. Assemble the object in the component body instead.
+    const militaryRelation = useGameStore(s => getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round))
+    const businessRelation = useGameStore(s => getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round))
+    const peopleRelation = useGameStore(s => getEffectiveRelation(s.relations.current.people, s.gameManagement.modifiers, 'people', s.gameManagement.round))
+    const effectiveRelations = {
+        military: militaryRelation,
+        business: businessRelation,
+        people: peopleRelation,
+    }
     const nextRound = useGameStore(s => s.gameManagement.nextRound)
 
     // Re-evaluate whether the threat is still live at round-end.

@@ -95,11 +95,17 @@ const EndScreen = () => {
     const endCause = useGameStore(s => s.gameManagement.endCause)
     const charisma = useGameStore(s => getEffectiveCharisma(s.gameManagement.charisma.current, s.gameManagement.modifiers, s.gameManagement.round))
     const meetCounts = useGameStore(s => s.gameManagement.meetCounts)
-    const relations = useGameStore(s => ({
-        military: getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round),
-        business: getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round),
-        people:   getEffectiveRelation(s.relations.current.people,   s.gameManagement.modifiers, 'people',   s.gameManagement.round),
-    }))
+    // Select each relation as a primitive — a selector returning a fresh object
+    // literal breaks useSyncExternalStore's Object.is check and causes an infinite
+    // re-render loop. Assemble the object in the component body instead.
+    const militaryRelation = useGameStore(s => getEffectiveRelation(s.relations.current.military, s.gameManagement.modifiers, 'military', s.gameManagement.round))
+    const businessRelation = useGameStore(s => getEffectiveRelation(s.relations.current.business, s.gameManagement.modifiers, 'business', s.gameManagement.round))
+    const peopleRelation = useGameStore(s => getEffectiveRelation(s.relations.current.people, s.gameManagement.modifiers, 'people', s.gameManagement.round))
+    const relations = {
+        military: militaryRelation,
+        business: businessRelation,
+        people: peopleRelation,
+    }
     const treasury = useGameStore(s => s.budget.treasury)
     const stats = useGameStore(s => s.stats)
     const setPhase = useGameStore(s => s.gameManagement.setPhase)
