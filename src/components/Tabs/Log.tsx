@@ -12,6 +12,7 @@ import { useGameStore } from '../../Stores/GameState'
 import { getGameDate } from '../../Utils/GameDate'
 import { useMemo, useState } from 'react'
 import { dumbifyText } from '../../Utils/String'
+import { formatLogEvent } from '../../Utils/RoundLog'
 import type { Modifier } from '../../types/GameState'
 import { computeRepealTier, sumModifiers } from '../../Utils/Modifiers'
 import { getModifierContent, isRepealable } from '../../assets/modifierContent'
@@ -128,7 +129,9 @@ const RepealCard = ({ mod, treasury, repealTakenThisRound, repeal }: RepealCardP
 // ---------------------------------------------------------------------------
 
 const Log = ({ isActive }: TabProps) => {
-    const { t } = useTranslation()
+    // Load every namespace the log can reference so structured events translate at
+    // render regardless of which content they point at (ADR-0011).
+    const { t } = useTranslation(['menu', 'laws', 'deals', 'periodic_events', 'daily_events', 'mini_challenges'])
     const { t: dailyEventT } = useTranslation('daily_events')
     const { t: periodicT } = useTranslation('periodic_events')
     const { t: miniT } = useTranslation('mini_challenges')
@@ -253,9 +256,17 @@ const Log = ({ isActive }: TabProps) => {
                 {logEntries.slice().reverse().map((entry, i) => (
                     <Card key={i} className={styles.logEntry}>
                         <Typography variant='h2'>{entry.date}</Typography>
-                        {entry.lines.map((msg, j) => (
-                            <Typography key={j} variant='body'>{msg}</Typography>
-                        ))}
+                        {entry.events.map((event, j) => {
+                            const { headline, effects } = formatLogEvent(event, t, dumbScore)
+                            return (
+                                <div key={j} className={styles.logEventRow}>
+                                    <Typography variant='body'>{headline}</Typography>
+                                    {effects && (
+                                        <Typography variant='body' className={styles.logEventEffects}>{effects}</Typography>
+                                    )}
+                                </div>
+                            )
+                        })}
                     </Card>
                 ))}
                 {logEntries.length === 0 && (

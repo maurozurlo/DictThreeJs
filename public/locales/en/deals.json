@@ -5,116 +5,138 @@
         "outcome": "Outcome",
         "no_current_deals": "No current deals",
         "1": {
+            "name": "Foreign Spy’s Offer",
             "text": "A foreign spy offers you classified intelligence in exchange for $50M. Accept the deal?",
             "acceptText": "You accepted the spy's offer. Gained valuable intelligence but risked exposure.",
             "rejectText": "You rejected the spy's offer. Played it safe but missed potential advantage.",
             "riskText": "The intelligence was a trap! Foreign relations suffer."
         },
         "2": {
+            "name": "Businessman’s Donation",
             "text": "A wealthy businessman offers you a $80M 'donation' for favorable policies. Accept?",
             "acceptText": "You accepted the businessman's donation. Treasury boosted but ethics questioned.",
             "rejectText": "You rejected the bribe. Maintained integrity but missed financial opportunity."
         },
         "3": {
+            "name": "Counter-Intelligence Op",
             "text": "Intelligence reports suggest a rival is planning against you. Spend $40M on counter-intelligence?",
             "acceptText": "You invested in counter-intelligence. Potential threats neutralized.",
             "rejectText": "You chose not to investigate. Saved money but remained vulnerable.",
             "riskText": "Your rival successfully undermined your position with the military!"
         },
         "4": {
+            "name": "Celebrity Endorsement",
             "text": "A popular celebrity wants to endorse your regime for $30M. Worth the investment?",
             "acceptText": "You hired the celebrity endorsement. Public image improved significantly.",
             "rejectText": "You declined the celebrity deal. Saved money but missed PR opportunity."
         },
         "5": {
+            "name": "Black-Market Arms",
             "text": "Black market arms dealers offer you military equipment for $60M. Make the deal?",
             "acceptText": "You purchased black market weapons. Military strength increased but reputation damaged.",
             "rejectText": "You refused the illegal arms deal. Maintained legitimacy but missed military advantage."
         },
         "6": {
+            "name": "Weapons Contract",
             "text": "A weapons manufacturer offers top-tier military equipment for $70M. Equip your forces?",
             "acceptText": "You signed the procurement contract. Your troops now have the best gear money can buy.",
             "rejectText": "You declined the purchase. The generals grumble about falling behind."
         },
         "7": {
+            "name": "Secret Defence Pact",
             "text": "A foreign general proposes a secret mutual defence pact worth $50M in aid. Sign it?",
             "acceptText": "You signed the pact. Military prestige grows and coffers swell.",
             "rejectText": "You declined but kept dialogue open. The generals respect the caution.",
             "riskText": "The pact leaks to the press — your allies are furious at the exposure!"
         },
         "8": {
+            "name": "Private Security Deal",
             "text": "A conglomerate wants to operate private security forces using state facilities for $30M/year. Allow it?",
             "acceptText": "You authorised the arrangement. Business thrives, though the brass resents the competition.",
             "rejectText": "You rejected the privatisation. The military relaxes; business sulks."
         },
         "9": {
+            "name": "Tech Monopoly",
             "text": "A tech giant offers $100M for an exclusive 10-year operating monopoly. Grant it?",
             "acceptText": "You granted the monopoly. The treasury swells, but citizens feel the squeeze.",
             "rejectText": "You declined to hand over the market. Business is disappointed."
         },
         "10": {
+            "name": "Oil Drilling Rights",
             "text": "A foreign oil company wants national drilling rights in exchange for $120M. Accept?",
             "acceptText": "You signed the drilling concession. The money flows in while the military eyes foreign boots on the ground.",
             "rejectText": "You declined the deal. Business tips its hat at your restraint."
         },
         "11": {
+            "name": "Broadcast Rights",
             "text": "A media conglomerate offers $40M for exclusive national broadcast rights. Grant them?",
             "acceptText": "You handed over the airwaves. Revenues rise, but the public notices the narrowing of voices.",
             "rejectText": "You kept the media landscape open. The people appreciate the free press."
         },
         "12": {
+            "name": "Shipping Monopoly",
             "text": "A shipping magnate proposes routing all trade through national ports for a 15% cut. Agree?",
             "acceptText": "You struck the deal. Freight money pours in and business is satisfied.",
             "rejectText": "You rejected the arrangement. The magnate is annoyed.",
             "riskText": "The shipping cartel sabotages a key port installation in retaliation!"
         },
         "13": {
+            "name": "NGO Aid Program",
             "text": "A humanitarian NGO offers to distribute aid nationwide — at a modest $20M logistical cost. Allow it?",
             "acceptText": "You opened the borders to aid workers. Citizens see a leader who cares.",
             "rejectText": "You blocked the NGO. Suspicion of foreign influence keeps the people wary."
         },
         "14": {
+            "name": "Union Endorsement",
             "text": "A union federation will endorse your government in exchange for $60M in labour reforms. Accept?",
             "acceptText": "You funded the reforms. Workers rally to your banner, though the generals raise an eyebrow.",
             "rejectText": "You rebuffed the unions. The military approves; the workers are bitter."
         },
         "15": {
+            "name": "Cultural Festival",
             "text": "A foreign government offers to co-fund a national cultural festival at no direct cost. Allow it?",
             "acceptText": "The streets fill with celebration. Citizens and business cheer the spectacle.",
             "rejectText": "You politely declined. Better to avoid owing favours.",
             "riskText": "The festival becomes a flashpoint — organisers are using it to rally opposition!"
         },
         "16": {
+            "name": "Investment Contract",
             "text": "A foreign consortium offers a long-term investment contract: $40M upfront plus dividends every round. Sign it?",
             "acceptText": "The contract is signed. Foreign capital flows in — and the dividends will keep coming.",
             "rejectText": "You declined. The consortium takes its capital elsewhere."
         },
         "17": {
+            "name": "Standing Arms Contract",
             "text": "An arms supplier offers a standing contract: modern equipment for $30M plus ongoing maintenance fees. Accept?",
             "acceptText": "The generals are delighted with their new hardware — but the maintenance bills arrive every round.",
             "rejectText": "You refused. The generals grumble about ageing equipment."
         },
         "18": {
+            "name": "Humanitarian Aid Pact",
             "text": "An international NGO proposes a humanitarian aid program your government would co-fund each round. Support it?",
             "acceptText": "The program launches. The people love it; business resents the recurring cost.",
             "rejectText": "You turned the NGO away. The people will remember."
         },
         "19": {
+            "name": "Miniature Cattle Patent",
             "text": "The International Agricultural Consortium offers you a miniature cattle patent. Tiny cows, endless bureaucracy.",
             "acceptText": "Tiny cows are shipped in. Somehow profitable. The people are uneasy.",
             "rejectText": "You decline the miniature cattle. Some opportunities are better left unmilked."
         },
         "20": {
+            "name": "Giant Mouse Landmark",
             "text": "The Technology Ministry proposes the world's largest computer mouse as a national landmark. Cost: $50M.",
             "acceptText": "The mouse is commissioned. Tourists will come for decades. Your approval rating rises inexplicably.",
             "rejectText": "You cancel the mouse. The ministry sulks, but the treasury thanks you."
         },
         "21": {
+            "name": "Pigeon Surveillance",
             "text": "Military intelligence proposes replacing surveillance drones with trained pigeons. Cheaper. Flappier.",
             "acceptText": "Pigeons are deployed. The military feels powerful. The people are suspicious.",
             "rejectText": "You veto the pigeon program. Drone procurement continues as normal."
         },
         "22": {
+            "name": "Hostage Demands",
             "text": "The neighboring country has detained several of your citizens after a diplomatic incident. Accept their demands?",
             "acceptText": "You comply. Your citizens are returned. The military is less than thrilled.",
             "rejectText": "You refuse. Trade sanctions follow. Costly, but the military respects the call."

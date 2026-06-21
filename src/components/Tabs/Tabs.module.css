@@ -82,6 +82,16 @@
         margin-bottom: 1rem;
     }
 
+    .logEventRow {
+        margin-bottom: 0.4rem;
+    }
+
+    .logEventEffects {
+        padding-left: 1.5rem;
+        opacity: 0.75;
+        font-style: italic;
+    }
+
     h2 {
         color: var(--accent-color);
     }

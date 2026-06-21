@@ -10,9 +10,49 @@ import type { DailyEvent } from "./DailyEvent";
 import type { Difficulty } from "../Constants/GameState";
 import type { Citizen, CitizenState } from "./Citizen";
 
+/**
+ * Actual resource changes recorded on a log event (ADR-0011). All optional;
+ * only non-zero stats are stored (see buildDeltas). These are the *applied*
+ * values — already grace-dampened where the engine dampens — never re-derived
+ * from law/deal content at render time.
+ */
+export interface LogDeltas {
+    military?: number;
+    business?: number;
+    people?: number;
+    charisma?: number;
+    treasury?: number;
+}
+
+/**
+ * One recorded happening within a round (ADR-0011). Stored structured and
+ * translated at render so the whole log re-localises on language switch.
+ * - `key` is the headline i18n key (menu ns, e.g. `log.met_with`, `log.event.*`).
+ * - `params` are literal interpolation values; `refParams` are values that are
+ *   themselves menu-ns i18n keys (e.g. `power.military`, `meet.dialogue`),
+ *   resolved at render.
+ * - `labelKey`/`labelNs` name a content item (law/deal/event title) in another
+ *   namespace, interpolated as `{{label}}`; `dumb` dumbifies it (daily events).
+ * - `deltas` are one-time changes applied this round; `ongoing` is the per-round
+ *   contribution an accepted law/deal modifier adds (rendered with a "/round" tag).
+ */
+export interface LogEvent {
+    key: string;
+    /** Namespace for `key` when the headline lives outside the menu ns (e.g. meet
+     *  result texts in the `meet` ns). Defaults to the menu ns. */
+    keyNs?: string;
+    params?: Record<string, string | number>;
+    refParams?: Record<string, string>;
+    labelKey?: string;
+    labelNs?: string;
+    dumb?: boolean;
+    deltas?: LogDeltas;
+    ongoing?: LogDeltas;
+}
+
 export type RoundLogEntry = {
     date: string;
-    lines: string[];
+    events: LogEvent[];
 };
 
 export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue' | 'advisor_1' | 'advisor_2' | 'advisor_3';
@@ -190,6 +230,13 @@ export type GameState = {
          * derived stats (charisma/relations) and per-round income/expense in real time.
          */
         modifiers: Modifier[];
+        /**
+         * Structured log events captured as the player acts during the round
+         * (ADR-0011). resolveRound() drains this into the round's RoundLogEntry
+         * and nextRound() resets it to []. Holds the actual applied deltas so the
+         * log never re-derives effects from content.
+         */
+        pendingLog: LogEvent[];
         /** True after a repeal is used this round; reset to false in nextRound(). */
         repealTakenThisRound: boolean;
         /** True when the START of this round yielded a 'grace' coup result (armed but survived).

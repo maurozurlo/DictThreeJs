@@ -5,116 +5,138 @@
         "outcome": "Resultado",
         "no_current_deals": "No hay acuerdos actuales",
         "1": {
+            "name": "Oferta del espía extranjero",
             "text": "Un espía extranjero te ofrece información clasificada a cambio de $50M. ¿Aceptar el trato?",
             "acceptText": "Aceptaste la oferta del espía. Obtuviste información valiosa, pero corriste el riesgo de ser descubierto.",
             "rejectText": "Rechazaste la oferta del espía. Jugaste a lo seguro, pero perdiste una posible ventaja.",
             "riskText": "¡La información era una trampa! Las relaciones exteriores se deterioran."
         },
         "2": {
+            "name": "Donación del empresario",
             "text": "Un empresario adinerado te ofrece una 'donación' de $80M a cambio de políticas favorables. ¿Aceptar?",
             "acceptText": "Aceptaste la donación del empresario. Las arcas del Estado aumentaron, pero tu ética quedó en duda.",
             "rejectText": "Rechazaste el soborno. Mantuviste la integridad, pero perdiste una oportunidad financiera."
         },
         "3": {
+            "name": "Operación de contrainteligencia",
             "text": "Informes de inteligencia sugieren que un rival planea en tu contra. ¿Gastar $40M en contrainteligencia?",
             "acceptText": "Invertiste en contrainteligencia. Las posibles amenazas fueron neutralizadas.",
             "rejectText": "Decidiste no investigar. Ahorraste dinero, pero quedaste vulnerable.",
             "riskText": "¡Tu rival logró socavar tu posición dentro del ejército!"
         },
         "4": {
+            "name": "Respaldo de celebridad",
             "text": "Una celebridad popular quiere apoyar tu régimen por $30M. ¿Vale la inversión?",
             "acceptText": "Contrataste el apoyo de la celebridad. La imagen pública mejoró considerablemente.",
             "rejectText": "Rechazaste el acuerdo con la celebridad. Ahorraste dinero, pero perdiste una oportunidad de relaciones públicas."
         },
         "5": {
+            "name": "Armas del mercado negro",
             "text": "Vendedores de armas del mercado negro te ofrecen equipamiento militar por $60M. ¿Hacer el trato?",
             "acceptText": "Compraste armas en el mercado negro. La fuerza militar aumentó, pero tu reputación se vio afectada.",
             "rejectText": "Rechazaste el trato ilegal de armas. Mantuviste la legitimidad, pero perdiste una ventaja militar."
         },
         "6": {
+            "name": "Contrato de armamento",
             "text": "Un fabricante de armas ofrece equipamiento militar de primer nivel por $70M. ¿Equipar tus fuerzas?",
             "acceptText": "Firmaste el contrato de adquisición. Tus tropas ahora tienen el mejor equipo que el dinero puede comprar.",
             "rejectText": "Rechazaste la compra. Los generales murmuran sobre el atraso."
         },
         "7": {
+            "name": "Pacto de defensa secreto",
             "text": "Un general extranjero propone un pacto secreto de defensa mutua con $50M en ayuda. ¿Firmarlo?",
             "acceptText": "Firmaste el pacto. El prestigio militar crece y las arcas se llenan.",
             "rejectText": "Lo rechazaste pero mantuviste el diálogo. Los generales respetan la cautela.",
             "riskText": "¡El pacto se filtra a la prensa — tus aliados están furiosos por la exposición!"
         },
         "8": {
+            "name": "Acuerdo de seguridad privada",
             "text": "Un consorcio quiere operar fuerzas de seguridad privadas usando instalaciones estatales por $30M/año. ¿Permitirlo?",
             "acceptText": "Autorizaste el acuerdo. Los negocios prosperan, aunque los militares resienten la competencia.",
             "rejectText": "Rechazaste la privatización. Los militares se relajan; los empresarios refunfuñan."
         },
         "9": {
+            "name": "Monopolio tecnológico",
             "text": "Una empresa tecnológica ofrece $100M por un monopolio exclusivo de operación de 10 años. ¿Concederlo?",
             "acceptText": "Otorgaste el monopolio. El tesoro se llena, pero los ciudadanos sienten la presión.",
             "rejectText": "Rechazaste entregar el mercado. Los empresarios están decepcionados."
         },
         "10": {
+            "name": "Derechos de perforación petrolera",
             "text": "Una empresa petrolera extranjera quiere derechos de extracción nacionales a cambio de $120M. ¿Aceptar?",
             "acceptText": "Firmaste la concesión de perforación. El dinero fluye mientras los militares vigilan con recelo.",
             "rejectText": "Rechazaste el trato. Los empresarios aplauden tu contención."
         },
         "11": {
+            "name": "Derechos de transmisión",
             "text": "Un conglomerado mediático ofrece $40M por derechos exclusivos de transmisión nacional. ¿Concederlos?",
             "acceptText": "Cediste las ondas aéreas. Los ingresos suben, pero el público nota el estrechamiento de voces.",
             "rejectText": "Mantuviste el panorama mediático abierto. El pueblo aprecia la prensa libre."
         },
         "12": {
+            "name": "Monopolio naviero",
             "text": "Un magnate naviero propone enrutar todo el comercio por puertos nacionales a cambio de un 15%. ¿Acordar?",
             "acceptText": "Cerraste el trato. El dinero del flete entra y los empresarios están satisfechos.",
             "rejectText": "Rechazaste el arreglo. El magnate está molesto.",
             "riskText": "¡El cartel naviero sabotea una instalación portuaria clave en represalia!"
         },
         "13": {
+            "name": "Programa de ayuda de ONG",
             "text": "Una ONG humanitaria ofrece distribuir ayuda a nivel nacional con un coste logístico de $20M. ¿Permitirlo?",
             "acceptText": "Abriste las fronteras a los trabajadores humanitarios. Los ciudadanos ven a un líder que se preocupa.",
             "rejectText": "Bloqueaste a la ONG. La sospecha de influencia extranjera mantiene al pueblo en guardia."
         },
         "14": {
+            "name": "Respaldo sindical",
             "text": "Una federación sindical respaldará tu gobierno a cambio de $60M en reformas laborales. ¿Aceptar?",
             "acceptText": "Financiaste las reformas. Los trabajadores se agrupan bajo tu bandera, aunque los generales arquean una ceja.",
             "rejectText": "Rechazaste a los sindicatos. Los militares aprueban; los trabajadores están amargados."
         },
         "15": {
+            "name": "Festival cultural",
             "text": "Un gobierno extranjero ofrece cofinanciar un festival cultural nacional sin coste directo. ¿Permitirlo?",
             "acceptText": "Las calles se llenan de celebración. Ciudadanos y empresarios aplauden el espectáculo.",
             "rejectText": "Rechazaste educadamente. Es mejor no deber favores.",
             "riskText": "¡El festival se convierte en un detonante — los organizadores lo usan para movilizar a la oposición!"
         },
         "16": {
+            "name": "Contrato de inversión",
             "text": "Un consorcio extranjero ofrece un contrato de inversión a largo plazo: $40M por adelantado más dividendos cada ronda. ¿Firmarlo?",
             "acceptText": "El contrato está firmado. El capital extranjero fluye — y los dividendos seguirán llegando.",
             "rejectText": "Rechazaste la oferta. El consorcio lleva su capital a otra parte."
         },
         "17": {
+            "name": "Contrato permanente de armas",
             "text": "Un proveedor de armas ofrece un contrato permanente: equipamiento moderno por $30M más cuotas de mantenimiento continuas. ¿Aceptar?",
             "acceptText": "Los generales están encantados con su nuevo arsenal — pero las facturas de mantenimiento llegan cada ronda.",
             "rejectText": "Te negaste. Los generales se quejan del equipamiento anticuado."
         },
         "18": {
+            "name": "Pacto de ayuda humanitaria",
             "text": "Una ONG internacional propone un programa de ayuda humanitaria que tu gobierno cofinanciaría cada ronda. ¿Apoyarlo?",
             "acceptText": "El programa se pone en marcha. El pueblo lo adora; las empresas resienten el coste recurrente.",
             "rejectText": "Rechazaste a la ONG. El pueblo lo recordará."
         },
         "19": {
+            "name": "Patente de ganado miniatura",
             "text": "El Consorcio Agrícola Internacional te ofrece una patente de ganado miniatura. Vacas diminutas, burocracia infinita.",
             "acceptText": "Las vacas diminutas llegan al país. Resultan rentables. El pueblo está inquieto.",
             "rejectText": "Rechazas el ganado miniatura. Algunas oportunidades es mejor no ordeñarlas."
         },
         "20": {
+            "name": "Monumento del ratón gigante",
             "text": "El Ministerio de Tecnología propone construir el ratón de ordenador más grande del mundo como monumento nacional. Coste: 50 M.",
             "acceptText": "El ratón se encarga. Llegará el turismo para generaciones. Tu popularidad sube inexplicablemente.",
             "rejectText": "Cancelas el ratón. El ministerio refunfuña, pero el erario te lo agradece."
         },
         "21": {
+            "name": "Vigilancia con palomas",
             "text": "Inteligencia militar propone sustituir los drones de vigilancia por palomas entrenadas. Más baratas. Más aleteo.",
             "acceptText": "Las palomas son desplegadas. El ejército se siente poderoso. El pueblo está suspicaz.",
             "rejectText": "Vetas el programa de palomas. La adquisición de drones continúa con normalidad."
         },
         "22": {
+            "name": "Exigencias por rehenes",
             "text": "El país vecino ha detenido a varios de tus ciudadanos tras un incidente diplomático. ¿Aceptas sus exigencias?",
             "acceptText": "Cedes. Tus ciudadanos regresan. El ejército no está muy contento.",
             "rejectText": "Te niegas. Siguen sanciones comerciales. Caro, pero el ejército respeta la decisión."

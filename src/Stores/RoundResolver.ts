@@ -9,7 +9,7 @@ import { GAMESTATE } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { LAWS } from "../assets/laws";
 import { WEIRD_LAWS } from "../assets/weirdLaws";
-import type { GameState, GameStats, RoundLogEntry, Modifier } from "../types/GameState";
+import type { GameState, GameStats, LogEvent, RoundLogEntry, Modifier } from "../types/GameState";
 import type { Power } from "../types/Power";
 import { applyBudgetEffects } from "./EffectHandler";
 import { calculateRoundFinancials, type RoundFinancials } from "./BudgetHandler";
@@ -22,7 +22,6 @@ import { educationToDumbScore } from "../Utils/String";
 import { getEffectiveCharisma, getEffectiveRelation, getEffectiveBudgetStat, fireOnStartModifiers, sumModifiers } from "../Utils/Modifiers";
 import { resolveCitizenPipeline } from "./CitizenHandler";
 import type { CitizenState } from "../types/Citizen";
-import i18n from "../i18n";
 
 type CoupResult = ReturnType<typeof checkCoup>;
 type RepStatuses = Record<Power, 'active' | 'sick' | 'eliminated'>;
@@ -109,21 +108,21 @@ export function resolveRound(state: GameState): RoundResolution {
     const effPeopleTax = getEffectiveBudgetStat(state.budget, mods, 'peopleTaxes', coupRound);
     const effBusinessTax = getEffectiveBudgetStat(state.budget, mods, 'businessTaxes', coupRound);
 
-    // --- 2. Budget → relation effects ---
-    const { newRelations, logMessages } = applyBudgetEffects(state.budget, state.relations.current, mods, coupRound);
+    // --- 2. Budget → relation effects (structured events, ADR-0011) ---
+    const { newRelations, logEvents: budgetEvents } = applyBudgetEffects(state.budget, state.relations.current, mods, coupRound);
 
     // --- 3. Tax penalty + charisma corrosion (Plan G) ---
-    const taxMessages: string[] = [];
+    const taxEvents: LogEvent[] = [];
     let newCharisma = state.gameManagement.charisma.current;
     if (effPeopleTax > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
         newRelations.people = Clamp(newRelations.people - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-        taxMessages.push(i18n.t('log.tax_penalty_people'));
+        taxEvents.push({ key: 'log.tax_penalty_people', deltas: { people: -1, charisma: -1 } });
     }
     if (effBusinessTax > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
         newRelations.business = Clamp(newRelations.business - 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
-        taxMessages.push(i18n.t('log.tax_penalty_business'));
+        taxEvents.push({ key: 'log.tax_penalty_business', deltas: { business: -1, charisma: -1 } });
     }
 
     // --- 4. Representative status for next round ---
@@ -141,35 +140,31 @@ export function resolveRound(state: GameState): RoundResolution {
             : 'none';
     const newDumbScore = educationToDumbScore(effEducation);
 
-    // --- 5. Build log entry ---
-    const logLines: string[] = [];
-    if (state.law.lawDecided && state.law.current && state.law.lastLawOutcome !== null) {
-        const verbKey = state.law.lastLawOutcome ? 'log.passed_law' : 'log.rejected_law';
-        const lawLabelKey = state.law.current.type === 'weird'
-            ? `laws.weird.${state.law.current.id}.label`
-            : `laws.labels.${state.law.current.id}`;
-        logLines.push(i18n.t(verbKey, { label: i18n.t(lawLabelKey, { ns: 'laws' }) }));
-    }
-    if (state.deals.dealDecided && state.deals.current) {
-        logLines.push(i18n.t(state.deals.lastDealAccepted ? 'log.accepted_deal' : 'log.declined_deal'));
-    }
-    if (state.meet.actionTaken.taken && state.meet.actionTaken.power && state.meet.actionTaken.type) {
-        logLines.push(i18n.t('log.met_with', {
-            power: i18n.t(`power.${state.meet.actionTaken.power}`),
-            action: i18n.t(`meet.${state.meet.actionTaken.type}`),
-        }));
-    }
-    logLines.push(i18n.t('log.financials', { income: financials.totalIncome, expenses: financials.expenses }));
-    logLines.push(...logMessages, ...taxMessages);
-    if (newCharisma > state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_up'));
-    else if (newCharisma < state.gameManagement.charisma.current) logLines.push(i18n.t('log.charisma_down'));
+    // --- 5. Build log entry (ADR-0011) ---
+    // The player's own actions (law/deal/meet/event/shop) were captured with their
+    // ACTUAL deltas into pendingLog as they happened this round; the resolution-time
+    // consequences (budget, tax, financials, coup, news) are appended here. The vague
+    // "charisma up/down" line is gone — per-action charisma deltas are now explicit.
+    const coupEvents: LogEvent[] = [];
     if (coupResult.outcome === 'yellow-warning') {
-        logLines.push(i18n.t('log.coup_yellow_warning', { faction: i18n.t(`power.${coupResult.faction}`) }));
+        coupEvents.push({ key: 'log.coup_yellow_warning', refParams: { faction: `power.${coupResult.faction}` } });
     }
     if (coupResult.outcome === 'grace') {
-        logLines.push(i18n.t('log.coup_red_warning', { faction: i18n.t(`power.${coupResult.faction}`) }));
+        coupEvents.push({ key: 'log.coup_red_warning', refParams: { faction: `power.${coupResult.faction}` } });
     }
-    const newLog: RoundLogEntry[] = [...state.log, { date: getGameDate(state.gameManagement.round), lines: logLines }];
+    const dailyEvents: LogEvent[] = state.dailyEvent.current
+        ? [{ key: 'log.event.daily', labelKey: state.dailyEvent.current.key, labelNs: 'daily_events', dumb: true }]
+        : [];
+
+    const events: LogEvent[] = [
+        ...state.gameManagement.pendingLog,
+        ...budgetEvents,
+        ...taxEvents,
+        { key: 'log.financials', params: { income: financials.totalIncome, expenses: financials.expenses } },
+        ...coupEvents,
+        ...dailyEvents,
+    ];
+    const newLog: RoundLogEntry[] = [...state.log, { date: getGameDate(state.gameManagement.round), events }];
 
     // --- 6. Increment round, onStart pass, draw next daily event ---
     const newRound = state.gameManagement.round + 1;

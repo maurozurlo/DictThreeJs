@@ -41,35 +41,35 @@ describe('applyBudgetEffects', () => {
         const result = applyBudgetEffects(makeBudget(), neutralRelations);
 
         expect(result.newRelations).toEqual(neutralRelations);
-        expect(result.logMessages).toHaveLength(0);
+        expect(result.logEvents).toHaveLength(0);
     });
 
     it('low security has no effect on military relations', () => {
         const result = applyBudgetEffects(makeBudget({ security: 2 }), neutralRelations);
 
         expect(result.newRelations.military).toBe(0);
-        expect(result.logMessages).not.toContain('log.budget_military_low');
+        expect(result.logEvents.map(e => e.key)).not.toContain('log.budget_military_low');
     });
 
     it('high security pleases the military by 1', () => {
         const result = applyBudgetEffects(makeBudget({ security: 8 }), neutralRelations);
 
         expect(result.newRelations.military).toBe(1);
-        expect(result.logMessages).toContain('log.budget_military_high');
+        expect(result.logEvents.map(e => e.key)).toContain('log.budget_military_high');
     });
 
     it('low health has no effect on people relations', () => {
         const result = applyBudgetEffects(makeBudget({ health: 2 }), neutralRelations);
 
         expect(result.newRelations.people).toBe(0);
-        expect(result.logMessages).not.toContain('log.budget_health_low');
+        expect(result.logEvents.map(e => e.key)).not.toContain('log.budget_health_low');
     });
 
     it('high health pleases the people by 1', () => {
         const result = applyBudgetEffects(makeBudget({ health: 8 }), neutralRelations);
 
         expect(result.newRelations.people).toBe(1);
-        expect(result.logMessages).toContain('log.budget_health_high');
+        expect(result.logEvents.map(e => e.key)).toContain('log.budget_health_high');
     });
 
     it('low infrastructure has no effect on business or people relations', () => {
@@ -77,7 +77,7 @@ describe('applyBudgetEffects', () => {
 
         expect(result.newRelations.business).toBe(0);
         expect(result.newRelations.people).toBe(0);
-        expect(result.logMessages).not.toContain('log.budget_infra_low');
+        expect(result.logEvents.map(e => e.key)).not.toContain('log.budget_infra_low');
     });
 
     it('high infrastructure pleases business and people by 1 each', () => {
@@ -85,7 +85,7 @@ describe('applyBudgetEffects', () => {
 
         expect(result.newRelations.business).toBe(1);
         expect(result.newRelations.people).toBe(1);
-        expect(result.logMessages).toContain('log.budget_infra_high');
+        expect(result.logEvents.map(e => e.key)).toContain('log.budget_infra_high');
     });
 
     it('low budget leaves relations unchanged even at near-minimum', () => {
@@ -104,7 +104,7 @@ describe('applyBudgetEffects', () => {
         );
 
         expect(result.newRelations).toEqual(neutralRelations);
-        expect(result.logMessages).toHaveLength(0);
+        expect(result.logEvents).toHaveLength(0);
     });
 
     it('does not mutate the input relations object', () => {
@@ -440,6 +440,71 @@ describe('handleDecision', () => {
             handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
 
             expect(lastSetArg().gameManagement.charisma.current).toBe(0);
+        });
+    });
+
+    // ADR-0011: every decision pushes a structured LogEvent carrying the ACTUAL
+    // applied deltas (grace-dampened on reject; the ongoing modifier effect on accept).
+    describe('Log event capture (ADR-0011)', () => {
+        const pendingLog = (arg: any) => arg.gameManagement.pendingLog;
+
+        it('records the dampened reject delta, not the authored amount', () => {
+            mockState.gameManagement!.round = 1; // round 1 → ×0.25 grace dampening
+            const law: Law = {
+                id: 5,
+                power: 'military',
+                acceptMods: [],
+                rejectMods: [{ stat: 'military', amount: -4, time: 1 }],
+            };
+
+            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+
+            const arg = lastSetArg();
+            // -4 dampened to round(-4 * 0.25) = -1 — the value actually applied to base.
+            expect(arg.relations.current.military).toBe(-1);
+            const event = pendingLog(arg).at(-1);
+            expect(event.key).toBe('log.rejected_law');
+            expect(event.labelKey).toBe('laws.labels.5');
+            expect(event.deltas.military).toBe(-1);
+        });
+
+        it('records an accepted law as ongoing relations + one-time treasury/charisma reward', () => {
+            const law: Law = {
+                id: 1,
+                power: 'military',
+                acceptMods: [
+                    { stat: 'treasury', amount: -50, time: 1 },
+                    { stat: 'military', amount: 2, time: 0 },
+                    { stat: 'business', amount: -1, time: 0 },
+                ],
+                rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
+            };
+
+            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
+
+            const event = pendingLog(lastSetArg()).at(-1);
+            expect(event.key).toBe('log.passed_law');
+            expect(event.ongoing).toEqual({ military: 2, business: -1 });
+            // One-time: the time:1 treasury that banks this round + the +1 charisma reward.
+            expect(event.deltas).toEqual({ treasury: -50, charisma: 1 });
+        });
+
+        it('records a deal with its per-deal name label', () => {
+            const deal: Deal = {
+                id: 9,
+                text: 't', acceptText: 'a', rejectText: 'r',
+                acceptMods: [{ stat: 'treasury', amount: 80, time: 1 }, { stat: 'business', amount: 2, time: 0 }],
+                rejectMods: [],
+            };
+
+            handleDecision({ type: 'deal', item: deal, hasAccepted: true, get: mockGet, set: mockSet });
+
+            const event = pendingLog(lastSetArg()).at(-1);
+            expect(event.key).toBe('log.accepted_deal_named');
+            expect(event.labelKey).toBe('deals.9.name');
+            expect(event.labelNs).toBe('deals');
+            expect(event.deltas).toEqual({ treasury: 80 });
+            expect(event.ongoing).toEqual({ business: 2 });
         });
     });
 

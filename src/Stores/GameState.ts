@@ -7,7 +7,7 @@ import { GAMESTATE } from "../Constants/GameState";
 import type { Difficulty } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
-import type { EndCause, GameState, ShopItemId } from "../types/GameState";
+import type { EndCause, GameState, LogDeltas, LogEvent, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
@@ -27,6 +27,14 @@ import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems"
 import { SECRET_ROOMS } from "../assets/secretRooms";
 import { buildStartState, buildLoadedState } from "./StateFactory";
 import { resolveRound, buildRoundStats, pickNextLaw } from "./RoundResolver";
+import { buildDeltas } from "../Utils/RoundLog";
+
+/** Relation before/after → LogDeltas diff bag (ADR-0011). */
+const relationDiff = (before: Record<Power, number>, after: Record<Power, number>): LogDeltas => ({
+    military: after.military - before.military,
+    business: after.business - before.business,
+    people: after.people - before.people,
+});
 
 
 export const INITIAL_STATE = ({ set, get }: {
@@ -248,6 +256,16 @@ export const INITIAL_STATE = ({ set, get }: {
                     // mutations (ADR-0008 class A); this entry enforces the "one weird law
                     // active" slot, drives Street View, and is a repealable ledger entry.
                     const weirdMod = buildWeirdLawModifier(current.id, round);
+                    // Weird-law effects are immediate base mutations — diff them for the log (ADR-0011).
+                    const weirdLogEvent: LogEvent = {
+                        key: 'log.passed_law',
+                        labelKey: `laws.weird.${current.id}.label`, labelNs: 'laws',
+                        deltas: buildDeltas({
+                            ...relationDiff(state.relations.current, newRelations),
+                            treasury: newTreasury - state.budget.treasury,
+                            charisma: newCharisma - state.gameManagement.charisma.current,
+                        }),
+                    };
                     set((s) => ({
                         budget: { ...s.budget, treasury: newTreasury },
                         relations: { ...s.relations, current: newRelations },
@@ -257,6 +275,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             modifiers: s.gameManagement.modifiers.some(m => m.id === weirdMod.id && m.state === 'active')
                                 ? s.gameManagement.modifiers
                                 : [...s.gameManagement.modifiers, weirdMod],
+                            pendingLog: [...s.gameManagement.pendingLog, weirdLogEvent],
                         },
                         law: {
                             ...s.law,
@@ -271,6 +290,13 @@ export const INITIAL_STATE = ({ set, get }: {
                     }));
                 } else {
                     set((s) => ({
+                        gameManagement: {
+                            ...s.gameManagement,
+                            pendingLog: [...s.gameManagement.pendingLog, {
+                                key: 'log.rejected_law',
+                                labelKey: `laws.weird.${current.id}.label`, labelNs: 'laws',
+                            } as LogEvent],
+                        },
                         law: {
                             ...s.law,
                             lastLawOutcome: false,
@@ -372,6 +398,11 @@ export const INITIAL_STATE = ({ set, get }: {
             });
 
             const periodicDelta = effect.treasury ?? 0;
+            const periodicLogEvent: LogEvent = {
+                key: 'log.event.event_resolved',
+                labelKey: `${event.id}.title`, labelNs: 'periodic_events',
+                deltas: buildDeltas({ ...relationDiff(state.relations.current, newRelations), treasury: periodicDelta }),
+            };
             set((s) => ({
                 periodicEvent: {
                     ...s.periodicEvent,
@@ -385,6 +416,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.gameManagement,
                     currentRoundExtraIncome: periodicDelta > 0 ? s.gameManagement.currentRoundExtraIncome + periodicDelta : s.gameManagement.currentRoundExtraIncome,
                     currentRoundExtraExpenses: periodicDelta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(periodicDelta) : s.gameManagement.currentRoundExtraExpenses,
+                    pendingLog: [...s.gameManagement.pendingLog, periodicLogEvent],
                 },
             }));
         },
@@ -435,6 +467,10 @@ export const INITIAL_STATE = ({ set, get }: {
             }
 
             const challengeDelta = effect.treasury ?? 0;
+            const challengeLogEvent: LogEvent = {
+                key: accepted ? 'log.event.opportunity_accepted' : 'log.event.opportunity_rejected',
+                deltas: buildDeltas({ ...relationDiff(state.relations.current, newRelations), treasury: challengeDelta }),
+            };
             set((s) => ({
                 miniChallenge: {
                     ...s.miniChallenge,
@@ -449,6 +485,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     ...s.gameManagement,
                     currentRoundExtraIncome: challengeDelta > 0 ? s.gameManagement.currentRoundExtraIncome + challengeDelta : s.gameManagement.currentRoundExtraIncome,
                     currentRoundExtraExpenses: challengeDelta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(challengeDelta) : s.gameManagement.currentRoundExtraExpenses,
+                    pendingLog: [...s.gameManagement.pendingLog, challengeLogEvent],
                 },
             }));
         },
@@ -465,9 +502,15 @@ export const INITIAL_STATE = ({ set, get }: {
                 if (state.shop.advisorLevel >= targetLevel) return;
                 const cost = ADVISOR_COSTS[item];
                 if (state.budget.treasury < cost) return;
+                const advisorEvent: LogEvent = {
+                    key: 'log.event.hired_advisor',
+                    params: { level: targetLevel },
+                    deltas: { treasury: -cost },
+                };
                 set((s) => ({
                     budget: { ...s.budget, treasury: s.budget.treasury - cost },
                     shop: { ...s.shop, advisorLevel: targetLevel },
+                    gameManagement: { ...s.gameManagement, pendingLog: [...s.gameManagement.pendingLog, advisorEvent] },
                 }));
             } else if (item === 'statue') {
                 // Owned count is derived from the modifiers ledger — single source of truth.
@@ -475,6 +518,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 const shopItem = STATUES[statueCount];
                 if (!shopItem) return; // all tiers owned
                 if (state.budget.treasury < shopItem.price) return;
+                const statueEvent: LogEvent = {
+                    key: 'log.event.bought_statue',
+                    deltas: { treasury: -shopItem.price },
+                    ongoing: buildDeltas({ charisma: shopItem.mods.reduce((a, m) => m.stat === 'charisma' ? a + m.amount : a, 0) }),
+                };
                 set((s) => ({
                     budget: { ...s.budget, treasury: s.budget.treasury - shopItem.price },
                     gameManagement: {
@@ -483,6 +531,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             ...s.gameManagement.modifiers,
                             buildShopModifier(shopItem, state.gameManagement.round),
                         ],
+                        pendingLog: [...s.gameManagement.pendingLog, statueEvent],
                     },
                 }));
             } else {
@@ -491,9 +540,15 @@ export const INITIAL_STATE = ({ set, get }: {
                 if (state.budget.treasury < mediaPackage.price) return;
                 const newFrozen = new Set(state.shop.frozenFactions);
                 newFrozen.add(mediaPackage.faction);
+                const mediaEvent: LogEvent = {
+                    key: 'log.event.bought_media',
+                    refParams: { faction: `power.${mediaPackage.faction}` },
+                    deltas: { treasury: -mediaPackage.price },
+                };
                 set((s) => ({
                     budget: { ...s.budget, treasury: s.budget.treasury - mediaPackage.price },
                     shop: { ...s.shop, frozenFactions: newFrozen },
+                    gameManagement: { ...s.gameManagement, pendingLog: [...s.gameManagement.pendingLog, mediaEvent] },
                 }));
             }
         },
@@ -549,6 +604,7 @@ export const INITIAL_STATE = ({ set, get }: {
         timerStartedAt: null,
         timerPausedAt: null,
         modifiers: [],
+        pendingLog: [],
         repealTakenThisRound: false,
         coupArmedLastRound: false,
         coupWarningFaction: null,
@@ -604,6 +660,14 @@ export const INITIAL_STATE = ({ set, get }: {
                     GAMESTATE.CHARISMA.MIN,
                     GAMESTATE.CHARISMA.MAX
                 );
+                // The skipped-meeting penalty was previously silent — record it (ADR-0011).
+                const timeoutEvent: LogEvent = {
+                    key: 'log.event.timeout',
+                    deltas: buildDeltas({
+                        ...relationDiff(state.relations.current, newRelations),
+                        charisma: newCharisma - state.gameManagement.charisma.current,
+                    }),
+                };
                 set((s) => ({
                     relations: { ...s.relations, current: newRelations },
                     gameManagement: {
@@ -614,6 +678,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         lastRoundExpenses: financials.expenses,
                         lastRoundRecurringIncome: financials.recurringIncome,
                         lastRoundRecurringExpenses: financials.recurringExpenses,
+                        pendingLog: [...s.gameManagement.pendingLog, timeoutEvent],
                     },
                 }));
             } else {
@@ -834,6 +899,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         representativeStatuses: newRepStatuses,
                         dumbScore: newDumbScore,
                         modifiers: modifiersAfterOnStart,
+                        pendingLog: [],
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
@@ -889,6 +955,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     representativeStatuses: newRepStatuses,
                     dumbScore: newDumbScore,
                     modifiers: modifiersAfterOnStart,
+                    pendingLog: [],
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
                 tabs: {
@@ -985,6 +1052,22 @@ export const INITIAL_STATE = ({ set, get }: {
                 && !state.law.lawDecided
                 && state.law.current?.power === power
                 && state.law.current?.type !== 'weird';
+            // Record the meeting using its result text as the headline (ADR-0011) — it
+            // already names the faction, the relation change and any treasury cost, and it
+            // explains zero-effect outcomes (e.g. inconclusive dialogue) that a deltas line
+            // alone would leave blank. The effects line carries the charisma delta, which
+            // the meet result texts omit. Only logged when the action went through (e.g. a
+            // bribe with insufficient funds is a no-op).
+            const { power: _omitPower, angryPower, ...meetLiteralParams } = resultText.params ?? {};
+            const meetRefParams: Record<string, string> = { power: `power.${power}` };
+            if (angryPower !== undefined) meetRefParams.angryPower = `power.${angryPower}`;
+            const meetEvent: LogEvent = {
+                key: resultText.key,
+                keyNs: 'meet',
+                params: meetLiteralParams,
+                refParams: meetRefParams,
+                deltas: buildDeltas({ charisma: newCharisma - state.gameManagement.charisma.current }),
+            };
             return {
                 meet: {
                     ...state.meet,
@@ -1007,6 +1090,9 @@ export const INITIAL_STATE = ({ set, get }: {
                         [power]: state.gameManagement.meetCounts[power] + 1,
                     } : state.gameManagement.meetCounts,
                     representativeStatuses: newRepStatuses,
+                    pendingLog: actionTaken
+                        ? [...state.gameManagement.pendingLog, meetEvent]
+                        : state.gameManagement.pendingLog,
                 },
                 law: lawVoided
                     ? { ...state.law, lawDecided: true }

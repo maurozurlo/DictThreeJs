@@ -1,5 +1,4 @@
-import type { GameState, Modifier, ModifierSpec, ModifierType } from "../types/GameState";
-import i18n from '../i18n';
+import type { GameState, LogDeltas, LogEvent, Modifier, ModifierSpec, ModifierType } from "../types/GameState";
 import type { Deal } from "../types/Deal";
 import type { Law } from "../types/Law";
 import { Clamp, getRandomFromList, rollChance } from "../Utils/Math";
@@ -8,10 +7,12 @@ import { GAMESTATE } from "../Constants/GameState";
 import { buildContentModifier, dealModifierId, lawModifierId } from "../assets/modifierContent";
 import { getEffectiveBudgetStat } from "../Utils/Modifiers";
 import { applyGraceDampening } from "../Utils/GracePeriod";
+import { buildDeltas } from "../Utils/RoundLog";
 
 export type BudgetEffectResult = {
     newRelations: GameState["relations"]["current"];
-    logMessages: string[];
+    /** Structured log events for budget→relation effects (ADR-0011). */
+    logEvents: LogEvent[];
 };
 
 const RELATION_STATS: ModifierSpec['stat'][] = ['military', 'business', 'people'];
@@ -19,6 +20,18 @@ const RELATION_STATS: ModifierSpec['stat'][] = ['military', 'business', 'people'
 /** Σ of a spec list's relation contributions — drives the law charisma "chose the better option" reward. */
 function sumRelationAmount(specs: ModifierSpec[]): number {
     return specs.reduce((sum, s) => (RELATION_STATS.includes(s.stat) ? sum + s.amount : sum), 0);
+}
+
+/** Sum the listed stats out of a spec list into a LogDeltas bag (for log display only). */
+function pickSpecDeltas(specs: ModifierSpec[], stats: readonly (keyof LogDeltas)[]): LogDeltas {
+    const d: LogDeltas = {};
+    for (const s of specs) {
+        if ((stats as readonly string[]).includes(s.stat)) {
+            const k = s.stat as keyof LogDeltas;
+            d[k] = (d[k] ?? 0) + s.amount;
+        }
+    }
+    return d;
 }
 
 /**
@@ -35,7 +48,7 @@ export function applyBudgetEffects(
 ): BudgetEffectResult {
     const { BUDGET_EFFECTS } = GAMESTATE;
     const cur = { ...relations };
-    const logMessages: string[] = [];
+    const logEvents: LogEvent[] = [];
 
     const security = getEffectiveBudgetStat(budget, modifiers, 'securitySpend', round);
     const health = getEffectiveBudgetStat(budget, modifiers, 'healthSpend', round);
@@ -44,23 +57,23 @@ export function applyBudgetEffects(
     // Security budget effects — high spending rewards military loyalty
     if (security > BUDGET_EFFECTS.SECURITY.HIGH) {
         cur.military = Clamp(cur.military + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push(i18n.t('log.budget_military_high'));
+        logEvents.push({ key: 'log.budget_military_high', deltas: { military: 1 } });
     }
 
     // Health budget effects — high spending rewards people loyalty
     if (health > BUDGET_EFFECTS.HEALTH.HIGH) {
         cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push(i18n.t('log.budget_health_high'));
+        logEvents.push({ key: 'log.budget_health_high', deltas: { people: 1 } });
     }
 
     // Infrastructure budget effects — high spending rewards business and people
     if (infrastructure > BUDGET_EFFECTS.INFRASTRUCTURE.HIGH) {
         cur.business = Clamp(cur.business + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
         cur.people = Clamp(cur.people + 1, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-        logMessages.push(i18n.t('log.budget_infra_high'));
+        logEvents.push({ key: 'log.budget_infra_high', deltas: { business: 1, people: 1 } });
     }
 
-    return { newRelations: cur, logMessages };
+    return { newRelations: cur, logEvents };
 }
 
 
@@ -147,6 +160,51 @@ export function handleDecision({
         GAMESTATE.CHARISMA.MAX
     );
 
+    // --- Log event (ADR-0011): record the ACTUAL applied effect, not the authored
+    //     content. On accept the lasting effect lives in the modifier (ongoing);
+    //     the only one-time hits are the time:1 treasury and the charisma reward.
+    //     On reject the relation/treasury base mutations are diffed post-dampening. ---
+    const relDiff: LogDeltas = {
+        military: newRelations.military - state.relations.current.military,
+        business: newRelations.business - state.relations.current.business,
+        people: newRelations.people - state.relations.current.people,
+    };
+    const treasuryDiff = newTreasury - state.budget.treasury;
+
+    let logEvent: LogEvent;
+    if (type === 'law') {
+        const law = item as Law;
+        const labelKey = `laws.labels.${law.id}`;
+        if (hasAccepted) {
+            logEvent = {
+                key: 'log.passed_law', labelKey, labelNs: 'laws',
+                deltas: buildDeltas({ treasury: pickSpecDeltas(law.acceptMods, ['treasury']).treasury, charisma: charismaDelta }),
+                ongoing: buildDeltas(pickSpecDeltas(law.acceptMods, ['military', 'business', 'people', 'charisma'])),
+            };
+        } else {
+            logEvent = {
+                key: 'log.rejected_law', labelKey, labelNs: 'laws',
+                deltas: buildDeltas({ ...relDiff, treasury: treasuryDiff, charisma: charismaDelta }),
+            };
+        }
+    } else {
+        const deal = item as Deal;
+        // Every deal now has a short name (deals.<id>.name); show it in the log.
+        const labelKey = `deals.${deal.id}.name`;
+        if (hasAccepted) {
+            logEvent = {
+                key: 'log.accepted_deal_named', labelKey, labelNs: 'deals',
+                deltas: buildDeltas({ treasury: pickSpecDeltas(deal.acceptMods, ['treasury']).treasury }),
+                ongoing: buildDeltas(pickSpecDeltas(deal.acceptMods, ['military', 'business', 'people', 'charisma'])),
+            };
+        } else {
+            logEvent = {
+                key: 'log.declined_deal_named', labelKey, labelNs: 'deals',
+                deltas: buildDeltas({ ...relDiff, treasury: treasuryDiff }),
+            };
+        }
+    }
+
     // Shared state update
     const baseUpdate = {
         budget: { ...state.budget, treasury: newTreasury },
@@ -155,6 +213,7 @@ export function handleDecision({
             ...state.gameManagement,
             charisma: { ...state.gameManagement.charisma, current: newCharisma },
             modifiers: newModifiers,
+            pendingLog: [...(state.gameManagement.pendingLog ?? []), logEvent],
         },
     };
 
