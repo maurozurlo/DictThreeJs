@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
@@ -282,31 +282,93 @@ function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
 // PlacedObject — renders one IDE/IPL instance from the world layout system
 // ---------------------------------------------------------------------------
 
-function PlacedObject({ placement }: { placement: ResolvedPlacement }) {
-    const { asset, pos, rot, scale } = placement;
-    const group = useLoader(OBJLoader, `/${asset}`);
+/**
+ * Readable solid colour per model, keyed on name fragments. Used until the GLB
+ * re-export carries UVs and the IDE references an external texture (see below).
+ */
+function paletteFor(modelName: string): string {
+    const n = modelName;
+    if (n.includes('road') || n.includes('pothole')) return ROAD_COLOR;
+    if (n.includes('plaza')) return PLAZA_COLOR;
+    if (n.includes('tree')) return '#4a7a3a';
+    if (n.includes('skybox') || n.includes('skyline')) return '#8fa6c4';
+    if (n.includes('flag')) return '#9a3a3a';
+    if (n.includes('graffiti') || n.includes('billboard')) return '#b07a3a';
+    if (n.includes('bld') || n.includes('building') || n.includes('scaffolding')) return BUILDING_COLOR;
+    if (n.includes('tank') || n.includes('cannon') || n.includes('gunnest') || n.includes('guard') ||
+        n.includes('barricade') || n.includes('searchlight') || n.includes('camera_pole')) return '#5a5e4a';
+    return '#9a9088';
+}
 
-    const cloned = useMemo(() => {
-        const g = group.clone(true);
-        g.traverse((child) => {
-            if (child instanceof THREE.Mesh) {
-                child.material = new THREE.MeshStandardMaterial({
-                    color: PLAZA_COLOR,
-                    wireframe: true,
-                });
-            }
-        });
+/** Apply one shared material to every mesh in a cloned glTF scene + enable shadows. */
+function applyMaterial(root: THREE.Object3D, material: THREE.Material): void {
+    root.traverse((child) => {
+        const mesh = child as THREE.Mesh;
+        if (mesh.isMesh) {
+            mesh.material = material;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+        }
+    });
+}
+
+function placementQuaternion(rot: ResolvedPlacement['rot']): THREE.Quaternion {
+    return new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]);
+}
+
+/**
+ * The GLBs already render Y-up (the Max exporter adds a root −90° X node, matching
+ * convert_maxdump.mjs), so no extra rotation is applied here. But the Max scene is
+ * in millimetres, so every GLB carries a 0.001 mm→m mesh-node scale, rendering 1000×
+ * too small. We multiply the placement scale by 1000 to undo it (net 1000 × 0.001 = 1).
+ * Proper source fix: set Max System Units to metres and re-export, then drop GLB_UNIT_FIX.
+ */
+const GLB_UNIT_FIX = 1000;
+
+function fixedScale(scale: ResolvedPlacement['scale']): [number, number, number] {
+    return [scale[0] * GLB_UNIT_FIX, scale[1] * GLB_UNIT_FIX, scale[2] * GLB_UNIT_FIX];
+}
+
+/** GLB rendered with a flat palette colour (no texture available yet). */
+function PlacedObjectSolid({ placement }: { placement: ResolvedPlacement }) {
+    const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
+
+    const object = useMemo(() => {
+        const g = (gltf.scene as THREE.Group).clone(true);
+        applyMaterial(g, new THREE.MeshStandardMaterial({
+            color: paletteFor(placement.modelName), roughness: 0.9, metalness: 0,
+        }));
         return g;
-    }, [group]);
+    }, [gltf, placement.modelName]);
 
-    const quaternion = useMemo(
-        () => new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]),
-        [rot],
-    );
+    const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
+    const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);
+    return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
+}
 
-    return (
-        <primitive object={cloned} position={pos} quaternion={quaternion} scale={scale} />
-    );
+/** GLB rendered with an EXTERNAL diffuse texture (public/textures/*) over its UVs. */
+function PlacedObjectTextured({ placement }: { placement: ResolvedPlacement }) {
+    const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
+    const texture = useLoader(THREE.TextureLoader, `/${placement.texture}`);
+
+    const object = useMemo(() => {
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.flipY = false; // glTF UV convention
+        const g = (gltf.scene as THREE.Group).clone(true);
+        applyMaterial(g, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0 }));
+        return g;
+    }, [gltf, texture]);
+
+    const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
+    const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);
+    return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
+}
+
+function PlacedObject({ placement }: { placement: ResolvedPlacement }) {
+    // `texture` is fixed per instance (data-driven), so this branch never flips at runtime.
+    return placement.texture
+        ? <PlacedObjectTextured placement={placement} />
+        : <PlacedObjectSolid placement={placement} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -380,20 +442,22 @@ function StreetView() {
                 <meshStandardMaterial color={GROUND_COLOR} />
             </mesh>
 
-            {/* Road strip */}
-            <mesh position={[0, -0.04, -8]} rotation={[-Math.PI / 2, 0, 0]}>
-                <planeGeometry args={[7, 28]} />
-                <meshStandardMaterial color={ROAD_COLOR} />
-            </mesh>
+            {/* Road strip + box-building placeholders — debug-only reference now that the
+                IPL/IDE GLBs (env_roads, env_bld_*) provide the real geometry. */}
+            {debugEnabled && (
+                <mesh position={[0, -0.04, -8]} rotation={[-Math.PI / 2, 0, 0]}>
+                    <planeGeometry args={[7, 28]} />
+                    <meshStandardMaterial color={ROAD_COLOR} />
+                </mesh>
+            )}
 
-            {/* Buildings */}
-            {buildings.map((b) => {
+            {debugEnabled && buildings.map((b) => {
                 const wp: [number, number, number] = [b.position.x, b.scale.y / 2, b.position.z];
                 return (
                     <mesh
                         key={b.id}
                         position={wp}
-                        onClick={debugEnabled ? () => setSelection({ id: b.id, worldPos: wp, size: [b.scale.x, b.scale.y, b.scale.z] }) : undefined}
+                        onClick={() => setSelection({ id: b.id, worldPos: wp, size: [b.scale.x, b.scale.y, b.scale.z] })}
                     >
                         <boxGeometry args={[b.scale.x, b.scale.y, b.scale.z]} />
                         <meshStandardMaterial color={BUILDING_COLOR} />

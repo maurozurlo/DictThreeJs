@@ -44,6 +44,7 @@ export function useStreetLayout(): ResolvedPlacement[] {
                 instanceId: inst.id,
                 modelName:  inst.modelName,
                 asset:      def.asset,
+                texture:    def.texture ?? null,
                 pos:        inst.pos,
                 rot:        inst.rot,
                 scale:      inst.scale ?? [1, 1, 1],

@@ -142,7 +142,11 @@ export const INITIAL_STATE = ({ set, get }: {
             } else if (tab === Tabs.Laws) {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
-                // Overhead oblique view of the metric-scale street scene (art-bible §10.0)
+                // TEMP diagnostic view — close overhead so the meshes are clearly visible.
+                // Restore the grabbed PhysCamera001 once mesh orientation/scale is confirmed:
+                //   pos (8.116, 67.961, 124.141), rot [-0.4364, 0]; fov TBD vs Max render
+                //   (142 u away → street is ~23% of frame even in Max; needs skybox/skyline
+                //    backdrop + horizontal-fov match for the wide browser aspect).
                 newCameraPos = new Vector3(0, 18, 14);
                 newCameraFov = 50;
                 newCameraRotation = [-0.76, 0];

@@ -1,6 +1,36 @@
 # Session State
 <!-- QA-PLAN: 2026-06-17 | System: sprint-7 | Plan written: production/qa/qa-plan-sprint-7-2026-06-17.md -->
 
+## Session Extract — Street mesh integration + PhysCamera grab 2026-06-22
+- Integrated the 26 exported GLBs + 60 IPL placements into the Street view (was a single wireframe plaza.obj placeholder).
+- Pipeline already existed (useStreetLayout + PlacedObject); changes:
+  - tools/ipl/convert_maxdump.mjs: reads optional texture-manifest.json (modelName→texture) → emits IDE `texture` field; report now written next to the dump. Re-ran it → regenerated src/assets/data/{street-placement.ipl.ts,street-objects.ide.ts} (--no-scale; meshes baked to size).
+  - src/types/WorldLayout.ts: added `texture?` to IDEObject + `texture` to ResolvedPlacement. src/Hooks/useStreetLayout.ts: pass-through.
+  - src/3d/StreetView.tsx: OBJLoader→GLTFLoader; dropped forced wireframe; PlacedObjectSolid (palette colour by model name) + PlacedObjectTextured (external PNG over UVs, dormant until re-export) + dispatcher.
+  - src/Stores/GameState.ts: Street-tab camera grabbed from Max PhysCamera001 — pos [8.116,67.961,124.141], rot [-0.4364,0] (aimed via target point; raw Max cam quaternion does NOT map), fov 50.3 (vertical FOV of the 25.571mm lens on 35mm; Max reports 60° horizontal). Target Distance 142.22 confirmed geometry.
+  - tools/maxscript/export_unique_meshes.ms: assigns temp PhysicalMaterial so ATF glTF exporter keeps UVs; writes texture-manifest.json from each source material's diffuse/base map.
+- KEY FINDING: current GLBs are geometry-only (POSITION+NORMAL, "fallback Material", NO UVs/materials/textures) — so external PNGs can't map yet. Needs a RE-EXPORT with the updated .ms. No unit conversion needed (dump space self-consistent, 1 unit = 1 m).
+- KNOWN LIMITATION: manifest = 1 texture/model; multi-material meshes (env_roads 9 prims, env_tree 3 prims) need per-submaterial mapping (follow-up). They render solid palette for now.
+- Verified: tsc -b clean, 579/579 tests pass (lone "error" = vitest fork-pool teardown timeout, not a test), vite build green.
+- NOT committed. Next: user re-exports (updated .ms) → copy texture-manifest.json next to dump → re-run convert → textures light up automatically. Then confirm/nudge camera fov vs Max.
+
+## Session Extract — Street view fixes (post-reexport) 2026-06-22
+- User re-exported: UVs now present (TEXCOORD_0), images embedded (harmless — engine uses external PNGs). texture-manifest.json correct. Copied to middleground/, re-ran convert → IDE now has `texture:` fields → textured render path active.
+- FIX 1: gated the 8 box-building placeholders + road strip behind debugEnabled (were always-on, looked like "placeholder models" over the GLBs). src/3d/StreetView.tsx.
+- FIX 2 (root cause): Max ATF glTF exporter leaves GEOMETRY Z-up (does NOT convert to Y-up, contrary to old script comment). IPL pos/rot already Y-up. Proof: ground meshes thin-in-Z, poles tall-in-Z. Engine now applies ZUP_TO_YUP = [-π/2,0,0] to each GLB INSIDE the placement (outer group=pos/quat/scale, inner primitive=rot -90°X). Math: world = T·R(iplQuat)·Rx(-90)·geom_zup; verified sign via streetlight. IPL conjugated rotations are correct as-is.
+- Updated export_unique_meshes.ms axis note (warns: if exporter ever fixed to Y-up, remove ZUP_TO_YUP or double-rotation).
+- tsc -b clean, vite build green. Still NOT committed. Next: user hard-refresh Street tab → should see textured, upright, correctly-placed meshes. Then nudge camera fov.
+
+## Session Extract — GLB scale/orientation root cause 2026-06-22
+- Symptom: meshes loaded (network) but rendered as a tiny clump on a green plane.
+- ROOT CAUSE (via parsing GLB node tree): every GLB = root node Rx(-90) [exporter DOES Y-up, matches convert_maxdump] + mesh node scale 0.001 [mm→m, Max scene is in millimetres]. Uniform 0.001 across all 26.
+- So my earlier ZUP_TO_YUP=[-π/2,0,0] was a WRONG double-rotation (net 180° flip), AND everything was 1000× too small.
+- FIX (src/3d/StreetView.tsx): removed ZUP_TO_YUP; added GLB_UNIT_FIX=1000 → placement scale ×1000 (net 1000×0.001=1, mathematically exact). Both PlacedObjectSolid/Textured now render gltf.scene directly at pos/quat/scale×1000.
+- Proper source fix (documented in export_unique_meshes.ms): set Max System Units to metres, re-export, then GLB_UNIT_FIX=1.
+- Street camera TEMP reverted to close overhead [0,18,14]/fov50/rot[-0.76,0] for mesh verification; PhysCamera values preserved in GameState.ts comment to restore after.
+- Lesson: GLB bbox from raw POSITION accessor is misleading — must apply node transforms. The 0.001 + root rotation only show in the node tree.
+- tsc clean. NOT committed. Next: user reloads (HMR fine, not stale) → verify meshes upright/sized/textured on close cam → restore PhysCamera + solve wide-aspect fov.
+
 ## Session Extract — /sprint-plan new Sprint 7 2026-06-17
 - Sprint 7 plan written: production/sprints/sprint-7.md
 - sprint-status.yaml reset to Sprint 7 (8 stories: 7-1..7-6, 5-8 carryover, 5-9 carryover)

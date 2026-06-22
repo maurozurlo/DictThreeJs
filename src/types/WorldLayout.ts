@@ -13,6 +13,13 @@ export interface IDEObject {
     modelName: string;
     /** Path to asset file relative to public/ (e.g. "models/plaza.obj"). null = no renderable asset. */
     asset: string | null;
+    /**
+     * EXTERNAL diffuse textures relative to public/ (e.g. ["textures/road.png", ...]),
+     * one per material slot of a multi-material mesh. The renderer applies each to the
+     * mesh part whose material NAME matches the texture's basename; unmatched parts get a
+     * solid palette colour. Populated from texture-manifest.json (see convert_maxdump.mjs).
+     */
+    textures?: string[];
     /** All specified conditions must pass for this object's instances to render. Omit = always visible. */
     visibleIf?: {
         /** Game tab that must be active. Matches Tabs const values (e.g. "Street"). */
@@ -55,6 +62,7 @@ export interface ResolvedPlacement {
     instanceId: number;
     modelName: string;
     asset: string | null;
+    texture: string | null;
     pos: [number, number, number];
     rot: [number, number, number, number];
     scale: [number, number, number];
