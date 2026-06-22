@@ -1,30 +1,27 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
 import { Tabs } from '../types/Tabs';
 import { STREET_LAYOUT } from '../assets/streetLayout';
-import { useStreetLayout } from '../Hooks/useStreetLayout';
+import { useStreetLayout, STREET_TEXTURE_SLOTS, STREET_TEXTURE_URLS } from '../Hooks/useStreetLayout';
 import type { ResolvedPlacement } from '../types/WorldLayout';
 import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
-import { getVisibleModifiers } from '../Utils/Modifiers';
 import type { CitizenState } from '../types/Citizen';
 import type { Citizen } from '../types/Citizen';
 import { computeBodyType } from '../Stores/CitizenHandler';
 
-const BUILDING_COLOR   = '#7a6e62';
-const PLAZA_COLOR      = '#b8a98a';
-const GROUND_COLOR     = '#5a6b4a';
-const ROAD_COLOR       = '#4a4a4a';
+const BUILDING_COLOR = '#7a6e62';
+const PLAZA_COLOR = '#b8a98a';
+const ROAD_COLOR = '#4a4a4a';
 const PEDESTRIAN_COLOR = '#4a90d9';
-const VEHICLE_COLOR    = '#d94a4a';
+const VEHICLE_COLOR = '#d94a4a';
 
 // Metric scale: 1 unit = 1 metre (see art-bible §10.0)
-const CAR_HALF_HEIGHT   = 0.7;
-const DEBUG_ARROW_Y     = 2.0;
+const CAR_HALF_HEIGHT = 0.7;
+const DEBUG_ARROW_Y = 2.0;
 /** Citizens pause when another ped is within this distance ahead of them (metres). */
 const MIN_PED_SEPARATION = 1.5;
 
@@ -86,7 +83,7 @@ function getOutfit(
     employed: boolean,
     faction: Citizen['faction'],
 ): string {
-    if (role === 'thief')     return '#444444';
+    if (role === 'thief') return '#444444';
     // TODO: swap to ped_special_man_protestor when asset is created
     if (role === 'protestor') return '#c0392b';
     if (employed && faction === 'military') return '#3d6b3d';
@@ -97,9 +94,9 @@ function getOutfit(
 /** Box geometry dimensions [width, height, depth] by body type. */
 function getPedDimensions(bodyType: 'slim' | 'fit' | 'fat'): [number, number, number] {
     switch (bodyType) {
-        case 'fat':  return [0.8, 1.5, 0.8];
+        case 'fat': return [0.8, 1.5, 0.8];
         case 'slim': return [0.4, 1.6, 0.4];
-        case 'fit':  return [0.6, 1.8, 0.6];
+        case 'fit': return [0.6, 1.8, 0.6];
     }
 }
 
@@ -138,15 +135,15 @@ function PedWalker({
 }: PedWalkerProps) {
     const meshRef = useRef<THREE.Mesh>(null);
 
-    const initPos     = startPos ?? new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z);
+    const initPos = startPos ?? new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z);
     const initNextIdx = startNextIdx ?? 1;
 
-    const pos     = useRef(initPos.clone());
+    const pos = useRef(initPos.clone());
     const nextIdx = useRef(initNextIdx);
 
-    const meshColor   = color ?? PEDESTRIAN_COLOR;
-    const [w, h, d]   = dimensions ?? [0.6, 1.8, 0.6];
-    const halfH       = h / 2;
+    const meshColor = color ?? PEDESTRIAN_COLOR;
+    const [w, h, d] = dimensions ?? [0.6, 1.8, 0.6];
+    const halfH = h / 2;
 
     // Remove this citizen from the registry on unmount (death, role → protestor, etc.)
     useEffect(() => {
@@ -161,11 +158,11 @@ function PedWalker({
             entry.copy(pos.current);
         }
 
-        const target    = path.waypoints[nextIdx.current];
+        const target = path.waypoints[nextIdx.current];
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
-        const toTarget  = targetPos.clone().sub(pos.current);
-        const dist      = toTarget.length();
-        const moveDir   = toTarget.clone().normalize();
+        const toTarget = targetPos.clone().sub(pos.current);
+        const dist = toTarget.length();
+        const moveDir = toTarget.clone().normalize();
 
         // Proximity pause: if another citizen ped is close AND ahead, wait this frame
         if (citizenId !== undefined) {
@@ -228,15 +225,15 @@ interface CarWalkerProps {
 
 function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
     const meshRef = useRef<THREE.Mesh>(null);
-    const pos     = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
+    const pos = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
     const nextIdx = useRef(1 % path.waypoints.length);
 
     useFrame((_, delta) => {
-        const target    = path.waypoints[nextIdx.current];
+        const target = path.waypoints[nextIdx.current];
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
-        const toTarget  = targetPos.clone().sub(pos.current);
-        const dist      = toTarget.length();
-        const step      = vehicle.speed * delta;
+        const toTarget = targetPos.clone().sub(pos.current);
+        const dist = toTarget.length();
+        const step = vehicle.speed * delta;
 
         if (dist <= step) {
             pos.current.copy(targetPos);
@@ -248,7 +245,7 @@ function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
 
         if (meshRef.current) {
             meshRef.current.position.set(pos.current.x, pos.current.y + CAR_HALF_HEIGHT, pos.current.z);
-            const fromIdx  = (nextIdx.current - 1 + path.waypoints.length) % path.waypoints.length;
+            const fromIdx = (nextIdx.current - 1 + path.waypoints.length) % path.waypoints.length;
             meshRef.current.rotation.y = path.waypoints[fromIdx].ry ?? 0;
         }
     });
@@ -300,20 +297,15 @@ function paletteFor(modelName: string): string {
     return '#9a9088';
 }
 
-/** Apply one shared material to every mesh in a cloned glTF scene + enable shadows. */
-function applyMaterial(root: THREE.Object3D, material: THREE.Material): void {
-    root.traverse((child) => {
-        const mesh = child as THREE.Mesh;
-        if (mesh.isMesh) {
-            mesh.material = material;
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-        }
-    });
-}
-
 function placementQuaternion(rot: ResolvedPlacement['rot']): THREE.Quaternion {
     return new THREE.Quaternion(rot[0], rot[1], rot[2], rot[3]);
+}
+
+/** "textures/Road_01.PNG" -> "road_01" — basename without extension, lower-cased. */
+function normalizeTexName(path: string): string {
+    const base = path.split('/').pop() ?? path;
+    let name = base.replace(/\.[^.]+$/, '').toLowerCase();
+    return name.replace(/_(png|jpg|jpeg|bmp|tga|gif)$/, '');
 }
 
 /**
@@ -329,57 +321,86 @@ function fixedScale(scale: ResolvedPlacement['scale']): [number, number, number]
     return [scale[0] * GLB_UNIT_FIX, scale[1] * GLB_UNIT_FIX, scale[2] * GLB_UNIT_FIX];
 }
 
-/** GLB rendered with a flat palette colour (no texture available yet). */
-function PlacedObjectSolid({ placement }: { placement: ResolvedPlacement }) {
+/** Texture entry keyed by normalized basename — carries the loaded texture and its per-slot transparency flag. */
+type TextureEntry = { tex: THREE.Texture; transparent: boolean };
+type TextureMap = Map<string, TextureEntry>;
+
+/**
+ * Renders one IPL placement. Each mesh part keeps its own material slot; we apply the
+ * external texture whose basename matches that part's material NAME (set at export time).
+ * Transparency is per-slot — decals/foliage slots get alphaTest cutout independently.
+ * Parts with no matching texture but an embedded map keep it; otherwise palette fallback.
+ */
+function PlacedObject({ placement, textures }: { placement: ResolvedPlacement; textures: TextureMap }) {
     const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
 
     const object = useMemo(() => {
+        const fallback = paletteFor(placement.modelName);
+        const pickMaterial = (mat: THREE.Material): THREE.Material => {
+            const entry = textures.get(normalizeTexName(mat.name ?? ''));
+            if (entry) {
+                const { tex, transparent } = entry;
+                tex.magFilter = THREE.NearestFilter;
+                tex.minFilter = THREE.NearestFilter;
+                tex.needsUpdate = true;
+                const alphaProps = transparent
+                    ? { transparent: true, alphaTest: 0.5, side: THREE.DoubleSide }
+                    : {};
+                return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0, ...alphaProps });
+            }
+            if ((mat as THREE.MeshStandardMaterial).map) return mat; // keep embedded texture
+            return new THREE.MeshStandardMaterial({ color: fallback, roughness: 0.9, metalness: 0 });
+        };
         const g = (gltf.scene as THREE.Group).clone(true);
-        applyMaterial(g, new THREE.MeshStandardMaterial({
-            color: paletteFor(placement.modelName), roughness: 0.9, metalness: 0,
-        }));
+        g.traverse((child) => {
+            const mesh = child as THREE.Mesh;
+            if (!mesh.isMesh) return;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.material = Array.isArray(mesh.material)
+                ? mesh.material.map(pickMaterial)
+                : pickMaterial(mesh.material);
+        });
         return g;
-    }, [gltf, placement.modelName]);
+    }, [gltf, textures, placement.modelName]);
 
     const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
     const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);
     return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
 }
 
-/** GLB rendered with an EXTERNAL diffuse texture (public/textures/*) over its UVs. */
-function PlacedObjectTextured({ placement }: { placement: ResolvedPlacement }) {
-    const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
-    const texture = useLoader(THREE.TextureLoader, `/${placement.texture}`);
+/**
+ * Preloads every external street texture once, then renders all placements. Lives inside
+ * the StreetView <Suspense> so the texture and GLB loads suspend together.
+ */
+function PlacedObjects({ placements }: { placements: ResolvedPlacement[] }) {
+    const loaded = useLoader(THREE.TextureLoader, STREET_TEXTURE_URLS.map((u) => `/${u}`));
 
-    const object = useMemo(() => {
-        texture.colorSpace = THREE.SRGBColorSpace;
-        texture.flipY = false; // glTF UV convention
-        const g = (gltf.scene as THREE.Group).clone(true);
-        applyMaterial(g, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0 }));
-        return g;
-    }, [gltf, texture]);
+    const textures = useMemo((): TextureMap => {
+        const map: TextureMap = new Map();
+        STREET_TEXTURE_SLOTS.forEach((slot, i) => {
+            const tex = loaded[i];
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.flipY = false; // glTF UV convention
+            map.set(normalizeTexName(slot.texture), { tex, transparent: slot.transparent });
+        });
+        return map;
+    }, [loaded]);
 
-    const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
-    const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);
-    return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
-}
-
-function PlacedObject({ placement }: { placement: ResolvedPlacement }) {
-    // `texture` is fixed per instance (data-driven), so this branch never flips at runtime.
-    return placement.texture
-        ? <PlacedObjectTextured placement={placement} />
-        : <PlacedObjectSolid placement={placement} />;
+    return (
+        <>
+            {placements.map((p) =>
+                p.asset !== null
+                    ? <PlacedObject key={p.instanceId} placement={p} textures={textures} />
+                    : null,
+            )}
+        </>
+    );
 }
 
 // ---------------------------------------------------------------------------
 // StreetView
 // ---------------------------------------------------------------------------
-
-interface DebugSelection {
-    id: string;
-    worldPos: [number, number, number];
-    size: [number, number, number];
-}
 
 interface CitizenPathAssignment {
     startPos: THREE.Vector3;
@@ -388,17 +409,13 @@ interface CitizenPathAssignment {
 }
 
 function StreetView() {
-    const activeTab       = useGameStore((s) => s.tabs.activeTab);
-    const debugEnabled    = useGameStore((s) => s.debug.enabled);
-    const modifiers       = useGameStore((s) => s.gameManagement.modifiers);
-    const round           = useGameStore((s) => s.gameManagement.round);
-    const visibleModifiers = useMemo(() => getVisibleModifiers(modifiers, round), [modifiers, round]);
-    const placements      = useStreetLayout();
-    const citizens        = useGameStore((s) => s.citizens);
-    const citizenStates   = useGameStore((s) => s.citizenStates);
-    const health          = useGameStore((s) => s.budget.expenditures.health);
-    const selectPed       = useGameStore((s) => s.scene.selectPed);
-    const [selection, setSelection] = useState<DebugSelection | null>(null);
+    const activeTab = useGameStore((s) => s.tabs.activeTab);
+    const debugEnabled = useGameStore((s) => s.debug.enabled);
+    const placements = useStreetLayout();
+    const citizens = useGameStore((s) => s.citizens);
+    const citizenStates = useGameStore((s) => s.citizenStates);
+    const health = useGameStore((s) => s.budget.expenditures.health);
+    const selectPed = useGameStore((s) => s.scene.selectPed);
 
     // Pre-compute stable path assignments for all 25 citizens. Depends only on
     // the citizens array (set once at game start) so assignments never shift mid-run.
@@ -414,9 +431,9 @@ function StreetView() {
 
         pathGroups.forEach((ids, pathIdx) => {
             if (ids.length === 0) return;
-            const path  = pedestrianPaths[pathIdx];
+            const path = pedestrianPaths[pathIdx];
             const total = pathTotalLength(path.waypoints);
-            const gap   = total / ids.length;
+            const gap = total / ids.length;
 
             ids.forEach((citizenId, rank) => {
                 const { pos, nextIdx } = positionAtPathDistance(path.waypoints, rank * gap);
@@ -431,47 +448,20 @@ function StreetView() {
 
     if (activeTab !== Tabs.Street) return null;
 
-    const { buildings, pedestrians, pedestrianPaths, vehicles, vehiclePaths } = STREET_LAYOUT;
-    const fmt = (n: number) => n.toFixed(1);
+    const { pedestrians, pedestrianPaths, vehicles, vehiclePaths } = STREET_LAYOUT;
 
     return (
         <group position={[0, 0, 0]}>
             {/* Ground — clicking deselects any selected citizen */}
             <mesh position={[0, -0.05, -8]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => selectPed(null)}>
                 <planeGeometry args={[42, 28]} />
-                <meshStandardMaterial color={GROUND_COLOR} />
+                <meshStandardMaterial transparent opacity={0} />
             </mesh>
 
-            {/* Road strip + box-building placeholders — debug-only reference now that the
-                IPL/IDE GLBs (env_roads, env_bld_*) provide the real geometry. */}
-            {debugEnabled && (
-                <mesh position={[0, -0.04, -8]} rotation={[-Math.PI / 2, 0, 0]}>
-                    <planeGeometry args={[7, 28]} />
-                    <meshStandardMaterial color={ROAD_COLOR} />
-                </mesh>
-            )}
 
-            {debugEnabled && buildings.map((b) => {
-                const wp: [number, number, number] = [b.position.x, b.scale.y / 2, b.position.z];
-                return (
-                    <mesh
-                        key={b.id}
-                        position={wp}
-                        onClick={() => setSelection({ id: b.id, worldPos: wp, size: [b.scale.x, b.scale.y, b.scale.z] })}
-                    >
-                        <boxGeometry args={[b.scale.x, b.scale.y, b.scale.z]} />
-                        <meshStandardMaterial color={BUILDING_COLOR} />
-                    </mesh>
-                );
-            })}
-
-            {/* IDE/IPL placed objects — OBJ reference meshes rendered as wireframe */}
+            {/* IDE/IPL placed objects — GLBs textured from public/textures by material name */}
             <Suspense fallback={null}>
-                {placements.map((p) =>
-                    p.asset !== null
-                        ? <PlacedObject key={p.instanceId} placement={p} />
-                        : null
-                )}
+                <PlacedObjects placements={placements} />
             </Suspense>
 
             {/* Atmospheric pedestrians */}
@@ -498,9 +488,9 @@ function StreetView() {
                     const citizen = citizens[i];
                     if (!citizen) return null;
 
-                    const bodyType    = computeBodyType(citizen.bodySeed, health);
+                    const bodyType = computeBodyType(citizen.bodySeed, health);
                     const outfitColor = getOutfit(cs.role, cs.employed, citizen.faction);
-                    const dims        = getPedDimensions(bodyType);
+                    const dims = getPedDimensions(bodyType);
                     const handleClick = (e: ThreeEvent<MouseEvent>) => {
                         e.stopPropagation();
                         selectPed(citizen.id);
@@ -543,28 +533,6 @@ function StreetView() {
                 });
             })()}
 
-            {/* Debug: click-to-inspect building position/size */}
-            {debugEnabled && selection && (
-                <Html position={[selection.worldPos[0], selection.worldPos[1] + selection.size[1] / 2 + 1, selection.worldPos[2]]}>
-                    <div
-                        style={{
-                            background: 'rgba(0,0,0,0.88)',
-                            color: '#fbee32',
-                            padding: '5px 8px',
-                            fontFamily: 'monospace',
-                            fontSize: '11px',
-                            whiteSpace: 'nowrap',
-                            border: '1px solid #fbee32',
-                            pointerEvents: 'none',
-                        }}
-                    >
-                        <div style={{ marginBottom: 3 }}><b>{selection.id}</b></div>
-                        <div>pos  [{selection.worldPos.map(fmt).join(', ')}]</div>
-                        <div>size [{selection.size.map(fmt).join(', ')}] m</div>
-                        <div>active effects: {visibleModifiers.length}</div>
-                    </div>
-                </Html>
-            )}
         </group>
     );
 }

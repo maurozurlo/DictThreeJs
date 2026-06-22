@@ -172,7 +172,12 @@ export type GameStats = {
 
 export type CameraState = {
     cameraPos: [number, number, number];
+    /** Vertical FOV in degrees, applied in CameraController when cameraHFov is unset. */
     cameraFov: number;
+    /** Horizontal FOV in degrees (from the Max PhysCamera). When set, CameraController
+     *  derives the vertical FOV dynamically from the live canvas aspect so framing
+     *  matches Max exactly regardless of window size. Unset for all non-Street tabs. */
+    cameraHFov?: number;
     /** Euler pitch (x) and yaw (y) in radians, applied in CameraController */
     cameraRotation: [number, number];
     cameraTarget?: Vector3;
@@ -182,6 +187,8 @@ export type CameraState = {
     moveCameraTo: (pos: [number, number, number], target?: Vector3) => void;
     cycleCamera: () => void;
     setCameraPositions: (positions: Vector3[], targets?: Vector3[]) => void;
+    /** Live-set the vertical FOV (used by the debug FOV slider). */
+    setCameraFov: (fov: number) => void;
 };
 
 export type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose' | 'special_ending';
@@ -191,9 +198,12 @@ export type GameState = {
         enabled: boolean;
         fov: number;
         selectorOpen: boolean;
+        /** When true, the free-fly camera takes over (debug only). Off = fixed CameraController. */
+        freeCam: boolean;
         setDebugMode: (enabled: boolean) => void;
         setFov: (fov: number) => void;
         toggleSelector: () => void;
+        setFreeCam: (freeCam: boolean) => void;
     },
     scene: {
         camera: CameraState;

@@ -75,10 +75,12 @@ const inst = env.map((r) => {
     return `        { ${fields.join(', ')} },`;
 });
 
-// ---- optional texture manifest (modelName -> texture filename) -------------
+// ---- optional texture manifest (modelName -> [texture filenames]) -----------
 // Written by tools/maxscript/export_unique_meshes.ms next to the dump. Lets the
 // IDE reference EXTERNAL texture files (public/textures/*) instead of embedding
-// them in the GLB. Missing manifest = no texture fields emitted (geometry only).
+// them in the GLB — one entry per material slot of a multi-material mesh. The
+// engine matches each by the mesh part's material name. Values may be a single
+// string (legacy) or an array. Missing manifest = no texture fields emitted.
 const manifestPath = join(dirname(dumpPath), 'texture-manifest.json');
 let texManifest = {};
 if (existsSync(manifestPath)) {
@@ -87,11 +89,21 @@ if (existsSync(manifestPath)) {
 }
 
 // ---- build IDE defs (one per unique model name) ----
+// Manifest format: array of { texture: string, transparent: boolean } per model.
+// Each slot maps to one material slot on the mesh; material NAME must match texture basename.
+const parseManifestEntry = (raw) => {
+    if (!raw || !Array.isArray(raw) || raw.length === 0) return [];
+    return raw.map((slot) => ({ texture: String(slot.texture), transparent: !!slot.transparent }));
+};
+
 const uniqueModels = [...new Set(env.map((r) => r.name))];
 let ideId = 2000;
 const objs = uniqueModels.map((name) => {
-    const tex = texManifest[name];
-    const texField = tex ? `, texture: 'textures/${tex}'` : '';
+    const slots = parseManifestEntry(texManifest[name]);
+    const texField = slots.length
+        ? `, textures: [${slots.map(({ texture, transparent }) =>
+            `{ texture: 'textures/${texture}', transparent: ${transparent} }`).join(', ')}]`
+        : '';
     return `        { id: ${++ideId}, modelName: '${name}', asset: 'models/${name}.glb', visibleIf: { tab: 'Street' }${texField} },`;
 });
 

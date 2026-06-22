@@ -3,9 +3,10 @@ import { useGameStore } from "../Stores/GameState";
 
 export function useCameraSwitcher(debug: boolean) {
     const cycleCamera = useGameStore((s) => s.scene.camera.cycleCamera);
+    const freeCamEnabled = false; // Placeholder for potential future free cam toggle
 
     useEffect(() => {
-        if (!debug) return;
+        if (!debug || !freeCamEnabled) return;
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.code === "Space") {
                 e.preventDefault();

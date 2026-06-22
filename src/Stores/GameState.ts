@@ -48,6 +48,7 @@ export const INITIAL_STATE = ({ set, get }: {
         enabled: false,
         fov: 34,
         selectorOpen: false,
+        freeCam: false,
         setDebugMode: (enabled: boolean) => set((state) => ({
             debug: { ...state.debug, enabled },
         })),
@@ -57,11 +58,15 @@ export const INITIAL_STATE = ({ set, get }: {
         toggleSelector: () => set((state) => ({
             debug: { ...state.debug, selectorOpen: !state.debug.selectorOpen },
         })),
+        setFreeCam: (freeCam: boolean) => set((state) => ({
+            debug: { ...state.debug, freeCam },
+        })),
     },
     scene: {
         camera: {
             cameraPos: [-1.336, 0.63, 0.302],
             cameraFov: 34,
+            cameraHFov: undefined,
             cameraRotation: [0, 0] as [number, number],
             cameraTarget: undefined,
             cameraPositions: [],
@@ -77,6 +82,14 @@ export const INITIAL_STATE = ({ set, get }: {
                             cameraPos: pos,
                             cameraTarget: target,
                         },
+                    },
+                })),
+
+            setCameraFov: (fov) =>
+                set((state) => ({
+                    scene: {
+                        ...state.scene,
+                        camera: { ...state.scene.camera, cameraFov: fov },
                     },
                 })),
 
@@ -134,6 +147,7 @@ export const INITIAL_STATE = ({ set, get }: {
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
             let newCameraFov = 34;
+            let newCameraHFov: number | undefined = undefined;
             let newCameraRotation: [number, number] = [0, 0];
             let newSecretRoomIndex = get().tabs.secretRoomIndex;
 
@@ -142,14 +156,17 @@ export const INITIAL_STATE = ({ set, get }: {
             } else if (tab === Tabs.Laws) {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
-                // TEMP diagnostic view — close overhead so the meshes are clearly visible.
-                // Restore the grabbed PhysCamera001 once mesh orientation/scale is confirmed:
-                //   pos (8.116, 67.961, 124.141), rot [-0.4364, 0]; fov TBD vs Max render
-                //   (142 u away → street is ~23% of frame even in Max; needs skybox/skyline
-                //    backdrop + horizontal-fov match for the wide browser aspect).
-                newCameraPos = new Vector3(0, 18, 14);
-                newCameraFov = 50;
-                newCameraRotation = [-0.76, 0];
+                // Grabbed from the 3ds Max PhysCamera001 (middleground/MaxDump). Position +
+                // aim converted Max Z-up → engine Y-up; aimed via the target point (the raw
+                // Max camera quaternion doesn't map directly — pitch derived from the look
+                // vector). fov 50.3 = vertical FOV of the 25.571 mm lens on a 35 mm frame
+                // (Max reports 60° horizontal). It sits 142 u back, so it's a wide vista —
+                // the skybox/skyline GLBs fill the frame behind the street. Tune fov live
+                // with the debug free-cam mouse-wheel (press I to read the value back).
+                newCameraPos = new Vector3(8.116, 67.961, 124.141);
+                newCameraFov = 50.3; // fallback vFOV; actual value derived from hFOV + canvas aspect at runtime
+                newCameraHFov = 60; // Max PhysCamera001 "Specify FOV" — horizontal; CameraController derives vFOV
+                newCameraRotation = [-0.4364, 0];
             } else if (tab === Tabs.Secret) {
                 const s = get();
                 // When a special ending is active, show the triggering faction's room;
@@ -184,6 +201,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         camera: {
                             ...s.scene.camera,
                             cameraFov: newCameraFov,
+                            cameraHFov: newCameraHFov,
                             cameraRotation: newCameraRotation,
                             ...(newCameraPos && {
                                 cameraPos: [newCameraPos.x, newCameraPos.y, newCameraPos.z],

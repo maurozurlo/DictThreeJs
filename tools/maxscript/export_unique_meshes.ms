@@ -63,29 +63,66 @@
             (matchPattern name pattern:"env_*") or (matchPattern name pattern:"ped_*") or (matchPattern name pattern:"veh_*")
         )
 
-        -- full source filename of an object's diffuse/base-colour texture map, or "".
-        -- Tolerant of Standard / Physical / Multi-sub materials.
-        fn texFilenameFor obj =
+        -- diffuse / base-colour bitmap of a SINGLE (sub)material, or undefined.
+        fn diffuseBitmapFor m =
         (
-            local m = obj.material
-            if m == undefined do return ""
-            if (classOf m == Multimaterial and m.numsubs > 0) do m = m.materialList[1]
-            if m == undefined do return ""
-            local map = undefined
-            if (hasProperty m #diffuseMap)     do map = m.diffuseMap        -- Standard & co.
-            if (map == undefined and hasProperty m #base_color_map) do map = m.base_color_map  -- Physical
-            if (map == undefined) do return ""
-            if (hasProperty map #filename and map.filename != undefined) then map.filename else ""
+            if m == undefined do return undefined
+            local mp = undefined
+            if (hasProperty m #diffuseMap and m.diffuseMap != undefined) do mp = m.diffuseMap                  -- Standard & co.
+            if (mp == undefined and hasProperty m #base_color_map and m.base_color_map != undefined) do mp = m.base_color_map  -- Physical
+            mp
         )
 
-        -- basename (with extension) of the above, or "".
-        fn texBasenameFor obj =
+        -- texture basename (with extension) of a SINGLE (sub)material, or "".
+        fn texBasenameOf m =
         (
-            local fn_ = texFilenameFor obj
-            if fn_ != "" then (filenameFromPath fn_) else ""
+            local mp = diffuseBitmapFor m
+            if mp != undefined and (hasProperty mp #filename) and mp.filename != undefined and mp.filename != "" then
+                (filenameFromPath mp.filename)
+            else ""
         )
 
-        -- write { modelName: "texture.png", ... } as JSON for the IPL converter
+        -- Convert a SINGLE material to a glTF-friendly PhysicalMaterial NAMED after its
+        -- texture basename (the engine matches textures to parts by material name), with a
+        -- base-colour map so the ATF exporter keeps UVs (TEXCOORD_0); a map-less material
+        -- drops them. The engine uses our EXTERNAL textures, so embed-vs-reference is moot.
+        fn toGltfSubMat m =
+        (
+            local tb = texBasenameOf m
+            local nm = if tb != "" then tb else (if m != undefined and m.name != undefined then m.name else "untextured")
+            local pm = PhysicalMaterial name:nm
+            local mp = diffuseBitmapFor m
+            if mp != undefined do pm.base_color_map = mp
+            pm
+        )
+
+        -- Convert a material (single or Multi) PRESERVING the multi-sub structure (matching
+        -- material IDs), and collect each slot's texture basename into texAcc (unique).
+        fn convertMaterialTree m texAcc =
+        (
+            if m != undefined and (classOf m == Multimaterial) then
+            (
+                local out = Multimaterial numsubs:m.numsubs
+                out.name = m.name
+                for i = 1 to m.numsubs do
+                (
+                    out.materialIDList[i] = m.materialIDList[i]
+                    out.names[i] = m.names[i]
+                    out.materialList[i] = toGltfSubMat m.materialList[i]
+                    local tb = texBasenameOf m.materialList[i]
+                    if tb != "" do appendIfUnique texAcc tb
+                )
+                out
+            )
+            else
+            (
+                local tb = texBasenameOf m
+                if tb != "" do appendIfUnique texAcc tb
+                toGltfSubMat m
+            )
+        )
+
+        -- write { "modelName": ["tex0.png", ...], ... } as JSON for the IPL converter
         fn writeTextureManifest dir pairs =
         (
             local mb = stringStream ""
@@ -94,8 +131,15 @@
             for i = 1 to n do
             (
                 local nm = substituteString pairs[i][1] "\\" "\\\\"
-                local tx = substituteString pairs[i][2] "\\" "\\\\"
-                format "  \"%\": \"%\"" nm tx to:mb
+                local arr = pairs[i][2]
+                format "  \"%\": [" nm to:mb
+                for j = 1 to arr.count do
+                (
+                    local tx = substituteString arr[j] "\\" "\\\\"
+                    format "\"%\"" tx to:mb
+                    if j < arr.count do format ", " to:mb
+                )
+                format "]" to:mb
                 if i < n then format ",\n" to:mb else format "\n" to:mb
             )
             format "}\n" to:mb
@@ -127,9 +171,9 @@
                     if (findItem exportedNames obj.name == 0) do
                     (
                         appendIfUnique exportedNames obj.name
-                        local srcTex = texFilenameFor obj       -- full path, from the SOURCE material
-                        local tex = if srcTex != "" then (filenameFromPath srcTex) else ""
-                        if tex != "" do append manifestPairs #(obj.name, tex)
+                        local modelTex = #()
+                        local newMat = convertMaterialTree obj.material modelTex   -- from the SOURCE material(s)
+                        if modelTex.count > 0 do append manifestPairs #(obj.name, modelTex)
                         lblStatus.text = ("Exporting: " + obj.name)
                         local tempObj = undefined
                         try
@@ -140,13 +184,11 @@
                             tempObj.transform = scaleMatrix tempObj.scale   -- zero pos+rot, keep scale
                             ResetXForm tempObj                              -- bake scale into geometry
                             collapseStack tempObj
-                            -- A PhysicalMaterial WITH a base-colour map is required for the ATF
-                            -- exporter to emit UVs (TEXCOORD_0) -- a map-less material drops them.
-                            -- The engine uses our EXTERNAL textures, so whether this image ends up
-                            -- embedded or not is irrelevant (external always wins render-side).
-                            local pm = PhysicalMaterial name:"export_uv_mat"
-                            if srcTex != "" do ( try ( pm.base_color_map = Bitmaptexture filename:srcTex ) catch () )
-                            tempObj.material = pm
+                            -- Replace materials with glTF-friendly PhysicalMaterials named after
+                            -- their textures, PRESERVING the multi-sub structure so each part keeps
+                            -- its own texture + UVs. The engine applies our EXTERNAL textures by
+                            -- matching each part's material name.
+                            tempObj.material = newMat
                             select tempObj
                             exportFile (dir + tempObj.name + ".glb") #noPrompt selectedOnly:true
                         )

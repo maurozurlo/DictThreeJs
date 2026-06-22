@@ -21,6 +21,7 @@ function CameraControllerFree() {
 
 export function Scene() {
     const debug = useGameStore((s) => s.debug.enabled);
+    const freeCam = useGameStore((s) => s.debug.freeCam);
     const repStatuses = useGameStore((s) => s.gameManagement.representativeStatuses);
     useCameraSwitcher(debug);
 
@@ -30,7 +31,7 @@ export function Scene() {
 
             <pointLight position={[-1.335, 0.642, -0.09]} intensity={.2} />
             <pointLight position={[-0.769, 0.734, -0.393]} intensity={.3} />
-            {debug ? <CameraControllerFree /> : <CameraController />}
+            {debug && freeCam ? <CameraControllerFree /> : <CameraController />}
             <MainModel />
             {repStatuses.business === 'active' && <Elite />}
             {repStatuses.people === 'active' && <People />}

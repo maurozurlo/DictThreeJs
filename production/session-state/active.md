@@ -1,6 +1,20 @@
 # Session State
 <!-- QA-PLAN: 2026-06-17 | System: sprint-7 | Plan written: production/qa/qa-plan-sprint-7-2026-06-17.md -->
 
+## Session Extract — Multi-texture pipeline (external, by material name) 2026-06-22
+- Problem: previous export script replaced each object's material with ONE PhysicalMaterial → MERGED multi-material meshes (env_roads 9 parts→1) to a single texture. User wants external multi-texture.
+- DESIGN (external, robust, exporter-image-mode-independent): export names each sub-material after its texture basename + keeps UVs + preserves Multi-material structure; engine preloads all public/textures PNGs once and applies each to the mesh part whose material NAME matches (normalized basename); embedded-map fallback, then palette fallback.
+- Files changed:
+  - src/types/WorldLayout.ts: IDEObject.texture(string) → textures(string[]); ResolvedPlacement.textures: string[].
+  - src/Hooks/useStreetLayout.ts: pass textures[]; export STREET_TEXTURES (union of all IDE textures).
+  - src/3d/StreetView.tsx: removed PlacedObjectSolid/Textured split + applyMaterial; new PlacedObject (per-material-slot texture by name via normalizeTexName) + PlacedObjects (preload all textures, build Map, render list); Suspense renders <PlacedObjects>.
+  - tools/ipl/convert_maxdump.mjs: manifest value string|array → IDE `textures: [...]`.
+  - tools/maxscript/export_unique_meshes.ms: diffuseBitmapFor/texBasenameOf/toGltfSubMat/convertMaterialTree (multi-aware, names mats after textures); manifest now model→[textures]; loop uses convertMaterialTree.
+- Re-ran convert (old single-string manifest → wrapped to 1-elem arrays). tsc -b clean, vite build green.
+- INTERIM STATE: current GLBs are still the FLATTENED single-material ones (material "export_uv_mat" + 1 embedded image) → engine keeps embedded map → shows single texture per model (not broken). Multi-texture needs RE-EXPORT with updated .ms.
+- Camera still TEMP close overhead [0,18,14]; PhysCamera values preserved in GameState.ts comment (restore after mesh verification + wide-aspect fov work).
+- NOT committed. Next: user re-exports (new .ms) → I read a multi-material GLB to confirm per-part materials named after textures → copy manifest to middleground → re-run convert → multi-texture lights up. Then restore PhysCamera + fov.
+
 ## Session Extract — Street mesh integration + PhysCamera grab 2026-06-22
 - Integrated the 26 exported GLBs + 60 IPL placements into the Street view (was a single wireframe plaza.obj placeholder).
 - Pipeline already existed (useStreetLayout + PlacedObject); changes:
