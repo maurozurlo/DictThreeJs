@@ -31,6 +31,7 @@ export const STREET_IDE: IDEFile = {
         { id: 2021, modelName: 'env_searchlight_large', asset: 'models/env_searchlight_large.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/spotlight.png', transparent: true }] },
         { id: 2022, modelName: 'env_graffiti_decal', asset: 'models/env_graffiti_decal.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/graffitti.png', transparent: true }] },
         { id: 2023, modelName: 'env_pothole_decal', asset: 'models/env_pothole_decal.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/pothole.png', transparent: true }] },
-        { id: 2024, modelName: 'env_camera_pole_medium', asset: 'models/env_camera_pole_medium.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/cccam.png', transparent: false }] },
+        { id: 2024, modelName: 'env_streetbarricade_medium', asset: 'models/env_streetbarricade_medium.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/streetbarricade.png', transparent: false }] },
+        { id: 2025, modelName: 'env_camera_pole_medium', asset: 'models/env_camera_pole_medium.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/camerapole.png', transparent: false }] },
     ],
 };

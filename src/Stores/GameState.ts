@@ -163,7 +163,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 // (Max reports 60° horizontal). It sits 142 u back, so it's a wide vista —
                 // the skybox/skyline GLBs fill the frame behind the street. Tune fov live
                 // with the debug free-cam mouse-wheel (press I to read the value back).
-                newCameraPos = new Vector3(8.116, 67.961, 124.141);
+                newCameraPos = new Vector3(8.116, 60.961, 124.141);
                 newCameraFov = 50.3; // fallback vFOV; actual value derived from hFOV + canvas aspect at runtime
                 newCameraHFov = 60; // Max PhysCamera001 "Specify FOV" — horizontal; CameraController derives vFOV
                 newCameraRotation = [-0.4364, 0];

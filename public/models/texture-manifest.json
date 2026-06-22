@@ -22,5 +22,7 @@
   "env_searchlight_large": ["spotlight.png"],
   "env_graffiti_decal": ["graffitti.png"],
   "env_pothole_decal": ["pothole.png"],
-  "env_camera_pole_medium": ["cccam.png"]
+  "env_streetbarricade_medium": ["flagpole.png", "streetbarricade.png"],
+  "env_camera_pole_medium": ["cccam.png"],
+  "env_camera_pole_medium001": ["cccam.png"]
 }

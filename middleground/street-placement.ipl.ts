@@ -67,5 +67,6 @@ export const STREET_IPL: IPLFile = {
         { id: 56, modelName: 'env_streetlight_standard_medium', pos: [-38.8027, 7.8753, -1.6384], rot: [0, -1, 0, 0] },
         { id: 57, modelName: 'env_streetlight_standard_medium', pos: [-38.8027, 7.8753, -26.2335], rot: [0, -1, 0, 0] },
         { id: 58, modelName: 'env_streetlight_standard_medium', pos: [-38.8027, 7.8753, 20.5951], rot: [0, -1, 0, 0] },
+        { id: 59, modelName: 'env_camera_pole_medium001', pos: [-39.6694, 12.2385, 1.8186], rot: [0, 0.707107, 0, 0.707107] },
     ],
 };
