@@ -7,7 +7,7 @@ export type MiniChallenge = {
     text: string;
     acceptText: string;
     rejectText: string;
-    acceptEffect: MiniChallengeEffect;
-    rejectEffect: MiniChallengeEffect;
+    acceptOutcome: MiniChallengeEffect;
+    rejectOutcome: MiniChallengeEffect;
     riskText?: string;
 };

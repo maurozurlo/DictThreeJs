@@ -289,8 +289,8 @@ The faction (`people`), label, and headline key all stay in the asset and are lo
 | Stat | Application | Read sites |
 |------|-------------|------------|
 | `treasury` | Direct mutation — summed in `nextRound()` step 1 alongside `roundIncome`; `newTreasury += sumModifiers(mods, 'treasury', round)`. With `delay: 0` (TIME_MODIFIER id 1), active from acquisition round — applied in that same round's `nextRound()`. | `nextRound()` only |
-| `businessTaxes` `peopleTaxes` | Read-through effective — `effectiveTax = base + sumModifiers(mods, stat, round)`, clamped 0–100. | Tax-penalty check in `RoundResolver`; Advisor verdict; UI display |
-| `securitySpend` `educationSpend` `healthSpend` `infrastructureSpend` | Read-through effective — `effectiveSpend = base + sumModifiers(mods, stat, round)`, clamped 0–10. | Employment check (`CitizenHandler`); happiness formula (`CitizenHandler`); body-type; `applyBudgetEffects`; Advisor |
+| `businessTaxes` `peopleTaxes` | Read-through effective — `effectiveTax = base + sumModifiers(mods, stat, round)`, clamped 0–50. | Tax-penalty check in `RoundResolver`; Advisor verdict; UI display |
+| `securitySpend` `educationSpend` `healthSpend` `infrastructureSpend` | Read-through effective — `effectiveSpend = base + sumModifiers(mods, stat, round)`, clamped 1–10. | Employment check (`CitizenHandler`); happiness formula (`CitizenHandler`); body-type; `applyBudgetEffects`; Advisor |
 
 **Content unification — Law/Deal/WeirdLaw type shape:**
 

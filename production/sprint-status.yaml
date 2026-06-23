@@ -14,7 +14,7 @@ goal: "Implement the Citizen Simulation — 25 persistent citizens whose fate tr
 start: "2026-06-17"
 end: "2026-06-24"
 generated: "2026-06-17"
-updated: "2026-06-18"
+updated: "2026-06-22"
 goal_amendment: "Scope expanded 2026-06-18: Modifier unification (P4a + P4b) added as Must Have — LawEffect/DealEffect/RecurringEffect conversion layer must be removed before further content work."
 
 stories:

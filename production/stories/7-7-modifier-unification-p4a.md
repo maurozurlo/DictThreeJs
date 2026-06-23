@@ -1,12 +1,12 @@
 # Story 7-7: Modifier Unification P4a — Type Contracts & Content Migration
 
 > **Epic**: Modifier Engine
-> **Status**: Not Started
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 1.5 days
 > **Manifest Version**: 2026-06-13
-> **Last Updated**: 2026-06-18
+> **Last Updated**: 2026-06-22
 
 ## Context
 
@@ -121,3 +121,10 @@ rejectMods: [
 
 - Depends on: Story 7-3 must be DONE (establishes P3; no type conflicts)
 - Unlocks: Story 7-8 (engine wiring cannot proceed until types are correct)
+
+## Completion Notes
+**Completed**: 2026-06-22
+**Criteria**: 17/17 passing
+**Deviations**: ADVISORY — `miniChallenges.ts` `acceptEffect`/`rejectEffect` fields (MiniChallengeEffect, a different type system) were not in scope; resolved by renaming to `acceptOutcome`/`rejectOutcome` on 2026-06-22
+**Test Evidence**: Integration — `tsc -b` clean + vitest 583/583 + grep assertions (AC-3, AC-9)
+**Code Review**: APPROVED WITH SUGGESTIONS (2026-06-22)

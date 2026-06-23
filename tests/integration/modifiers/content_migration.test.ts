@@ -124,10 +124,10 @@ describe('Class-A content (periodic events, mini-challenges) — no modifier', (
     it('mini-challenge effects are pure immediate deltas — no modifier shape in the effect objects', async () => {
         const { MINI_CHALLENGES } = await import('../../../src/assets/miniChallenges');
         for (const challenge of MINI_CHALLENGES) {
-            expect(challenge.acceptEffect).not.toHaveProperty('mods');
-            expect(challenge.acceptEffect).not.toHaveProperty('recurringEffect');
-            expect(challenge.rejectEffect).not.toHaveProperty('mods');
-            expect(challenge.rejectEffect).not.toHaveProperty('recurringEffect');
+            expect(challenge.acceptOutcome).not.toHaveProperty('mods');
+            expect(challenge.acceptOutcome).not.toHaveProperty('recurringEffect');
+            expect(challenge.rejectOutcome).not.toHaveProperty('mods');
+            expect(challenge.rejectOutcome).not.toHaveProperty('recurringEffect');
         }
     });
 });

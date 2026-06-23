@@ -1,12 +1,12 @@
 # Story 7-8: Modifier Unification P4b — Engine Wiring & Read Sites
 
 > **Epic**: Modifier Engine
-> **Status**: Not Started
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Integration
 > **Estimate**: 2.0 days
 > **Manifest Version**: 2026-06-13
-> **Last Updated**: 2026-06-18
+> **Last Updated**: 2026-06-22
 
 ## Context
 
@@ -155,3 +155,10 @@ export function getEffectiveBudgetStat(
 
 - Depends on: Story 7-7 must be DONE (types and content must exist before wiring)
 - Unlocks: Active-Legislation UI can display effective budget contributions; Advisor reads full modifier context
+
+## Completion Notes
+**Completed**: 2026-06-22
+**Criteria**: 15/15 passing
+**Deviations**: ADVISORY — `miniChallenges.ts` naming (resolved in 7-7 close-out); double `set()` in normal-law/deal paths (pre-existing ADR-0002 debt, logged in tech-debt-register.md); string-slice key derivation in `getEffectiveBudgetStat` (logged); missing reject-path/floor clamping tests (logged)
+**Test Evidence**: Integration — `tests/integration/modifiers/modifier_application.test.ts` exists and passes; `tsc -b` clean; vitest 583/583
+**Code Review**: APPROVED WITH SUGGESTIONS (2026-06-22)

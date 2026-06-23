@@ -1,0 +1,5 @@
+# Tech Debt Register
+
+- **2026-06-22** (Story 7-8 — Modifier Unification P4b): Double `set()` in normal-law and deal decision paths in `GameState.ts` — `handleDecision` issues one `set()` then the caller issues a second for stats. ADR-0002 mandates a single atomic `set()`; the weird-law path correctly uses one. Pre-existing violation not introduced by 7-8. Tracked from `production/stories/7-8-modifier-unification-p4b.md`.
+- **2026-06-22** (Story 7-8 — Modifier Unification P4b): `getEffectiveBudgetStat` expenditure key derivation uses `stat.slice(0, -'Spend'.length)` cast to `keyof Expenditures` — works for all current keys but suppresses type safety. Replace with an explicit lookup table. Tracked from `production/stories/7-8-modifier-unification-p4b.md`.
+- **2026-06-22** (Story 7-8 — Modifier Unification P4b): Missing tests for reject-path treasury timing (applied at decision time, not deferred), weird-law treasury timing (class A immediate), and expenditure floor clamping (`EXPENDITURE.MIN = 1`). Tracked from `production/stories/7-8-modifier-unification-p4b.md`.

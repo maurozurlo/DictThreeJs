@@ -106,7 +106,7 @@ export function getEffectiveRelation(
 /**
  * Effective budget-slider value (ADR-0008 Amendment 2026-06-18 §9): base slider
  * value plus in-window modifier contributions to that stat, re-clamped to the
- * slider's range (0–100 for tax rates, 0–10 for expenditures). Every gameplay
+ * slider's range (0–50 for tax rates, 1–10 for expenditures). Every gameplay
  * site that formerly read `budget.taxes.*` / `budget.expenditures.*` directly
  * (tax penalty, citizen happiness/employment, applyBudgetEffects, health rep
  * check) reads through here so law/deal budget modifiers take effect.

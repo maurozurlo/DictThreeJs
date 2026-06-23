@@ -494,3 +494,13 @@ Task: Implemented — pending story-done
 - Tech debt logged: None
 - Code reviews: Deferred — to run before sprint close-out
 - Next recommended: 7-7 Modifier Unification P4a (Must Have, currently backlog)
+
+## Session Extract — /story-done + /code-review 2026-06-22
+- Verdict: COMPLETE WITH NOTES (both stories)
+- Story: production/stories/7-7-modifier-unification-p4a.md — Modifier Unification P4a (17/17 criteria)
+- Story: production/stories/7-8-modifier-unification-p4b.md — Modifier Unification P4b (15/15 criteria)
+- Files changed: src/types/MiniChallenge.ts, src/assets/miniChallenges.ts, src/Stores/GameState.ts, tests/integration/modifiers/content_migration.test.ts (acceptOutcome/rejectOutcome rename); src/Utils/Modifiers.ts (doc comment fix); docs/architecture/adr-0008-timed-modifier-engine.md (tax bound fix); docs/tech-debt-register.md (created)
+- Code review: APPROVED WITH SUGGESTIONS — double set() pre-existing debt, string-slice key derivation, missing reject-path tests logged
+- Tech debt logged: 3 items in docs/tech-debt-register.md
+- Suite: 583/583 passing, tsc clean
+- Next: All Must Have stories complete. Run /smoke-check sprint → /team-qa sprint → /retrospective before sprint close-out

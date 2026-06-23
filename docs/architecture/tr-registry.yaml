@@ -436,3 +436,21 @@ requirements:
     revised: ""
     adr: docs/architecture/adr-0003-react-threejs-integration.md
     status: active
+
+  # --- Budget UX (Sprint 8) ---
+  - id: TR-budget-002
+    system: budget
+    gdd: design/gdd/game-concept.md
+    requirement: "Budget tab shows itemised next-round projection: tax income, base expenses, law treasury effects (time:1 mods pending), deal treasury effects (time:1 mods pending), recurring income, recurring expense, and total net — so the player sees exactly what nextRound() will apply before they advance"
+    created: 2026-06-22
+    revised: ""
+    status: active
+
+  # --- Law/Deal UX (Sprint 8) ---
+  - id: TR-laws-001
+    system: laws
+    gdd: design/gdd/laws.md
+    requirement: "Law and deal acceptance/rejection requires a pre-commit confirmation step: clicking Accept/Reject shows a human-readable consequence preview (with timing labels: next round / permanent / per round) before actUponLaw/actUponDeal fires; a second Confirm tap commits; post-decision view shows what the committed law/deal is doing"
+    created: 2026-06-22
+    revised: ""
+    status: active

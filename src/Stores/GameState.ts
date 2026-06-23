@@ -453,7 +453,7 @@ export const INITIAL_STATE = ({ set, get }: {
             const challenge = state.miniChallenge.current;
             if (!challenge || state.miniChallenge.decided) return;
 
-            const effect = accepted ? challenge.acceptEffect : challenge.rejectEffect;
+            const effect = accepted ? challenge.acceptOutcome : challenge.rejectOutcome;
             const resultKey = `${challenge.id}.${accepted ? 'accept' : 'reject'}`;
 
             // Apply treasury change
