@@ -118,7 +118,13 @@
         "net": "Neto",
         "peopleTax": "Población",
         "businessTax": "Empresas",
-        "rounds_left": "~{{rounds}} rondas restantes"
+        "rounds_left": "~{{rounds}} rondas restantes",
+        "expenses": "Gastos",
+        "recurring_income": "Ingresos recurrentes",
+        "recurring_expense": "Gasto recurrente",
+        "law_effects": "Efectos de leyes (próxima ronda)",
+        "deal_effects": "Efectos de tratos (próxima ronda)",
+        "total": "Total"
     },
     "meet": {
         "none_selected": "Selecciona una facción para comenzar la reunión",

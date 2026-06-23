@@ -118,7 +118,13 @@
     "net": "Net",
     "peopleTax": "People Tax",
     "businessTax": "Business Tax",
-    "rounds_left": "~{{rounds}} rounds left"
+    "rounds_left": "~{{rounds}} rounds left",
+    "expenses": "Expenses",
+    "recurring_income": "Recurring Income",
+    "recurring_expense": "Recurring Expense",
+    "law_effects": "Law Effects (next round)",
+    "deal_effects": "Deal Effects (next round)",
+    "total": "Total"
   },
   "meet": {
     "none_selected": "Select a faction to begin the meeting",

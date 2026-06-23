@@ -37,10 +37,14 @@ const Budget = ({ isActive }: TabProps) => {
         <TabLayout
             headerTitle={t('tabs.budget')}
             sideMenu={<>
-                <Typography variant="caption" className={styles.positive}>{t('budget.in')}: +{MoneyNumberFormatter(financials.totalIncome)}</Typography>
-                <Typography variant="caption" className={styles.negative}>{t('budget.out')}: -{MoneyNumberFormatter(financials.expenses)}</Typography>
+                <Typography variant="caption" className={styles.positive}>{t('budget.taxes')}: +{MoneyNumberFormatter(financials.totalIncome)}</Typography>
+                <Typography variant="caption" className={styles.negative}>{t('budget.expenses')}: -{MoneyNumberFormatter(financials.expenses)}</Typography>
+                {financials.recurringIncome !== 0 && <Typography variant="caption" className={styles.positive}>{t('budget.recurring_income')}: +{MoneyNumberFormatter(financials.recurringIncome)}</Typography>}
+                {financials.recurringExpenses !== 0 && <Typography variant="caption" className={styles.negative}>{t('budget.recurring_expense')}: -{MoneyNumberFormatter(financials.recurringExpenses)}</Typography>}
+                {financials.lawTreasuryDelta !== 0 && <Typography variant="caption" className={financials.lawTreasuryDelta >= 0 ? styles.positive : styles.negative}>{t('budget.law_effects')}: {financials.lawTreasuryDelta >= 0 ? '+' : ''}{MoneyNumberFormatter(financials.lawTreasuryDelta)}</Typography>}
+                {financials.dealTreasuryDelta !== 0 && <Typography variant="caption" className={financials.dealTreasuryDelta >= 0 ? styles.positive : styles.negative}>{t('budget.deal_effects')}: {financials.dealTreasuryDelta >= 0 ? '+' : ''}{MoneyNumberFormatter(financials.dealTreasuryDelta)}</Typography>}
                 <div className={clsx(styles.netStatus, net >= 0 ? styles.positive : styles.negative)}>
-                    {t('budget.net')}: {net >= 0 ? '+' : '-'}{MoneyNumberFormatter(Math.abs(net))}
+                    {t('budget.total')}: {net >= 0 ? '+' : ''}{MoneyNumberFormatter(net)}
                 </div>
                 {roundsLeft !== null && <Typography variant="caption" className={styles.roundsWarning}><Icon type="warning" /> {t('budget.rounds_left', { rounds: roundsLeft })}</Typography>}
             </>}

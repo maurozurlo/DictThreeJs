@@ -504,3 +504,12 @@ Task: Implemented — pending story-done
 - Tech debt logged: 3 items in docs/tech-debt-register.md
 - Suite: 583/583 passing, tsc clean
 - Next: All Must Have stories complete. Run /smoke-check sprint → /team-qa sprint → /retrospective before sprint close-out
+
+## Session Extract — /dev-story 8-1 2026-06-22
+- Story: production/stories/8-1-budget-projection-breakdown.md — Budget Projection Breakdown
+- Files changed: src/Stores/BudgetHandler.ts (RoundFinancials + lawTreasuryDelta/dealTreasuryDelta + totalTreasuryDelta in netChange), src/Stores/RoundResolver.ts (removed duplicate treasuryModDelta — now in financials.netChange), src/components/Tabs/Budget.tsx (7-row itemized projection sideMenu), public/locales/en/menu.json (+6 budget.* keys), public/locales/es/menu.json (+6 budget.* keys)
+- Key fix: RoundResolver was adding treasuryModDelta separately; after including treasury in netChange, the removal of that line was required to avoid double-counting
+- Test written: None — UI story; evidence doc required at production/qa/evidence/8-1-budget-projection-evidence.md
+- Blockers: None
+- Suite: 583/583, tsc clean
+- Next: /code-review src/Stores/BudgetHandler.ts src/components/Tabs/Budget.tsx then /story-done production/stories/8-1-budget-projection-breakdown.md

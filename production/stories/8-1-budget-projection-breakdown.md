@@ -1,12 +1,13 @@
 # Story 8-1: Budget Projection Breakdown
 
 > **Epic**: Budget UX
-> **Status**: Not Started
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: UI
 > **Estimate**: 0.5 days
 > **Manifest Version**: 2026-06-13
 > **Last Updated**: 2026-06-22
+
 
 ## Context
 

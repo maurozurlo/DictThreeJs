@@ -13,6 +13,10 @@ export type RoundFinancials = {
     recurringIncome: number;
     /** Per-round expenses from active recurring effects (laws/deals). 0 when none active. */
     recurringExpenses: number;
+    /** Summed treasury-stat modifier contributions from active law-recurring entries this round (time:1 specs pending). */
+    lawTreasuryDelta: number;
+    /** Summed treasury-stat modifier contributions from active deal entries this round (time:1 specs pending). */
+    dealTreasuryDelta: number;
     netChange: number;
 };
 
@@ -54,9 +58,16 @@ export function calculateRoundFinancials(
     const expenses = (health + infrastructure + security + education) * INCOME.EXPENDITURE_COST_PER_LEVEL;
     const recurringIncome = sumModifiers(modifiers, 'roundIncome', round);
     const recurringExpenses = sumModifiers(modifiers, 'roundExpense', round);
-    const netChange = totalIncome + recurringIncome - expenses - recurringExpenses;
+    const lawMods  = modifiers.filter(m => m.type === 'law-recurring' && m.state === 'active');
+    const dealMods = modifiers.filter(m => m.type === 'deal'          && m.state === 'active');
+    const lawTreasuryDelta  = sumModifiers(lawMods,  'treasury', round);
+    const dealTreasuryDelta = sumModifiers(dealMods, 'treasury', round);
+    // Total treasury delta covers ALL modifier types (not just law/deal) so that
+    // RoundResolver can use netChange directly without a separate sumModifiers call.
+    const totalTreasuryDelta = sumModifiers(modifiers, 'treasury', round);
+    const netChange = totalIncome + recurringIncome - expenses - recurringExpenses + totalTreasuryDelta;
 
-    return { peopleIncome, businessIncome, totalIncome, expenses, recurringIncome, recurringExpenses, netChange };
+    return { peopleIncome, businessIncome, totalIncome, expenses, recurringIncome, recurringExpenses, lawTreasuryDelta, dealTreasuryDelta, netChange };
 }
 
 /**

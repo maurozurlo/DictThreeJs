@@ -19,7 +19,7 @@ import { getGameDate } from "../Utils/GameDate";
 import { filterLawPool } from "./RecurringHandler";
 import { checkCoup } from "./CoupHandler";
 import { educationToDumbScore } from "../Utils/String";
-import { getEffectiveCharisma, getEffectiveRelation, getEffectiveBudgetStat, fireOnStartModifiers, sumModifiers } from "../Utils/Modifiers";
+import { getEffectiveCharisma, getEffectiveRelation, getEffectiveBudgetStat, fireOnStartModifiers } from "../Utils/Modifiers";
 import { resolveCitizenPipeline } from "./CitizenHandler";
 import type { CitizenState } from "../types/Citizen";
 
@@ -90,10 +90,9 @@ export function resolveRound(state: GameState): RoundResolution {
     //        at the resolving round; ADR-0008 §5). All current recurring content is
     //        immediate+permanent, so the resolving round and round+1 are equivalent. ---
     const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, coupRound);
-    // One-shot treasury modifiers (accept-path treasury specs, time:1) bank in the
-    // resolving round (ADR-0008 §9 / Amendment 2026-06-18, AC-7).
-    const treasuryModDelta = sumModifiers(state.gameManagement.modifiers, 'treasury', coupRound);
-    let newTreasury = state.budget.treasury + financials.netChange + treasuryModDelta;
+    // Treasury-stat modifiers (accept-path time:1 specs, ADR-0008 §9) are now included
+    // in financials.netChange via calculateRoundFinancials — no separate sumModifiers call needed.
+    let newTreasury = state.budget.treasury + financials.netChange;
     const recurringGmFields = recurringFieldKeys(financials);
 
     // Effective budget sliders (base + active law/deal modifier contributions,
