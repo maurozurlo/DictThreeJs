@@ -213,6 +213,31 @@
     }
   },
   "stat": {
-    "population": "Population"
+    "population": "Population",
+    "military": "Military relations",
+    "business": "Business relations",
+    "people": "People relations",
+    "charisma": "Charisma",
+    "treasury": "Treasury",
+    "roundIncome": "Income",
+    "roundExpense": "Expense",
+    "securitySpend": "Security budget",
+    "educationSpend": "Education budget",
+    "healthSpend": "Health budget",
+    "infrastructureSpend": "Infrastructure budget",
+    "businessTaxes": "Business tax rate",
+    "peopleTaxes": "People tax rate"
+  },
+  "consequence": {
+    "next_round": "next round",
+    "permanent": "permanent",
+    "per_round": "per round",
+    "none": "No immediate effects.",
+    "confirm_approve": "You are about to approve this law.",
+    "confirm_reject": "You are about to reject this law.",
+    "confirm_accept_deal": "You are about to accept this deal.",
+    "confirm_reject_deal": "You are about to reject this deal.",
+    "confirm": "Confirm",
+    "back": "Back"
   }
 }

@@ -11,3 +11,11 @@
 .dealCard {
     margin: 1rem 2rem;
 }
+
+.positive {
+    color: var(--income-green);
+}
+
+.negative {
+    color: var(--expense-red);
+}

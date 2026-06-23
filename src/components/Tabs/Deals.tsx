@@ -7,10 +7,11 @@ import styles from './Deals.module.css'
 import Button from '../Button/Button'
 import Typography from '../Typography/Typography'
 import clsx from 'clsx'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { dumbifyText } from '../../Utils/String'
 import AdvisorButton from '../Advisor/AdvisorButton'
 import { computeDealVerdict, computeDealTrigger } from '../../Utils/Advisor'
+import { formatConsequences } from '../../Utils/formatConsequences'
 
 const Deals = ({ isActive }: TabProps) => {
     const { t: menuT } = useTranslation('menu')
@@ -20,6 +21,10 @@ const Deals = ({ isActive }: TabProps) => {
     const dealDecided = useGameStore(s => s.deals.dealDecided)
     const actUponDeal = useGameStore(s => s.deals.actUponDeal)
     const dumbScore = useGameStore(s => s.gameManagement.dumbScore)
+
+    const [pendingDecision, setPendingDecision] = useState<boolean | null>(null);
+    const [lastDecision, setLastDecision] = useState<boolean | null>(null);
+
     const dealText = useMemo(
         () => currentDeal ? dumbifyText(t(currentDeal.text), dumbScore) : '',
         [currentDeal?.text, dumbScore, t]
@@ -32,24 +37,68 @@ const Deals = ({ isActive }: TabProps) => {
         }>
             {currentDeal ?
                 <Card className={styles.dealCard}>
-                    <Typography variant='body' className={clsx({
-                        [styles.isInactive]: dealDecided
-                    })}>{dealText}</Typography>
+                    {pendingDecision !== null ? (
+                        // Confirmation view
+                        <>
+                            <Typography variant='h3'>
+                                {menuT(pendingDecision ? 'consequence.confirm_accept_deal' : 'consequence.confirm_reject_deal')}
+                            </Typography>
+                            {(() => {
+                                const mods = pendingDecision ? currentDeal.acceptMods : currentDeal.rejectMods;
+                                const lines = formatConsequences(mods, menuT);
+                                return lines.length === 0
+                                    ? <Typography variant='caption'>{menuT('consequence.none')}</Typography>
+                                    : lines.map((line, i) => (
+                                        <Typography key={i} variant='caption' className={line.amount >= 0 ? styles.positive : styles.negative}>
+                                            {line.label}: {line.amount >= 0 ? '+' : ''}{line.amount}
+                                            {line.timing ? ` (${line.timing})` : ''}
+                                        </Typography>
+                                    ));
+                            })()}
+                            <div className={styles.cardActions}>
+                                <Button onClick={() => {
+                                    setLastDecision(pendingDecision);
+                                    actUponDeal(pendingDecision);
+                                    setPendingDecision(null);
+                                }}>{menuT('consequence.confirm')}</Button>
+                                <Button onClick={() => setPendingDecision(null)}>{menuT('consequence.back')}</Button>
+                            </div>
+                        </>
+                    ) : (
+                        // Normal / post-decision view
+                        <>
+                            <Typography variant='body' className={clsx({
+                                [styles.isInactive]: dealDecided
+                            })}>{dealText}</Typography>
 
-                    <div className={styles.cardActions}>
-                        <Button disabled={dealDecided} onClick={() => actUponDeal(true)}>{t('deals.accept')}</Button>
-                        <Button disabled={dealDecided} onClick={() => actUponDeal(false)}>{t('deals.reject')}</Button>
-                    </div>
+                            <div className={styles.cardActions}>
+                                <Button disabled={dealDecided} onClick={() => setPendingDecision(true)}>{t('deals.accept')}</Button>
+                                <Button disabled={dealDecided} onClick={() => setPendingDecision(false)}>{t('deals.reject')}</Button>
+                            </div>
 
-                    {dealDecided ? <>
-                        <Typography variant='h3'>{t('deals.outcome')}</Typography>
-                        {outcome && outcome.length ?
-                            <span>
-                                {outcome.map((line) => (
-                                    <Typography key={line} variant='body'>{t(line)}</Typography>
-                                ))}
-                            </span> : ""}
-                    </> : null}
+                            {dealDecided ? <>
+                                <Typography variant='h3'>{t('deals.outcome')}</Typography>
+                                {outcome && outcome.length ?
+                                    <span>
+                                        {outcome.map((line) => (
+                                            <Typography key={line} variant='body'>{t(line)}</Typography>
+                                        ))}
+                                    </span> : ""}
+                                {lastDecision !== null && (() => {
+                                    const mods = lastDecision ? currentDeal.acceptMods : currentDeal.rejectMods;
+                                    const lines = formatConsequences(mods, menuT);
+                                    return lines.length === 0
+                                        ? <Typography variant='caption'>{menuT('consequence.none')}</Typography>
+                                        : lines.map((line, i) => (
+                                            <Typography key={i} variant='caption' className={line.amount >= 0 ? styles.positive : styles.negative}>
+                                                {line.label}: {line.amount >= 0 ? '+' : ''}{line.amount}
+                                                {line.timing ? ` (${line.timing})` : ''}
+                                            </Typography>
+                                        ));
+                                })()}
+                            </> : null}
+                        </>
+                    )}
                 </Card>
 
                 : <Card>

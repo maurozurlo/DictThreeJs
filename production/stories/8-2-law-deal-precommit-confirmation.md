@@ -1,7 +1,7 @@
 # Story 8-2: Law/Deal Pre-Commit Confirmation
 
 > **Epic**: Budget UX
-> **Status**: Not Started
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: UI
 > **Estimate**: 1.0 days

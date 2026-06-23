@@ -213,6 +213,31 @@
         }
     },
     "stat": {
-        "population": "Población"
+        "population": "Población",
+        "military": "Relación militar",
+        "business": "Relación con élite",
+        "people": "Relación con el pueblo",
+        "charisma": "Carisma",
+        "treasury": "Tesoro",
+        "roundIncome": "Ingresos",
+        "roundExpense": "Gastos",
+        "securitySpend": "Presupuesto de seguridad",
+        "educationSpend": "Presupuesto de educación",
+        "healthSpend": "Presupuesto de salud",
+        "infrastructureSpend": "Presupuesto de infraestructura",
+        "businessTaxes": "Tasa de impuesto empresarial",
+        "peopleTaxes": "Tasa de impuesto al pueblo"
+    },
+    "consequence": {
+        "next_round": "próxima ronda",
+        "permanent": "permanente",
+        "per_round": "por ronda",
+        "none": "Sin efectos inmediatos.",
+        "confirm_approve": "Estás a punto de aprobar esta ley.",
+        "confirm_reject": "Estás a punto de rechazar esta ley.",
+        "confirm_accept_deal": "Estás a punto de aceptar este trato.",
+        "confirm_reject_deal": "Estás a punto de rechazar este trato.",
+        "confirm": "Confirmar",
+        "back": "Volver"
     }
 }
