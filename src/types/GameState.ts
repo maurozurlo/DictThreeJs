@@ -230,6 +230,10 @@ export type GameState = {
         lastRoundRecurringIncome: number;
         /** Recurring expense total for the round just ended — written by nextRound(). */
         lastRoundRecurringExpenses: number;
+        /** Summed treasury-stat modifier contributions from active law entries for the round just ended. */
+        lastRoundLawTreasuryDelta: number;
+        /** Summed treasury-stat modifier contributions from active deal entries for the round just ended. */
+        lastRoundDealTreasuryDelta: number;
         currentRoundExtraIncome: number;
         currentRoundExtraExpenses: number;
         timerStartedAt: number | null;

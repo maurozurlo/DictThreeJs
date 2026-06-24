@@ -30,6 +30,8 @@ type Relations = GameState['relations']['current'];
 const recurringFieldKeys = (financials: RoundFinancials) => ({
     lastRoundRecurringIncome: financials.recurringIncome,
     lastRoundRecurringExpenses: financials.recurringExpenses,
+    lastRoundLawTreasuryDelta: financials.lawTreasuryDelta,
+    lastRoundDealTreasuryDelta: financials.dealTreasuryDelta,
     repealTakenThisRound: false,
 });
 

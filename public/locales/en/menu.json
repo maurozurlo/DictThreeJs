@@ -25,6 +25,8 @@
     "budget_expenses": "Budget expenses:",
     "recurring_income": "Legislation income:",
     "recurring_expenses": "Legislation costs:",
+    "law_effects": "Law effects:",
+    "deal_effects": "Deal effects:",
     "extra_expenses": "Extra expenses:",
     "net": "Net:",
     "coup_warning": "Coup imminent! A faction is moving against you.",

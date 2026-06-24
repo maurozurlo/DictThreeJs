@@ -20,6 +20,8 @@ const DayEnded = () => {
     const lastRoundExpenses = useGameStore(s => s.gameManagement.lastRoundExpenses)
     const recurringIncome = useGameStore(s => s.gameManagement.lastRoundRecurringIncome)
     const recurringExpenses = useGameStore(s => s.gameManagement.lastRoundRecurringExpenses)
+    const lawTreasuryDelta = useGameStore(s => s.gameManagement.lastRoundLawTreasuryDelta)
+    const dealTreasuryDelta = useGameStore(s => s.gameManagement.lastRoundDealTreasuryDelta)
     const extraIncome = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
     const extraExpenses = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
     // coupArmedLastRound is written at the START of the current round by nextRound().
@@ -54,7 +56,7 @@ const DayEnded = () => {
 
     if (!dayEnded || phase !== 'start') return null
 
-    const net = lastRoundIncome + recurringIncome + extraIncome
+    const net = lastRoundIncome + recurringIncome + extraIncome + lawTreasuryDelta + dealTreasuryDelta
         - lastRoundExpenses - recurringExpenses - extraExpenses
 
     return (
@@ -81,6 +83,22 @@ const DayEnded = () => {
                     <div className={styles.statRow}>
                         <span>{t('actionPanel.recurring_expenses')}</span>
                         <span className={styles.negative}>-{MoneyNumberFormatter(recurringExpenses)}</span>
+                    </div>
+                )}
+                {lawTreasuryDelta !== 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.law_effects')}</span>
+                        <span className={lawTreasuryDelta >= 0 ? styles.positive : styles.negative}>
+                            {lawTreasuryDelta >= 0 ? '+' : ''}{MoneyNumberFormatter(lawTreasuryDelta)}
+                        </span>
+                    </div>
+                )}
+                {dealTreasuryDelta !== 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.deal_effects')}</span>
+                        <span className={dealTreasuryDelta >= 0 ? styles.positive : styles.negative}>
+                            {dealTreasuryDelta >= 0 ? '+' : ''}{MoneyNumberFormatter(dealTreasuryDelta)}
+                        </span>
                     </div>
                 )}
                 {extraIncome > 0 && (

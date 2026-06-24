@@ -621,6 +621,8 @@ export const INITIAL_STATE = ({ set, get }: {
         lastRoundExpenses: 0,
         lastRoundRecurringIncome: 0,
         lastRoundRecurringExpenses: 0,
+        lastRoundLawTreasuryDelta: 0,
+        lastRoundDealTreasuryDelta: 0,
         currentRoundExtraIncome: 0,
         currentRoundExtraExpenses: 0,
         timerStartedAt: null,
@@ -700,6 +702,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         lastRoundExpenses: financials.expenses,
                         lastRoundRecurringIncome: financials.recurringIncome,
                         lastRoundRecurringExpenses: financials.recurringExpenses,
+                        lastRoundLawTreasuryDelta: financials.lawTreasuryDelta,
+                        lastRoundDealTreasuryDelta: financials.dealTreasuryDelta,
                         pendingLog: [...s.gameManagement.pendingLog, timeoutEvent],
                     },
                 }));
@@ -712,6 +716,8 @@ export const INITIAL_STATE = ({ set, get }: {
                         lastRoundExpenses: financials.expenses,
                         lastRoundRecurringIncome: financials.recurringIncome,
                         lastRoundRecurringExpenses: financials.recurringExpenses,
+                        lastRoundLawTreasuryDelta: financials.lawTreasuryDelta,
+                        lastRoundDealTreasuryDelta: financials.dealTreasuryDelta,
                     },
                 }));
             }
