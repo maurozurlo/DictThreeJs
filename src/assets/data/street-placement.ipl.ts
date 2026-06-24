@@ -67,5 +67,11 @@ export const STREET_IPL: IPLFile = {
         { id: 56, modelName: 'env_streetlight_standard_medium', pos: [-38.8027, 7.8753, -1.6384], rot: [0, -1, 0, 0] },
         { id: 57, modelName: 'env_streetlight_standard_medium', pos: [-38.8027, 7.8753, -26.2335], rot: [0, -1, 0, 0] },
         { id: 58, modelName: 'env_streetlight_standard_medium', pos: [-38.8027, 7.8753, 20.5951], rot: [0, -1, 0, 0] },
+        // Poor building tier — same footprint positions as their normal counterparts (inst 1, 2, 5, 6, 11)
+        { id: 59, modelName: 'env_bld_mixeduse_poor',    pos: [73.2308, 8.5841, -15.381],   rot: [0, 0, 0, 1] },
+        { id: 60, modelName: 'env_bld_apartment_poor',   pos: [-70.5091, 12.1701, 6.2423],  rot: [0, 0, 0, 1] },
+        { id: 61, modelName: 'env_bld_commercial_poor',  pos: [28.9129, 7.6798, -61.6309],  rot: [0, 0, 0, 1] },
+        { id: 62, modelName: 'env_bld_civic_poor',       pos: [-25.9581, 13.3443, -66.44],  rot: [0, 0, 0, 1] },
+        { id: 63, modelName: 'env_bld_residential_poor', pos: [72.7167, 3.8065, 9.7592],    rot: [0, 0, 0, 1] },
     ],
 };
