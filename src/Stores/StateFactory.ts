@@ -81,6 +81,7 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             representativeStatuses: { military: 'active', business: 'active', people: 'active' },
             dumbScore: educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
             rngSeed,
+            conditionStage: 0,
         },
         specialEnding: { ...state.specialEnding, available: false, faction: null, used: false, outcome: null },
         shop: { ...state.shop, frozenFactions: new Set<Power>(), advisorLevel: 0 as 0 | 1 | 2 | 3 },
@@ -179,6 +180,7 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
             representativeStatuses: (gm.representativeStatuses as Record<Power, 'active' | 'sick' | 'eliminated'>) ?? { military: 'active', business: 'active', people: 'active' },
             dumbScore: typeof gm.dumbScore === 'number' ? gm.dumbScore : educationToDumbScore(GAMESTATE.BUDGET.EXPENDITURES.education),
             rngSeed: typeof gm.rngSeed === 'number' ? gm.rngSeed : state.gameManagement.rngSeed,
+            conditionStage: typeof gm.conditionStage === 'number' ? gm.conditionStage : 0,
             timerStartedAt: Date.now(),
             timerPausedAt: null,
             charisma: {

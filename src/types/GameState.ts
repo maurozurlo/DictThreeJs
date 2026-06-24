@@ -272,6 +272,12 @@ export type GameState = {
         representativeStatuses: Record<Power, 'active' | 'sick' | 'eliminated'>;
         /** Dumbification score [0–100] frozen at the start of each round from the education budget. */
         dumbScore: number;
+        /**
+         * Building condition tier offset. Range −5 (all poor) to +5 (all rich), 0 = all normal.
+         * Advanced each round by BuildingDegradationHandler (Story 8-7). Read by
+         * buildingVariantForSlot (Story 8-8) to select the correct GLB variant per slot.
+         */
+        conditionStage: number;
         /** Seed the run's PRNG was initialized with at new-game (ADR-0010). Informational /
          *  shareable; the live cursor is serialized separately by SaveLoad.buildSavePayload. */
         rngSeed: number;
