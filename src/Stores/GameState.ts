@@ -532,7 +532,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 set((s) => ({
                     budget: { ...s.budget, treasury: s.budget.treasury - cost },
                     shop: { ...s.shop, advisorLevel: targetLevel },
-                    gameManagement: { ...s.gameManagement, pendingLog: [...s.gameManagement.pendingLog, advisorEvent] },
+                    gameManagement: {
+                        ...s.gameManagement,
+                        pendingLog: [...s.gameManagement.pendingLog, advisorEvent],
+                        currentRoundShopCost: s.gameManagement.currentRoundShopCost + cost,
+                    },
                 }));
             } else if (item === 'statue') {
                 // Owned count is derived from the modifiers ledger — single source of truth.
@@ -554,6 +558,7 @@ export const INITIAL_STATE = ({ set, get }: {
                             buildShopModifier(shopItem, state.gameManagement.round),
                         ],
                         pendingLog: [...s.gameManagement.pendingLog, statueEvent],
+                        currentRoundShopCost: s.gameManagement.currentRoundShopCost + shopItem.price,
                     },
                 }));
             } else {
@@ -570,7 +575,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 set((s) => ({
                     budget: { ...s.budget, treasury: s.budget.treasury - mediaPackage.price },
                     shop: { ...s.shop, frozenFactions: newFrozen },
-                    gameManagement: { ...s.gameManagement, pendingLog: [...s.gameManagement.pendingLog, mediaEvent] },
+                    gameManagement: {
+                        ...s.gameManagement,
+                        pendingLog: [...s.gameManagement.pendingLog, mediaEvent],
+                        currentRoundShopCost: s.gameManagement.currentRoundShopCost + mediaPackage.price,
+                    },
                 }));
             }
         },
@@ -625,6 +634,9 @@ export const INITIAL_STATE = ({ set, get }: {
         lastRoundDealTreasuryDelta: 0,
         currentRoundExtraIncome: 0,
         currentRoundExtraExpenses: 0,
+        currentRoundExpropriateGain: 0,
+        currentRoundBribeCost: 0,
+        currentRoundShopCost: 0,
         timerStartedAt: null,
         timerPausedAt: null,
         modifiers: [],
@@ -793,6 +805,9 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        currentRoundExpropriateGain: 0,
+                        currentRoundBribeCost: 0,
+                        currentRoundShopCost: 0,
                         coupArmedLastRound: false,
                         coupWarningFaction: null,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -821,6 +836,9 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        currentRoundExpropriateGain: 0,
+                        currentRoundBribeCost: 0,
+                        currentRoundShopCost: 0,
                         coupArmedLastRound: false,
                         coupWarningFaction: null,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -849,6 +867,9 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        currentRoundExpropriateGain: 0,
+                        currentRoundBribeCost: 0,
+                        currentRoundShopCost: 0,
                         coupArmedLastRound: false,
                         coupWarningFaction: null,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -921,6 +942,9 @@ export const INITIAL_STATE = ({ set, get }: {
                         ...recurringGmFields,
                         currentRoundExtraIncome: 0,
                         currentRoundExtraExpenses: 0,
+                        currentRoundExpropriateGain: 0,
+                        currentRoundBribeCost: 0,
+                        currentRoundShopCost: 0,
                         coupArmedLastRound: newCoupArmedLastRound,
                         coupWarningFaction: newCoupWarningFaction,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -1094,7 +1118,10 @@ export const INITIAL_STATE = ({ set, get }: {
                 keyNs: 'meet',
                 params: meetLiteralParams,
                 refParams: meetRefParams,
-                deltas: buildDeltas({ charisma: newCharisma - state.gameManagement.charisma.current }),
+                deltas: buildDeltas({
+                    charisma: newCharisma - state.gameManagement.charisma.current,
+                    treasury: treasuryUpdate,
+                }),
             };
             return {
                 meet: {
@@ -1118,6 +1145,12 @@ export const INITIAL_STATE = ({ set, get }: {
                         [power]: state.gameManagement.meetCounts[power] + 1,
                     } : state.gameManagement.meetCounts,
                     representativeStatuses: newRepStatuses,
+                    currentRoundBribeCost: action === 'bribe' && actionTaken && treasuryUpdate < 0
+                        ? state.gameManagement.currentRoundBribeCost + Math.abs(treasuryUpdate)
+                        : state.gameManagement.currentRoundBribeCost,
+                    currentRoundExpropriateGain: action === 'expropriate' && actionTaken && treasuryUpdate > 0
+                        ? state.gameManagement.currentRoundExpropriateGain + treasuryUpdate
+                        : state.gameManagement.currentRoundExpropriateGain,
                     pendingLog: actionTaken
                         ? [...state.gameManagement.pendingLog, meetEvent]
                         : state.gameManagement.pendingLog,

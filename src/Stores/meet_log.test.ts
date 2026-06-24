@@ -23,8 +23,9 @@ describe('meeting log capture', () => {
         expect(ev.keyNs).toBe('meet');
         expect(ev.refParams?.power).toBe('power.military');
         expect(ev.params?.cost).toBeTypeOf('number');
-        // Bribe costs no charisma → no effects line.
-        expect(ev.deltas).toBeUndefined();
+        // Bribe carries a treasury delta; charisma is zero so only treasury appears.
+        expect(ev.deltas?.treasury).toBeTypeOf('number');
+        expect((ev.deltas?.treasury ?? 0)).toBeLessThan(0);
     });
 
     it('eliminate records the charisma cost on the effects line', () => {

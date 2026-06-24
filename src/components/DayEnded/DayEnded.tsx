@@ -22,6 +22,9 @@ const DayEnded = () => {
     const recurringExpenses = useGameStore(s => s.gameManagement.lastRoundRecurringExpenses)
     const lawTreasuryDelta = useGameStore(s => s.gameManagement.lastRoundLawTreasuryDelta)
     const dealTreasuryDelta = useGameStore(s => s.gameManagement.lastRoundDealTreasuryDelta)
+    const expropriateGain = useGameStore(s => s.gameManagement.currentRoundExpropriateGain)
+    const bribeCost = useGameStore(s => s.gameManagement.currentRoundBribeCost)
+    const shopCost = useGameStore(s => s.gameManagement.currentRoundShopCost)
     const extraIncome = useGameStore(s => s.gameManagement.currentRoundExtraIncome)
     const extraExpenses = useGameStore(s => s.gameManagement.currentRoundExtraExpenses)
     // coupArmedLastRound is written at the START of the current round by nextRound().
@@ -56,8 +59,8 @@ const DayEnded = () => {
 
     if (!dayEnded || phase !== 'start') return null
 
-    const net = lastRoundIncome + recurringIncome + extraIncome + lawTreasuryDelta + dealTreasuryDelta
-        - lastRoundExpenses - recurringExpenses - extraExpenses
+    const net = lastRoundIncome + recurringIncome + extraIncome + lawTreasuryDelta + dealTreasuryDelta + expropriateGain
+        - lastRoundExpenses - recurringExpenses - extraExpenses - bribeCost - shopCost
 
     return (
         <Modal>
@@ -83,6 +86,24 @@ const DayEnded = () => {
                     <div className={styles.statRow}>
                         <span>{t('actionPanel.recurring_expenses')}</span>
                         <span className={styles.negative}>-{MoneyNumberFormatter(recurringExpenses)}</span>
+                    </div>
+                )}
+                {expropriateGain > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.expropriation_gain')}</span>
+                        <span className={styles.positive}>+{MoneyNumberFormatter(expropriateGain)}</span>
+                    </div>
+                )}
+                {bribeCost > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.bribe_cost')}</span>
+                        <span className={styles.negative}>-{MoneyNumberFormatter(bribeCost)}</span>
+                    </div>
+                )}
+                {shopCost > 0 && (
+                    <div className={styles.statRow}>
+                        <span>{t('actionPanel.shop_cost')}</span>
+                        <span className={styles.negative}>-{MoneyNumberFormatter(shopCost)}</span>
                     </div>
                 )}
                 {lawTreasuryDelta !== 0 && (

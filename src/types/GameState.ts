@@ -236,6 +236,12 @@ export type GameState = {
         lastRoundDealTreasuryDelta: number;
         currentRoundExtraIncome: number;
         currentRoundExtraExpenses: number;
+        /** Treasury gained from expropriation actions this round. */
+        currentRoundExpropriateGain: number;
+        /** Treasury spent on bribe actions this round. */
+        currentRoundBribeCost: number;
+        /** Treasury spent in the shop (advisor, statue, media) this round. */
+        currentRoundShopCost: number;
         timerStartedAt: number | null;
         timerPausedAt: number | null;
         /**
