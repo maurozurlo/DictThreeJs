@@ -8,18 +8,17 @@ import type { IDEFile } from '../../types/WorldLayout';
 export const STREET_IDE: IDEFile = {
     version: 1,
     objs: [
-        // Buildings Normal (infrastructure tier 4–7)
-        { id: 2001, modelName: 'env_bld_mixeduse_normal', asset: 'models/env_bld_mixeduse_poor.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/building4.png', transparent: false }] },
-        { id: 2002, modelName: 'env_bld_apartment_normal', asset: 'models/env_bld_apartment_normal.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/building1.png', transparent: false }] },
-        { id: 2003, modelName: 'env_bld_commercial_normal', asset: 'models/env_bld_commercial_normal.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/building5.png', transparent: false }] },
-        { id: 2004, modelName: 'env_bld_civic_normal', asset: 'models/env_bld_civic_normal.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/building2.png', transparent: false }] },
-        { id: 2005, modelName: 'env_bld_residential_normal', asset: 'models/env_bld_residential_normal.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/building3.png', transparent: false }] },
-        // Buildings Poor (infrastructure tier 1–3)
-        { id: 2006, modelName: 'env_bld_mixeduse_poor', asset: 'models/env_bld_mixeduse_poor.glb', visibleIf: { tab: 'Street', infrastructure: [1, 3] }, textures: [{ texture: 'textures/building4_poor.png', transparent: false }] },
-        { id: 2007, modelName: 'env_bld_apartment_poor', asset: 'models/env_bld_apartment_poor.glb', visibleIf: { tab: 'Street', infrastructure: [1, 3] }, textures: [{ texture: 'textures/building1_poor.png', transparent: false }] },
-        { id: 2008, modelName: 'env_bld_commercial_poor', asset: 'models/env_bld_commercial_poor.glb', visibleIf: { tab: 'Street', infrastructure: [1, 3] }, textures: [{ texture: 'textures/building5_poor.png', transparent: false }] },
-        { id: 2009, modelName: 'env_bld_civic_poor', asset: 'models/env_bld_civic_poor.glb', visibleIf: { tab: 'Street', infrastructure: [1, 3] }, textures: [{ texture: 'textures/building2_poor.png', transparent: false }] },
-        { id: 2010, modelName: 'env_bld_residential_poor', asset: 'models/env_bld_residential_poor.glb', visibleIf: { tab: 'Street', infrastructure: [1, 3] }, textures: [{ texture: 'textures/building3_poor.png', transparent: false }] },
+        // Buildings — variant selected by conditionStage in useStreetLayout — visibleIf.infrastructure not used for buildings
+        { id: 2001, modelName: 'env_bld_mixeduse_normal', asset: 'models/env_bld_mixeduse_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building4.png', transparent: false }] },
+        { id: 2002, modelName: 'env_bld_apartment_normal', asset: 'models/env_bld_apartment_normal.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building1.png', transparent: false }] },
+        { id: 2003, modelName: 'env_bld_commercial_normal', asset: 'models/env_bld_commercial_normal.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building5.png', transparent: false }] },
+        { id: 2004, modelName: 'env_bld_civic_normal', asset: 'models/env_bld_civic_normal.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building2.png', transparent: false }] },
+        { id: 2005, modelName: 'env_bld_residential_normal', asset: 'models/env_bld_residential_normal.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building3.png', transparent: false }] },
+        { id: 2006, modelName: 'env_bld_mixeduse_poor', asset: 'models/env_bld_mixeduse_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building4_poor.png', transparent: false }] },
+        { id: 2007, modelName: 'env_bld_apartment_poor', asset: 'models/env_bld_apartment_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building1_poor.png', transparent: false }] },
+        { id: 2008, modelName: 'env_bld_commercial_poor', asset: 'models/env_bld_commercial_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building5_poor.png', transparent: false }] },
+        { id: 2009, modelName: 'env_bld_civic_poor', asset: 'models/env_bld_civic_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building2_poor.png', transparent: false }] },
+        { id: 2010, modelName: 'env_bld_residential_poor', asset: 'models/env_bld_residential_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/building3_poor.png', transparent: false }] },
         // Street Objects
         { id: 2011, modelName: 'env_flagpole_large', asset: 'models/env_flagpole_large.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/flagpole.png', transparent: false }] },
         { id: 2012, modelName: 'env_flag_small', asset: 'models/env_flag_small.glb', visibleIf: { tab: 'Street' } },

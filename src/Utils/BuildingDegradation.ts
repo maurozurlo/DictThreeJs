@@ -10,6 +10,9 @@ import {
     BUILDING_STAGE_MAX,
 } from '../Constants/BuildingDegradation';
 
+/** Number of building slots in the street scene. Each slot renders one variant. */
+export const NUM_BUILDING_SLOTS = 5;
+
 /**
  * Advances the building condition counter by one round.
  *
@@ -43,4 +46,25 @@ export function advanceConditionStage(conditionStage: number, infrastructure: nu
     }
 
     return Clamp(conditionStage + delta, BUILDING_STAGE_MIN, BUILDING_STAGE_MAX);
+}
+
+/**
+ * Returns the display variant for a single building slot given the current condition stage.
+ *
+ * Formula (GDD §3.1):
+ *   poorSlotCount  = max(0, −conditionStage)
+ *   richSlotCount  = max(0, +conditionStage)
+ *   slot < poorSlotCount              → 'poor'
+ *   slot < NUM_BUILDING_SLOTS − richSlotCount → 'normal'
+ *   otherwise                         → 'rich'
+ *
+ * @param slotIndex     Zero-indexed building slot (0–4)
+ * @param conditionStage Current stage from game state (−5 to +5)
+ */
+export function buildingVariantForSlot(slotIndex: number, conditionStage: number): 'poor' | 'normal' | 'rich' {
+    const poorSlotCount = Math.max(0, -conditionStage);
+    const richSlotCount = Math.max(0, conditionStage);
+    if (slotIndex < poorSlotCount) return 'poor';
+    if (slotIndex < NUM_BUILDING_SLOTS - richSlotCount) return 'normal';
+    return 'rich';
 }
