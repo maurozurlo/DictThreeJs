@@ -41,7 +41,7 @@ Both axes are evaluated independently each round. A city can have Rich buildings
 Full model list and counts from `STREET VIEW 0.1 REQUIREMENTS - Sheet2.csv`.
 
 **Infrastructure — Poor tier:**
-Skybox Overcast, Skyline Poor, Poor Buildings 1–5 (cracked apartment, leaning apartment, rundown house, improvised market, burned graffitied building), Dead Tree ×2, Streetlight ×1, Billboard ×2, Empty Statue Pedestal ×3, Burned Decal ×8, Pothole Decal ×10.
+Skybox Overcast, Skyline Poor, Poor Buildings 1–5 (cracked apartment, leaning apartment, rundown house, improvised market, burned graffitied building), Dead Tree ×2, Streetlight ×1, Billboard ×2, Empty Statue Pedestal ×3, Burned Decal ×8, Pothole Decal ×10, Burning Trash Can ×4.
 
 **Infrastructure — Normal tier:**
 Skybox Grey, Skyline Normal, Normal Buildings 1–5 (4-storey apartment, 2-storey residential, mixed-use, market, government office), Tree ×10, Park Bench ×6, Electric Pole ×6, Streetlight ×4, Construction Site ×2, Billboard ×2, Empty Statue Pedestal ×3.
@@ -50,7 +50,7 @@ Skybox Grey, Skyline Normal, Normal Buildings 1–5 (4-storey apartment, 2-store
 Skybox Sunny, Skyline Rich, Rich Buildings 1–5 (luxury tower, grand hotel, corporate HQ, luxury mall, monumental government palace), Palm Tree ×10, Bush ×5, Park Bench ×1, Electric Pole ×1, Luxury Streetlight ×6, Big Fountain ×2, Luxury Garden ×2, Billboard ×2, Empty Statue Pedestal ×3.
 
 **Security — Disorder tier:**
-Graffiti Decal ×10, Barricade ×2, Burning Trash Can ×4.
+Graffiti Decal ×10, Barricade ×2.
 
 **Security — Controlled tier:**
 Guard Post ×2, Security Camera Pole ×4.
