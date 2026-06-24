@@ -778,6 +778,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 recurringGmFields, newRelations, newCharisma, newRepStatuses,
                 newSelectedPower, newDumbScore, newLog, newRound, modifiersAfterOnStart,
                 nextDailyEvent, newCitizenStates, newDisplayedPopulation, bankruptcy, overthrown,
+                newConditionStage,
             } = resolution;
 
             // Context for the cumulative stats update applied in each surviving branch.
@@ -953,6 +954,7 @@ export const INITIAL_STATE = ({ set, get }: {
                         dumbScore: newDumbScore,
                         modifiers: modifiersAfterOnStart,
                         pendingLog: [],
+                        conditionStage: newConditionStage,
                     },
                     shop: { ...s.shop, frozenFactions: new Set<Power>() },
                     ...(specialEndingFaction ? {
@@ -1009,6 +1011,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     dumbScore: newDumbScore,
                     modifiers: modifiersAfterOnStart,
                     pendingLog: [],
+                    conditionStage: newConditionStage,
                 },
                 shop: { ...s.shop, frozenFactions: new Set<Power>() },
                 tabs: {

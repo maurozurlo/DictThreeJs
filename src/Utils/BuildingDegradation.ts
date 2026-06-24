@@ -1,0 +1,46 @@
+import { Clamp } from './Math';
+import {
+    BUILDING_POOR_THRESHOLD,
+    BUILDING_RICH_THRESHOLD,
+    BUILDING_DEGRADE_RATE,
+    BUILDING_RECOVER_RATE_RICH,
+    BUILDING_RECOVER_RATE_POOR_REPAIR,
+    BUILDING_RECOVER_RATE_RICH_DECAY,
+    BUILDING_STAGE_MIN,
+    BUILDING_STAGE_MAX,
+} from '../Constants/BuildingDegradation';
+
+/**
+ * Advances the building condition counter by one round.
+ *
+ * Degradation formula (GDD §3.1):
+ *   infrastructure ≤ BUILDING_POOR_THRESHOLD                              → −BUILDING_DEGRADE_RATE
+ *   infrastructure ≥ BUILDING_RICH_THRESHOLD AND stage < STAGE_MAX       → +BUILDING_RECOVER_RATE_RICH
+ *   Normal tier AND stage < 0                                             → +BUILDING_RECOVER_RATE_POOR_REPAIR
+ *   Normal tier AND stage > 0                                             → −BUILDING_RECOVER_RATE_RICH_DECAY
+ *   otherwise (Normal tier, stage === 0)                                  → 0
+ *
+ * Output is always clamped to [BUILDING_STAGE_MIN, BUILDING_STAGE_MAX].
+ *
+ * @param conditionStage - current stage value
+ * @param infrastructure - effective infrastructure slider value (post-modifier)
+ */
+export function advanceConditionStage(conditionStage: number, infrastructure: number): number {
+    let delta: number;
+
+    const isNormalTier = infrastructure > BUILDING_POOR_THRESHOLD && infrastructure < BUILDING_RICH_THRESHOLD;
+
+    if (infrastructure <= BUILDING_POOR_THRESHOLD) {
+        delta = -BUILDING_DEGRADE_RATE;
+    } else if (infrastructure >= BUILDING_RICH_THRESHOLD && conditionStage < BUILDING_STAGE_MAX) {
+        delta = BUILDING_RECOVER_RATE_RICH;
+    } else if (isNormalTier && conditionStage < 0) {
+        delta = BUILDING_RECOVER_RATE_POOR_REPAIR;
+    } else if (isNormalTier && conditionStage > 0) {
+        delta = -BUILDING_RECOVER_RATE_RICH_DECAY;
+    } else {
+        delta = 0;
+    }
+
+    return Clamp(conditionStage + delta, BUILDING_STAGE_MIN, BUILDING_STAGE_MAX);
+}

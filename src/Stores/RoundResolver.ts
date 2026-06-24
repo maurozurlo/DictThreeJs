@@ -22,6 +22,7 @@ import { educationToDumbScore } from "../Utils/String";
 import { getEffectiveCharisma, getEffectiveRelation, getEffectiveBudgetStat, fireOnStartModifiers } from "../Utils/Modifiers";
 import { resolveCitizenPipeline } from "./CitizenHandler";
 import type { CitizenState } from "../types/Citizen";
+import { advanceConditionStage } from "../Utils/BuildingDegradation";
 
 type CoupResult = ReturnType<typeof checkCoup>;
 type RepStatuses = Record<Power, 'active' | 'sick' | 'eliminated'>;
@@ -57,6 +58,7 @@ export type RoundResolution =
         newDisplayedPopulation: number;
         bankruptcy: boolean;
         overthrown: Power | undefined;
+        newConditionStage: number;
     };
 
 /**
@@ -141,6 +143,10 @@ export function resolveRound(state: GameState): RoundResolution {
             : 'none';
     const newDumbScore = educationToDumbScore(effEducation);
 
+    // --- 4b. Building condition stage (Story 8-7) ---
+    const currentConditionStage = state.gameManagement.conditionStage;
+    const newConditionStage = advanceConditionStage(currentConditionStage, effInfrastructure);
+
     // --- 5. Build log entry (ADR-0011) ---
     // The player's own actions (law/deal/meet/event/shop) were captured with their
     // ACTUAL deltas into pendingLog as they happened this round; the resolution-time
@@ -157,12 +163,24 @@ export function resolveRound(state: GameState): RoundResolution {
         ? [{ key: 'log.event.daily', labelKey: state.dailyEvent.current.key, labelNs: 'daily_events', dumb: true }]
         : [];
 
+    const degradationEvents: LogEvent[] = [];
+    if (currentConditionStage > -1 && newConditionStage <= -1) {
+        degradationEvents.push({ key: 'log.buildingDegradationStart' });
+    }
+    if (currentConditionStage > -3 && newConditionStage <= -3) {
+        degradationEvents.push({ key: 'log.buildingDegradationAdvanced' });
+    }
+    if (currentConditionStage > -5 && newConditionStage <= -5) {
+        degradationEvents.push({ key: 'log.buildingDegradationMax' });
+    }
+
     const events: LogEvent[] = [
         ...state.gameManagement.pendingLog,
         ...budgetEvents,
         ...taxEvents,
         { key: 'log.financials', params: { income: financials.totalIncome, expenses: financials.expenses } },
         ...coupEvents,
+        ...degradationEvents,
         ...dailyEvents,
     ];
     const newLog: RoundLogEntry[] = [...state.log, { date: getGameDate(state.gameManagement.round), events }];
@@ -214,6 +232,7 @@ export function resolveRound(state: GameState): RoundResolution {
         newLog, newRound, modifiersAfterOnStart, nextDailyEvent,
         newCitizenStates, newDisplayedPopulation,
         bankruptcy, overthrown,
+        newConditionStage,
     };
 }
 
