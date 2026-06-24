@@ -32,6 +32,7 @@ export const STREET_TEXTURE_URLS: string[] = STREET_TEXTURE_SLOTS.map((s) => s.t
 export function useStreetLayout(): ResolvedPlacement[] {
     const activeTab      = useGameStore((s) => s.tabs.activeTab);
     const infrastructure = useGameStore((s) => s.budget.expenditures.infrastructure);
+    const security       = useGameStore((s) => s.budget.expenditures.security);
     const modifiers      = useGameStore((s) => s.gameManagement.modifiers);
     const round          = useGameStore((s) => s.gameManagement.round);
 
@@ -52,6 +53,10 @@ export function useStreetLayout(): ResolvedPlacement[] {
                     const [min, max] = v.infrastructure;
                     if (infrastructure < min || infrastructure > max) return [];
                 }
+                if (v.security !== undefined) {
+                    const [min, max] = v.security;
+                    if (security < min || security > max) return [];
+                }
                 if (v.modifier !== undefined) {
                     if (!visibleModifiers.some((m) => m.id === v.modifier)) return [];
                 }
@@ -68,5 +73,5 @@ export function useStreetLayout(): ResolvedPlacement[] {
                 scale:      inst.scale ?? [1, 1, 1],
             }];
         });
-    }, [activeTab, infrastructure, round, visibleModifiers]);
+    }, [activeTab, infrastructure, security, round, visibleModifiers]);
 }

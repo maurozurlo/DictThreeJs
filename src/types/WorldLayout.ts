@@ -31,8 +31,10 @@ export interface IDEObject {
     visibleIf?: {
         /** Game tab that must be active. Matches Tabs const values (e.g. "Street"). */
         tab?: string;
-        /** budget.expenditures.infrastructure slider range [min, max] inclusive (0–10). */
+        /** budget.expenditures.infrastructure slider range [min, max] inclusive (1–10). */
         infrastructure?: [number, number];
+        /** budget.expenditures.security slider range [min, max] inclusive (1–10). */
+        security?: [number, number];
         /** Modifier ID (e.g. "laws.5") that must be currently active. */
         modifier?: string;
         /** Minimum round number. */
