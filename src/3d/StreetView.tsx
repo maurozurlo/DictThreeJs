@@ -5,9 +5,11 @@ import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
 import { Tabs } from '../types/Tabs';
 import { STREET_LAYOUT } from '../assets/streetLayout';
+import { STREET_PATHS } from '../assets/data/street-paths';
 import { useStreetLayout, STREET_TEXTURE_SLOTS, STREET_TEXTURE_URLS } from '../Hooks/useStreetLayout';
 import type { ResolvedPlacement } from '../types/WorldLayout';
 import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
+import { lightPhase } from '../Utils/TrafficLight';
 import CitizenModels from './CitizenModels';
 
 const BUILDING_COLOR = '#7a6e62';
@@ -19,6 +21,7 @@ const VEHICLE_COLOR = '#d94a4a';
 // Metric scale: 1 unit = 1 metre (see art-bible §10.0)
 const CAR_HALF_HEIGHT = 0.7;
 const DEBUG_ARROW_Y = 2.0;
+const CAR_SPEED = 6.0;
 
 // ---------------------------------------------------------------------------
 // PedWalker
@@ -99,7 +102,7 @@ function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
     const pos = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
     const nextIdx = useRef(1 % path.waypoints.length);
 
-    useFrame((_, delta) => {
+    useFrame((state, delta) => {
         const target = path.waypoints[nextIdx.current];
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
         const toTarget = targetPos.clone().sub(pos.current);
@@ -108,7 +111,10 @@ function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
 
         if (dist <= step) {
             pos.current.copy(targetPos);
-            nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
+            // stopFor gate: hold at the baked stop node while peds have the light
+            if (!(target.stopFor && lightPhase(state.clock.elapsedTime) === 'peds')) {
+                nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
+            }
         } else {
             toTarget.normalize();
             pos.current.addScaledVector(toTarget, step);
@@ -281,7 +287,7 @@ function StreetView() {
 
     if (activeTab !== Tabs.Street) return null;
 
-    const { pedestrians, pedestrianPaths, vehicles, vehiclePaths } = STREET_LAYOUT;
+    const { pedestrians, pedestrianPaths } = STREET_LAYOUT;
 
     return (
         <group position={[0, 0, 0]}>
@@ -310,12 +316,15 @@ function StreetView() {
                 return <PedWalker key={ped.id} ped={ped} path={path} debugEnabled={debugEnabled} />;
             })}
 
-            {/* Vehicles */}
-            {vehicles.map((v) => {
-                const path = vehiclePaths.find((p) => p.id === v.pathId);
-                if (!path) return null;
-                return <CarWalker key={v.id} vehicle={v} path={path} debugEnabled={debugEnabled} />;
-            })}
+            {/* Vehicles — one per exported car loop; stopFor nodes gate them at crossings */}
+            {STREET_PATHS.carPaths.map((p) => (
+                <CarWalker
+                    key={p.id}
+                    vehicle={{ id: `car-${p.id}`, pathId: p.id, speed: CAR_SPEED }}
+                    path={p}
+                    debugEnabled={debugEnabled}
+                />
+            ))}
 
         </group>
     );

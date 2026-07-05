@@ -35,6 +35,14 @@
     )
     fn fnum v = formattedPrint v format:decimals
     fn hasPrefix s p = (s.count >= p.count and (substring s 1 p.count) == p)
+    fn joinStrs arr = (
+        local out = ""
+        for j = 1 to arr.count do (
+            out += arr[j]
+            if j < arr.count do out += ", "
+        )
+        out
+    )
 
     fn wantedShape name = (
         hasPrefix name "path_ped_" or hasPrefix name "path_car_" or \
@@ -55,33 +63,27 @@
         local s = shapesToDump[i]
         if (numSplines s) > 1 do format "-- WARNING: % has % splines; only spline 1 is dumped\n" s.name (numSplines s)
 
-        local closed = isClosed s 1
+        local closedFlag = isClosed s 1
         local nk = numKnots s 1
+        local knotsJoined = ""
+        local samplesJoined = ""
 
         in coordsys world (
-            -- knots
             local knotStrs = for k = 1 to nk collect (pt3Json (getKnotPoint s 1 k))
+            knotsJoined = joinStrs knotStrs
 
-            -- even arc-length samples (closed loops skip the duplicate end point)
             local len = curveLength s 1
-            local steps = amax 4 ((ceil (len / SAMPLE_STEP)) as integer)
-            local lastT = if closed then (steps - 1) else steps
+            local steps = (amax 4 ((ceil (len / SAMPLE_STEP)) as integer))
+            local lastT = if closedFlag then (steps - 1) else steps
             local sampleStrs = for t = 0 to lastT collect (
                 pt3Json (lengthInterp s 1 ((t as float) / (steps as float)))
             )
-
-            format "  {\"name\": %, \"closed\": %, " (jstr s.name) (if closed then "true" else "false") to:sb
-            format "\"knots\": [%], " (
-                local ks = stringStream ""
-                (for j = 1 to knotStrs.count do (format "%" knotStrs[j] to:ks; if j < knotStrs.count do format ", " to:ks))
-                ks as string
-            ) to:sb
-            format "\"samples\": [%]}" (
-                local ss = stringStream ""
-                (for j = 1 to sampleStrs.count do (format "%" sampleStrs[j] to:ss; if j < sampleStrs.count do format ", " to:ss))
-                ss as string
-            ) to:sb
+            samplesJoined = joinStrs sampleStrs
         )
+
+        format "  {\"name\": %, \"closed\": %, " (jstr s.name) (if closedFlag then "true" else "false") to:sb
+        format "\"knots\": [%], " knotsJoined to:sb
+        format "\"samples\": [%]}" samplesJoined to:sb
         if i < n then format ",\n" to:sb else format "\n" to:sb
     )
     format "]}\n" to:sb

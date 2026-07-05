@@ -6,11 +6,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
-import { STREET_LAYOUT } from '../assets/streetLayout';
-import type { WaypointPath } from '../types/StreetLayout';
+import { STREET_PATHS } from '../assets/data/street-paths';
+import type { WaypointPath, Waypoint, Crossing } from '../types/StreetLayout';
 import type { Citizen, CitizenState } from '../types/Citizen';
 import { computeBodyType } from '../Stores/CitizenHandler';
 import { pathTotalLength, positionAtPathDistance } from '../Utils/PathUtils';
+import { canStartCrossing } from '../Utils/TrafficLight';
 
 // ---------------------------------------------------------------------------
 // Asset catalogue
@@ -40,6 +41,8 @@ const PROP_URL_LIST = [
 ] as const;
 type PropKind = 'armyHat' | 'megaphone' | 'sign';
 const PROP_KINDS: readonly PropKind[] = ['armyHat', 'megaphone', 'sign'];
+
+const IDLE_URL = '/models/citizens/idle.fbx';
 
 const TEX_BASE = '/textures/peds';
 const HEAD_TEXTURE_URLS = [`${TEX_BASE}/head_citizen1.png`, `${TEX_BASE}/head_citizen2.png`];
@@ -138,12 +141,60 @@ const PROP_FIT: Record<PropKind, PropFit> = {
     sign: { bone: 'mixamorigRightHand', position: [0, 0.45, 0], rotation: [0, Math.PI / 2, Math.PI], scale: 550 },
 };
 
-/** Protestors cluster statically at these plaza positions (cycles if > 8).
- *  Spread for env-scale peds (~2.2 units shoulder width). */
+/** Chance to cross the street when arriving at a kerb waypoint (cosmetic). */
+const CROSS_CHANCE = 0.45;
+
+/** Fallback protest spots if no zone_protest was exported (cycles if > 8). */
 const PROTESTOR_POSITIONS: readonly [number, number, number][] = [
     [-4, 0, -6], [-1.5, 0, -7], [1.5, 0, -6], [4, 0, -7],
     [-3, 0, -9.5], [0, 0, -10.5], [3, 0, -9.5], [0, 0, -13],
 ];
+
+// ---------------------------------------------------------------------------
+// Exported path data lookups (see tools/ipl/convert_paths.mjs)
+// ---------------------------------------------------------------------------
+
+const PED_PATHS = STREET_PATHS.pedPaths;
+const PED_PATHS_BY_ID = new Map(PED_PATHS.map((p) => [p.id, p]));
+
+interface KerbOption { crossing: Crossing; end: 0 | 1; }
+
+/** pathId -> waypointIdx -> crossings anchored at that kerb. */
+const KERB_CROSSINGS: Map<string, Map<number, KerbOption[]>> = (() => {
+    const map = new Map<string, Map<number, KerbOption[]>>();
+    STREET_PATHS.crossings.forEach((crossing) => {
+        crossing.links.forEach((link, endIdx) => {
+            if (!link) return;
+            let byIdx = map.get(link.pathId);
+            if (!byIdx) { byIdx = new Map(); map.set(link.pathId, byIdx); }
+            const arr = byIdx.get(link.waypointIdx) ?? [];
+            arr.push({ crossing, end: endIdx as 0 | 1 });
+            byIdx.set(link.waypointIdx, arr);
+        });
+    });
+    return map;
+})();
+
+const PROTEST_ZONE = STREET_PATHS.zones.find((z) => z.id === 'protest') ?? null;
+const ZONE_PAD = 1.2;
+const ZONE_COLS = 4;
+const ZONE_ROW_SPACING = 2.6;
+
+/** Jittered grid spot inside zone_protest (stable per slot; falls back to the table). */
+function protestorPositionForSlot(slot: number): readonly [number, number, number] {
+    if (!PROTEST_ZONE) return PROTESTOR_POSITIONS[slot % PROTESTOR_POSITIONS.length];
+    const w = Math.max(0.1, PROTEST_ZONE.max[0] - PROTEST_ZONE.min[0] - ZONE_PAD * 2);
+    const d = Math.max(0.1, PROTEST_ZONE.max[1] - PROTEST_ZONE.min[1] - ZONE_PAD * 2);
+    const rows = Math.max(1, Math.floor(d / ZONE_ROW_SPACING) + 1);
+    const col = slot % ZONE_COLS;
+    const row = Math.floor(slot / ZONE_COLS) % rows;
+    // Deterministic jitter so spots don't shuffle between renders
+    const jx = ((((slot + 1) * 2654435761) >>> 16) % 100) / 100 - 0.5;
+    const jz = ((((slot + 1) * 40503) >>> 8) % 100) / 100 - 0.5;
+    const x = PROTEST_ZONE.min[0] + ZONE_PAD + (col / Math.max(1, ZONE_COLS - 1)) * w + jx;
+    const z = PROTEST_ZONE.min[1] + ZONE_PAD + (row / Math.max(1, rows - 1)) * d + jz;
+    return [x, 0, z] as const;
+}
 
 // ---------------------------------------------------------------------------
 // Shared per-frame position registry for proximity pausing
@@ -207,11 +258,22 @@ interface CitizenAssets {
     textures: Map<string, THREE.Texture>;
     /** Prop template objects — materials already prepared; clone per instance. */
     props: Record<PropKind, THREE.Object3D>;
+    /** Shared bones-only idle clip (idle.fbx) — retargets onto every body's rig. */
+    idleClip: THREE.AnimationClip | null;
+}
+
+/** Longest clip in an FBX ("Take 001" is a zero-length stub). */
+function longestClip(animations: THREE.AnimationClip[]): THREE.AnimationClip | null {
+    return animations.reduce<THREE.AnimationClip | null>(
+        (best, c) => (best === null || c.duration > best.duration ? c : best),
+        null,
+    );
 }
 
 /** Loads and prepares every model/texture the citizen roster needs. Suspends. */
 function useCitizenAssets(): CitizenAssets {
     const models = useLoader(FBXLoader, BODY_TYPES.map((bt) => MODEL_URLS[bt]));
+    const idleFbx = useLoader(FBXLoader, IDLE_URL);
     const gltfs = useLoader(GLTFLoader, [...PROP_URL_LIST]);
     const loadedTextures = useLoader(THREE.TextureLoader, ALL_TEXTURE_URLS);
 
@@ -227,11 +289,7 @@ function useCitizenAssets(): CitizenAssets {
         const bodies = {} as Record<BodyType, BodyModelAsset>;
         BODY_TYPES.forEach((bt, i) => {
             const source = models[i];
-            // Longest clip is the Mixamo walk ("Take 001" is a zero-length stub)
-            const walkClip = source.animations.reduce<THREE.AnimationClip | null>(
-                (best, c) => (best === null || c.duration > best.duration ? c : best),
-                null,
-            );
+            const walkClip = longestClip(source.animations);
             const bounds = new THREE.Box3().setFromObject(source);
             const rawHeight = Math.max(bounds.max.y - bounds.min.y, 1e-3);
             const modelScale = (TARGET_HEIGHTS[bt] * PED_WORLD_SCALE) / rawHeight;
@@ -254,8 +312,8 @@ function useCitizenAssets(): CitizenAssets {
             props[kind] = template;
         });
 
-        return { bodies, textures, props };
-    }, [models, gltfs, loadedTextures]);
+        return { bodies, textures, props, idleClip: longestClip(idleFbx.animations) };
+    }, [models, idleFbx, gltfs, loadedTextures]);
 }
 
 // ---------------------------------------------------------------------------
@@ -311,8 +369,8 @@ function buildCitizenModel(
     return { model, mixer: new THREE.AnimationMixer(model) };
 }
 
-/** Starts the walk action StrictMode-safely; returns the effect cleanup. */
-function startWalkAction(
+/** Starts a looping clip action StrictMode-safely; returns the effect cleanup. */
+function startClipAction(
     mixer: THREE.AnimationMixer,
     clip: THREE.AnimationClip | null,
     timeScale: number,
@@ -343,6 +401,16 @@ interface WalkerProps {
     onClick: (e: ThreeEvent<MouseEvent>) => void;
 }
 
+type WalkerMode = 'walk' | 'wait' | 'cross';
+
+interface CrossingTraversal {
+    crossing: Crossing;
+    /** Which crossing end we entered from (0 = waypoints[0] side). */
+    fromEnd: 0 | 1;
+    /** Index into crossing.waypoints currently being walked toward. */
+    idx: number;
+}
+
 function CitizenModelWalker({
     assets, bodyType, appearance, path,
     startPos, startNextIdx, speed, citizenId, onClick,
@@ -350,6 +418,14 @@ function CitizenModelWalker({
     const groupRef = useRef<THREE.Group>(null);
     const pos = useRef(startPos.clone());
     const nextIdx = useRef(startNextIdx);
+    // Crossing state — walkers hop between loops via crossings, so the active
+    // path lives in a ref (the `path` prop is only the starting loop).
+    const pathRef = useRef(path);
+    const mode = useRef<WalkerMode>('walk');
+    const traversal = useRef<CrossingTraversal | null>(null);
+    const actions = useRef<{ walk: THREE.AnimationAction | null; idle: THREE.AnimationAction | null; moving: boolean }>(
+        { walk: null, idle: null, moving: true },
+    );
 
     const body = assets.bodies[bodyType];
 
@@ -362,25 +438,60 @@ function CitizenModelWalker({
         [assets, body, appearance],
     );
 
-    useEffect(
-        () => startWalkAction(mixer, body.walkClip, speed / WALK_CLIP_NATURAL_SPEED, phase),
-        [mixer, body.walkClip, speed, phase],
-    );
+    useEffect(() => {
+        const walk = body.walkClip ? mixer.clipAction(body.walkClip) : null;
+        if (walk && body.walkClip) {
+            walk.time = phase * body.walkClip.duration;
+            walk.timeScale = speed / WALK_CLIP_NATURAL_SPEED;
+            walk.play();
+        }
+        const idle = assets.idleClip ? mixer.clipAction(assets.idleClip) : null;
+        if (idle && assets.idleClip) idle.time = phase * assets.idleClip.duration;
+        actions.current = { walk, idle, moving: true };
+        return () => { mixer.stopAllAction(); };
+    }, [mixer, body.walkClip, assets.idleClip, speed, phase]);
+
+    /** Crossfade between the walk and idle actions (kerb waiting). */
+    const setMoving = (moving: boolean) => {
+        const a = actions.current;
+        if (a.moving === moving) return;
+        a.moving = moving;
+        const from = moving ? a.idle : a.walk;
+        const to = moving ? a.walk : a.idle;
+        if (!to) return;
+        to.reset();
+        if (from) to.crossFadeFrom(from, 0.25, false);
+        to.play();
+    };
 
     // Remove this citizen from the registry on unmount (death, role change, etc.)
     useEffect(() => {
         return () => { citizenPedPositions.delete(citizenId); };
     }, [citizenId]);
 
-    useFrame((_, delta) => {
+    useFrame((state, delta) => {
         mixer.update(delta);
+        const elapsed = state.clock.elapsedTime;
+        const curPath = pathRef.current;
 
         // Register current position so neighbours can read it
         let entry = citizenPedPositions.get(citizenId);
         if (!entry) { entry = new THREE.Vector3(); citizenPedPositions.set(citizenId, entry); }
         entry.copy(pos.current);
 
-        const target = path.waypoints[nextIdx.current];
+        // Waiting at a kerb: idle until the ped-crossing window opens
+        if (mode.current === 'wait') {
+            if (traversal.current && canStartCrossing(elapsed)) {
+                mode.current = 'cross';
+                setMoving(true);
+            } else {
+                return;
+            }
+        }
+
+        const target: Waypoint = mode.current === 'cross' && traversal.current
+            ? traversal.current.crossing.waypoints[traversal.current.idx]
+            : curPath.waypoints[nextIdx.current];
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
         const toTarget = targetPos.clone().sub(pos.current);
         const dist = toTarget.length();
@@ -396,7 +507,44 @@ function CitizenModelWalker({
         const step = speed * delta;
         if (dist <= step) {
             pos.current.copy(targetPos);
-            nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
+
+            if (mode.current === 'cross' && traversal.current) {
+                const t = traversal.current;
+                const lastIdx = t.fromEnd === 0 ? t.crossing.waypoints.length - 1 : 0;
+                if (t.idx === lastIdx) {
+                    // Far kerb reached — hop onto the linked loop
+                    const link = t.crossing.links[t.fromEnd === 0 ? 1 : 0];
+                    const dest = link ? PED_PATHS_BY_ID.get(link.pathId) : undefined;
+                    if (link && dest) {
+                        pathRef.current = dest;
+                        nextIdx.current = (link.waypointIdx + 1) % dest.waypoints.length;
+                    }
+                    traversal.current = null;
+                    mode.current = 'walk';
+                } else {
+                    t.idx += t.fromEnd === 0 ? 1 : -1;
+                }
+            } else {
+                const arrivedIdx = nextIdx.current;
+                nextIdx.current = (nextIdx.current + 1) % curPath.waypoints.length;
+
+                // Kerb decision: maybe cross the street here (cosmetic roll)
+                const options = KERB_CROSSINGS.get(curPath.id)?.get(arrivedIdx);
+                if (options && options.length > 0 && Math.random() < CROSS_CHANCE) {
+                    const pick = options[Math.floor(Math.random() * options.length)];
+                    traversal.current = {
+                        crossing: pick.crossing,
+                        fromEnd: pick.end,
+                        idx: pick.end === 0 ? 0 : pick.crossing.waypoints.length - 1,
+                    };
+                    if (canStartCrossing(elapsed)) {
+                        mode.current = 'cross';
+                    } else {
+                        mode.current = 'wait';
+                        setMoving(false);
+                    }
+                }
+            }
         } else {
             pos.current.addScaledVector(moveDir, step);
         }
@@ -450,9 +598,15 @@ function CitizenModelStatic({ assets, bodyType, appearance, position, onClick }:
         };
     }, [assets, body, appearance]);
 
+    // Idle on the spot (retargeted shared clip); marching walk as a fallback
     useEffect(
-        () => startWalkAction(mixer, body.walkClip, PROTESTOR_ANIM_TIMESCALE, phase),
-        [mixer, body.walkClip, phase],
+        () => startClipAction(
+            mixer,
+            assets.idleClip ?? body.walkClip,
+            assets.idleClip ? 1 : PROTESTOR_ANIM_TIMESCALE,
+            phase,
+        ),
+        [mixer, assets.idleClip, body.walkClip, phase],
     );
 
     useFrame((_, delta) => { mixer.update(delta); });
@@ -503,13 +657,12 @@ function CitizenModels() {
         const map = new Map<number, CitizenPathAssignment>();
         if (citizens.length === 0) return map;
 
-        const { pedestrianPaths } = STREET_LAYOUT;
-        const pathGroups: number[][] = pedestrianPaths.map(() => []);
-        citizens.forEach((c) => pathGroups[c.id % pedestrianPaths.length].push(c.id));
+        const pathGroups: number[][] = PED_PATHS.map(() => []);
+        citizens.forEach((c) => pathGroups[c.id % PED_PATHS.length].push(c.id));
 
         pathGroups.forEach((ids, pathIdx) => {
             if (ids.length === 0) return;
-            const path = pedestrianPaths[pathIdx];
+            const path = PED_PATHS[pathIdx];
             const total = pathTotalLength(path.waypoints);
             const gap = total / ids.length;
 
@@ -545,7 +698,6 @@ function CitizenModels() {
 
     if (citizens.length === 0) return null;
 
-    const { pedestrianPaths } = STREET_LAYOUT;
     let protestorSlot = 0;
 
     return (
@@ -565,15 +717,14 @@ function CitizenModels() {
                 };
 
                 if (cs.role === 'protestor') {
-                    const posIdx = protestorSlot % PROTESTOR_POSITIONS.length;
-                    protestorSlot++;
+                    const slot = protestorSlot++;
                     return (
                         <CitizenModelStatic
                             key={citizen.id}
                             assets={assets}
                             bodyType={bodyType}
                             appearance={appearance}
-                            position={PROTESTOR_POSITIONS[posIdx]}
+                            position={protestorPositionForSlot(slot)}
                             onClick={handleClick}
                         />
                     );
@@ -581,7 +732,7 @@ function CitizenModels() {
 
                 const assignment = citizenPathAssignments.get(citizen.id);
                 if (!assignment) return null;
-                const path = pedestrianPaths[citizen.id % pedestrianPaths.length];
+                const path = PED_PATHS[citizen.id % PED_PATHS.length];
 
                 return (
                     <CitizenModelWalker

@@ -1,8 +1,3 @@
 {
-  "env_bld_residential_poor": ["building3_poor.png", "trash.png"],
-  "env_tree_poor": ["leaves.png", "trunk.png", "treeguard.png"],
-  "env_bld_mixeduse_poor": ["building4_poor.png", "concrete_buildings_base.png"],
-  "env_bld_commercial_poor": ["building5_poor.png"],
-  "env_bld_civic_poor": ["building2_poor.png", "concrete_buildings_top.png", "trash.png"],
-  "env_bld_apartment_poor": ["building1_poor.png", "concrete_buildings_top.png", "trash.png"]
+  "env_roads": ["stone.png", "sidewalk_str.png", "sidewalk_crn.png", "concrete_buildings_base.png", "road_centr.png", "road_corner.png", "park.png"]
 }
