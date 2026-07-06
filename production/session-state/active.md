@@ -513,3 +513,19 @@ Task: Implemented — pending story-done
 - Blockers: None
 - Suite: 583/583, tsc clean
 - Next: /code-review src/Stores/BudgetHandler.ts src/components/Tabs/Budget.tsx then /story-done production/stories/8-1-budget-projection-breakdown.md
+
+## Session Extract — Junker vehicle model 2026-07-06
+- Task: replace box cars with the new car_junker.glb model (first real vehicle; more models later)
+- Files changed: src/3d/Vehicles.tsx (new — junker rendering, per-car paint tint, wheel spin, ported CarWalker movement/stopFor logic), src/3d/StreetView.tsx (CarWalker + box car removed; renders <Vehicles/> in Suspense)
+- GLB facts (recorded from binary inspection): nose points +X; parts chassis_hi / wheels_front / wheels_back under exporter dummies (0.258245 dummy scale × 0.001 mesh scale); material→texture map matched by image size: Material__1627=body(128²), 1628=lights(64²), 1629+1630=wheels(256×32), 'fallback Material'=untextured back-wheel slot
+- Key fixes: wheels_back has NO UVs → shares wheels_front geometry; wheel geometry offset from node origin → re-pivoted (idempotent, StrictMode/useLoader-cache safe); car_junker_body.png is grayscale → tint pool multiplies like ped textures
+- Scale/speed: VEHICLE_WORLD_SCALE 3.7 (matches PED_WORLD_SCALE), CAR_LENGTH_M 4.5, CAR_SPEED_MPS 3.5
+- Verified: screenshot sequence — stopFor gate holds during ped phase, drives loops, heading matches nose, textures + tints render, no console errors; suite 596/596, tsc clean
+- NOT committed
+
+## Session Extract — Vehicle size + count 2026-07-06
+- CAR_LENGTH_M 4.5 → 2.9 (~65%, user said car too big)
+- Spawning: was 1 car per loop (3 total) → now proportional, one per CAR_TARGET_SPACING=100 units of loop length → 3+3+8 = 14 cars (loops are 336/336/822 units)
+- Added same-loop follow gap (MIN_CAR_SEPARATION=13, carPositions registry) so cars queue behind a stopFor-gated leader instead of stacking; no timeout needed (uniform speed per loop, leader always clears)
+- Suite 662/662, tsc clean; user checks visuals themselves (no more screenshots)
+- NOT committed

@@ -11,6 +11,7 @@ import SecretRoom from "./3d/SecretRoom";
 import Statue from "./3d/Statue";
 import StreetView from "./3d/StreetView";
 import { useGameStore } from "./Stores/GameState";
+import { Tabs } from "./types/Tabs";
 
 function CameraControllerFree() {
     console.log("Free camera mode enabled");
@@ -20,6 +21,7 @@ function CameraControllerFree() {
 
 
 export function Scene() {
+    const tab = useGameStore((s) => s.tabs.activeTab);
     const debug = useGameStore((s) => s.debug.enabled);
     const freeCam = useGameStore((s) => s.debug.freeCam);
     const repStatuses = useGameStore((s) => s.gameManagement.representativeStatuses);
@@ -32,13 +34,13 @@ export function Scene() {
             <pointLight position={[-1.335, 0.642, -0.09]} intensity={.2} />
             <pointLight position={[-0.769, 0.734, -0.393]} intensity={.3} />
             {debug && freeCam ? <CameraControllerFree /> : <CameraController />}
-            <MainModel />
+            {tab === Tabs.Laws || tab === Tabs.Meet ? <MainModel /> : null}
             {repStatuses.business === 'active' && <Elite />}
             {repStatuses.people === 'active' && <People />}
             {repStatuses.military === 'active' && <Military />}
             <SecretRoom />
             <Statue />
-            <StreetView />
+            {tab === Tabs.Street ? <StreetView /> : null}
         </Canvas>
     );
 }

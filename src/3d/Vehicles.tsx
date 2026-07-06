@@ -1,10 +1,11 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import { STREET_PATHS } from '../assets/data/street-paths';
 import type { WaypointPath, VehicleConfig } from '../types/StreetLayout';
 import { lightPhase } from '../Utils/TrafficLight';
+import { pathTotalLength, positionAtPathDistance } from '../Utils/PathUtils';
 
 // ---------------------------------------------------------------------------
 // Asset catalogue
@@ -46,11 +47,26 @@ const CAR_MATERIAL_TEXTURE: Record<string, CarTexKind> = {
  */
 const VEHICLE_WORLD_SCALE = 3.7;
 
-/** Junker length in metres (× VEHICLE_WORLD_SCALE at render). */
-const CAR_LENGTH_M = 4.5;
+/**
+ * Junker length in metres (× VEHICLE_WORLD_SCALE at render). Tuned to ~65% of
+ * the real 4.5 m — full metric size read too big against the street layout.
+ */
+const CAR_LENGTH_M = 2.9;
 
 /** Car ground speed in m/s (metric) — city-crawl pace, ~2.5× ped walk speed. */
 const CAR_SPEED_MPS = 3.5;
+
+/** Target centre-to-centre spacing (world units) between spawned cars on a loop. */
+const CAR_TARGET_SPACING = 100;
+
+/**
+ * A car holds while the same-loop car ahead is closer than this (world units,
+ * centre-to-centre; the junker is ~10.7 long) — queues form at stop gates
+ * instead of cars stacking on the same stop node.
+ */
+const MIN_CAR_SEPARATION = 13;
+/** cos of the half-angle of the "ahead" cone for the follow-gap check. */
+const CAR_BLOCK_CONE_COS = Math.cos((45 * Math.PI) / 180);
 
 // Body tint pool — car_junker_body.png is grayscale so material.color
 // multiplies through as the paint colour. Cosmetic only: deliberately NOT the
@@ -181,6 +197,12 @@ function buildCarModel(template: THREE.Group, tint: string): CarParts {
 }
 
 // ---------------------------------------------------------------------------
+// Shared per-frame position registry for the follow-gap check
+// ---------------------------------------------------------------------------
+
+const carPositions = new Map<string, { pathId: string; pos: THREE.Vector3 }>();
+
+// ---------------------------------------------------------------------------
 // JunkerCar — one vehicle following a car loop
 // ---------------------------------------------------------------------------
 
@@ -188,26 +210,54 @@ interface JunkerCarProps {
     assets: CarAssets;
     vehicle: VehicleConfig;
     path: WaypointPath;
+    /** Spawn point along the loop (see positionAtPathDistance). */
+    startPos: THREE.Vector3;
+    startNextIdx: number;
 }
 
-function JunkerCar({ assets, vehicle, path }: JunkerCarProps) {
+function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarProps) {
     const groupRef = useRef<THREE.Group>(null);
-    const pos = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
-    const nextIdx = useRef(1 % path.waypoints.length);
+    const pos = useRef(startPos.clone());
+    const nextIdx = useRef(startNextIdx);
 
     const { model, wheels } = useMemo(
         () => buildCarModel(assets.template, randomFrom(CAR_BODY_TINTS)),
         [assets],
     );
 
+    useEffect(() => {
+        return () => { carPositions.delete(vehicle.id); };
+    }, [vehicle.id]);
+
     useFrame((state, delta) => {
+        // Register current position so followers on this loop can read it
+        let entry = carPositions.get(vehicle.id);
+        if (!entry) { entry = { pathId: vehicle.pathId, pos: new THREE.Vector3() }; carPositions.set(vehicle.id, entry); }
+        entry.pos.copy(pos.current);
+
         const target = path.waypoints[nextIdx.current];
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
         const toTarget = targetPos.clone().sub(pos.current);
         const dist = toTarget.length();
         const step = vehicle.speed * delta;
-        let moved = step;
+        const moveDir = dist > 1e-6 ? toTarget.clone().divideScalar(dist) : null;
 
+        // Follow gap: hold while the same-loop car ahead is too close. Cars on a
+        // loop share one speed and never gain on each other in the open — this
+        // only bites behind a car held at a stopFor gate, so no push-through
+        // timeout is needed (the leader always clears when the light flips).
+        if (moveDir) {
+            for (const [otherId, other] of carPositions) {
+                if (otherId === vehicle.id || other.pathId !== vehicle.pathId) continue;
+                const diff = other.pos.clone().sub(pos.current);
+                const d = diff.length();
+                if (d < MIN_CAR_SEPARATION && d > 1e-4 && diff.divideScalar(d).dot(moveDir) > CAR_BLOCK_CONE_COS) {
+                    return; // hold: no movement, no wheel spin
+                }
+            }
+        }
+
+        let moved = step;
         if (dist <= step) {
             pos.current.copy(targetPos);
             moved = dist;
@@ -216,8 +266,7 @@ function JunkerCar({ assets, vehicle, path }: JunkerCarProps) {
                 nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
             }
         } else {
-            toTarget.normalize();
-            pos.current.addScaledVector(toTarget, step);
+            pos.current.addScaledVector(moveDir!, step);
         }
 
         // Roll the wheels by the arc length the car covered this frame
@@ -231,10 +280,10 @@ function JunkerCar({ assets, vehicle, path }: JunkerCarProps) {
         }
     });
 
-    const start = path.waypoints[0];
+    const startRy = path.waypoints[(startNextIdx - 1 + path.waypoints.length) % path.waypoints.length].ry ?? 0;
 
     return (
-        <group ref={groupRef} position={[start.x, start.y, start.z]} rotation={[0, start.ry ?? 0, 0]}>
+        <group ref={groupRef} position={[startPos.x, startPos.y, startPos.z]} rotation={[0, startRy, 0]}>
             {/* GLB nose points +X; the ry convention faces −Z at 0 — yaw the model into line */}
             <group rotation={[0, Math.PI / 2, 0]} scale={assets.modelScale} position={[0, assets.yOffset, 0]}>
                 <primitive object={model} />
@@ -244,26 +293,47 @@ function JunkerCar({ assets, vehicle, path }: JunkerCarProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Vehicles — one junker per exported car loop
+// Vehicles — junkers spread along every exported car loop
 // ---------------------------------------------------------------------------
 
+interface CarSpawn {
+    id: string;
+    path: WaypointPath;
+    startPos: THREE.Vector3;
+    startNextIdx: number;
+}
+
 /**
- * Renders every street vehicle: one junker per exported car loop, painted from
- * the cosmetic tint pool, wheels rolling with ground speed. Baked `stopFor`
- * waypoints gate cars at crossings during the ped light phase. Must render
- * inside a <Suspense> boundary (GLB + texture loads suspend).
+ * Renders every street vehicle: junkers spawned along each exported car loop
+ * (one per ~CAR_TARGET_SPACING units, evenly spaced), painted from the cosmetic
+ * tint pool, wheels rolling with ground speed. Baked `stopFor` waypoints gate
+ * cars at crossings during the ped light phase; the follow gap queues cars
+ * behind a gated leader. Must render inside a <Suspense> boundary (GLB +
+ * texture loads suspend).
  */
 function Vehicles() {
     const assets = useCarAssets();
 
+    const spawns = useMemo((): CarSpawn[] =>
+        STREET_PATHS.carPaths.flatMap((path) => {
+            const total = pathTotalLength(path.waypoints);
+            const count = Math.max(1, Math.round(total / CAR_TARGET_SPACING));
+            return Array.from({ length: count }, (_, rank): CarSpawn => {
+                const { pos, nextIdx } = positionAtPathDistance(path.waypoints, (rank * total) / count);
+                return { id: `car-${path.id}-${rank}`, path, startPos: pos, startNextIdx: nextIdx };
+            });
+        }), []);
+
     return (
         <>
-            {STREET_PATHS.carPaths.map((p) => (
+            {spawns.map((s) => (
                 <JunkerCar
-                    key={p.id}
+                    key={s.id}
                     assets={assets}
-                    vehicle={{ id: `car-${p.id}`, pathId: p.id, speed: CAR_SPEED_MPS * VEHICLE_WORLD_SCALE }}
-                    path={p}
+                    vehicle={{ id: s.id, pathId: s.path.id, speed: CAR_SPEED_MPS * VEHICLE_WORLD_SCALE }}
+                    path={s.path}
+                    startPos={s.startPos}
+                    startNextIdx={s.startNextIdx}
                 />
             ))}
         </>
