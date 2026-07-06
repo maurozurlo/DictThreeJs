@@ -43,9 +43,13 @@ type PropKind = 'armyHat' | 'megaphone' | 'sign';
 const PROP_KINDS: readonly PropKind[] = ['armyHat', 'megaphone', 'sign'];
 
 const IDLE_URL = '/models/citizens/idle.fbx';
+const SAD_WALK_URL = '/models/citizens/sad_walk.fbx';
+const HAPPY_WALK_URL = '/models/citizens/happy_walk.fbx';
 
 const TEX_BASE = '/textures/peds';
 const HEAD_TEXTURE_URLS = [`${TEX_BASE}/head_citizen1.png`, `${TEX_BASE}/head_citizen2.png`];
+/** Balaclava head — thieves only. Grayscale like the others, so skin tint still applies. */
+const THIEF_HEAD_TEXTURE_URL = `${TEX_BASE}/head_citizen_thf.png`;
 
 /** Role-specific body/pants textures ship pre-coloured; only 'citizen' gets tinted. */
 function bodyTextureUrl(v: PedVariant): string {
@@ -60,6 +64,7 @@ const ALL_TEXTURE_URLS: string[] = [
     ...ALL_VARIANTS.map(bodyTextureUrl),
     ...ALL_VARIANTS.map(pantsTextureUrl),
     ...HEAD_TEXTURE_URLS,
+    THIEF_HEAD_TEXTURE_URL,
 ];
 
 /**
@@ -95,12 +100,48 @@ const HITBOX_DIMS: Record<BodyType, [number, number, number]> = {
     fit: [0.6, 1.8, 0.6],
 };
 
-/** Ground speed (m/s) at which the Mixamo walk cycle plays at 1× without foot sliding. */
+/**
+ * Citizen ground speed range in m/s (metric). Multiplied by PED_WORLD_SCALE at
+ * assignment — peds cover ground in world units, and the environment is drawn
+ * PED_WORLD_SCALE× oversized, so metric speeds read as a crawl without it.
+ */
+const PED_SPEED_MIN = 0.9;
+const PED_SPEED_MAX = 1.4;
+/**
+ * Ground speed (m/s, metric) at which the Mixamo walk cycle plays at 1× without
+ * foot sliding. Compared against world-unit speeds via × PED_WORLD_SCALE (the
+ * model is scaled up by the same factor, so its stride length scales with it).
+ */
 const WALK_CLIP_NATURAL_SPEED = 1.4;
 /** Static protestors march in place at this fraction of walk speed (placeholder anim). */
 const PROTESTOR_ANIM_TIMESCALE = 0.45;
+/** Walk-mood thresholds: happiness below the first → sad_walk; at/above the second → happy_walk. */
+const SAD_WALK_BELOW = 3;
+const HAPPY_WALK_FROM = 8;
 /** Citizens pause when another ped is within this distance ahead of them (world units). */
 const MIN_PED_SEPARATION = 3.0;
+/**
+ * cos of the half-angle of the "ahead" cone — a neighbour only blocks when the
+ * direction to it is within ~35° of the move direction (70° full cone). A wider
+ * cone makes peds converging at corner kerbs block each other at right angles.
+ */
+const PED_BLOCK_CONE_COS = Math.cos((35 * Math.PI) / 180);
+/**
+ * Seconds a proximity pause may last before the walker pushes through anyway.
+ * Symmetric pauses deadlock without this — two peds meeting head-on where two
+ * crossings share a kerb each see the other "ahead" and both freeze forever.
+ */
+const PED_PAUSE_TIMEOUT_S = 2.5;
+/**
+ * Each sidewalk polyline is treated as an implicit 3-lane corridor: peds walk
+ * a line parallel to it, shifted sideways by their lane. Spreading walkers
+ * across lanes turns most would-be blocks into beside-each-other passes, so
+ * the pause timeout demotes to a rare fallback. Width in world units — small
+ * against the ~7–11-unit sidewalks, so corners barely cut.
+ */
+const PED_LANE_WIDTH = 1.4;
+/** Center-biased lane picks, cycled by spacing rank along each loop. */
+const PED_LANES = [0, 1, 0, -1] as const;
 
 // Tint pools for regular citizens — the ped textures are grayscale so
 // material.color multiplies through as the part colour. Cosmetic only:
@@ -236,7 +277,7 @@ function rollAppearance(variant: PedVariant, skin: Citizen['skin']): Appearance 
         bodyTint: variant === 'citizen' ? randomFrom(CIVILIAN_BODY_TINTS) : null,
         pantsTint: variant === 'citizen' ? randomFrom(CIVILIAN_PANTS_TINTS) : null,
         skinTint: SKIN_TONES[skin],
-        headTextureUrl: randomFrom(HEAD_TEXTURE_URLS),
+        headTextureUrl: variant === 'thf' ? THIEF_HEAD_TEXTURE_URL : randomFrom(HEAD_TEXTURE_URLS),
     };
 }
 
@@ -260,6 +301,9 @@ interface CitizenAssets {
     props: Record<PropKind, THREE.Object3D>;
     /** Shared bones-only idle clip (idle.fbx) — retargets onto every body's rig. */
     idleClip: THREE.AnimationClip | null;
+    /** Bones-only mood walk clips — retarget like idleClip; picked by happiness. */
+    sadWalkClip: THREE.AnimationClip | null;
+    happyWalkClip: THREE.AnimationClip | null;
 }
 
 /** Longest clip in an FBX ("Take 001" is a zero-length stub). */
@@ -273,7 +317,7 @@ function longestClip(animations: THREE.AnimationClip[]): THREE.AnimationClip | n
 /** Loads and prepares every model/texture the citizen roster needs. Suspends. */
 function useCitizenAssets(): CitizenAssets {
     const models = useLoader(FBXLoader, BODY_TYPES.map((bt) => MODEL_URLS[bt]));
-    const idleFbx = useLoader(FBXLoader, IDLE_URL);
+    const clipFbx = useLoader(FBXLoader, [IDLE_URL, SAD_WALK_URL, HAPPY_WALK_URL]);
     const gltfs = useLoader(GLTFLoader, [...PROP_URL_LIST]);
     const loadedTextures = useLoader(THREE.TextureLoader, ALL_TEXTURE_URLS);
 
@@ -312,8 +356,13 @@ function useCitizenAssets(): CitizenAssets {
             props[kind] = template;
         });
 
-        return { bodies, textures, props, idleClip: longestClip(idleFbx.animations) };
-    }, [models, idleFbx, gltfs, loadedTextures]);
+        return {
+            bodies, textures, props,
+            idleClip: longestClip(clipFbx[0].animations),
+            sadWalkClip: longestClip(clipFbx[1].animations),
+            happyWalkClip: longestClip(clipFbx[2].animations),
+        };
+    }, [models, clipFbx, gltfs, loadedTextures]);
 }
 
 // ---------------------------------------------------------------------------
@@ -397,6 +446,10 @@ interface WalkerProps {
     startPos: THREE.Vector3;
     startNextIdx: number;
     speed: number;
+    /** Persistent sideways shift from the loop polyline (world units) — the ped's lane. */
+    laneOffset: number;
+    /** Current happiness (0–10) — picks the walk-mood clip. */
+    happiness: number;
     citizenId: number;
     onClick: (e: ThreeEvent<MouseEvent>) => void;
 }
@@ -413,7 +466,7 @@ interface CrossingTraversal {
 
 function CitizenModelWalker({
     assets, bodyType, appearance, path,
-    startPos, startNextIdx, speed, citizenId, onClick,
+    startPos, startNextIdx, speed, laneOffset, happiness, citizenId, onClick,
 }: WalkerProps) {
     const groupRef = useRef<THREE.Group>(null);
     const pos = useRef(startPos.clone());
@@ -423,6 +476,8 @@ function CitizenModelWalker({
     const pathRef = useRef(path);
     const mode = useRef<WalkerMode>('walk');
     const traversal = useRef<CrossingTraversal | null>(null);
+    /** clock time the current proximity pause started; null while unblocked. */
+    const pausedSince = useRef<number | null>(null);
     const actions = useRef<{ walk: THREE.AnimationAction | null; idle: THREE.AnimationAction | null; moving: boolean }>(
         { walk: null, idle: null, moving: true },
     );
@@ -438,18 +493,28 @@ function CitizenModelWalker({
         [assets, body, appearance],
     );
 
+    // Bucket, not raw happiness, so the actions only rebuild when a threshold
+    // is crossed at round resolution — not on every happiness tick within a band.
+    const mood = happiness < SAD_WALK_BELOW ? 'sad' : happiness >= HAPPY_WALK_FROM ? 'happy' : 'normal';
+
     useEffect(() => {
-        const walk = body.walkClip ? mixer.clipAction(body.walkClip) : null;
-        if (walk && body.walkClip) {
-            walk.time = phase * body.walkClip.duration;
-            walk.timeScale = speed / WALK_CLIP_NATURAL_SPEED;
-            walk.play();
+        const moodClip = mood === 'sad' ? assets.sadWalkClip : mood === 'happy' ? assets.happyWalkClip : null;
+        // Fall back to the body's own walk when the mood clip failed to load
+        const walkClip = moodClip ?? body.walkClip;
+        const walk = walkClip ? mixer.clipAction(walkClip) : null;
+        if (walk && walkClip) {
+            walk.time = phase * walkClip.duration;
+            walk.timeScale = speed / (WALK_CLIP_NATURAL_SPEED * PED_WORLD_SCALE);
         }
         const idle = assets.idleClip ? mixer.clipAction(assets.idleClip) : null;
         if (idle && assets.idleClip) idle.time = phase * assets.idleClip.duration;
-        actions.current = { walk, idle, moving: true };
+        // Keep the pause state across mood swaps so a kerb-waiting or blocked
+        // ped doesn't pop to walking for a frame when its bucket changes.
+        const moving = actions.current.moving;
+        (moving ? walk : idle)?.play();
+        actions.current = { walk, idle, moving };
         return () => { mixer.stopAllAction(); };
-    }, [mixer, body.walkClip, assets.idleClip, speed, phase]);
+    }, [mixer, body.walkClip, assets.idleClip, assets.sadWalkClip, assets.happyWalkClip, mood, speed, phase]);
 
     /** Crossfade between the walk and idle actions (kerb waiting). */
     const setMoving = (moving: boolean) => {
@@ -493,16 +558,47 @@ function CitizenModelWalker({
             ? traversal.current.crossing.waypoints[traversal.current.idx]
             : curPath.waypoints[nextIdx.current];
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
+        // Lane shift: aim for a point offset perpendicular to the current loop
+        // segment, so the ped walks a parallel line in its own lane. Crossings
+        // are narrow and kerb-anchored — no shift while traversing one.
+        if (mode.current !== 'cross' && laneOffset !== 0) {
+            const wps = curPath.waypoints;
+            const from = wps[(nextIdx.current - 1 + wps.length) % wps.length];
+            const segX = target.x - from.x;
+            const segZ = target.z - from.z;
+            const segLen = Math.hypot(segX, segZ);
+            if (segLen > 1e-4) {
+                targetPos.x += (segZ / segLen) * laneOffset;
+                targetPos.z += (-segX / segLen) * laneOffset;
+            }
+        }
         const toTarget = targetPos.clone().sub(pos.current);
         const dist = toTarget.length();
         const moveDir = toTarget.clone().normalize();
 
-        // Proximity pause: if another citizen ped is close AND ahead, wait this frame
+        // Proximity pause: idle while another ped is close and inside the ahead
+        // cone, but give up after PED_PAUSE_TIMEOUT_S and push through — momentary
+        // overlap beats the permanent deadlock of two peds yielding to each other.
+        let blocked = false;
         for (const [otherId, otherPos] of citizenPedPositions) {
             if (otherId === citizenId) continue;
             const diff = otherPos.clone().sub(pos.current);
-            if (diff.length() < MIN_PED_SEPARATION && diff.dot(moveDir) > 0) return;
+            const d = diff.length();
+            // d ≈ 0 means already overlapping (post-push-through) — don't re-block
+            if (d < MIN_PED_SEPARATION && d > 1e-4 && diff.divideScalar(d).dot(moveDir) > PED_BLOCK_CONE_COS) {
+                blocked = true;
+                break;
+            }
         }
+        if (blocked && pausedSince.current === null) pausedSince.current = elapsed;
+        if (!blocked) pausedSince.current = null;
+        // While blocked past the timeout, pausedSince keeps its old timestamp so
+        // the walker doesn't re-pause every other frame until the jam clears.
+        if (blocked && elapsed - pausedSince.current! < PED_PAUSE_TIMEOUT_S) {
+            setMoving(false);
+            return;
+        }
+        setMoving(true);
 
         const step = speed * delta;
         if (dist <= step) {
@@ -634,6 +730,8 @@ interface CitizenPathAssignment {
     startPos: THREE.Vector3;
     startNextIdx: number;
     speed: number;
+    /** Persistent sideways shift from the loop polyline (world units). */
+    laneOffset: number;
 }
 
 /**
@@ -668,9 +766,13 @@ function CitizenModels() {
 
             ids.forEach((citizenId, rank) => {
                 const { pos, nextIdx } = positionAtPathDistance(path.waypoints, rank * gap);
-                // Spread speeds evenly across [0.9, 1.4] within each path group
-                const speed = 0.9 + (rank / ids.length) * 0.5;
-                map.set(citizenId, { startPos: pos, startNextIdx: nextIdx, speed });
+                // Spread metric speeds evenly within each path group, then scale
+                // to world units so pace matches the oversized environment
+                const speed = (PED_SPEED_MIN + (rank / ids.length) * (PED_SPEED_MAX - PED_SPEED_MIN)) * PED_WORLD_SCALE;
+                // Cycle lanes by rank so neighbours along a loop sit in
+                // different lanes — overtakes pass instead of queueing
+                const laneOffset = PED_LANES[rank % PED_LANES.length] * PED_LANE_WIDTH;
+                map.set(citizenId, { startPos: pos, startNextIdx: nextIdx, speed, laneOffset });
             });
         });
 
@@ -744,6 +846,8 @@ function CitizenModels() {
                         startPos={assignment.startPos}
                         startNextIdx={assignment.startNextIdx}
                         speed={assignment.speed}
+                        laneOffset={assignment.laneOffset}
+                        happiness={cs.happiness}
                         citizenId={citizen.id}
                         onClick={handleClick}
                     />

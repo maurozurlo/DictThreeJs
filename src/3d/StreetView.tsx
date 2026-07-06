@@ -4,100 +4,32 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
 import { Tabs } from '../types/Tabs';
-import { STREET_LAYOUT } from '../assets/streetLayout';
 import { STREET_PATHS } from '../assets/data/street-paths';
 import { useStreetLayout, STREET_TEXTURE_SLOTS, STREET_TEXTURE_URLS } from '../Hooks/useStreetLayout';
 import type { ResolvedPlacement } from '../types/WorldLayout';
-import type { WaypointPath, PedestrianConfig, VehicleConfig } from '../types/StreetLayout';
+import type { WaypointPath, VehicleConfig } from '../types/StreetLayout';
 import { lightPhase } from '../Utils/TrafficLight';
 import CitizenModels from './CitizenModels';
 
 const BUILDING_COLOR = '#7a6e62';
 const PLAZA_COLOR = '#b8a98a';
 const ROAD_COLOR = '#4a4a4a';
-const PEDESTRIAN_COLOR = '#4a90d9';
 const VEHICLE_COLOR = '#d94a4a';
 
 // Metric scale: 1 unit = 1 metre (see art-bible §10.0)
 const CAR_HALF_HEIGHT = 0.7;
-const DEBUG_ARROW_Y = 2.0;
 const CAR_SPEED = 6.0;
 
 // ---------------------------------------------------------------------------
-// PedWalker
-// ---------------------------------------------------------------------------
-
-interface PedWalkerProps {
-    ped: PedestrianConfig;
-    path: WaypointPath;
-    debugEnabled: boolean;
-}
-
-/** Atmospheric box pedestrian. Simulation citizens render via CitizenModels. */
-function PedWalker({ ped, path, debugEnabled }: PedWalkerProps) {
-    const meshRef = useRef<THREE.Mesh>(null);
-
-    const start = path.waypoints[0];
-    const pos = useRef(new THREE.Vector3(start.x, start.y, start.z));
-    const nextIdx = useRef(1);
-
-    const halfH = 0.9;
-
-    useFrame((_, delta) => {
-        const target = path.waypoints[nextIdx.current];
-        const targetPos = new THREE.Vector3(target.x, target.y, target.z);
-        const toTarget = targetPos.clone().sub(pos.current);
-        const dist = toTarget.length();
-
-        const step = ped.speed * delta;
-        if (dist <= step) {
-            pos.current.copy(targetPos);
-            nextIdx.current = (nextIdx.current + 1) % path.waypoints.length;
-        } else {
-            pos.current.addScaledVector(toTarget.normalize(), step);
-        }
-
-        if (meshRef.current) {
-            meshRef.current.position.set(pos.current.x, pos.current.y + halfH, pos.current.z);
-            const fromIdx = (nextIdx.current - 1 + path.waypoints.length) % path.waypoints.length;
-            meshRef.current.rotation.y = path.waypoints[fromIdx].ry ?? 0;
-        }
-    });
-
-    return (
-        <>
-            <mesh ref={meshRef} position={[start.x, start.y + halfH, start.z]}>
-                <boxGeometry args={[0.6, 1.8, 0.6]} />
-                <meshStandardMaterial color={PEDESTRIAN_COLOR} />
-            </mesh>
-
-            {debugEnabled && path.waypoints.map((wp, i) => (
-                <group key={i} position={[wp.x, wp.y + DEBUG_ARROW_Y, wp.z]} rotation={[0, wp.ry ?? 0, 0]}>
-                    <mesh position={[0, 0, -1.5]}>
-                        <boxGeometry args={[0.15, 0.15, 3.0]} />
-                        <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.8} />
-                    </mesh>
-                    <mesh position={[0, 0, -3.3]} rotation={[Math.PI / 2, 0, 0]}>
-                        <coneGeometry args={[0.3, 0.6, 6]} />
-                        <meshStandardMaterial color="yellow" emissive="yellow" emissiveIntensity={0.8} />
-                    </mesh>
-                </group>
-            ))}
-        </>
-    );
-}
-
-// ---------------------------------------------------------------------------
-// CarWalker (unchanged)
+// CarWalker
 // ---------------------------------------------------------------------------
 
 interface CarWalkerProps {
     vehicle: VehicleConfig;
     path: WaypointPath;
-    debugEnabled: boolean;
 }
 
-function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
+function CarWalker({ vehicle, path }: CarWalkerProps) {
     const meshRef = useRef<THREE.Mesh>(null);
     const pos = useRef(new THREE.Vector3(path.waypoints[0].x, path.waypoints[0].y, path.waypoints[0].z));
     const nextIdx = useRef(1 % path.waypoints.length);
@@ -130,25 +62,10 @@ function CarWalker({ vehicle, path, debugEnabled }: CarWalkerProps) {
     const start = path.waypoints[0];
 
     return (
-        <>
-            <mesh ref={meshRef} position={[start.x, start.y + CAR_HALF_HEIGHT, start.z]}>
-                <boxGeometry args={[2.0, 1.4, 4.5]} />
-                <meshStandardMaterial color={VEHICLE_COLOR} />
-            </mesh>
-
-            {debugEnabled && path.waypoints.map((wp, i) => (
-                <group key={i} position={[wp.x, wp.y + DEBUG_ARROW_Y, wp.z]} rotation={[0, wp.ry ?? 0, 0]}>
-                    <mesh position={[0, 0, -1.5]}>
-                        <boxGeometry args={[0.15, 0.15, 3.0]} />
-                        <meshStandardMaterial color="orange" emissive="orange" emissiveIntensity={0.8} />
-                    </mesh>
-                    <mesh position={[0, 0, -3.3]} rotation={[Math.PI / 2, 0, 0]}>
-                        <coneGeometry args={[0.3, 0.6, 6]} />
-                        <meshStandardMaterial color="orange" emissive="orange" emissiveIntensity={0.8} />
-                    </mesh>
-                </group>
-            ))}
-        </>
+        <mesh ref={meshRef} position={[start.x, start.y + CAR_HALF_HEIGHT, start.z]}>
+            <boxGeometry args={[2.0, 1.4, 4.5]} />
+            <meshStandardMaterial color={VEHICLE_COLOR} />
+        </mesh>
     );
 }
 
@@ -281,13 +198,10 @@ function PlacedObjects({ placements }: { placements: ResolvedPlacement[] }) {
 
 function StreetView() {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
-    const debugEnabled = useGameStore((s) => s.debug.enabled);
     const placements = useStreetLayout();
     const selectPed = useGameStore((s) => s.scene.selectPed);
 
     if (activeTab !== Tabs.Street) return null;
-
-    const { pedestrians, pedestrianPaths } = STREET_LAYOUT;
 
     return (
         <group position={[0, 0, 0]}>
@@ -309,20 +223,12 @@ function StreetView() {
                 <CitizenModels />
             </Suspense>
 
-            {/* Atmospheric pedestrians */}
-            {pedestrians.map((ped) => {
-                const path = pedestrianPaths.find((p) => p.id === ped.pathId);
-                if (!path) return null;
-                return <PedWalker key={ped.id} ped={ped} path={path} debugEnabled={debugEnabled} />;
-            })}
-
             {/* Vehicles — one per exported car loop; stopFor nodes gate them at crossings */}
             {STREET_PATHS.carPaths.map((p) => (
                 <CarWalker
                     key={p.id}
                     vehicle={{ id: `car-${p.id}`, pathId: p.id, speed: CAR_SPEED }}
                     path={p}
-                    debugEnabled={debugEnabled}
                 />
             ))}
 
