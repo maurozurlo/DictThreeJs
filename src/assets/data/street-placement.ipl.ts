@@ -16,7 +16,7 @@ export const STREET_IPL: IPLFile = {
         { id: 5, modelName: 'env_bld_commercial_normal', pos: [28.9129, 7.6798, -61.6309], rot: [0, 0, 0, 1] },
         { id: 6, modelName: 'env_bld_civic_normal', pos: [-25.9581, 13.3443, -66.44], rot: [0, 0, 0, 1] },
         { id: 7, modelName: 'env_skyline', pos: [-131.6872, 57.1183, 76.8685], rot: [0, 0, 0, 1] },
-        { id: 8, modelName: 'env_roads', pos: [3.8571, -0.8605, -12.2616], rot: [0, 0, 0, 1] },
+        { id: 8, modelName: 'env_roads', pos: [3.8571, -0.8605, -6.0427], rot: [0, 0, 0, 1] },
         { id: 9, modelName: 'env_plaza', pos: [4.1503, -0.1285, -3.4297], rot: [0, 0, 0, 1] },
         { id: 10, modelName: 'env_streetlight_standard_medium', pos: [45.8288, 7.8753, -1.6384], rot: [0, 0, 0, 1] },
         { id: 11, modelName: 'env_bld_residential_normal', pos: [72.7167, 3.8065, 9.7592], rot: [0, 0, 0, 1] },
