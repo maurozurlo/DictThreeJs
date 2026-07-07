@@ -761,11 +761,11 @@ function CitizenModels() {
         pathGroups.forEach((ids, pathIdx) => {
             if (ids.length === 0) return;
             const path = PED_PATHS[pathIdx];
-            const total = pathTotalLength(path.waypoints);
+            const total = pathTotalLength(path);
             const gap = total / ids.length;
 
             ids.forEach((citizenId, rank) => {
-                const { pos, nextIdx } = positionAtPathDistance(path.waypoints, rank * gap);
+                const { pos, nextIdx } = positionAtPathDistance(path, rank * gap);
                 // Spread metric speeds evenly within each path group, then scale
                 // to world units so pace matches the oversized environment
                 const speed = (PED_SPEED_MIN + (rank / ids.length) * (PED_SPEED_MAX - PED_SPEED_MIN)) * PED_WORLD_SCALE;

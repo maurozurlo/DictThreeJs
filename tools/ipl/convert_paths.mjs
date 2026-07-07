@@ -116,13 +116,16 @@ const crossShapes = byPrefix('cross_');
 const zoneShapes = byPrefix('zone_');
 
 // ---- ped + car paths ----------------------------------------------------------
-function toPath(s, idPrefix) {
-    if (!s.closed) warnings.push(`${s.name}: expected a CLOSED loop but it is open`);
+// Ped loops must close (walkers have nowhere else to go); car paths may be
+// open one-way splines — their ends get linked to the nearest node on
+// another car path below instead.
+function toPath(s, idPrefix, requireClosed) {
+    if (requireClosed && !s.closed) warnings.push(`${s.name}: expected a CLOSED loop but it is open`);
     const pts = withRy(dedupeLoop(simplify(s.samples, SIMPLIFY_TOL)), s.closed);
     return { id: s.name.replace(idPrefix, '').replace(/_/g, '-'), name: s.name, waypoints: pts, loop: s.closed };
 }
-const pedPaths = pedShapes.map((s) => toPath(s, 'path_ped_'));
-const carPaths = carShapes.map((s) => toPath(s, 'path_car_'));
+const pedPaths = pedShapes.map((s) => toPath(s, 'path_ped_', true));
+const carPaths = carShapes.map((s) => toPath(s, 'path_car_', false));
 
 // ---- crossings: project endpoints onto ped-loop SEGMENTS and insert kerbs ------
 // Long straights simplify down to 2 waypoints, so mid-block crossing endpoints
@@ -241,6 +244,56 @@ for (const path of carPaths) {
     for (const ins of inserts) path.waypoints.splice(ins.segIdx + 1, 0, ins.waypoint);
 }
 
+// ---- link open car-path ends to the nearest node on another car path ----------
+// An open path (drawn as a single one-way spline, no closing segment) has
+// nowhere to go once a car reaches its last waypoint. Find the closest point
+// on any OTHER car path within CAR_LINK_SNAP and splice a junction waypoint
+// there (reusing an existing vertex if one is already close, same as the
+// crossing-kerb linking above) — the runtime then hops onto it, same idea as
+// a ped crossing hop. No candidate within range means a genuine dead end.
+const CAR_LINK_SNAP = 8; // m
+let carLinkCount = 0;
+for (const path of carPaths) {
+    if (path.loop) continue;
+    const lastIdx = path.waypoints.length - 1;
+    const endPt = path.waypoints[lastIdx];
+
+    let best = null;
+    for (const other of carPaths) {
+        if (other === path) continue;
+        const n = other.waypoints.length;
+        const segCount = other.loop ? n : n - 1;
+        for (let i = 0; i < segCount; i++) {
+            const A = other.waypoints[i], B = other.waypoints[(i + 1) % n];
+            const abx = B.x - A.x, abz = B.z - A.z;
+            const len2 = abx * abx + abz * abz;
+            const t = len2 < 1e-12 ? 0 : Math.max(0, Math.min(1, ((endPt.x - A.x) * abx + (endPt.z - A.z) * abz) / len2));
+            const point = { x: A.x + t * abx, y: A.y, z: A.z + t * abz };
+            const d = dist2d(endPt, point);
+            if (!best || d < best.d) best = { path: other, segIdx: i, point, d };
+        }
+    }
+
+    if (!best || best.d > CAR_LINK_SNAP) {
+        warnings.push(`${path.id}: open end has no other car path within ${CAR_LINK_SNAP} m (closest ${best ? best.d.toFixed(1) : 'n/a'} m) — dead end`);
+        continue;
+    }
+
+    const target = best.path;
+    const n = target.waypoints.length;
+    const A = target.waypoints[best.segIdx], B = target.waypoints[(best.segIdx + 1) % n];
+    let waypointIdx;
+    if (dist2d(best.point, A) < VERTEX_SNAP) waypointIdx = best.segIdx;
+    else if (dist2d(best.point, B) < VERTEX_SNAP) waypointIdx = (best.segIdx + 1) % n;
+    else {
+        target.waypoints.splice(best.segIdx + 1, 0, { x: r2(best.point.x), y: r2(best.point.y), z: r2(best.point.z) });
+        target.waypoints = withRy(target.waypoints, target.loop);
+        waypointIdx = best.segIdx + 1;
+    }
+    path.waypoints[lastIdx].endLink = { pathId: target.id, waypointIdx };
+    carLinkCount++;
+}
+
 // ---- zones ---------------------------------------------------------------------
 const zones = zoneShapes.map((s) => {
     const pts = s.knots.length >= 3 ? s.knots : s.samples;
@@ -257,6 +310,7 @@ const wpStr = (w) => {
     const parts = [`x: ${w.x}`, `y: ${w.y}`, `z: ${w.z}`];
     if (w.ry !== undefined) parts.push(`ry: ${w.ry}`);
     if (w.stopFor !== undefined) parts.push(`stopFor: '${w.stopFor}'`);
+    if (w.endLink !== undefined) parts.push(`endLink: { pathId: '${w.endLink.pathId}', waypointIdx: ${w.endLink.waypointIdx} }`);
     return `            { ${parts.join(', ')} },`;
 };
 const pathStr = (p) => `        {
@@ -284,7 +338,10 @@ const ts = `import type { StreetPaths } from '../../types/StreetLayout';
  *
  * Car paths carry baked \`stopFor\` waypoints ${STOP_BACKOFF} m before each crossing:
  * a car must wait there while that crossing's light is in its ped phase.
- * Crossing \`links\` anchor each end to a ped-loop waypoint (the kerb).
+ * Crossing \`links\` anchor each end to a ped-loop waypoint (the kerb). An open
+ * (non-loop) car path's last waypoint may carry an \`endLink\` to the nearest
+ * node on another car path (within ${CAR_LINK_SNAP} m) — a car hops onto it there
+ * instead of stopping; no link means a genuine dead end.
  */
 export const STREET_PATHS: StreetPaths = {
     pedPaths: [
@@ -311,5 +368,6 @@ console.log(`shapes: ${pedShapes.length} ped, ${carShapes.length} car, ${crossSh
 for (const p of [...pedPaths, ...carPaths]) console.log(`  ${p.id}: ${p.waypoints.length} waypoints`);
 for (const c of crossings) console.log(`  cross ${c.id}: links -> ${c.links.map((l) => (l ? `${l.pathId}[${l.waypointIdx}]` : 'NONE')).join(', ')}`);
 console.log(`baked ${stopCount} car stop node(s)`);
+console.log(`baked ${carLinkCount} car endpoint link(s)`);
 if (warnings.length) { console.log('\nWARNINGS:'); warnings.forEach((w) => console.log('  ! ' + w)); }
 console.log(`\nwrote ${outFile}`);

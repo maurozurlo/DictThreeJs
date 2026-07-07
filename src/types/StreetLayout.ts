@@ -9,6 +9,14 @@ export interface Waypoint extends Vec3 {
     ry?: number;
     /** Car stop node: halt here while the named crossing is in its ped phase. */
     stopFor?: string;
+    /**
+     * Only meaningful on the LAST waypoint of a non-loop path: the nearest
+     * point found on another car path at conversion time, within snap range.
+     * On reaching this waypoint, the traveller continues onto that path/index
+     * instead of stopping — an open path's equivalent of a loop's wraparound.
+     * Absent means a genuine dead end (no path was close enough to link).
+     */
+    endLink?: CrossingLink;
 }
 
 export interface WaypointPath {
