@@ -4,7 +4,7 @@ import { STREET_IDE } from '../assets/data/street-objects.ide';
 import { STREET_IPL } from '../assets/data/street-placement.ipl';
 import type { ResolvedPlacement, TextureSlot } from '../types/WorldLayout';
 import { getVisibleModifiers } from '../Utils/Modifiers';
-import { buildingVariantForSlot } from '../Utils/BuildingDegradation';
+import { buildingVariantForSlot, groundVariantSuffix } from '../Utils/BuildingDegradation';
 
 const ideMap = new Map(STREET_IDE.objs.map((o) => [o.modelName, o]));
 
@@ -23,6 +23,10 @@ const BUILDING_SLOTS: BuildingSlot[] = [
 const BUILDING_VARIANT_NAMES = new Set(
     BUILDING_SLOTS.flatMap((s) => [s.poor, ...(s.rich ? [s.rich] : [])]),
 );
+
+/** Single-mesh ground objects whose GLB doesn't change between tiers — only the painted
+ *  texture does, via textureVariantSuffix (art-bible §7.2.3). */
+const GROUND_MODEL_NAMES = new Set(['env_roads', 'env_plaza']);
 
 /**
  * Deduplicated texture slots across the entire IDE. Keyed by texture path; if the same
@@ -107,6 +111,8 @@ export function useStreetLayout(): ResolvedPlacement[] {
                 if (v.minRound !== undefined && round < v.minRound) return [];
             }
 
+            const suffix = GROUND_MODEL_NAMES.has(inst.modelName) ? groundVariantSuffix(conditionStage) : '';
+
             return [{
                 instanceId: inst.id,
                 modelName:  inst.modelName,
@@ -115,6 +121,7 @@ export function useStreetLayout(): ResolvedPlacement[] {
                 pos:        inst.pos,
                 rot:        inst.rot,
                 scale:      inst.scale ?? [1, 1, 1],
+                ...(suffix ? { textureVariantSuffix: suffix } : {}),
             }];
         });
     }, [activeTab, infrastructure, security, conditionStage, round, visibleModifiers]);

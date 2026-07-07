@@ -68,14 +68,20 @@ type TextureMap = Map<string, TextureEntry>;
  * external texture whose basename matches that part's material NAME (set at export time).
  * Transparency is per-slot — decals/foliage slots get alphaTest cutout independently.
  * Parts with no matching texture but an embedded map keep it; otherwise palette fallback.
+ *
+ * `placement.textureVariantSuffix` (e.g. `'_poor'`) lets a single GLB whose material names
+ * never change (env_roads, env_plaza) swap textures by game state: the suffixed key is tried
+ * first, falling back to the bare name if no such variant texture was preloaded.
  */
 function PlacedObject({ placement, textures }: { placement: ResolvedPlacement; textures: TextureMap }) {
     const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
+    const variantSuffix = placement.textureVariantSuffix;
 
     const object = useMemo(() => {
         const fallback = paletteFor(placement.modelName);
         const pickMaterial = (mat: THREE.Material): THREE.Material => {
-            const entry = textures.get(normalizeTexName(mat.name ?? ''));
+            const baseName = normalizeTexName(mat.name ?? '');
+            const entry = (variantSuffix ? textures.get(baseName + variantSuffix) : undefined) ?? textures.get(baseName);
             if (entry) {
                 const { tex, transparent } = entry;
                 tex.magFilter = THREE.NearestFilter;
@@ -100,7 +106,7 @@ function PlacedObject({ placement, textures }: { placement: ResolvedPlacement; t
                 : pickMaterial(mesh.material);
         });
         return g;
-    }, [gltf, textures, placement.modelName]);
+    }, [gltf, textures, placement.modelName, variantSuffix]);
 
     const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
     const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);

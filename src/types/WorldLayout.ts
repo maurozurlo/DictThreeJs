@@ -76,4 +76,11 @@ export interface ResolvedPlacement {
     pos: [number, number, number];
     rot: [number, number, number, number];
     scale: [number, number, number];
+    /**
+     * Suffix appended to a mesh part's material-name lookup key when resolving its texture
+     * (e.g. `'_poor'`). Lets a single GLB whose material names never change (env_roads,
+     * env_plaza) swap which painted texture it wears by game state, instead of swapping
+     * models the way buildings do (art-bible §7.2.3). Omit/undefined = no suffix.
+     */
+    textureVariantSuffix?: string;
 }

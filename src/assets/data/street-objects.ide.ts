@@ -24,11 +24,32 @@ export const STREET_IDE: IDEFile = {
         { id: 2012, modelName: 'env_flag_small', asset: 'models/map/env_flag_small.glb', visibleIf: { tab: 'Street' } },
 
         { id: 2013, modelName: 'env_skyline', asset: 'models/map/env_skyline.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/skyline.png', transparent: true }] },
-        { id: 2014, modelName: 'env_roads', asset: 'models/map/env_roads.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/stone.png', transparent: false }] },
-        { id: 2015, modelName: 'env_plaza', asset: 'models/map/env_plaza.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/park.png', transparent: false }] },
+        // env_roads carries 7 material slots (per texture-manifest.json); poor variants swap
+        // the painted texture in place — see groundVariantSuffix / textureVariantSuffix.
+        { id: 2014, modelName: 'env_roads', asset: 'models/map/env_roads.glb', visibleIf: { tab: 'Street' }, textures: [
+            { texture: 'textures/map/stone.png', transparent: false },
+            { texture: 'textures/map/sidewalk_str.png', transparent: false },
+            { texture: 'textures/map/sidewalk_crn.png', transparent: false },
+            { texture: 'textures/map/concrete_buildings_base.png', transparent: false },
+            { texture: 'textures/map/road_centr.png', transparent: false },
+            { texture: 'textures/map/road_corner.png', transparent: false },
+            { texture: 'textures/map/park.png', transparent: false },
+            { texture: 'textures/map/stone_poor.png', transparent: false },
+            { texture: 'textures/map/sidewalk_str_poor.png', transparent: false },
+            { texture: 'textures/map/sidewalk_crn_poor.png', transparent: false },
+            { texture: 'textures/map/concrete_buildings_base_poor.png', transparent: false },
+            { texture: 'textures/map/road_centr_poor.png', transparent: false },
+            { texture: 'textures/map/road_corner_poor.png', transparent: false },
+            { texture: 'textures/map/park_poor.png', transparent: false },
+        ] },
+        { id: 2015, modelName: 'env_plaza', asset: 'models/map/env_plaza.glb', visibleIf: { tab: 'Street' }, textures: [
+            { texture: 'textures/map/park.png', transparent: false },
+            { texture: 'textures/map/park_poor.png', transparent: false },
+        ] },
         { id: 2016, modelName: 'env_streetlight_standard_medium', asset: 'models/map/env_streetlight_standard_medium.glb', visibleIf: { tab: 'Street', infrastructure: [4, 10] }, textures: [{ texture: 'textures/map/streetlight.png', transparent: false }] },
 
         { id: 2017, modelName: 'env_tree_medium', asset: 'models/map/env_tree_medium.glb', visibleIf: { tab: 'Street', infrastructure: [4, 10] }, textures: [{ texture: 'textures/map/leaves.png', transparent: true }, { texture: 'textures/map/trunk.png', transparent: false }, { texture: 'textures/map/treeguard.png', transparent: true }] },
+        { id: 2031, modelName: 'env_tree_poor', asset: 'models/map/env_tree_poor.glb', visibleIf: { tab: 'Street', infrastructure: [1, 3] }, textures: [{ texture: 'textures/map/leaves.png', transparent: true }, { texture: 'textures/map/trunk.png', transparent: false }, { texture: 'textures/map/treeguard.png', transparent: true }] },
         { id: 2018, modelName: 'env_parkbench_medium', asset: 'models/map/env_parkbench_medium.glb', visibleIf: { tab: 'Street', infrastructure: [4, 10] }, textures: [{ texture: 'textures/map/parkbench.png', transparent: false }] },
         { id: 2019, modelName: 'env_guard_post_small', asset: 'models/map/env_guard_post_small.glb', visibleIf: { tab: 'Street', security: [4, 7] }, textures: [{ texture: 'textures/map/guardpost.png', transparent: false }] },
         { id: 2020, modelName: 'env_tank_large', asset: 'models/map/env_tank_large.glb', visibleIf: { tab: 'Street', security: [8, 10] }, textures: [{ texture: 'textures/map/tank.png', transparent: false }] },

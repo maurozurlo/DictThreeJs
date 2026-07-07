@@ -73,5 +73,13 @@ export const STREET_IPL: IPLFile = {
         { id: 61, modelName: 'env_bld_commercial_poor',  pos: [28.9129, 7.6798, -61.6309],  rot: [0, 0, 0, 1] },
         { id: 62, modelName: 'env_bld_civic_poor',       pos: [-25.9581, 13.3443, -66.44],  rot: [0, 0, 0, 1] },
         { id: 63, modelName: 'env_bld_residential_poor', pos: [72.7167, 3.8065, 9.7592],    rot: [0, 0, 0, 1] },
+        // Poor tier trees — same positions/rotations as their normal counterparts (inst 12-18)
+        { id: 64, modelName: 'env_tree_poor', pos: [0.3428, 9.1004, -54.0962], rot: [0, 0.2281, 0, 0.973638] },
+        { id: 65, modelName: 'env_tree_poor', pos: [-53.4657, 9.1004, -54.0962], rot: [0, 0.2281, 0, 0.973638] },
+        { id: 66, modelName: 'env_tree_poor', pos: [54.7719, 9.1004, -54.0962], rot: [0, 0.2281, 0, 0.973638] },
+        { id: 67, modelName: 'env_tree_poor', pos: [66.2294, 9.3805, 28.0292], rot: [0, 0.2281, 0, 0.973638] },
+        { id: 68, modelName: 'env_tree_poor', pos: [-58.3231, 9.3805, -24.5433], rot: [0, 0.2281, 0, 0.973638] },
+        { id: 69, modelName: 'env_tree_poor', pos: [70.3186, 9.1004, -47.8994], rot: [0, 0.2281, 0, 0.973638] },
+        { id: 70, modelName: 'env_tree_poor', pos: [-59.1944, 9.1004, 29.0541], rot: [0, 0.2281, 0, 0.973638] },
     ],
 };

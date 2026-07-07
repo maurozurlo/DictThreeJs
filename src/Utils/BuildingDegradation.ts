@@ -68,3 +68,15 @@ export function buildingVariantForSlot(slotIndex: number, conditionStage: number
     if (slotIndex < NUM_BUILDING_SLOTS - richSlotCount) return 'normal';
     return 'rich';
 }
+
+/**
+ * Texture-variant suffix for single-mesh ground objects (env_roads, env_plaza) whose GLB
+ * geometry is identical across tiers — only the painted texture changes (art-bible §7.2.3).
+ * Unlike buildings there is no per-slot partial conversion: the whole mesh flips at once.
+ * No rich variant exists yet, mirroring the building system's current poor/normal-only state.
+ *
+ * @param conditionStage Current stage from game state (−5 to +5)
+ */
+export function groundVariantSuffix(conditionStage: number): '_poor' | '' {
+    return conditionStage < 0 ? '_poor' : '';
+}
