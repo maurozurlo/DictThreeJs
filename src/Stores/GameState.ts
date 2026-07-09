@@ -1,9 +1,10 @@
 // store.ts
 import { create } from "zustand";
-import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
-import { GAMESTATE, STREET_CAMERA } from "../Constants/GameState";
+import { GAMESTATE, STREET_CAMERA, TAB_CAMERA, DEFAULT_TAB_FOV } from "../Constants/GameState";
+import { pausedTimerFields, resumedTimerFields } from "../Utils/Timer";
+import type { TimerFields } from "../Utils/Timer";
 import type { Difficulty } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
@@ -154,23 +155,24 @@ export const INITIAL_STATE = ({ set, get }: {
                 if (!gm.dwelling && tab === Tabs.Street && gm.phase === 'start') return;
             }
 
-            const cameraPositions = get().scene.camera.cameraPositions;
-            let newCameraPos: Vector3 | undefined;
-            let newCameraFov = 34;
+            // Camera routing is data-driven (TAB_CAMERA, Story 10-2); only the
+            // secret rooms need live state for room cycling.
+            const config = TAB_CAMERA[tab];
+            let newCameraPos: [number, number, number] | undefined;
+            let newCameraFov: number = DEFAULT_TAB_FOV;
             let newCameraHFov: number | undefined = undefined;
             let newCameraRotation: [number, number] = [0, 0];
             let newSecretRoomIndex = get().tabs.secretRoomIndex;
 
-            if (tab === Tabs.Meet) {
-                newCameraPos = cameraPositions[0];
-            } else if (tab === Tabs.Laws) {
-                newCameraPos = cameraPositions[1];
-            } else if (tab === Tabs.Street) {
-                newCameraPos = new Vector3(...STREET_CAMERA.pos);
-                newCameraFov = STREET_CAMERA.fov;
-                newCameraHFov = STREET_CAMERA.hFov;
-                newCameraRotation = STREET_CAMERA.rotation;
-            } else if (tab === Tabs.Secret) {
+            if (config.kind === 'scan') {
+                const p = get().scene.camera.cameraPositions[config.index];
+                if (p) newCameraPos = [p.x, p.y, p.z];
+            } else if (config.kind === 'fixed') {
+                newCameraPos = config.pos;
+                newCameraFov = config.fov;
+                newCameraHFov = config.hFov;
+                newCameraRotation = config.rotation;
+            } else if (config.kind === 'secret') {
                 const s = get();
                 // When a special ending is active, show the triggering faction's room;
                 // otherwise cycle through rooms for exploration.
@@ -180,21 +182,22 @@ export const INITIAL_STATE = ({ set, get }: {
                     newSecretRoomIndex = (s.tabs.secretRoomIndex + 1) % SECRET_ROOMS.length;
                 }
                 const room = SECRET_ROOMS[newSecretRoomIndex];
-                newCameraPos = new Vector3(...room.pos);
+                newCameraPos = room.pos;
                 newCameraFov = room.fov;
                 newCameraRotation = room.rotation;
             }
 
             set((s) => {
-                const now = Date.now();
-                let { timerStartedAt, timerPausedAt } = s.gameManagement;
-                const isInGame = s.gameManagement.phase === 'start';
-
-                if (tab === Tabs.Menu && isInGame && timerPausedAt === null) {
-                    timerPausedAt = now;
-                } else if (s.tabs.activeTab === Tabs.Menu && isInGame && timerPausedAt !== null) {
-                    timerStartedAt = timerStartedAt !== null ? timerStartedAt + (now - timerPausedAt) : null;
-                    timerPausedAt = null;
+                // Entering the Menu mid-game pauses the work-day timer; leaving
+                // it resumes. Same arithmetic as pauseTimer/resumeTimer (ADR-0006).
+                let timerPatch: Partial<TimerFields> | null = null;
+                if (s.gameManagement.phase === 'start') {
+                    const now = Date.now();
+                    if (tab === Tabs.Menu) {
+                        timerPatch = pausedTimerFields(s.gameManagement, now);
+                    } else if (s.tabs.activeTab === Tabs.Menu) {
+                        timerPatch = resumedTimerFields(s.gameManagement, now);
+                    }
                 }
 
                 return {
@@ -206,13 +209,11 @@ export const INITIAL_STATE = ({ set, get }: {
                             cameraFov: newCameraFov,
                             cameraHFov: newCameraHFov,
                             cameraRotation: newCameraRotation,
-                            ...(newCameraPos && {
-                                cameraPos: [newCameraPos.x, newCameraPos.y, newCameraPos.z],
-                            }),
+                            ...(newCameraPos && { cameraPos: newCameraPos }),
                         },
                     },
                     meet: { ...s.meet, selectedPower: 'none' },
-                    gameManagement: { ...s.gameManagement, timerStartedAt, timerPausedAt },
+                    gameManagement: { ...s.gameManagement, ...(timerPatch ?? {}) },
                 };
             });
         },
@@ -694,97 +695,71 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, state.gameManagement.round);
 
-            // Apply relation/charisma penalty only when meet action was skipped
-            if (!state.meet.actionTaken.taken) {
-                const round = state.gameManagement.round;
-                const penalty = Math.min(round, 3);
-                const frozenFactions = state.shop.frozenFactions;
-                const newRelations = { ...state.relations.current };
-                const toPenalise = [...PowerList]
+            // Skipped-meeting penalty: the two lowest non-frozen factions and
+            // charisma take a hit, recorded as a timeout event (ADR-0011).
+            const skipped = !state.meet.actionTaken.taken;
+            let newRelations = state.relations.current;
+            let newCharisma = state.gameManagement.charisma.current;
+            const timeoutEvents: LogEvent[] = [];
+            if (skipped) {
+                const penalty = Math.min(state.gameManagement.round, 3);
+                newRelations = { ...state.relations.current };
+                [...PowerList]
                     .sort((a, b) => newRelations[a] - newRelations[b])
                     .slice(0, 2)
-                    .filter(p => !frozenFactions.has(p));
-                toPenalise.forEach((p) => {
-                    newRelations[p] = Clamp(newRelations[p] - penalty, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
-                });
-                const newCharisma = Clamp(
-                    state.gameManagement.charisma.current - 1,
-                    GAMESTATE.CHARISMA.MIN,
-                    GAMESTATE.CHARISMA.MAX
-                );
-                // The skipped-meeting penalty was previously silent — record it (ADR-0011).
-                const timeoutEvent: LogEvent = {
+                    .filter(p => !state.shop.frozenFactions.has(p))
+                    .forEach((p) => {
+                        newRelations[p] = Clamp(newRelations[p] - penalty, GAMESTATE.RELATIONS.MIN, GAMESTATE.RELATIONS.MAX);
+                    });
+                newCharisma = Clamp(newCharisma - 1, GAMESTATE.CHARISMA.MIN, GAMESTATE.CHARISMA.MAX);
+                timeoutEvents.push({
                     key: 'log.event.timeout',
                     deltas: buildDeltas({
                         ...relationDiff(state.relations.current, newRelations),
                         charisma: newCharisma - state.gameManagement.charisma.current,
                     }),
-                };
-                set((s) => ({
-                    relations: { ...s.relations, current: newRelations },
-                    tabs: { ...s.tabs, activeTab: Tabs.Street },
-                    scene: {
-                        ...s.scene,
-                        camera: {
-                            ...s.scene.camera,
-                            cameraFov: STREET_CAMERA.fov,
-                            cameraHFov: STREET_CAMERA.hFov,
-                            cameraRotation: STREET_CAMERA.rotation,
-                            cameraPos: STREET_CAMERA.pos,
-                        },
-                    },
-                    gameManagement: {
-                        ...s.gameManagement,
-                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                        dayEnded: true,
-                        dwelling: true,
-                        lastRoundIncome: financials.totalIncome,
-                        lastRoundExpenses: financials.expenses,
-                        lastRoundRecurringIncome: financials.recurringIncome,
-                        lastRoundRecurringExpenses: financials.recurringExpenses,
-                        lastRoundLawTreasuryDelta: financials.lawTreasuryDelta,
-                        lastRoundDealTreasuryDelta: financials.dealTreasuryDelta,
-                        pendingLog: [...s.gameManagement.pendingLog, timeoutEvent],
-                    },
-                }));
-            } else {
-                set((s) => ({
-                    tabs: { ...s.tabs, activeTab: Tabs.Street },
-                    scene: {
-                        ...s.scene,
-                        camera: {
-                            ...s.scene.camera,
-                            cameraFov: STREET_CAMERA.fov,
-                            cameraHFov: STREET_CAMERA.hFov,
-                            cameraRotation: STREET_CAMERA.rotation,
-                            cameraPos: STREET_CAMERA.pos,
-                        },
-                    },
-                    gameManagement: {
-                        ...s.gameManagement,
-                        dayEnded: true,
-                        dwelling: true,
-                        lastRoundIncome: financials.totalIncome,
-                        lastRoundExpenses: financials.expenses,
-                        lastRoundRecurringIncome: financials.recurringIncome,
-                        lastRoundRecurringExpenses: financials.recurringExpenses,
-                        lastRoundLawTreasuryDelta: financials.lawTreasuryDelta,
-                        lastRoundDealTreasuryDelta: financials.dealTreasuryDelta,
-                    },
-                }));
+                });
             }
-            // Reveal/dwell hinge is now visible over the Street scene (ADR-0012) — its advance button calls nextRound()
+
+            // Open the hinge on Street (ADR-0012) — the reveal/dwell UI's advance
+            // button calls nextRound(). Camera snaps with the tab in the same set().
+            set((s) => ({
+                relations: { ...s.relations, current: newRelations },
+                tabs: { ...s.tabs, activeTab: Tabs.Street },
+                scene: {
+                    ...s.scene,
+                    camera: {
+                        ...s.scene.camera,
+                        cameraFov: STREET_CAMERA.fov,
+                        cameraHFov: STREET_CAMERA.hFov,
+                        cameraRotation: STREET_CAMERA.rotation,
+                        cameraPos: STREET_CAMERA.pos,
+                    },
+                },
+                gameManagement: {
+                    ...s.gameManagement,
+                    charisma: { ...s.gameManagement.charisma, current: newCharisma },
+                    dayEnded: true,
+                    dwelling: true,
+                    lastRoundIncome: financials.totalIncome,
+                    lastRoundExpenses: financials.expenses,
+                    lastRoundRecurringIncome: financials.recurringIncome,
+                    lastRoundRecurringExpenses: financials.recurringExpenses,
+                    lastRoundLawTreasuryDelta: financials.lawTreasuryDelta,
+                    lastRoundDealTreasuryDelta: financials.dealTreasuryDelta,
+                    pendingLog: [...s.gameManagement.pendingLog, ...timeoutEvents],
+                },
+            }));
         },
         pauseTimer: () => {
-            if (get().gameManagement.timerPausedAt !== null) return
-            set((s) => ({ gameManagement: { ...s.gameManagement, timerPausedAt: Date.now() } }))
+            const patch = pausedTimerFields(get().gameManagement, Date.now());
+            if (!patch) return;
+            set((s) => ({ gameManagement: { ...s.gameManagement, ...patch } }));
         },
         resumeTimer: () => {
-            const { timerStartedAt, timerPausedAt } = get().gameManagement
-            if (timerPausedAt === null) return
-            const now = Date.now()
-            const newStartedAt = timerStartedAt !== null ? timerStartedAt + (now - timerPausedAt) : null
-            set((s) => ({ gameManagement: { ...s.gameManagement, timerStartedAt: newStartedAt, timerPausedAt: null } }))
+            const patch = resumedTimerFields(get().gameManagement, Date.now());
+            if (!patch) return;
+            set((s) => ({ gameManagement: { ...s.gameManagement, ...patch } }));
         },
         advanceRoundRequested: false,
         requestAdvanceRound: () => set((s) => ({

@@ -1,11 +1,28 @@
 # Story 10-2: Hinge/Tab/Camera Single Paths — expireTimer Merge, TAB_CAMERA, Timer Helper
 
 > **Epic**: Simplification & Debt (Sprint 10)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 1.0 days
 > **Last Updated**: 2026-07-08
+
+## Completion Notes
+
+Implemented as scoped. `expireTimer()` is one `set()` — the skipped-meeting penalty
+(relations, charisma, timeout event) computed up front and applied via a shared patch,
+~40 lines saved. `TAB_CAMERA` discriminated-union table added to `Constants/GameState.ts`
+(`scan` / `fixed` / `secret` / `default` kinds; Street reuses `STREET_CAMERA`);
+`setActiveTab`'s camera if/else chain replaced by the lookup, `three`'s `Vector3`
+import dropped from the store. New `src/Utils/Timer.ts` (`pausedTimerFields` /
+`resumedTimerFields`) is the single pause/resume implementation used by `pauseTimer`,
+`resumeTimer`, and `setActiveTab`'s Menu auto-pause.
+
+9 new tests (`tests/unit/roundloop/timer_helpers.test.ts`): pure helper arithmetic,
+store pause/resume, Menu-tab auto-pause round-trip, and both expireTimer penalty
+cases. Existing `tab_gating.test.ts` passes unmodified (AC-4). Suite 722/722,
+`tsc -b` clean, build green, Puppeteer walkthrough 5/5 — hinge lands on the Street
+vista camera (Sprint 9 camera-bug regression guard held).
 
 ## Context
 

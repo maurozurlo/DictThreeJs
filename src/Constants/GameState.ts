@@ -268,3 +268,32 @@ export const STREET_CAMERA = {
     hFov: 60,  // Max PhysCamera001 "Specify FOV" — horizontal; CameraController derives vFOV
     rotation: [-0.4364, 0] as [number, number],
 };
+
+/** Camera fov applied to tabs without a dedicated camera (Story 10-2). */
+export const DEFAULT_TAB_FOV = 34;
+
+/**
+ * Per-tab camera routing consumed by `setActiveTab` (Story 10-2).
+ * - `scan`: index into the palace camera positions scanned from the FBX at load
+ *   (see MainModel → setCameraPositions).
+ * - `fixed`: full static camera (Street vista).
+ * - `secret`: SECRET_ROOMS cycling — room choice needs live state, resolved in the store.
+ * - `default`: reset fov/rotation, keep the current position.
+ */
+export type TabCameraConfig =
+    | { kind: 'scan'; index: number }
+    | { kind: 'fixed'; pos: [number, number, number]; fov: number; hFov?: number; rotation: [number, number] }
+    | { kind: 'secret' }
+    | { kind: 'default' };
+
+export const TAB_CAMERA: Record<Tabs, TabCameraConfig> = {
+    [Tabs.Menu]: { kind: 'default' },
+    [Tabs.Log]: { kind: 'default' },
+    [Tabs.Meet]: { kind: 'scan', index: 0 },
+    [Tabs.Laws]: { kind: 'scan', index: 1 },
+    [Tabs.Deals]: { kind: 'default' },
+    [Tabs.Budget]: { kind: 'default' },
+    [Tabs.Shop]: { kind: 'default' },
+    [Tabs.Street]: { kind: 'fixed', ...STREET_CAMERA },
+    [Tabs.Secret]: { kind: 'secret' },
+};
