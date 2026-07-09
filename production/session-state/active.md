@@ -168,9 +168,9 @@
 - Next recommended: 2-6 Budget forecast includes recurring effects (0.5d, ready-for-dev) OR 2-7 Coup mechanic (1.5d, ready-for-dev)
 
 <!-- STATUS -->
-Epic: Meta-Progression (Sprint 3)
-Feature: 3-1 Meta-Progression Data Layer
-Task: Implemented — pending story-done
+Epic: Round Loop & Street Reveal (Sprint 9)
+Feature: Must Haves 9-1/9-2/9-3 complete
+Task: Should Haves 9-4 (round-1 opening) / 9-5 (crisis docket check) ready-for-dev, not started
 <!-- /STATUS -->
 
 ## Session Extract — /dev-story 2-5 2026-06-12
@@ -529,3 +529,14 @@ Task: Implemented — pending story-done
 - Added same-loop follow gap (MIN_CAR_SEPARATION=13, carPositions registry) so cars queue behind a stopFor-gated leader instead of stacking; no timeout needed (uniform speed per loop, leader always clears)
 - Suite 662/662, tsc clean; user checks visuals themselves (no more screenshots)
 - NOT committed
+
+## Session Extract — Sprint 9: Round Loop Phase Split 2026-07-08
+- TRIGGER: user found `ROUND_LOOP_STREET_REVEAL_0_1.md` (design notes from a prior willbot/sim-design-advisor session, committed 2026-06-23 alongside the then-new Epic 8 building-degradation stories but never acted on). User explicitly said stop worrying about closing out the informal "Sprint 8" (epic-8 stories 8-1..8-8 are implemented + smoke-tested per `production/qa/smoke-2026-06-24.md` 655/655 but story files still show Backlog/In Progress — left as-is, not blocking) — go straight to implementing the round-loop idea, no questions, ASAP.
+- Wrote docs/architecture/adr-0012-round-loop-phase-split.md (Accepted) formalizing the design doc's decisions against the existing expireTimer()/nextRound()/setActiveTab architecture. TR-roundloop-001/002 registered (tr-registry.yaml v5).
+- Sprint 9 created: production/sprints/sprint-9.md, production/sprint-status.yaml (sprint 9). Must Haves 9-1/9-2/9-3 implemented + closed same session (auto-synced to `done` by a hook watching story Status fields). Should Haves 9-4 (round-1 opening) and 9-5 (crisis docket consistency spike) scoped as stories but NOT implemented this session — ready-for-dev, left for a follow-up.
+- Architecture found (via Explore agent + direct reads): `gameManagement.phase` has no work/hinge sub-state; Street was reachable any time during `phase==='start'` (never phase-gated, only tab-gated); `expireTimer()` sets `dayEnded:true` but does NOT call `nextRound()` — that's the Continue button's job; `DayEnded` is an unconditional full-viewport Modal in App.tsx that already overlays whatever tab is active. A `Newspaper.tsx` + `dumbifyText(text, dumbScore)` propaganda-distortion pattern already existed (used in Log/Meet/Laws/Deals) — reused for the newsreel headline instead of inventing a new mechanism.
+- Implementation: added `gameManagement.dwelling: boolean` (types/GameState.ts, GameState.ts INITIAL_STATE, StateFactory build/load — load always forces false, the hinge is never persisted mid-flight). `expireTimer()` (both branches) now sets `dwelling:true` + force-navigates `activeTab:Tabs.Street` in the same atomic set(). All 6 `nextRound()` branches (coup/bankruptcy/overthrown/victory/periodicEvent/normal — turned out to be 6, not the 5 estimated) reset `dwelling:false`. `setActiveTab` gate: blocks Meet/Laws/Deals/Budget when dwelling, blocks Street when `!dwelling && phase==='start'`, debug bypasses both. `Navbar.tsx` disabled logic mirrors the gate. `DayEnded.tsx` two-stage render: mandatory scrim (existing stat rows + new headline, `GAMESTATE.ROUNDS.MANDATORY_REVEAL_MS`=3000ms, no advance button) → non-blocking `.dwellBanner` corner card (headline + advance button) once the window elapses. New `src/Utils/RevealHeadline.ts` (deterministic round%5 pool, i18n `hinge.headline.*` EN/ES, dumbifyText applied at DayEnded call site).
+- Bug caught during live verification (not by tests): dwellBanner's first CSS placement (`bottom: 1.5rem`) visually overlapped the existing ActionPanel bottom HUD strip's "Click a citizen to inspect" prompt. Fixed by repositioning to `top: calc(var(--navbar-height) + 1rem)` — confirmed clean via a second screenshot pass.
+- Verified: 20 new unit tests (tests/unit/roundloop/{dwelling_state,tab_gating,reveal_headline}.test.ts) + full suite 696/696, tsc -b clean, npm run build green. Also ran an end-to-end Puppeteer walkthrough against the live dev server (New Game → force round-end → screenshot mandatory reveal → wait past window → screenshot dwell stage confirming no full-viewport scrim + Street interactive underneath → click advance → confirm tabs flip back) — this is real behavioral proof, not just unit-test coverage.
+- Committed and pushed per standing "autonomous sprint" preference (implement → commit → push → continue, no per-story questions).
+- Next: design doc §8's actual validation question ("does the player linger or mash?") requires real human playtesting across 3-4 months — not something this session can answer. Should Haves 9-4/9-5 are scoped and ready whenever picked up.

@@ -224,6 +224,12 @@ export type GameState = {
         endReason: string | null;
         endCause: EndCause;
         dayEnded: boolean;
+        /**
+         * True during the after-work hinge (ADR-0012): Street View is the only
+         * reachable tab (besides Menu), decision tabs (Meet/Laws/Deals/Budget)
+         * are locked. Set true by expireTimer(), reset false by nextRound().
+         */
+        dwelling: boolean;
         lastRoundIncome: number;
         lastRoundExpenses: number;
         /** Recurring income total for the round just ended — written by nextRound(). */

@@ -9,114 +9,63 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 7
-goal: "Implement the Citizen Simulation — 25 persistent citizens whose fate tracks your rule"
-start: "2026-06-17"
-end: "2026-06-24"
-generated: "2026-06-17"
-updated: "2026-06-22"
-goal_amendment: "Scope expanded 2026-06-18: Modifier unification (P4a + P4b) added as Must Have — LawEffect/DealEffect/RecurringEffect conversion layer must be removed before further content work."
+sprint: 9
+goal: "Round Loop Phase Split — timed work day (Street locked) / untimed after-work hinge (mandatory reveal + optional dwell)"
+start: "2026-07-08"
+end: "2026-07-15"
+generated: "2026-07-08"
+updated: "2026-07-08"
+goal_amendment: ""
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
-  - id: "7-1"
-    name: "CitizenHandler P1 — generation + immutable identity"
-    file: "production/stories/7-1-citizen-handler-p1.md"
+  - id: "9-1"
+    name: "dwelling state — work/hinge phase split"
+    file: "production/stories/9-1-round-phase-dwelling-state.md"
     priority: must-have
     status: done
     owner: ""
-    estimate_days: 1.0
+    estimate_days: 0.75
     blocker: ""
-    completed: "2026-06-18"
+    completed: "2026-07-08"
 
-  - id: "7-2"
-    name: "CitizenHandler P2 — employment + happiness + body-type"
-    file: "production/stories/7-2-citizen-handler-p2.md"
+  - id: "9-2"
+    name: "Tab gating — Street lock / decision lock"
+    file: "production/stories/9-2-tab-gating-street-lock.md"
+    priority: must-have
+    status: done
+    owner: ""
+    estimate_days: 0.5
+    blocker: ""
+    completed: "2026-07-08"
+
+  - id: "9-3"
+    name: "Street reveal + newsreel — mandatory reveal, optional dwell"
+    file: "production/stories/9-3-street-reveal-newsreel.md"
     priority: must-have
     status: done
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: "2026-06-18"
-
-  - id: "7-3"
-    name: "CitizenHandler P3 — role fork + death + feedback + nextRound() wiring"
-    file: "production/stories/7-3-citizen-handler-p3.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 2.0
-    blocker: ""
-    completed: "2026-06-18"
-
-  - id: "7-7"
-    name: "Modifier Unification P4a — type contracts & content migration"
-    file: "production/stories/7-7-modifier-unification-p4a.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 1.5
-    blocker: ""
-    completed: "2026-06-18"
-
-  - id: "7-8"
-    name: "Modifier Unification P4b — engine wiring & read sites"
-    file: "production/stories/7-8-modifier-unification-p4b.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 2.0
-    blocker: ""
-    completed: "2026-06-18"
+    completed: "2026-07-08"
 
   # ── Should Have ─────────────────────────────────────────────────────────
-  - id: "7-4"
-    name: "Street View — citizen rendering by role/outfit/bodyType"
-    file: "production/stories/7-4-street-view-citizens.md"
+  - id: "9-4"
+    name: "Round 1 opening — inherited city state"
+    file: "production/stories/9-4-round-one-opening-reveal.md"
     priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-18"
-
-  - id: "7-5"
-    name: "Citizen Inspector UI (click-to-inspect panel)"
-    file: "production/stories/7-5-citizen-inspector-ui.md"
-    priority: should-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-06-18"
-
-  # ── Nice to Have ────────────────────────────────────────────────────────
-  - id: "7-6"
-    name: "Population HUD readout — displayedPopulation to stat area"
-    file: "production/stories/7-6-population-hud.md"
-    priority: nice-to-have
-    status: done
-    owner: ""
-    estimate_days: 0.25
-    blocker: ""
-    completed: "2026-06-18"
-
-  - id: "5-8"
-    name: "External playtest — non-developer Medium difficulty session (carryover)"
-    file: "production/stories/5-8-external-playtest.md"
-    priority: nice-to-have
     status: ready-for-dev
     owner: ""
     estimate_days: 0.5
     blocker: ""
     completed: ""
 
-  - id: "5-9"
-    name: "Hard difficulty playtest reconciliation (carryover)"
-    file: "production/stories/5-9-hard-difficulty-reconciliation.md"
-    priority: nice-to-have
+  - id: "9-5"
+    name: "Crisis docket consistency check"
+    file: "production/stories/9-5-crisis-docket-consistency.md"
+    priority: should-have
     status: ready-for-dev
     owner: ""
-    estimate_days: 0.25
+    estimate_days: 0.5
     blocker: ""
     completed: ""

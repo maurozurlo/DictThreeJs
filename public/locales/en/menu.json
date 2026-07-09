@@ -247,5 +247,14 @@
     "confirm_reject_deal": "You are about to reject this deal.",
     "confirm": "Confirm",
     "back": "Back"
+  },
+  "hinge": {
+    "headline": {
+      "0": "PROSPERITY SOARS",
+      "1": "THE PEOPLE REJOICE",
+      "2": "A GLORIOUS MONTH FOR THE REGIME",
+      "3": "HISTORY WILL REMEMBER THIS DAY",
+      "4": "THE FUTURE HAS NEVER LOOKED BRIGHTER"
+    }
   }
 }

@@ -113,6 +113,9 @@ export interface Rounds {
     START: number;
     MAX: number;
     TIME_LENGTH_MS: number;
+    /** Minimum time (ms) the after-work hinge's mandatory reveal stage stays
+     *  on screen before the advance button becomes available (ADR-0012). */
+    MANDATORY_REVEAL_MS: number;
 }
 
 export interface TabsConfig {
@@ -142,7 +145,8 @@ export const GAMESTATE: GAME_STATE_CONSTANTS = {
     ROUNDS: {
         START: 1,
         MAX: 10,
-        TIME_LENGTH_MS: 2 * 60 * 1000
+        TIME_LENGTH_MS: 2 * 60 * 1000,
+        MANDATORY_REVEAL_MS: 3000
     },
     TABS: {
         START_TAB: Tabs.Menu

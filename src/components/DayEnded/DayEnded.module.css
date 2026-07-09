@@ -34,3 +34,30 @@
     align-items: center;
     gap: .5rem;
 }
+
+.headline {
+    text-align: center;
+    letter-spacing: 0.05rem;
+}
+
+/* Non-blocking dwell-stage banner (ADR-0012) — deliberately NOT a full-viewport
+   Modal scrim, so the Street scene stays interactive (camera, ped click) behind it.
+   Sits just below the Navbar rather than at the bottom, so it never overlaps the
+   fixed-height ActionPanel HUD strip (--action-panel-height) at the bottom of the screen. */
+.dwellBanner {
+    position: fixed;
+    left: 50%;
+    top: calc(var(--navbar-height) + 1rem);
+    transform: translateX(-50%);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    max-width: 480px;
+    background: var(--hud-panel-bg);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    pointer-events: auto;
+}

@@ -24,7 +24,7 @@
 #
 # STATUS VALUES: active | deprecated | superseded-by: TR-[system]-NNN
 
-version: 4
+version: 5
 last_updated: "2026-06-18"
 
 requirements:
@@ -453,4 +453,22 @@ requirements:
     requirement: "Law and deal acceptance/rejection requires a pre-commit confirmation step: clicking Accept/Reject shows a human-readable consequence preview (with timing labels: next round / permanent / per round) before actUponLaw/actUponDeal fires; a second Confirm tap commits; post-decision view shows what the committed law/deal is doing"
     created: 2026-06-22
     revised: ""
+    status: active
+
+  # --- Round Loop & Street Reveal (Sprint 9) ---
+  - id: TR-roundloop-001
+    system: roundloop
+    gdd: ROUND_LOOP_STREET_REVEAL_0_1.md
+    requirement: "Street View is unreachable during the timed work-day round and reachable only during the untimed after-work hinge; decision tabs (Meet/Laws/Deals/Budget) are unreachable during the hinge; exactly one hinge occurs per round transition, triggered by expireTimer()"
+    created: 2026-07-08
+    revised: ""
+    adr: docs/architecture/adr-0012-round-loop-phase-split.md
+    status: active
+  - id: TR-roundloop-002
+    system: roundloop
+    gdd: ROUND_LOOP_STREET_REVEAL_0_1.md
+    requirement: "The after-work hinge presents a mandatory brief reveal (cannot be skipped before a minimum window elapses) fused with a placeholder newsreel headline over the existing round-end financial breakdown, followed by optional unlimited dwell time in the Street View before the player advances to the next work day"
+    created: 2026-07-08
+    revised: ""
+    adr: docs/architecture/adr-0012-round-loop-phase-split.md
     status: active

@@ -63,6 +63,7 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             difficulty: chosenDifficulty,
             round: GAMESTATE.ROUNDS.START,
             dayEnded: false,
+            dwelling: false,
             endReason: null,
             endCause: null,
             currentRoundExtraIncome: 0,
@@ -168,6 +169,10 @@ export function buildLoadedState(state: GameState, data: Record<string, unknown>
             difficulty: (gm.difficulty as Difficulty) ?? 'medium',
             endReason: (gm.endReason as string | null) ?? null,
             dayEnded: (gm.dayEnded as boolean) ?? false,
+            // Always resumes mid-work-day, never mid-hinge — the reveal/dwell state
+            // (ADR-0012) is not persisted; a reload always lands back in the locked
+            // work day regardless of what dwelling was at save time.
+            dwelling: false,
             lastRoundIncome: (gm.lastRoundIncome as number) ?? 0,
             lastRoundExpenses: (gm.lastRoundExpenses as number) ?? 0,
             lastRoundRecurringIncome: (gm.lastRoundRecurringIncome as number) ?? 0,

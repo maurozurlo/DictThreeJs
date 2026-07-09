@@ -247,5 +247,14 @@
         "confirm_reject_deal": "Estás a punto de rechazar este trato.",
         "confirm": "Confirmar",
         "back": "Volver"
+    },
+    "hinge": {
+        "headline": {
+            "0": "LA PROSPERIDAD SE DISPARA",
+            "1": "EL PUEBLO CELEBRA",
+            "2": "UN MES GLORIOSO PARA EL RÉGIMEN",
+            "3": "LA HISTORIA RECORDARÁ ESTE DÍA",
+            "4": "EL FUTURO NUNCA HABÍA SIDO TAN BRILLANTE"
+        }
     }
 }

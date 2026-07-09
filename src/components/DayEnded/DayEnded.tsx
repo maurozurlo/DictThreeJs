@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useGameStore } from '../../Stores/GameState'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { GAMESTATE } from '../../Constants/GameState'
@@ -10,11 +11,15 @@ import AdvisorButton from '../Advisor/AdvisorButton'
 import { computeDayendedVerdict, computeDayendedTrigger } from '../../Utils/Advisor'
 import { getEffectiveCharisma, getEffectiveRelation } from '../../Utils/Modifiers'
 import { Icon } from '../Icon/Icon'
+import { dumbifyText } from '../../Utils/String'
+import { buildRevealHeadline } from '../../Utils/RevealHeadline'
 
 const DayEnded = () => {
     const { t } = useTranslation()
     const phase = useGameStore(s => s.gameManagement.phase)
     const dayEnded = useGameStore(s => s.gameManagement.dayEnded)
+    const dwelling = useGameStore(s => s.gameManagement.dwelling)
+    const dumbScore = useGameStore(s => s.gameManagement.dumbScore)
     const round = useGameStore(s => s.gameManagement.round)
     const lastRoundIncome = useGameStore(s => s.gameManagement.lastRoundIncome)
     const lastRoundExpenses = useGameStore(s => s.gameManagement.lastRoundExpenses)
@@ -57,10 +62,36 @@ const DayEnded = () => {
     const advisorVerdict = computeDayendedVerdict(coupStillActive, treasury)
     const advisorTrigger = computeDayendedTrigger(coupStillActive, treasury)
 
+    // Mandatory-reveal-then-optional-dwell hinge (ADR-0012). The minimum viewing
+    // window is local UI timing, not store state — Handlers stay pure (ADR-0002).
+    const [revealAcked, setRevealAcked] = useState(false)
+    useEffect(() => {
+        if (!dayEnded) return
+        setRevealAcked(false)
+        const timer = setTimeout(() => setRevealAcked(true), GAMESTATE.ROUNDS.MANDATORY_REVEAL_MS)
+        return () => clearTimeout(timer)
+    }, [dayEnded])
+
     if (!dayEnded || phase !== 'start') return null
 
     const net = lastRoundIncome + recurringIncome + extraIncome + lawTreasuryDelta + dealTreasuryDelta + expropriateGain
         - lastRoundExpenses - recurringExpenses - extraExpenses - bribeCost - shopCost
+
+    const headline = dumbifyText(buildRevealHeadline(round, t), dumbScore)
+    const advanceLabel = round + 1 <= GAMESTATE.ROUNDS.MAX
+        ? t('actionPanel.continue_month', { month: round + 1 })
+        : t('actionPanel.finish_month', { month: round })
+
+    // Dwell stage: non-blocking corner banner — no full-viewport scrim, so the
+    // Street scene (camera, ped click-to-inspect) stays interactive underneath.
+    if (dwelling && revealAcked) {
+        return (
+            <div className={styles.dwellBanner}>
+                <Typography variant="h3" color="accent" className={styles.headline}>{headline}</Typography>
+                <Button onClick={nextRound}>{advanceLabel}</Button>
+            </div>
+        )
+    }
 
     return (
         <Modal>
@@ -68,6 +99,7 @@ const DayEnded = () => {
                 <Typography variant="h2" color="accent" className={styles.header}>
                     <Icon type="calendar" />
                     {t('actionPanel.month_ended', { round })}</Typography>
+                <Typography variant="h3" color="accent" className={styles.headline}>{headline}</Typography>
                 <div className={styles.statRow}>
                     <span>{t('actionPanel.tax_income')}</span>
                     <span className={styles.positive}>+{MoneyNumberFormatter(lastRoundIncome)}</span>
@@ -146,9 +178,7 @@ const DayEnded = () => {
                     </div>
                 )}
                 <AdvisorButton category="dayended" verdict={advisorVerdict} trigger={advisorTrigger} />
-                <Button onClick={nextRound}>
-                    {round + 1 <= GAMESTATE.ROUNDS.MAX ? t('actionPanel.continue_month', { month: round + 1 }) : t('actionPanel.finish_month', { month: round })}
-                </Button>
+                {/* No advance button here — mandatory reveal stage cannot be skipped early (ADR-0012 AC-6). */}
             </ModalCard>
         </Modal>
     )

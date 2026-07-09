@@ -16,6 +16,7 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
     const displayTabs = activeTab !== Tabs.Menu;
     const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
+    const dwelling = useGameStore(s => s.gameManagement.dwelling)
     const secretAvailable = useGameStore(s => s.specialEnding.available)
     const debugEnabled = useGameStore(s => s.debug.enabled)
     const phase = useGameStore(s => s.gameManagement.phase)
@@ -35,14 +36,19 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
         if (miniChallengePending) pending.add(Tabs.Log)
     }
 
+    // Round Loop Phase Split (ADR-0012): decision tabs lock during the after-work
+    // hinge (dwelling); Street locks during the timed work day. Debug bypasses both.
+    const decisionTabsDisabled = (tabsLocked || dwelling) && !debugEnabled;
+    const streetDisabled = !dwelling && !debugEnabled;
+
     const tabConfig: { tab: Tabs, icon: IconType, label: string, disabled?: boolean }[] = [
         { tab: Tabs.Log, icon: 'news', label: t('tabs.log') },
-        { tab: Tabs.Meet, icon: 'meet', label: t('tabs.meet'), disabled: tabsLocked },
-        { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws'), disabled: tabsLocked },
-        { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals'), disabled: tabsLocked },
-        { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: tabsLocked },
+        { tab: Tabs.Meet, icon: 'meet', label: t('tabs.meet'), disabled: decisionTabsDisabled },
+        { tab: Tabs.Laws, icon: 'law', label: t('tabs.laws'), disabled: decisionTabsDisabled },
+        { tab: Tabs.Deals, icon: 'opportunity', label: t('tabs.deals'), disabled: decisionTabsDisabled },
+        { tab: Tabs.Budget, icon: 'budget', label: t('tabs.budget'), disabled: decisionTabsDisabled },
         { tab: Tabs.Shop, icon: 'shop', label: t('tabs.shop') },
-        { tab: Tabs.Street, icon: 'street', label: t('tabs.street') },
+        { tab: Tabs.Street, icon: 'street', label: t('tabs.street'), disabled: streetDisabled },
         ...((secretAvailable || debugEnabled) ? [{ tab: Tabs.Secret, icon: 'secret' as IconType, label: '???' }] : []),
     ];
 

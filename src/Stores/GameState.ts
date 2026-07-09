@@ -144,6 +144,18 @@ export const INITIAL_STATE = ({ set, get }: {
             // Menu, Secret and Shop tabs bypass lock; all others respect it
             if (get().tabs.tabsLocked && tab !== Tabs.Secret && tab !== Tabs.Shop && tab !== Tabs.Menu) return;
 
+            // Round Loop Phase Split (ADR-0012): during the after-work hinge
+            // (dwelling), decision tabs are locked — nothing to decide until
+            // nextRound() fires. During the work day, Street is locked — it is
+            // reachable only during the hinge. Debug mode bypasses both.
+            const gm = get().gameManagement;
+            const debugEnabled = get().debug.enabled;
+            if (!debugEnabled) {
+                const decisionTabs: Tabs[] = [Tabs.Meet, Tabs.Laws, Tabs.Deals, Tabs.Budget];
+                if (gm.dwelling && decisionTabs.includes(tab)) return;
+                if (!gm.dwelling && tab === Tabs.Street && gm.phase === 'start') return;
+            }
+
             const cameraPositions = get().scene.camera.cameraPositions;
             let newCameraPos: Vector3 | undefined;
             let newCameraFov = 34;
@@ -626,6 +638,7 @@ export const INITIAL_STATE = ({ set, get }: {
         endReason: null,
         endCause: null,
         dayEnded: false,
+        dwelling: false,
         lastRoundIncome: 0,
         lastRoundExpenses: 0,
         lastRoundRecurringIncome: 0,
@@ -707,10 +720,12 @@ export const INITIAL_STATE = ({ set, get }: {
                 };
                 set((s) => ({
                     relations: { ...s.relations, current: newRelations },
+                    tabs: { ...s.tabs, activeTab: Tabs.Street },
                     gameManagement: {
                         ...s.gameManagement,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
                         dayEnded: true,
+                        dwelling: true,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
                         lastRoundRecurringIncome: financials.recurringIncome,
@@ -722,9 +737,11 @@ export const INITIAL_STATE = ({ set, get }: {
                 }));
             } else {
                 set((s) => ({
+                    tabs: { ...s.tabs, activeTab: Tabs.Street },
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: true,
+                        dwelling: true,
                         lastRoundIncome: financials.totalIncome,
                         lastRoundExpenses: financials.expenses,
                         lastRoundRecurringIncome: financials.recurringIncome,
@@ -734,7 +751,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     },
                 }));
             }
-            // Brief overlay is now visible — its Continue button calls nextRound()
+            // Reveal/dwell hinge is now visible over the Street scene (ADR-0012) — its advance button calls nextRound()
         },
         pauseTimer: () => {
             if (get().gameManagement.timerPausedAt !== null) return
@@ -763,6 +780,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
+                        dwelling: false,
                         endReason: i18n.t(`endscreen.coup_narrative.${resolution.coupResult.faction}`, { ns: 'endscreen' }),
                         endCause: resolution.coupResult.cause,
                         phase: 'lose',
@@ -798,6 +816,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
+                        dwelling: false,
                         endReason: i18n.t('endscreen.end_reason.bankruptcy', { ns: 'endscreen' }),
                         endCause: 'bankruptcy' as EndCause,
                         phase: 'lose',
@@ -829,6 +848,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
+                        dwelling: false,
                         endReason: i18n.t(`endscreen.end_reason.overthrown_${overthrown}`, { ns: 'endscreen' }),
                         endCause: overthrown as EndCause,
                         phase: 'lose',
@@ -860,6 +880,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
+                        dwelling: false,
                         endReason: null,
                         endCause: null,
                         phase: 'victory',
@@ -937,6 +958,7 @@ export const INITIAL_STATE = ({ set, get }: {
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: false,
+                        dwelling: false,
                         round: newRound,
                         timerStartedAt: Date.now(),
                         lastRoundIncome: financials.totalIncome,
@@ -997,6 +1019,7 @@ export const INITIAL_STATE = ({ set, get }: {
                 gameManagement: {
                     ...s.gameManagement,
                     dayEnded: false,
+                    dwelling: false,
                     round: newRound,
                     timerStartedAt: Date.now(),
                     lastRoundIncome: financials.totalIncome,
