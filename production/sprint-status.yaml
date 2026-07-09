@@ -9,8 +9,8 @@
 #   done           ↔  Complete
 #   blocked        ↔  Blocked
 
-sprint: 9
-goal: "Round Loop Phase Split — timed work day (Street locked) / untimed after-work hinge (mandatory reveal + optional dwell)"
+sprint: 10
+goal: "Simplification & Debt — execute code-audit-2026-07-08: de-duplicate GameState.ts round paths, extract Handlers per ADR-0002, remove dead code, close standards gaps"
 start: "2026-07-08"
 end: "2026-07-15"
 generated: "2026-07-08"
@@ -19,53 +19,73 @@ goal_amendment: ""
 
 stories:
   # ── Must Have ───────────────────────────────────────────────────────────
-  - id: "9-1"
-    name: "dwelling state — work/hinge phase split"
-    file: "production/stories/9-1-round-phase-dwelling-state.md"
+  - id: "10-1"
+    name: "nextRound() de-duplication — buildGameOverPatch / buildRoundStartPatch"
+    file: "production/stories/10-1-nextround-dedup.md"
     priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.75
-    blocker: ""
-    completed: "2026-07-08"
-
-  - id: "9-2"
-    name: "Tab gating — Street lock / decision lock"
-    file: "production/stories/9-2-tab-gating-street-lock.md"
-    priority: must-have
-    status: done
-    owner: ""
-    estimate_days: 0.5
-    blocker: ""
-    completed: "2026-07-08"
-
-  - id: "9-3"
-    name: "Street reveal + newsreel — mandatory reveal, optional dwell"
-    file: "production/stories/9-3-street-reveal-newsreel.md"
-    priority: must-have
-    status: done
+    status: ready-for-dev
     owner: ""
     estimate_days: 1.5
     blocker: ""
-    completed: "2026-07-08"
+    completed: ""
 
-  # ── Should Have ─────────────────────────────────────────────────────────
-  - id: "9-4"
-    name: "Round 1 opening — inherited city state"
-    file: "production/stories/9-4-round-one-opening-reveal.md"
-    priority: should-have
-    status: done
+  - id: "10-2"
+    name: "Hinge/tab/camera single paths — expireTimer merge, TAB_CAMERA, timer helper"
+    file: "production/stories/10-2-hinge-tab-camera-paths.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+
+  - id: "10-3"
+    name: "Handler extraction + set() atomicity"
+    file: "production/stories/10-3-handler-extraction.md"
+    priority: must-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 1.0
+    blocker: ""
+    completed: ""
+
+  - id: "10-4"
+    name: "Picker unification — swapLaw drift fix + pickNextDeal"
+    file: "production/stories/10-4-picker-unification.md"
+    priority: must-have
+    status: ready-for-dev
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: "2026-07-08"
+    completed: ""
 
-  - id: "9-5"
-    name: "Crisis docket consistency check"
-    file: "production/stories/9-5-crisis-docket-consistency.md"
+  # ── Should Have ─────────────────────────────────────────────────────────
+  - id: "10-5"
+    name: "Dead-code sweep"
+    file: "production/stories/10-5-dead-code-sweep.md"
     priority: should-have
     status: ready-for-dev
     owner: ""
     estimate_days: 0.5
+    blocker: ""
+    completed: ""
+
+  - id: "10-6"
+    name: "Test relocation — src/** tests into tests/unit/"
+    file: "production/stories/10-6-test-relocation.md"
+    priority: should-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.25
+    blocker: ""
+    completed: ""
+
+  - id: "10-7"
+    name: "ADR hygiene — ADR-0007 supersede, ADR-0004 status"
+    file: "production/stories/10-7-adr-hygiene.md"
+    priority: should-have
+    status: ready-for-dev
+    owner: ""
+    estimate_days: 0.25
     blocker: ""
     completed: ""
