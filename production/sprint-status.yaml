@@ -53,11 +53,11 @@ stories:
     name: "Picker unification — swapLaw drift fix + pickNextDeal"
     file: "production/stories/10-4-picker-unification.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-08"
 
   # ── Should Have ─────────────────────────────────────────────────────────
   - id: "10-5"

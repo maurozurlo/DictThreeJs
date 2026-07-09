@@ -381,12 +381,7 @@ export function prepareRoundStart(state: GameState, r: ContinueResolution): Draw
         ? getRandomFromList(MINI_CHALLENGES)
         : null;
 
-    const dealPool = state.deals.interactedWithDeals.size >= DEALS.length
-        ? new Set<typeof DEALS[number]>()
-        : state.deals.interactedWithDeals;
-    const randomDeal = getRandomUniqueItem(DEALS, dealPool);
-    const updatedDeals = new Set(dealPool);
-    if (randomDeal) updatedDeals.add(randomDeal);
+    const { deal: randomDeal, updatedDeals } = pickNextDeal(state.deals.interactedWithDeals);
 
     const updatedLaws = new Set(state.law.interactedWithLaws);
     const randomLaw = pickNextLaw(state, r.newRepStatuses, updatedLaws);
@@ -443,19 +438,39 @@ export function buildRoundStartPatch(
 }
 
 /**
+ * Deal draw with pool-reset-on-exhaustion (Story 10-4) — the single
+ * implementation behind swapDeal and the round-start content draw. When every
+ * deal has been shown, the interacted set resets so the cycle restarts.
+ */
+export function pickNextDeal(interactedWithDeals: Set<typeof DEALS[number]>): {
+    deal: typeof DEALS[number] | null;
+    updatedDeals: Set<typeof DEALS[number]>;
+} {
+    const pool = interactedWithDeals.size >= DEALS.length
+        ? new Set<typeof DEALS[number]>()
+        : interactedWithDeals;
+    const deal = getRandomUniqueItem(DEALS, pool);
+    const updatedDeals = new Set(pool);
+    if (deal) updatedDeals.add(deal);
+    return { deal, updatedDeals };
+}
+
+/**
  * Biased law selection (Plan G) + weird-law trigger (Story 5-2). 10% chance of a
  * weird law when no weird law is active; otherwise a faction-biased pick from the
- * pool, excluding sick/eliminated factions.
+ * pool, excluding sick/eliminated factions. `allowWeird: false` (swap path,
+ * Story 10-4) skips the weird roll entirely — swaps never surface weird laws.
  */
 export function pickNextLaw(
     state: GameState,
     newRepStatuses: RepStatuses,
     usedLaws: Set<typeof LAWS[number]>,
+    opts: { allowWeird?: boolean } = {},
 ): typeof LAWS[number] | null {
     const hasActiveWeirdLaw = state.gameManagement.modifiers.findIndex(
         m => m.type === 'weird-law' && m.state === 'active',
     ) !== -1;
-    if (!hasActiveWeirdLaw && rollChance(0.10)) {
+    if ((opts.allowWeird ?? true) && !hasActiveWeirdLaw && rollChance(0.10)) {
         return getRandomFromList(WEIRD_LAWS);
     }
     const lawPool = filterLawPool(LAWS, state.gameManagement.modifiers);

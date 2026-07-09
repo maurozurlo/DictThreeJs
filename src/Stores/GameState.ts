@@ -6,7 +6,7 @@ import { GAMESTATE, STREET_CAMERA, TAB_CAMERA, DEFAULT_TAB_FOV } from "../Consta
 import { pausedTimerFields, resumedTimerFields } from "../Utils/Timer";
 import type { TimerFields } from "../Utils/Timer";
 import type { Difficulty } from "../Constants/GameState";
-import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
+import { Clamp, getRandomFromList, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
 import type { EndCause, GameState, LogEvent, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
@@ -16,16 +16,14 @@ import { handleActionOutcome } from "./ActionHandler";
 import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import i18n from '../i18n';
 import type { Power, MeetActionType } from "../types/Power";
-import { getRandomUniqueItemForPower } from "../Utils/Laws";
 import { Power as PowerList } from "../Constants/Power";
-import { filterLawPool } from "./RecurringHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
 import { getEffectiveCharisma, computeRepealTier } from "../Utils/Modifiers";
 import { getModifierContent } from "../assets/modifierContent";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 import { buildStartState, buildLoadedState } from "./StateFactory";
-import { resolveRound, buildGameOverPatch, buildRoundStartPatch, prepareRoundStart } from "./RoundResolver";
+import { resolveRound, buildGameOverPatch, buildRoundStartPatch, prepareRoundStart, pickNextLaw, pickNextDeal } from "./RoundResolver";
 import { buildDeltas, relationDiff } from "../Utils/RoundLog";
 
 
@@ -219,17 +217,16 @@ export const INITIAL_STATE = ({ set, get }: {
         swapLaw: () => {
             set((state) => {
                 const updatedLaws = new Set(state.law.interactedWithLaws);
-                const pickNextLaw = (usedLaws: Set<typeof LAWS[number]>) => {
-                    const lawPool = filterLawPool(LAWS, state.gameManagement.modifiers);
-                    if (state.budget.taxes.peopleTaxes > GAMESTATE.INCOME.TAX_PENALTY_PEOPLE_THRESHOLD) {
-                        return getRandomUniqueItemForPower(lawPool, usedLaws, 'people') ?? getRandomUniqueItem(lawPool, usedLaws);
-                    }
-                    if (state.budget.taxes.businessTaxes > GAMESTATE.INCOME.TAX_PENALTY_BUSINESS_THRESHOLD) {
-                        return getRandomUniqueItemForPower(lawPool, usedLaws, 'business') ?? getRandomUniqueItem(lawPool, usedLaws);
-                    }
-                    return getRandomUniqueItem(lawPool, usedLaws);
-                };
-                const nextLaw = pickNextLaw(updatedLaws);
+                // Canonical picker (Story 10-4): the swap path now excludes
+                // sick/eliminated representatives' laws (drift fix vs. the old
+                // inline closure) but never surfaces weird laws — swaps have
+                // never produced them (allowWeird: false preserves that).
+                const nextLaw = pickNextLaw(
+                    state,
+                    state.gameManagement.representativeStatuses,
+                    updatedLaws,
+                    { allowWeird: false },
+                );
                 if (!nextLaw) {
                     console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
                     return {};
@@ -268,16 +265,11 @@ export const INITIAL_STATE = ({ set, get }: {
         },
         swapDeal: () => {
             set((state) => {
-                const updatedDeals = new Set(state.deals.interactedWithDeals);
-                const dealPool = updatedDeals.size >= DEALS.length
-                    ? new Set<typeof DEALS[number]>()
-                    : updatedDeals;
-                const nextDeal = getRandomUniqueItem(DEALS, dealPool);
+                const { deal: nextDeal, updatedDeals } = pickNextDeal(state.deals.interactedWithDeals);
                 if (!nextDeal) {
                     console.warn('⚠️ Deal pool empty — all deals have been shown.');
                     return {};
                 }
-                updatedDeals.add(nextDeal);
                 return { deals: { ...state.deals, current: nextDeal, interactedWithDeals: updatedDeals, dealDecided: false, lastDealOutcome: null, lastDealAccepted: null } };
             });
         },

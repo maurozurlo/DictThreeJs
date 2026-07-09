@@ -1,7 +1,7 @@
 # Story 10-4: Picker Unification — swapLaw Drift Fix + pickNextDeal
 
 > **Epic**: Simplification & Debt (Sprint 10)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 0.5 days
@@ -20,6 +20,24 @@ The "reset pool when exhausted + draw unique" deal dance is duplicated in
 
 **Arbitrated behavior decision**: fix the rep-status drift (bug), keep
 `allowWeird: false` on swap (preserves observed behavior).
+
+## Completion Notes
+
+Implemented as scoped. `pickNextLaw` gained `opts.allowWeird` (default true —
+nextRound path and its RNG order untouched); `swapLaw`'s inline closure deleted, now
+calls the canonical picker with current rep statuses + `allowWeird: false`. The
+drift bug is fixed: swaps no longer propose laws from eliminated/sick factions.
+`pickNextDeal` added to `RoundResolver.ts`, used by `swapDeal` and
+`prepareRoundStart` (one draw semantics: pool resets on exhaustion — `swapDeal`'s
+old variant kept accumulating the interacted set past exhaustion; the reset
+semantics is strictly better and the draw behavior is equivalent). `filterLawPool` /
+`getRandomUniqueItemForPower` / `getRandomUniqueItem` imports dropped from the store.
+
+7 new tests (`tests/unit/laws/law_picker.test.ts`): seed-sweep property tests for
+faction exclusion (100 seeds), weird-law gating (200 seeds, plus a contrast test
+proving the default path CAN produce weird laws), store-level swapLaw regression
+guards, and pickNextDeal exclusion/reset semantics. Suite 738/738, `tsc -b` clean,
+build green.
 
 ## Acceptance Criteria
 
