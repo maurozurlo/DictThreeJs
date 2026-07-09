@@ -84,7 +84,7 @@ describe('handleActionOutcome', () => {
         // Reset RNG mocks to defaults before each test (ADR-0010 contract).
         vi.mocked(MathUtils.rollChance).mockReset().mockImplementation((_p: number) => false);
         vi.mocked(MathUtils.rollFloat).mockReset().mockReturnValue(0.5);
-        vi.mocked(MathUtils.getRandomFromList).mockReset().mockImplementation((arr: unknown[]) => arr[0]);
+        vi.mocked(MathUtils.getRandomFromList).mockReset().mockImplementation((arr: readonly unknown[]) => arr[0]);
 
         mockState = {
             budget: {

@@ -171,10 +171,10 @@ describe('handleRelations', () => {
 
 describe('handleDecision', () => {
     let mockState: Partial<GameState>;
-    let mockGet: () => GameState;
     let mockSet: (p: Partial<GameState>) => void;
 
-    // Resolve the partial passed to the single set() call.
+    // handleDecision now RETURNS the patch (Story 10-3); tests feed it through
+    // mockSet so the original single-set() assertions read unchanged.
     const lastSetArg = () => (mockSet as any).mock.calls[0][0];
     // Amount of a stat on a built modifier's resolved mods.
     const modAmount = (mod: any, stat: string): number | undefined =>
@@ -196,6 +196,14 @@ describe('handleDecision', () => {
                 charisma: { current: 0 },
                 modifiers: [],
                 round: 3, // past the grace window — reject base mutations are un-dampened
+                currentRoundExtraIncome: 0,
+                currentRoundExtraExpenses: 0,
+            },
+            stats: {
+                lawsPassed: 0,
+                lawsRejected: 0,
+                dealsAccepted: 0,
+                dealsRejected: 0,
             },
             deals: {
                 dealDecided: false,
@@ -210,7 +218,6 @@ describe('handleDecision', () => {
             }
         } as unknown as GameState;
 
-        mockGet = vi.fn(() => mockState as GameState);
         mockSet = vi.fn((_: Partial<GameState>) => { });
     });
 
@@ -231,7 +238,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: true, state: mockState as GameState }));
 
             const arg = lastSetArg();
             // Treasury + relations are NOT mutated on accept — they live in the modifier.
@@ -255,7 +262,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: -1, time: 1 }, { stat: 'people', amount: 1, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             const arg = lastSetArg();
             expect(arg.budget.treasury).toBe(100);
@@ -272,7 +279,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'treasury', amount: -20, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             expect(lastSetArg().budget.treasury).toBe(80);
         });
@@ -289,7 +296,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'business', amount: -1, time: 1 }],
             };
 
-            handleDecision({ type: 'deal', item: deal, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'deal', item: deal, hasAccepted: true, state: mockState as GameState }));
 
             const arg = lastSetArg();
             expect(arg.budget.treasury).toBe(100);
@@ -316,7 +323,7 @@ describe('handleDecision', () => {
                 riskText: 'Things went wrong!',
             };
 
-            handleDecision({ type: 'deal', item: deal, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'deal', item: deal, hasAccepted: false, state: mockState as GameState }));
 
             const arg = lastSetArg();
             expect(arg.budget.treasury).toBe(100); // reject has no treasury spec
@@ -340,7 +347,7 @@ describe('handleDecision', () => {
                 riskText: 'Things went wrong!',
             };
 
-            handleDecision({ type: 'deal', item: deal, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'deal', item: deal, hasAccepted: false, state: mockState as GameState }));
 
             const arg = lastSetArg();
             expect(arg.relations.current).toEqual({ military: 0, business: 0, people: 0 });
@@ -363,7 +370,7 @@ describe('handleDecision', () => {
                 riskText: 'Things went wrong!',
             };
 
-            handleDecision({ type: 'deal', item: deal, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'deal', item: deal, hasAccepted: true, state: mockState as GameState }));
 
             const arg = lastSetArg();
             // No -2 penalty even though risk rolled true; treasury stays base (it's in the modifier).
@@ -385,7 +392,7 @@ describe('handleDecision', () => {
                 rejectMods: [],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: true, state: mockState as GameState }));
 
             const arg = lastSetArg();
             const mod = findMod(arg, 'laws.3');
@@ -404,7 +411,7 @@ describe('handleDecision', () => {
                 rejectMods: [],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: true, state: mockState as GameState }));
 
             const arg = lastSetArg();
             const mod = findMod(arg, 'laws.4');
@@ -424,7 +431,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: 1, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             expect(lastSetArg().gameManagement.charisma.current).toBe(1);
         });
@@ -437,7 +444,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             expect(lastSetArg().gameManagement.charisma.current).toBe(0);
         });
@@ -457,7 +464,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: -4, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             const arg = lastSetArg();
             // -4 dampened to round(-4 * 0.25) = -1 — the value actually applied to base.
@@ -480,7 +487,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: -1, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: true, state: mockState as GameState }));
 
             const event = pendingLog(lastSetArg()).at(-1);
             expect(event.key).toBe('log.passed_law');
@@ -497,7 +504,7 @@ describe('handleDecision', () => {
                 rejectMods: [],
             };
 
-            handleDecision({ type: 'deal', item: deal, hasAccepted: true, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'deal', item: deal, hasAccepted: true, state: mockState as GameState }));
 
             const event = pendingLog(lastSetArg()).at(-1);
             expect(event.key).toBe('log.accepted_deal_named');
@@ -518,7 +525,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'military', amount: 5, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             expect(lastSetArg().relations.current.military).toBe(10);
         });
@@ -532,7 +539,7 @@ describe('handleDecision', () => {
                 rejectMods: [{ stat: 'people', amount: -5, time: 1 }],
             };
 
-            handleDecision({ type: 'law', item: law, hasAccepted: false, get: mockGet, set: mockSet });
+            mockSet(handleDecision({ type: 'law', item: law, hasAccepted: false, state: mockState as GameState }));
 
             expect(lastSetArg().relations.current.people).toBe(-10);
         });

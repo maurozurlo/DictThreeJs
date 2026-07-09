@@ -23,6 +23,18 @@ function signedMoney(n: number): string {
     return `${n > 0 ? '+' : '-'}$${Math.abs(n)}M`;
 }
 
+/** Relation before/after → LogDeltas diff bag (ADR-0011). */
+export function relationDiff(
+    before: Record<'military' | 'business' | 'people', number>,
+    after: Record<'military' | 'business' | 'people', number>,
+): LogDeltas {
+    return {
+        military: after.military - before.military,
+        business: after.business - before.business,
+        people: after.people - before.people,
+    };
+}
+
 /**
  * Keep only the non-zero stats of a raw delta bag, returning `undefined` when
  * nothing changed. Capture sites pass computed before/after diffs through this so

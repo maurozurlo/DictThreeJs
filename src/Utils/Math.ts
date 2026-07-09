@@ -51,7 +51,7 @@ export function getRandomNumberInRange(min: number, max: number): number {
     return Math.floor(next() * (max - min + 1)) + min;
 }
 
-export function getRandomUniqueItem<T>(list: T[], used: Set<T>): T | null {
+export function getRandomUniqueItem<T>(list: readonly T[], used: Set<T>): T | null {
     if (list.length === 0) {
         console.warn("⚠️ getRandomUniqueItem: list is empty.");
         return null;
@@ -68,7 +68,7 @@ export function getRandomUniqueItem<T>(list: T[], used: Set<T>): T | null {
     return available[randomIndex];
 }
 
-export function getRandomFromList<T>(list: T[]): T {
+export function getRandomFromList<T>(list: readonly T[]): T {
     if (list.length === 0) {
         throw new Error("getRandomFromList: list is empty.");
     }

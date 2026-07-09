@@ -8,9 +8,10 @@ import type { TimerFields } from "../Utils/Timer";
 import type { Difficulty } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
-import type { EndCause, GameState, LogDeltas, LogEvent, ShopItemId } from "../types/GameState";
+import type { EndCause, GameState, LogEvent, ShopItemId } from "../types/GameState";
 import { LAWS } from "../assets/laws";
-import { handleDecision, handleRelations } from "./EffectHandler";
+import { handleDecision, handleRelations, handleWeirdLaw, applyEventEffect } from "./EffectHandler";
+import { handlePurchase } from "./ShopHandler";
 import { handleActionOutcome } from "./ActionHandler";
 import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
 import i18n from '../i18n';
@@ -20,20 +21,12 @@ import { Power as PowerList } from "../Constants/Power";
 import { filterLawPool } from "./RecurringHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma, countModifiersByType, computeRepealTier } from "../Utils/Modifiers";
-import { buildWeirdLawModifier, getModifierContent } from "../assets/modifierContent";
-import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
+import { getEffectiveCharisma, computeRepealTier } from "../Utils/Modifiers";
+import { getModifierContent } from "../assets/modifierContent";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 import { buildStartState, buildLoadedState } from "./StateFactory";
 import { resolveRound, buildGameOverPatch, buildRoundStartPatch, prepareRoundStart } from "./RoundResolver";
-import { buildDeltas } from "../Utils/RoundLog";
-
-/** Relation before/after → LogDeltas diff bag (ADR-0011). */
-const relationDiff = (before: Record<Power, number>, after: Record<Power, number>): LogDeltas => ({
-    military: after.military - before.military,
-    business: after.business - before.business,
-    people: after.people - before.people,
-});
+import { buildDeltas, relationDiff } from "../Utils/RoundLog";
 
 
 export const INITIAL_STATE = ({ set, get }: {
@@ -249,104 +242,13 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const current = state.law.current;
             if (!current) return;
-
-            // Weird law path — one-time effects, no faction penalty on reject, slot tracking
-            if (current.type === 'weird') {
-                if (hasAccepted) {
-                    const round = state.gameManagement.round;
-                    const newRelations = { ...state.relations.current };
-                    let newTreasury = state.budget.treasury;
-                    let charismaDelta = 0;
-                    // Weird-law effects are ADR-0008 class A — applied as immediate base
-                    // mutations (the weird modifier below carries no contributions).
-                    for (const spec of current.acceptMods) {
-                        if (spec.stat === 'treasury') {
-                            newTreasury += spec.amount;
-                        } else if (spec.stat === 'military' || spec.stat === 'business' || spec.stat === 'people') {
-                            newRelations[spec.stat] = handleRelations({
-                                power: spec.stat,
-                                amount: spec.amount,
-                                current: newRelations[spec.stat],
-                                round,
-                            });
-                        } else if (spec.stat === 'charisma') {
-                            charismaDelta += spec.amount;
-                        }
-                    }
-                    const newCharisma = Clamp(
-                        state.gameManagement.charisma.current + charismaDelta,
-                        GAMESTATE.CHARISMA.MIN,
-                        GAMESTATE.CHARISMA.MAX
-                    );
-                    // Weird-law ledger/slot modifier — effects above are immediate base
-                    // mutations (ADR-0008 class A); this entry enforces the "one weird law
-                    // active" slot, drives Street View, and is a repealable ledger entry.
-                    const weirdMod = buildWeirdLawModifier(current.id, round);
-                    // Weird-law effects are immediate base mutations — diff them for the log (ADR-0011).
-                    const weirdLogEvent: LogEvent = {
-                        key: 'log.passed_law',
-                        labelKey: `laws.weird.${current.id}.label`, labelNs: 'laws',
-                        deltas: buildDeltas({
-                            ...relationDiff(state.relations.current, newRelations),
-                            treasury: newTreasury - state.budget.treasury,
-                            charisma: newCharisma - state.gameManagement.charisma.current,
-                        }),
-                    };
-                    set((s) => ({
-                        budget: { ...s.budget, treasury: newTreasury },
-                        relations: { ...s.relations, current: newRelations },
-                        gameManagement: {
-                            ...s.gameManagement,
-                            charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                            modifiers: s.gameManagement.modifiers.some(m => m.id === weirdMod.id && m.state === 'active')
-                                ? s.gameManagement.modifiers
-                                : [...s.gameManagement.modifiers, weirdMod],
-                            pendingLog: [...s.gameManagement.pendingLog, weirdLogEvent],
-                        },
-                        law: {
-                            ...s.law,
-                            lastLawOutcome: true,
-                            lawDecided: true,
-                            interactedWithLaws: new Set(s.law.interactedWithLaws).add(current),
-                        },
-                        stats: {
-                            ...s.stats,
-                            lawsPassed: s.stats.lawsPassed + 1,
-                        },
-                    }));
-                } else {
-                    set((s) => ({
-                        gameManagement: {
-                            ...s.gameManagement,
-                            pendingLog: [...s.gameManagement.pendingLog, {
-                                key: 'log.rejected_law',
-                                labelKey: `laws.weird.${current.id}.label`, labelNs: 'laws',
-                            } as LogEvent],
-                        },
-                        law: {
-                            ...s.law,
-                            lastLawOutcome: false,
-                            lawDecided: true,
-                            interactedWithLaws: new Set(s.law.interactedWithLaws).add(current),
-                        },
-                        stats: {
-                            ...s.stats,
-                            lawsRejected: s.stats.lawsRejected + 1,
-                        },
-                    }));
-                }
-                return;
-            }
-
-            // Normal law path
-            handleDecision({ type: "law", item: current, hasAccepted, get, set });
-            set((s) => ({
-                stats: {
-                    ...s.stats,
-                    lawsPassed: hasAccepted ? s.stats.lawsPassed + 1 : s.stats.lawsPassed,
-                    lawsRejected: !hasAccepted ? s.stats.lawsRejected + 1 : s.stats.lawsRejected,
-                },
-            }));
+            // Weird laws: one-time base effects, no faction penalty on reject,
+            // slot-tracking ledger modifier. Normal laws: modifier on accept,
+            // base mutations on reject (ADR-0008). Either way: one atomic set().
+            const patch = current.type === 'weird'
+                ? handleWeirdLaw(state, current, hasAccepted)
+                : handleDecision({ type: "law", item: current, hasAccepted, state });
+            set(patch);
         },
     },
     deals: {
@@ -360,24 +262,9 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const current = state.deals.current;
             if (!current) return;
-            // Treasury delta for the round's extra-income/expense readout (DayEnded +
-            // totalExtras stats). The treasury itself is applied via the modifier in
-            // nextRound (accept) or as a base mutation in handleDecision (reject).
-            const chosenMods = hasAccepted ? current.acceptMods : current.rejectMods;
-            const delta = chosenMods.reduce((sum, s) => (s.stat === 'treasury' ? sum + s.amount : sum), 0);
-            handleDecision({ type: "deal", item: current, hasAccepted, get, set });
-            set((s) => ({
-                stats: {
-                    ...s.stats,
-                    dealsAccepted: hasAccepted ? s.stats.dealsAccepted + 1 : s.stats.dealsAccepted,
-                    dealsRejected: !hasAccepted ? s.stats.dealsRejected + 1 : s.stats.dealsRejected,
-                },
-                gameManagement: {
-                    ...s.gameManagement,
-                    currentRoundExtraIncome: delta > 0 ? s.gameManagement.currentRoundExtraIncome + delta : s.gameManagement.currentRoundExtraIncome,
-                    currentRoundExtraExpenses: delta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(delta) : s.gameManagement.currentRoundExtraExpenses,
-                },
-            }));
+            // handleDecision returns the full patch — modifier/base mutations,
+            // stats, and the extra-income/expense recap counters (Story 10-3).
+            set(handleDecision({ type: "deal", item: current, hasAccepted, state }));
         },
         swapDeal: () => {
             set((state) => {
@@ -405,46 +292,17 @@ export const INITIAL_STATE = ({ set, get }: {
             if (!event || state.periodicEvent.decided) return;
 
             const option = event.options[optionIndex];
-            const effect = option.effect;
-
-            // Apply treasury change
-            const newTreasury = state.budget.treasury + (effect.treasury ?? 0);
-
-            // Apply relation changes
-            const newRelations = { ...state.relations.current };
-            (Object.keys(newRelations) as Power[]).forEach((power) => {
-                const delta = effect[power];
-                if (typeof delta === 'number') {
-                    newRelations[power] = Clamp(
-                        newRelations[power] + delta,
-                        GAMESTATE.RELATIONS.MIN,
-                        GAMESTATE.RELATIONS.MAX
-                    );
-                }
-            });
-
-            const periodicDelta = effect.treasury ?? 0;
-            const periodicLogEvent: LogEvent = {
-                key: 'log.event.event_resolved',
-                labelKey: `${event.id}.title`, labelNs: 'periodic_events',
-                deltas: buildDeltas({ ...relationDiff(state.relations.current, newRelations), treasury: periodicDelta }),
-            };
-            set((s) => ({
+            set({
+                ...applyEventEffect(state, option.effect, {
+                    key: 'log.event.event_resolved',
+                    labelKey: `${event.id}.title`, labelNs: 'periodic_events',
+                }),
                 periodicEvent: {
-                    ...s.periodicEvent,
+                    ...state.periodicEvent,
                     decided: true,
                     resultKey: `${event.id}.options.${option.id}.result`,
                 },
-                budget: { ...s.budget, treasury: newTreasury },
-                relations: { ...s.relations, current: newRelations },
-                tabs: { ...s.tabs, tabsLocked: false },
-                gameManagement: {
-                    ...s.gameManagement,
-                    currentRoundExtraIncome: periodicDelta > 0 ? s.gameManagement.currentRoundExtraIncome + periodicDelta : s.gameManagement.currentRoundExtraIncome,
-                    currentRoundExtraExpenses: periodicDelta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(periodicDelta) : s.gameManagement.currentRoundExtraExpenses,
-                    pendingLog: [...s.gameManagement.pendingLog, periodicLogEvent],
-                },
-            }));
+            });
         },
     },
     miniChallenge: {
@@ -460,132 +318,39 @@ export const INITIAL_STATE = ({ set, get }: {
             const effect = accepted ? challenge.acceptOutcome : challenge.rejectOutcome;
             const resultKey = `${challenge.id}.${accepted ? 'accept' : 'reject'}`;
 
-            // Apply treasury change
-            let newTreasury = state.budget.treasury + (effect.treasury ?? 0);
-
-            // Apply relation changes
-            const newRelations = { ...state.relations.current };
-            (Object.keys(newRelations) as Power[]).forEach((power) => {
-                const delta = effect[power];
-                if (typeof delta === 'number') {
-                    newRelations[power] = Clamp(
-                        newRelations[power] + delta,
-                        GAMESTATE.RELATIONS.MIN,
-                        GAMESTATE.RELATIONS.MAX
-                    );
-                }
-            });
-
-            // Handle risk
+            // Risk roll (commit-on-roll, ADR-0010). The relation penalty only
+            // lands on rejection; acceptance risk is narrative flavour.
             let riskTriggered = false;
+            let riskPenalty: { power: Power; amount: number } | undefined;
             if (effect.risk && rollChance(effect.risk)) {
                 riskTriggered = true;
-                // Risk penalty: random power loses 2 on rejection
                 if (!accepted) {
                     const powers: Power[] = ['military', 'business', 'people'];
-                    const angryPower = getRandomFromList(powers);
-                    newRelations[angryPower] = Clamp(
-                        newRelations[angryPower] - 2,
-                        GAMESTATE.RELATIONS.MIN,
-                        GAMESTATE.RELATIONS.MAX
-                    );
+                    riskPenalty = { power: getRandomFromList(powers), amount: -2 };
                 }
             }
 
-            const challengeDelta = effect.treasury ?? 0;
-            const challengeLogEvent: LogEvent = {
-                key: accepted ? 'log.event.opportunity_accepted' : 'log.event.opportunity_rejected',
-                deltas: buildDeltas({ ...relationDiff(state.relations.current, newRelations), treasury: challengeDelta }),
-            };
-            set((s) => ({
+            set({
+                ...applyEventEffect(state, effect, {
+                    key: accepted ? 'log.event.opportunity_accepted' : 'log.event.opportunity_rejected',
+                }, riskPenalty),
                 miniChallenge: {
-                    ...s.miniChallenge,
+                    ...state.miniChallenge,
                     decided: true,
                     resultKey,
                     riskTriggered,
                 },
-                budget: { ...s.budget, treasury: newTreasury },
-                relations: { ...s.relations, current: newRelations },
-                tabs: { ...s.tabs, tabsLocked: false },
-                gameManagement: {
-                    ...s.gameManagement,
-                    currentRoundExtraIncome: challengeDelta > 0 ? s.gameManagement.currentRoundExtraIncome + challengeDelta : s.gameManagement.currentRoundExtraIncome,
-                    currentRoundExtraExpenses: challengeDelta < 0 ? s.gameManagement.currentRoundExtraExpenses + Math.abs(challengeDelta) : s.gameManagement.currentRoundExtraExpenses,
-                    pendingLog: [...s.gameManagement.pendingLog, challengeLogEvent],
-                },
-            }));
+            });
         },
     },
     shop: {
         frozenFactions: new Set<Power>(),
         advisorLevel: 0 as 0 | 1 | 2 | 3,
         buy: (item: ShopItemId) => {
-            const state = get();
-            if (item === 'advisor_1' || item === 'advisor_2' || item === 'advisor_3') {
-                const ADVISOR_COSTS: Record<typeof item, number> = { advisor_1: 100, advisor_2: 150, advisor_3: 200 };
-                const ADVISOR_LEVELS: Record<typeof item, 1 | 2 | 3> = { advisor_1: 1, advisor_2: 2, advisor_3: 3 };
-                const targetLevel = ADVISOR_LEVELS[item];
-                if (state.shop.advisorLevel >= targetLevel) return;
-                const cost = ADVISOR_COSTS[item];
-                if (state.budget.treasury < cost) return;
-                const advisorEvent: LogEvent = {
-                    key: 'log.event.hired_advisor',
-                    params: { level: targetLevel },
-                    deltas: { treasury: -cost },
-                };
-                set((s) => ({
-                    budget: { ...s.budget, treasury: s.budget.treasury - cost },
-                    shop: { ...s.shop, advisorLevel: targetLevel },
-                    gameManagement: {
-                        ...s.gameManagement,
-                        pendingLog: [...s.gameManagement.pendingLog, advisorEvent],
-                        currentRoundShopCost: s.gameManagement.currentRoundShopCost + cost,
-                    },
-                }));
-            } else if (item === 'statue') {
-                // Owned count is derived from the modifiers ledger — single source of truth.
-                const statueCount = countModifiersByType(state.gameManagement.modifiers, 'statue');
-                const shopItem = STATUES[statueCount];
-                if (!shopItem) return; // all tiers owned
-                if (state.budget.treasury < shopItem.price) return;
-                const statueEvent: LogEvent = {
-                    key: 'log.event.bought_statue',
-                    deltas: { treasury: -shopItem.price },
-                    ongoing: buildDeltas({ charisma: shopItem.mods.reduce((a, m) => m.stat === 'charisma' ? a + m.amount : a, 0) }),
-                };
-                set((s) => ({
-                    budget: { ...s.budget, treasury: s.budget.treasury - shopItem.price },
-                    gameManagement: {
-                        ...s.gameManagement,
-                        modifiers: [
-                            ...s.gameManagement.modifiers,
-                            buildShopModifier(shopItem, state.gameManagement.round),
-                        ],
-                        pendingLog: [...s.gameManagement.pendingLog, statueEvent],
-                        currentRoundShopCost: s.gameManagement.currentRoundShopCost + shopItem.price,
-                    },
-                }));
-            } else {
-                const mediaPackage = MEDIA_PACKAGES.find(p => p.id === item);
-                if (!mediaPackage || state.shop.frozenFactions.has(mediaPackage.faction)) return;
-                if (state.budget.treasury < mediaPackage.price) return;
-                const newFrozen = new Set(state.shop.frozenFactions);
-                newFrozen.add(mediaPackage.faction);
-                const mediaEvent: LogEvent = {
-                    key: 'log.event.bought_media',
-                    refParams: { faction: `power.${mediaPackage.faction}` },
-                    deltas: { treasury: -mediaPackage.price },
-                };
-                set((s) => ({
-                    budget: { ...s.budget, treasury: s.budget.treasury - mediaPackage.price },
-                    shop: { ...s.shop, frozenFactions: newFrozen },
-                    gameManagement: {
-                        ...s.gameManagement,
-                        pendingLog: [...s.gameManagement.pendingLog, mediaEvent],
-                        currentRoundShopCost: s.gameManagement.currentRoundShopCost + mediaPackage.price,
-                    },
-                }));
-            }
+            // Rejected purchases (owned tier, frozen faction, insufficient
+            // treasury) return null — silent no-op by design (Story 10-3).
+            const patch = handlePurchase(get(), item);
+            if (patch) set(patch);
         },
     },
     specialEnding: {

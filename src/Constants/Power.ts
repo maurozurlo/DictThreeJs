@@ -1,1 +1,1 @@
-export const Power = ["people", "business", "military"];
+export const Power = ["people", "business", "military"] as const;

@@ -43,11 +43,11 @@ stories:
     name: "Handler extraction + set() atomicity"
     file: "production/stories/10-3-handler-extraction.md"
     priority: must-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 1.0
     blocker: ""
-    completed: ""
+    completed: "2026-07-08"
 
   - id: "10-4"
     name: "Picker unification — swapLaw drift fix + pickNextDeal"

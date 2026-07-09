@@ -1,11 +1,34 @@
 # Story 10-3: Handler Extraction + set() Atomicity
 
 > **Epic**: Simplification & Debt (Sprint 10)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 1.0 days
 > **Last Updated**: 2026-07-08
+
+## Completion Notes
+
+Implemented as scoped, plus one typing fix the work surfaced. `handleDecision` now
+returns the full patch (including stats and deal extra-income/expense counters);
+`handleWeirdLaw` and `applyEventEffect` extracted into `EffectHandler.ts`;
+`handlePurchase` in new `ShopHandler.ts`. `actUponLaw`/`actUponDeal`/`periodicEvent.resolve`/
+`miniChallenge.resolve`/`shop.buy` are each one lookup + one atomic `set()` (rejected
+purchases: zero set() — silent no-op preserved). `relationDiff` moved to
+`Utils/RoundLog.ts` as the single shared implementation.
+
+**Typing fix**: `Constants/Power.ts` lacked `as const`, so the `Power` union type had
+silently widened to `string` everywhere (`Record<Power, number>` was an index
+signature). Fixed; `getRandomFromList`/`getRandomUniqueItem` widened to accept
+`readonly` arrays.
+
+9 new tests (`tests/unit/laws/decision_atomicity.test.ts`) assert exactly ONE store
+notification per decision via subscription counting — the direct ADR-0002 atomicity
+check (previously 2 per law/deal decision). EffectHandler tests adapted mechanically
+(`mockSet(handleDecision(...))` — all assertions unchanged). Suite 731/731, `tsc -b`
+clean, build green. Puppeteer 6/6: law approve, deal accept, shop purchase (treasury
+deducted), two round advances, round-3 periodic event (International Summit) rendered
+and resolved live.
 
 ## Context
 
