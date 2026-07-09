@@ -12,8 +12,6 @@ import { LAWS } from "../assets/laws";
 import { handleDecision, handleRelations } from "./EffectHandler";
 import { handleActionOutcome } from "./ActionHandler";
 import { handleBudgetChange, calculateRoundFinancials } from "./BudgetHandler";
-import { PERIODIC_EVENTS } from "../assets/periodicEvents";
-import { MINI_CHALLENGES } from "../assets/miniChallenges";
 import i18n from '../i18n';
 import type { Power, MeetActionType } from "../types/Power";
 import { getRandomUniqueItemForPower } from "../Utils/Laws";
@@ -21,12 +19,12 @@ import { Power as PowerList } from "../Constants/Power";
 import { filterLawPool } from "./RecurringHandler";
 import { educationToDumbScore } from "../Utils/String";
 import { exportSave } from "../Utils/SaveLoad";
-import { getEffectiveCharisma, getEffectiveRelation, countModifiersByType, computeRepealTier } from "../Utils/Modifiers";
+import { getEffectiveCharisma, countModifiersByType, computeRepealTier } from "../Utils/Modifiers";
 import { buildWeirdLawModifier, getModifierContent } from "../assets/modifierContent";
 import { STATUES, MEDIA_PACKAGES, buildShopModifier } from "../assets/ShopItems";
 import { SECRET_ROOMS } from "../assets/secretRooms";
 import { buildStartState, buildLoadedState } from "./StateFactory";
-import { resolveRound, buildRoundStats, pickNextLaw } from "./RoundResolver";
+import { resolveRound, buildGameOverPatch, buildRoundStartPatch, prepareRoundStart } from "./RoundResolver";
 import { buildDeltas } from "../Utils/RoundLog";
 
 /** Relation before/after → LogDeltas diff bag (ADR-0011). */
@@ -799,6 +797,8 @@ export const INITIAL_STATE = ({ set, get }: {
             const state = get();
             const resolution = resolveRound(state);
 
+            // Coup pre-empts round resolution entirely — no financials applied,
+            // no round increment (ADR-0009).
             if (resolution.kind === 'coup') {
                 set((s) => ({
                     gameManagement: {
@@ -815,262 +815,35 @@ export const INITIAL_STATE = ({ set, get }: {
                 return;
             }
 
-            const {
-                newCoupArmedLastRound, newCoupWarningFaction, financials, newTreasury,
-                recurringGmFields, newRelations, newCharisma, newRepStatuses,
-                newSelectedPower, newDumbScore, newLog, newRound, modifiersAfterOnStart,
-                nextDailyEvent, newCitizenStates, newDisplayedPopulation, bankruptcy, overthrown,
-                newConditionStage,
-            } = resolution;
-
-            // Context for the cumulative stats update applied in each surviving branch.
-            const statsCtx = {
-                financials, newTreasury, prevRound: state.gameManagement.round,
-                newRelations, coupGraceFired: newCoupArmedLastRound,
-            };
-
-            if (bankruptcy) {
-                set((s) => ({
-                    budget: { ...s.budget, treasury: newTreasury },
-                    relations: { ...s.relations, current: newRelations },
-                    log: newLog,
-                    stats: buildRoundStats(s, statsCtx),
-                    citizenStates: newCitizenStates,
-                    displayedPopulation: newDisplayedPopulation,
-                    gameManagement: {
-                        ...s.gameManagement,
-                        dayEnded: false,
-                        dwelling: false,
-                        endReason: i18n.t('endscreen.end_reason.bankruptcy', { ns: 'endscreen' }),
-                        endCause: 'bankruptcy' as EndCause,
-                        phase: 'lose',
-                        round: newRound,
-                        lastRoundIncome: financials.totalIncome,
-                        lastRoundExpenses: financials.expenses,
-                        ...recurringGmFields,
-                        currentRoundExtraIncome: 0,
-                        currentRoundExtraExpenses: 0,
-                        currentRoundExpropriateGain: 0,
-                        currentRoundBribeCost: 0,
-                        currentRoundShopCost: 0,
-                        coupArmedLastRound: false,
-                        coupWarningFaction: null,
-                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                    }
+            if (resolution.bankruptcy) {
+                set((s) => buildGameOverPatch(s, resolution, {
+                    phase: 'lose',
+                    endReason: i18n.t('endscreen.end_reason.bankruptcy', { ns: 'endscreen' }),
+                    endCause: 'bankruptcy' as EndCause,
                 }));
                 return;
             }
 
-            if (overthrown) {
-                set((s) => ({
-                    budget: { ...s.budget, treasury: newTreasury },
-                    relations: { ...s.relations, current: newRelations },
-                    log: newLog,
-                    stats: buildRoundStats(s, statsCtx),
-                    citizenStates: newCitizenStates,
-                    displayedPopulation: newDisplayedPopulation,
-                    gameManagement: {
-                        ...s.gameManagement,
-                        dayEnded: false,
-                        dwelling: false,
-                        endReason: i18n.t(`endscreen.end_reason.overthrown_${overthrown}`, { ns: 'endscreen' }),
-                        endCause: overthrown as EndCause,
-                        phase: 'lose',
-                        round: newRound,
-                        lastRoundIncome: financials.totalIncome,
-                        lastRoundExpenses: financials.expenses,
-                        ...recurringGmFields,
-                        currentRoundExtraIncome: 0,
-                        currentRoundExtraExpenses: 0,
-                        currentRoundExpropriateGain: 0,
-                        currentRoundBribeCost: 0,
-                        currentRoundShopCost: 0,
-                        coupArmedLastRound: false,
-                        coupWarningFaction: null,
-                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                    }
+            if (resolution.overthrown) {
+                set((s) => buildGameOverPatch(s, resolution, {
+                    phase: 'lose',
+                    endReason: i18n.t(`endscreen.end_reason.overthrown_${resolution.overthrown}`, { ns: 'endscreen' }),
+                    endCause: resolution.overthrown as EndCause,
                 }));
                 return;
             }
 
-            if (newRound > GAMESTATE.ROUNDS.MAX) {
-                set((s) => ({
-                    budget: { ...s.budget, treasury: newTreasury },
-                    relations: { ...s.relations, current: newRelations },
-                    log: newLog,
-                    stats: buildRoundStats(s, statsCtx),
-                    citizenStates: newCitizenStates,
-                    displayedPopulation: newDisplayedPopulation,
-                    gameManagement: {
-                        ...s.gameManagement,
-                        dayEnded: false,
-                        dwelling: false,
-                        endReason: null,
-                        endCause: null,
-                        phase: 'victory',
-                        round: newRound,
-                        lastRoundIncome: financials.totalIncome,
-                        lastRoundExpenses: financials.expenses,
-                        ...recurringGmFields,
-                        currentRoundExtraIncome: 0,
-                        currentRoundExtraExpenses: 0,
-                        currentRoundExpropriateGain: 0,
-                        currentRoundBribeCost: 0,
-                        currentRoundShopCost: 0,
-                        coupArmedLastRound: false,
-                        coupWarningFaction: null,
-                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                    }
+            if (resolution.newRound > GAMESTATE.ROUNDS.MAX) {
+                set((s) => buildGameOverPatch(s, resolution, {
+                    phase: 'victory',
+                    endReason: null,
+                    endCause: null,
                 }));
                 return;
             }
 
-            // --- 8.4. Restore frozen factions (all-change freeze powerup) ---
-            state.shop.frozenFactions.forEach(faction => {
-                newRelations[faction] = state.relations.current[faction];
-            });
-
-            // --- 8.5. Unlock special ending at round 9 if any faction meets threshold ---
-            // Special ending reads EFFECTIVE relations (ADR-0008 §6), consistent with coup/overthrow.
-            const factionsAtThreshold = (Object.keys(newRelations) as Power[]).filter(
-                p => getEffectiveRelation(newRelations[p], state.gameManagement.modifiers, p, newRound) >= GAMESTATE.SPECIAL_ENDING_THRESHOLD
-            );
-            let specialEndingFaction: Power | null = null;
-            if (newRound === 9 && factionsAtThreshold.length > 0 && !state.specialEnding.used) {
-                const counts = state.gameManagement.meetCounts;
-                specialEndingFaction = factionsAtThreshold.reduce((best, p) =>
-                    counts[p] >= counts[best] ? p : best
-                );
-            }
-            const specialRoomIndex = specialEndingFaction !== null
-                ? GAMESTATE.FACTION_ROOM_INDEX[specialEndingFaction]
-                : undefined;
-
-            // --- 9. Check for periodic event ---
-            const periodicEvent = PERIODIC_EVENTS.find(e => e.round === newRound) ?? null;
-            if (periodicEvent) {
-                const periodicDealPool = state.deals.interactedWithDeals.size >= DEALS.length
-                    ? new Set<typeof DEALS[number]>()
-                    : state.deals.interactedWithDeals;
-                const randomDeal = getRandomUniqueItem(DEALS, periodicDealPool);
-                const updatedDeals = new Set(periodicDealPool);
-                if (randomDeal) updatedDeals.add(randomDeal);
-                const updatedLaws = new Set(state.law.interactedWithLaws);
-                const randomLaw = pickNextLaw(state, newRepStatuses, updatedLaws);
-                if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
-                if (randomLaw) updatedLaws.add(randomLaw);
-
-                set((s) => ({
-                    budget: { ...s.budget, treasury: newTreasury },
-                    relations: { ...s.relations, current: newRelations },
-                    log: newLog,
-                    stats: buildRoundStats(s, statsCtx),
-                    dailyEvent: { current: nextDailyEvent },
-                    periodicEvent: { ...s.periodicEvent, current: periodicEvent, decided: false, resultKey: null },
-                    miniChallenge: { ...s.miniChallenge, current: null, decided: false, resultKey: null, riskTriggered: false },
-                    meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: newSelectedPower },
-                    law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
-                    deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
-                    citizenStates: newCitizenStates,
-                    displayedPopulation: newDisplayedPopulation,
-                    tabs: {
-                        ...s.tabs,
-                        activeTab: Tabs.Log,
-                        tabsLocked: false,
-                        ...(specialRoomIndex !== undefined ? { secretRoomIndex: specialRoomIndex } : {}),
-                    },
-                    gameManagement: {
-                        ...s.gameManagement,
-                        dayEnded: false,
-                        dwelling: false,
-                        round: newRound,
-                        timerStartedAt: Date.now(),
-                        lastRoundIncome: financials.totalIncome,
-                        lastRoundExpenses: financials.expenses,
-                        ...recurringGmFields,
-                        currentRoundExtraIncome: 0,
-                        currentRoundExtraExpenses: 0,
-                        currentRoundExpropriateGain: 0,
-                        currentRoundBribeCost: 0,
-                        currentRoundShopCost: 0,
-                        coupArmedLastRound: newCoupArmedLastRound,
-                        coupWarningFaction: newCoupWarningFaction,
-                        charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                        representativeStatuses: newRepStatuses,
-                        dumbScore: newDumbScore,
-                        modifiers: modifiersAfterOnStart,
-                        pendingLog: [],
-                        conditionStage: newConditionStage,
-                    },
-                    shop: { ...s.shop, frozenFactions: new Set<Power>() },
-                    ...(specialEndingFaction ? {
-                        specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction },
-                    } : {}),
-                }));
-                return;
-            }
-
-            // --- 10. 40% chance for mini-challenge ---
-            const hasMiniChallenge = rollChance(0.4);
-            const miniChallengeToShow = hasMiniChallenge
-                ? getRandomFromList(MINI_CHALLENGES)
-                : null;
-
-            const normalDealPool = state.deals.interactedWithDeals.size >= DEALS.length
-                ? new Set<typeof DEALS[number]>()
-                : state.deals.interactedWithDeals;
-            const randomDeal = getRandomUniqueItem(DEALS, normalDealPool);
-            const updatedDeals = new Set(normalDealPool);
-            if (randomDeal) updatedDeals.add(randomDeal);
-            const updatedLaws = new Set(state.law.interactedWithLaws);
-            const randomLaw = pickNextLaw(state, newRepStatuses, updatedLaws);
-            if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
-            if (randomLaw) updatedLaws.add(randomLaw);
-
-            set((s) => ({
-                budget: { ...s.budget, treasury: newTreasury },
-                relations: { ...s.relations, current: newRelations },
-                log: newLog,
-                stats: buildRoundStats(s, statsCtx),
-                dailyEvent: { current: nextDailyEvent },
-                periodicEvent: { ...s.periodicEvent, current: null, decided: false, resultKey: null },
-                miniChallenge: { ...s.miniChallenge, current: miniChallengeToShow, decided: false, resultKey: null, riskTriggered: false },
-                meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: newSelectedPower },
-                law: { ...s.law, current: randomLaw, lawDecided: false, interactedWithLaws: updatedLaws, lastLawOutcome: null },
-                deals: { ...s.deals, current: randomDeal, dealDecided: false, interactedWithDeals: updatedDeals, lastDealAccepted: null },
-                citizenStates: newCitizenStates,
-                displayedPopulation: newDisplayedPopulation,
-                gameManagement: {
-                    ...s.gameManagement,
-                    dayEnded: false,
-                    dwelling: false,
-                    round: newRound,
-                    timerStartedAt: Date.now(),
-                    lastRoundIncome: financials.totalIncome,
-                    lastRoundExpenses: financials.expenses,
-                    ...recurringGmFields,
-                    currentRoundExtraIncome: 0,
-                    currentRoundExtraExpenses: 0,
-                    coupArmedLastRound: newCoupArmedLastRound,
-                    coupWarningFaction: newCoupWarningFaction,
-                    charisma: { ...s.gameManagement.charisma, current: newCharisma },
-                    representativeStatuses: newRepStatuses,
-                    dumbScore: newDumbScore,
-                    modifiers: modifiersAfterOnStart,
-                    pendingLog: [],
-                    conditionStage: newConditionStage,
-                },
-                shop: { ...s.shop, frozenFactions: new Set<Power>() },
-                tabs: {
-                    ...s.tabs,
-                    activeTab: Tabs.Log,
-                    tabsLocked: false,
-                    ...(specialRoomIndex !== undefined ? { secretRoomIndex: specialRoomIndex } : {}),
-                },
-                ...(specialEndingFaction ? {
-                    specialEnding: { ...s.specialEnding, available: true, faction: specialEndingFaction },
-                } : {}),
-            }));
+            const drawn = prepareRoundStart(state, resolution);
+            set((s) => buildRoundStartPatch(s, resolution, drawn));
         },
         repeal: (modifierId: string) => {
             const state = get();

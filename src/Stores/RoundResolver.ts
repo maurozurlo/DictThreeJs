@@ -9,7 +9,11 @@ import { GAMESTATE } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { LAWS } from "../assets/laws";
 import { WEIRD_LAWS } from "../assets/weirdLaws";
-import type { GameState, GameStats, LogEvent, RoundLogEntry, Modifier } from "../types/GameState";
+import { DEALS } from "../assets/deals";
+import { PERIODIC_EVENTS } from "../assets/periodicEvents";
+import { MINI_CHALLENGES } from "../assets/miniChallenges";
+import { Tabs } from "../types/Tabs";
+import type { EndCause, GameState, GameStats, LogEvent, RoundLogEntry, Modifier } from "../types/GameState";
 import type { Power } from "../types/Power";
 import { applyBudgetEffects } from "./EffectHandler";
 import { calculateRoundFinancials, type RoundFinancials } from "./BudgetHandler";
@@ -258,6 +262,183 @@ export function buildRoundStats(
         coupGraceFired: s.stats.coupGraceFired || ctx.coupGraceFired,
         totalRecurringIncomeEarned: s.stats.totalRecurringIncomeEarned + ctx.financials.recurringIncome,
         totalRecurringExpensesSpent: s.stats.totalRecurringExpensesSpent + ctx.financials.recurringExpenses,
+    };
+}
+
+type ContinueResolution = Extract<RoundResolution, { kind: 'continue' }>;
+
+/** Per-round recap counters — zeroed on EVERY branch that resolves a round. */
+const ZEROED_ROUND_COUNTERS = {
+    currentRoundExtraIncome: 0,
+    currentRoundExtraExpenses: 0,
+    currentRoundExpropriateGain: 0,
+    currentRoundBribeCost: 0,
+    currentRoundShopCost: 0,
+} as const;
+
+/** Store slices every resolving branch applies identically (Story 10-1). */
+const buildResolvedCore = (s: GameState, r: ContinueResolution) => ({
+    budget: { ...s.budget, treasury: r.newTreasury },
+    relations: { ...s.relations, current: r.newRelations },
+    log: r.newLog,
+    stats: buildRoundStats(s, {
+        financials: r.financials,
+        newTreasury: r.newTreasury,
+        prevRound: s.gameManagement.round,
+        newRelations: r.newRelations,
+        coupGraceFired: r.newCoupArmedLastRound,
+    }),
+    citizenStates: r.newCitizenStates,
+    displayedPopulation: r.newDisplayedPopulation,
+});
+
+/** gameManagement fields every resolving branch applies identically. */
+const buildResolvedGm = (s: GameState, r: ContinueResolution) => ({
+    ...s.gameManagement,
+    dayEnded: false,
+    dwelling: false,
+    round: r.newRound,
+    lastRoundIncome: r.financials.totalIncome,
+    lastRoundExpenses: r.financials.expenses,
+    ...r.recurringGmFields,
+    ...ZEROED_ROUND_COUNTERS,
+    charisma: { ...s.gameManagement.charisma, current: r.newCharisma },
+});
+
+export type GameOverEnd = {
+    phase: 'lose' | 'victory';
+    endReason: string | null;
+    endCause: EndCause | null;
+};
+
+/**
+ * Full store patch for a game-ending resolution (bankruptcy / overthrown /
+ * victory). Deliberately leaves tabs, meet, law, deals, dailyEvent, modifiers,
+ * pendingLog, and the timer untouched — the game is over, those slices are dead
+ * weight, and EndScreen overlays by phase.
+ */
+export function buildGameOverPatch(
+    s: GameState,
+    r: ContinueResolution,
+    end: GameOverEnd,
+): Partial<GameState> {
+    return {
+        ...buildResolvedCore(s, r),
+        gameManagement: {
+            ...buildResolvedGm(s, r),
+            phase: end.phase,
+            endReason: end.endReason,
+            endCause: end.endCause,
+            coupArmedLastRound: false,
+            coupWarningFaction: null,
+        },
+    };
+}
+
+/** Content drawn for the next round by prepareRoundStart. */
+export type DrawnRoundContent = {
+    periodicEvent: typeof PERIODIC_EVENTS[number] | null;
+    miniChallenge: typeof MINI_CHALLENGES[number] | null;
+    randomLaw: typeof LAWS[number] | null;
+    updatedLaws: Set<typeof LAWS[number]>;
+    randomDeal: typeof DEALS[number] | null;
+    updatedDeals: Set<typeof DEALS[number]>;
+    specialEndingFaction: Power | null;
+    specialRoomIndex: number | undefined;
+};
+
+/**
+ * Pre-set() work for a surviving round: frozen-faction restore (mutates
+ * `r.newRelations` in place, matching the original inline step), special-ending
+ * unlock, and the RNG content draws. RNG call order is load-bearing (ADR-0010):
+ * normal rounds roll the mini-challenge BEFORE the deal/law draws; periodic
+ * rounds skip that roll entirely.
+ */
+export function prepareRoundStart(state: GameState, r: ContinueResolution): DrawnRoundContent {
+    // Restore frozen factions (all-change freeze powerup).
+    state.shop.frozenFactions.forEach(faction => {
+        r.newRelations[faction] = state.relations.current[faction];
+    });
+
+    // Unlock special ending at round 9 if any faction meets the threshold —
+    // reads EFFECTIVE relations (ADR-0008 §6), consistent with coup/overthrow.
+    const factionsAtThreshold = (Object.keys(r.newRelations) as Power[]).filter(
+        p => getEffectiveRelation(r.newRelations[p], state.gameManagement.modifiers, p, r.newRound) >= GAMESTATE.SPECIAL_ENDING_THRESHOLD,
+    );
+    let specialEndingFaction: Power | null = null;
+    if (r.newRound === 9 && factionsAtThreshold.length > 0 && !state.specialEnding.used) {
+        const counts = state.gameManagement.meetCounts;
+        specialEndingFaction = factionsAtThreshold.reduce((best, p) =>
+            counts[p] >= counts[best] ? p : best
+        );
+    }
+    const specialRoomIndex = specialEndingFaction !== null
+        ? GAMESTATE.FACTION_ROOM_INDEX[specialEndingFaction]
+        : undefined;
+
+    const periodicEvent = PERIODIC_EVENTS.find(e => e.round === r.newRound) ?? null;
+    const miniChallenge = !periodicEvent && rollChance(0.4)
+        ? getRandomFromList(MINI_CHALLENGES)
+        : null;
+
+    const dealPool = state.deals.interactedWithDeals.size >= DEALS.length
+        ? new Set<typeof DEALS[number]>()
+        : state.deals.interactedWithDeals;
+    const randomDeal = getRandomUniqueItem(DEALS, dealPool);
+    const updatedDeals = new Set(dealPool);
+    if (randomDeal) updatedDeals.add(randomDeal);
+
+    const updatedLaws = new Set(state.law.interactedWithLaws);
+    const randomLaw = pickNextLaw(state, r.newRepStatuses, updatedLaws);
+    if (!randomLaw) console.warn('⚠️ Law pool empty — income cap filter may have exhausted all candidates.');
+    if (randomLaw) updatedLaws.add(randomLaw);
+
+    return {
+        periodicEvent, miniChallenge,
+        randomLaw, updatedLaws, randomDeal, updatedDeals,
+        specialEndingFaction, specialRoomIndex,
+    };
+}
+
+/**
+ * Full store patch for a surviving round: applies the resolution, resets the
+ * decision slices with the drawn content, unlocks tabs on Log, restarts the
+ * work-day timer, and clears the per-round bookkeeping.
+ */
+export function buildRoundStartPatch(
+    s: GameState,
+    r: ContinueResolution,
+    drawn: DrawnRoundContent,
+): Partial<GameState> {
+    return {
+        ...buildResolvedCore(s, r),
+        dailyEvent: { current: r.nextDailyEvent },
+        periodicEvent: { ...s.periodicEvent, current: drawn.periodicEvent, decided: false, resultKey: null },
+        miniChallenge: { ...s.miniChallenge, current: drawn.miniChallenge, decided: false, resultKey: null, riskTriggered: false },
+        meet: { ...s.meet, actionTaken: { type: undefined, taken: false, power: undefined }, actionOutcomeText: null, selectedPower: r.newSelectedPower },
+        law: { ...s.law, current: drawn.randomLaw, lawDecided: false, interactedWithLaws: drawn.updatedLaws, lastLawOutcome: null },
+        deals: { ...s.deals, current: drawn.randomDeal, dealDecided: false, interactedWithDeals: drawn.updatedDeals, lastDealAccepted: null },
+        shop: { ...s.shop, frozenFactions: new Set<Power>() },
+        tabs: {
+            ...s.tabs,
+            activeTab: Tabs.Log,
+            tabsLocked: false,
+            ...(drawn.specialRoomIndex !== undefined ? { secretRoomIndex: drawn.specialRoomIndex } : {}),
+        },
+        gameManagement: {
+            ...buildResolvedGm(s, r),
+            timerStartedAt: Date.now(),
+            coupArmedLastRound: r.newCoupArmedLastRound,
+            coupWarningFaction: r.newCoupWarningFaction,
+            representativeStatuses: r.newRepStatuses,
+            dumbScore: r.newDumbScore,
+            modifiers: r.modifiersAfterOnStart,
+            pendingLog: [],
+            conditionStage: r.newConditionStage,
+        },
+        ...(drawn.specialEndingFaction ? {
+            specialEnding: { ...s.specialEnding, available: true, faction: drawn.specialEndingFaction },
+        } : {}),
     };
 }
 

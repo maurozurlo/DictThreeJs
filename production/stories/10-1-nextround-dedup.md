@@ -1,11 +1,31 @@
 # Story 10-1: `nextRound()` De-duplication — buildGameOverPatch / buildRoundStartPatch
 
 > **Epic**: Simplification & Debt (Sprint 10)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: 1.5 days
 > **Last Updated**: 2026-07-08
+
+## Completion Notes
+
+Implemented as scoped. `RoundResolver.ts` gains `buildResolvedCore`/`buildResolvedGm`
+(shared internals), `buildGameOverPatch`, `prepareRoundStart` (frozen-faction restore +
+special-ending unlock + RNG draws, order preserved per ADR-0010), and
+`buildRoundStartPatch`. Store `nextRound()` reduced from ~275 to ~50 lines: resolve →
+coup / three game-over branches / survive, one `set()` each.
+
+**Behavior fix shipped with the unification** (audit-predicted bug class): the normal
+branch previously failed to zero `currentRoundBribeCost`/`currentRoundExpropriateGain`/
+`currentRoundShopCost` (periodic + game-over branches did), so DayEnded's recap
+accumulated across consecutive normal rounds. All five counters now zero on every
+branch — pinned red-then-green by `test_nextround_normal_zeroes_all_five_round_counters`.
+
+Test-first: 9 pinning tests in `tests/unit/roundloop/next_round_branches.test.ts`
+written and run BEFORE the refactor (8 passed pre-refactor, 1 red = the counter bug).
+Suite 713/713, `tsc -b` clean, build green. Puppeteer walkthrough (live dev server,
+UI-only driving): New Game → intro dwell → work day → hinge → Month 2 → debug-drained
+treasury → bankruptcy Game Over screen. 5/5 checks passed, screenshots reviewed.
 
 ## Context
 
