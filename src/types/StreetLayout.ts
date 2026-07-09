@@ -1,4 +1,4 @@
-export interface Vec3 {
+interface Vec3 {
     x: number;
     y: number;
     z: number;
@@ -27,7 +27,7 @@ export interface WaypointPath {
 }
 
 /** A kerb anchor: the ped-loop waypoint a crossing endpoint snaps onto. */
-export interface CrossingLink {
+interface CrossingLink {
     pathId: string;
     waypointIdx: number;
 }
@@ -45,7 +45,7 @@ export interface Crossing {
 }
 
 /** Axis-aligned ground zone (XZ bounds), e.g. the protest square. */
-export interface PathZone {
+interface PathZone {
     id: string;
     min: [number, number];
     max: [number, number];

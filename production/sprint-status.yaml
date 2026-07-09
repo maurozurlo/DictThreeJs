@@ -64,11 +64,11 @@ stories:
     name: "Dead-code sweep"
     file: "production/stories/10-5-dead-code-sweep.md"
     priority: should-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-08"
 
   - id: "10-6"
     name: "Test relocation — src/** tests into tests/unit/"

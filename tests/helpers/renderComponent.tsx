@@ -39,4 +39,3 @@ export function renderWithProviders(ui: ReactElement): RenderResult {
     return render(<I18nextProvider i18n={testI18n}>{ui}</I18nextProvider>)
 }
 
-export { testI18n }

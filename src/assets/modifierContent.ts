@@ -37,7 +37,7 @@ export function dealModifierId(dealId: number): string {
 }
 
 /** Namespaced modifier id for a weird law's ledger/slot entry. */
-export function weirdLawModifierId(lawId: number): string {
+function weirdLawModifierId(lawId: number): string {
     return `weird.${lawId}`;
 }
 

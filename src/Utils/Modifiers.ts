@@ -14,7 +14,7 @@ export type BudgetModifierStat =
  * the instance. Resolved windows are persisted — never the id — so a later
  * registry rebalance cannot retroactively alter a live save. Append-only.
  */
-export interface TimeModifier {
+interface TimeModifier {
     id: number;
     /** Rounds before the contribution starts (0 = immediate). */
     delay: number;
@@ -22,7 +22,7 @@ export interface TimeModifier {
     duration: number | null;
 }
 
-export const TIME_MODIFIERS: TimeModifier[] = [
+const TIME_MODIFIERS: TimeModifier[] = [
     { id: 0, delay: 0, duration: null }, // immediate + permanent (statue, recurring income)
     { id: 1, delay: 0, duration: 1 },    // now, one round (very common)
     { id: 2, delay: 2, duration: null }, // delayed 2, then permanent (the cows)

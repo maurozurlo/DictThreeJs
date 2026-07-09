@@ -27,7 +27,7 @@ import { resolveRound, buildGameOverPatch, buildRoundStartPatch, prepareRoundSta
 import { buildDeltas, relationDiff } from "../Utils/RoundLog";
 
 
-export const INITIAL_STATE = ({ set, get }: {
+const INITIAL_STATE = ({ set, get }: {
     set: {
         (partial: GameState | Partial<GameState> | ((state: GameState) => GameState | Partial<GameState>), replace?: false): void;
         (state: GameState | ((state: GameState) => GameState), replace: true): void;

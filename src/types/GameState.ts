@@ -56,7 +56,7 @@ export type RoundLogEntry = {
 };
 
 export type ShopItemId = 'media_coverage' | 'media_shielding' | 'media_blackout' | 'statue' | 'advisor_1' | 'advisor_2' | 'advisor_3';
-export type AdvisorLevel = 0 | 1 | 2 | 3;
+type AdvisorLevel = 0 | 1 | 2 | 3;
 
 export type EndCause = 'military' | 'business' | 'people' | 'bankruptcy' | 'military_coup' | 'business_coup' | 'people_coup' | null;
 
@@ -141,7 +141,7 @@ export interface Modifier {
     mods: ResolvedStatMod[];
 }
 
-export type RelationSnapshot = {
+type RelationSnapshot = {
     round: number;
     military: number;
     business: number;
@@ -170,7 +170,7 @@ export type GameStats = {
     repealCount: number;
 };
 
-export type CameraState = {
+type CameraState = {
     cameraPos: [number, number, number];
     /** Vertical FOV in degrees, applied in CameraController when cameraHFov is unset. */
     cameraFov: number;
@@ -191,7 +191,7 @@ export type CameraState = {
     setCameraFov: (fov: number) => void;
 };
 
-export type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose' | 'special_ending';
+type GamePhase = 'idle' | 'start' | 'event' | 'victory' | 'lose' | 'special_ending';
 
 export type GameState = {
     debug: {

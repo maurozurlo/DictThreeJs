@@ -241,7 +241,7 @@ export function resolveRound(state: GameState): RoundResolution {
 }
 
 /** Build the cumulative stats update for a resolved round. */
-export function buildRoundStats(
+function buildRoundStats(
     s: GameState,
     ctx: { financials: RoundFinancials; newTreasury: number; prevRound: number; newRelations: Relations; coupGraceFired: boolean },
 ): GameStats {

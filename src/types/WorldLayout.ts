@@ -13,7 +13,7 @@ export interface TextureSlot {
 }
 
 /** IDE objs entry — metadata for one model type. */
-export interface IDEObject {
+interface IDEObject {
     /** Unique integer ID. */
     id: number;
     /** Logical name — matched by IPLInstance.modelName. */
@@ -48,7 +48,7 @@ export interface IDEFile {
 }
 
 /** IPL inst entry — one world instance of a model. */
-export interface IPLInstance {
+interface IPLInstance {
     /** Unique integer instance ID. */
     id: number;
     /** References IDEObject.modelName. */

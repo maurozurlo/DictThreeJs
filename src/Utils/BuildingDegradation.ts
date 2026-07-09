@@ -11,7 +11,7 @@ import {
 } from '../Constants/BuildingDegradation';
 
 /** Number of building slots in the street scene. Each slot renders one variant. */
-export const NUM_BUILDING_SLOTS = 5;
+const NUM_BUILDING_SLOTS = 5;
 
 /**
  * Advances the building condition counter by one round.

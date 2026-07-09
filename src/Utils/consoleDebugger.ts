@@ -3,12 +3,6 @@ import { useGameStore } from '../Stores/GameState';
 /** Set to false to silence all debug output. Flip before shipping. */
 const DEBUG = true;
 
-/** Guarded console.log — no-ops when DEBUG is false. */
-export function debugLog(label: string, ...args: unknown[]): void {
-    if (!DEBUG) return;
-    console.log(`[DEBUG | ${label}]`, ...args);
-}
-
 /**
  * Subscribe to every treasury mutation and log it with context.
  *

@@ -10,7 +10,7 @@ import type { Modifier, ModifierStat, ModifierType, ShopItemId } from '../types/
 import type { Power } from '../types/Power';
 
 /** A stat contribution template on a shop item — `time` is a TIME_MODIFIERS id. */
-export interface ShopModTemplate {
+interface ShopModTemplate {
     stat: ModifierStat;
     amount: number;
     /** TIME_MODIFIERS id resolved to a concrete window at purchase. */

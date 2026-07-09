@@ -119,16 +119,16 @@ export const THIEF_SKIM = 2;
 // ---------------------------------------------------------------------------
 
 /** Relation weight in factionFortune: (rel/10) × FACTION_FORTUNE_REL_WEIGHT (GDD §4.1). */
-export const FACTION_FORTUNE_REL_WEIGHT = 3;
+const FACTION_FORTUNE_REL_WEIGHT = 3;
 
 /** Normalises a 0–10 budget to −1…+1: (budget − 5) / FACTION_FORTUNE_BUDGET_DIVISOR (GDD §4.1). */
-export const FACTION_FORTUNE_BUDGET_DIVISOR = 5;
+const FACTION_FORTUNE_BUDGET_DIVISOR = 5;
 
 /** Charisma weight in charismaTerm: (charisma/10) × CHARISMA_TERM_WEIGHT (GDD §4.1). */
-export const CHARISMA_TERM_WEIGHT = 2;
+const CHARISMA_TERM_WEIGHT = 2;
 
 /** Happiness penalty applied to unemployed army/business peds each round (GDD §4.1). */
-export const DISPLACEMENT_PENALTY = 2;
+const DISPLACEMENT_PENALTY = 2;
 
 /** Scales relation swing to the volatility contribution (GDD §4.1). */
 export const VOLATILITY_COEFFICIENT = 0.4;
@@ -137,19 +137,19 @@ export const VOLATILITY_COEFFICIENT = 0.4;
 export const VOLATILITY_CAP = 2;
 
 /** businessTax percentage above which a −0.5 budgetSignal penalty fires (GDD §4.1). */
-export const BUSINESS_TAX_PENALTY_THRESHOLD = 45;
+const BUSINESS_TAX_PENALTY_THRESHOLD = 45;
 
 /** peopleTax percentage above which a −0.5 budgetSignal penalty fires (GDD §4.1). */
-export const PEOPLE_TAX_PENALTY_THRESHOLD = 30;
+const PEOPLE_TAX_PENALTY_THRESHOLD = 30;
 
 /** Amount subtracted from budgetSignal when the faction's tax threshold is exceeded (GDD §4.1). */
-export const TAX_PENALTY_AMOUNT = 0.5;
+const TAX_PENALTY_AMOUNT = 0.5;
 
 /** Minimum security budget for army peds to remain employed (GDD §4.2). */
-export const ARMY_SECURITY_THRESHOLD = 4;
+const ARMY_SECURITY_THRESHOLD = 4;
 
 /** Minimum infrastructure budget for business peds to remain employed (GDD §4.2). */
-export const BUSINESS_INFRA_THRESHOLD = 3;
+const BUSINESS_INFRA_THRESHOLD = 3;
 
 /** fatShare lerp lower bound at health = 0 (GDD §4.5). */
 export const FAT_AT_ZERO = 0.05;

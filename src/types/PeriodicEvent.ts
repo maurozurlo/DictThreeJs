@@ -1,8 +1,8 @@
 import type { Power } from "./Power";
 
-export type PeriodicEventEffect = Partial<Record<Power, number> & { treasury: number }>;
+type PeriodicEventEffect = Partial<Record<Power, number> & { treasury: number }>;
 
-export type PeriodicEventOption = {
+type PeriodicEventOption = {
     id: string;
     text: string;
     effect: PeriodicEventEffect;

@@ -1,7 +1,7 @@
 import type { Power } from "../types/Power";
 import { Tabs } from "../types/Tabs";
 
-export interface Coup {
+interface Coup {
     /** Faction relation value that arms the coup trigger (relation ≥ this). */
     RELATION_THRESHOLD: number;
     /** Player charisma value that enables armed factions to strike (charisma ≤ this). */
@@ -13,7 +13,7 @@ export interface Coup {
 }
 
 /** Cost entry for repealing an active recurring law at a given tier. */
-export interface RepealCostEntry {
+interface RepealCostEntry {
     /** Treasury deducted on repeal. */
     treasury: number;
     /** Relation penalty applied to the law's source faction (always negative). */
@@ -21,7 +21,7 @@ export interface RepealCostEntry {
 }
 
 /** Tiered repeal costs indexed by tier name. */
-export interface RepealCost {
+interface RepealCost {
     Small: RepealCostEntry;
     Medium: RepealCostEntry;
     Large: RepealCostEntry;
@@ -44,72 +44,72 @@ export interface GAME_STATE_CONSTANTS {
     FACTION_ROOM_INDEX: PowerKeys;
 }
 
-export interface Budget {
+interface Budget {
     TREASURY: number;
     BOUNDS: Bounds;
     EXPENDITURES: Expenditures;
     TAXES: Taxes;
 }
 
-export interface Bounds {
+interface Bounds {
     EXPENDITURE: Expenditure;
     TAX: Expenditure;
 }
 
-export interface Expenditure {
+interface Expenditure {
     MIN: number;
     MAX: number;
 }
 
-export interface Expenditures {
+interface Expenditures {
     health: number;
     infrastructure: number;
     security: number;
     education: number;
 }
 
-export interface Taxes {
+interface Taxes {
     peopleTaxes: number;
     businessTaxes: number;
 }
 
-export interface Charisma {
+interface Charisma {
     INITIAL: number;
     MIN: number;
     MAX: number;
 }
 
-export interface Meet {
+interface Meet {
     ACTIONS: Actions;
 }
 
-export interface Actions {
+interface Actions {
     BRIBE: Bribe;
     EXPROPRIATE: Expropriate;
     DIALOGUE: Dialogue;
 }
 
-export interface Dialogue {
+interface Dialogue {
     BASE_SUCCESS_RATE: PowerKeys;
 }
 
-export interface Bribe {
+interface Bribe {
     COSTS: PowerKeys;
 }
 
-export type PowerKeys = Record<Power, number>
+type PowerKeys = Record<Power, number>
 
-export interface Expropriate {
+interface Expropriate {
     GAINS: PowerKeys;
 }
 
-export interface Relations {
+interface Relations {
     INITIAL: PowerKeys;
     MIN: number;
     MAX: number;
 }
 
-export interface Rounds {
+interface Rounds {
     START: number;
     MAX: number;
     TIME_LENGTH_MS: number;
@@ -118,11 +118,11 @@ export interface Rounds {
     MANDATORY_REVEAL_MS: number;
 }
 
-export interface TabsConfig {
+interface TabsConfig {
     START_TAB: Tabs;
 }
 
-export interface Income {
+interface Income {
     PEOPLE_BASE: number;
     BUSINESS_BASE: number;
     EXPENDITURE_COST_PER_LEVEL: number;
@@ -130,12 +130,12 @@ export interface Income {
     TAX_PENALTY_BUSINESS_THRESHOLD: number;
 }
 
-export interface BudgetEffectThreshold {
+interface BudgetEffectThreshold {
     LOW: number;
     HIGH: number;
 }
 
-export interface BudgetEffects {
+interface BudgetEffects {
     SECURITY: BudgetEffectThreshold;
     HEALTH: BudgetEffectThreshold;
     INFRASTRUCTURE: BudgetEffectThreshold;
