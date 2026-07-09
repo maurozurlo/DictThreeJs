@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { filterLawPool } from './RecurringHandler';
-import { RECURRING } from '../Constants/Costs';
-import type { Modifier, ResolvedStatMod } from '../types/GameState';
-import type { Law } from '../types/Law';
+import { filterLawPool } from '../../../src/Stores/RecurringHandler';
+import { RECURRING } from '../../../src/Constants/Costs';
+import type { Modifier, ResolvedStatMod } from '../../../src/types/GameState';
+import type { Law } from '../../../src/types/Law';
 
 /**
  * Law-pool filter (ADR-0008 §8): at most RECURRING.MAX_INCOME_LAWS_PER_RUN

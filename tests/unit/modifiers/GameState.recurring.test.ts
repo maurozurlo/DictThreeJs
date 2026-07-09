@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import type { Law } from '../types/Law';
-import type { Deal } from '../types/Deal';
-import { buildContentModifier, buildWeirdLawModifier } from '../assets/modifierContent';
+import type { Law } from '../../../src/types/Law';
+import type { Deal } from '../../../src/types/Deal';
+import { buildContentModifier, buildWeirdLawModifier } from '../../../src/assets/modifierContent';
 
 /**
  * Modifier construction (ADR-0008 Amendment 2026-06-18 — formerly buildRecurringModifier).

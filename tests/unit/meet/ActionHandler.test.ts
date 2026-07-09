@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handleActionOutcome } from './ActionHandler';
-import * as MathUtils from '../Utils/Math';
-import type { GameState } from '../types/GameState';
+import { handleActionOutcome } from '../../../src/Stores/ActionHandler';
+import * as MathUtils from '../../../src/Utils/Math';
+import type { GameState } from '../../../src/types/GameState';
 
 // Seeded RNG (ADR-0010): control randomness by mocking the named Utils/Math
 // functions, never Math.random. Defaults below = "no backlash, mid dialogue roll";
@@ -9,8 +9,8 @@ import type { GameState } from '../types/GameState';
 // implementation that compares a fixed rolled value against the real probability
 // `p` that ActionHandler computes — so charisma's effect on the threshold is still
 // exercised, exactly as `next() < p` would behave.
-vi.mock('../Utils/Math', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../Utils/Math')>();
+vi.mock('../../../src/Utils/Math', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../../../src/Utils/Math')>();
     return {
         ...actual,
         rollChance: vi.fn((_p: number) => false),
@@ -20,7 +20,7 @@ vi.mock('../Utils/Math', async (importOriginal) => {
 });
 
 // Mock the effect handler
-vi.mock('./EffectHandler', () => ({
+vi.mock('../../../src/Stores/EffectHandler', () => ({
     handleRelations: ({ amount, current }: { amount: number, current: number }) => {
         const newValue = current + amount;
         return Math.max(-10, Math.min(10, newValue));
@@ -28,7 +28,7 @@ vi.mock('./EffectHandler', () => ({
 }));
 
 // Mock constants
-vi.mock('../Constants/GameState', () => ({
+vi.mock('../../../src/Constants/GameState', () => ({
     GAMESTATE: {
         RELATIONS: {
             INITIAL: {

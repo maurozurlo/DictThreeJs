@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
-import { calculateRoundFinancials, handleBudgetChange } from './BudgetHandler';
-import { GAMESTATE } from '../Constants/GameState';
-import type { GameState } from '../types/GameState';
+import { calculateRoundFinancials, handleBudgetChange } from '../../../src/Stores/BudgetHandler';
+import { GAMESTATE } from '../../../src/Constants/GameState';
+import type { GameState } from '../../../src/types/GameState';
 
 describe('handleBudgetChange', () => {
     const mockBudget: GameState['budget'] = {

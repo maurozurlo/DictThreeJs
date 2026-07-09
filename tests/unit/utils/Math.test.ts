@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Clamp, getRandomNumberInRange, getRandomUniqueItem, getRandomFromList, seedRng } from './Math';
+import { Clamp, getRandomNumberInRange, getRandomUniqueItem, getRandomFromList, seedRng } from '../../../src/Utils/Math';
 
 describe('Math utilities', () => {
     describe('Clamp', () => {

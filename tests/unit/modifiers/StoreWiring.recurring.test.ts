@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useGameStore } from './GameState';
-import type { Modifier } from '../types/GameState';
-import type { Law } from '../types/Law';
+import { useGameStore } from '../../../src/Stores/GameState';
+import type { Modifier } from '../../../src/types/GameState';
+import type { Law } from '../../../src/types/Law';
 
 /**
  * Store wiring integration tests — recurring effect lifecycle on the modifier
@@ -13,7 +13,7 @@ import type { Law } from '../types/Law';
  */
 
 // i18n is initialised with an http backend — return keys verbatim in node
-vi.mock('../i18n', () => ({
+vi.mock('../../../src/i18n', () => ({
     default: { t: (key: string) => key }
 }));
 

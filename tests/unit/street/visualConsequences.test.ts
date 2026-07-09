@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { getActiveVisualConsequences, VISUAL_CONSEQUENCES } from './visualConsequences';
-import type { GameState, Modifier } from '../types/GameState';
-import type { Power } from '../types/Power';
+import { getActiveVisualConsequences, VISUAL_CONSEQUENCES } from '../../../src/assets/visualConsequences';
+import type { GameState, Modifier } from '../../../src/types/GameState';
+import type { Power } from '../../../src/types/Power';
 
 /**
  * Visual Consequence Registry — pure evaluator (TR-lasting-009, formerly Story 2-9).

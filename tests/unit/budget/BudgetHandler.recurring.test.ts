@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calculateRoundFinancials } from './BudgetHandler';
-import type { GameState, Modifier, ResolvedStatMod } from '../types/GameState';
+import { calculateRoundFinancials } from '../../../src/Stores/BudgetHandler';
+import type { GameState, Modifier, ResolvedStatMod } from '../../../src/types/GameState';
 
 /**
  * calculateRoundFinancials — recurring income/expense from modifiers (ADR-0008 P2,

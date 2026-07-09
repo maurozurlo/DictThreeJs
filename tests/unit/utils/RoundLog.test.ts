@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { buildDeltas, formatDeltas, formatLogEvent, type TFn } from './RoundLog';
-import type { LogEvent } from '../types/GameState';
+import { buildDeltas, formatDeltas, formatLogEvent, type TFn } from '../../../src/Utils/RoundLog';
+import type { LogEvent } from '../../../src/types/GameState';
 
 // Fake i18next `t`: looks up a small dictionary and interpolates {{vars}} from opts.
 // Namespace is ignored (the dictionary is flat), which is all the formatter needs.

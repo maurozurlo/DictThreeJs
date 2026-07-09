@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { applyBudgetEffects, handleDecision, handleRelations } from './EffectHandler';
-import type { GameState } from '../types/GameState';
-import type { Deal } from '../types/Deal';
-import type { Law } from '../types/Law';
-import * as MathUtils from '../Utils/Math';
+import { applyBudgetEffects, handleDecision, handleRelations } from '../../../src/Stores/EffectHandler';
+import type { GameState } from '../../../src/types/GameState';
+import type { Deal } from '../../../src/types/Deal';
+import type { Law } from '../../../src/types/Law';
+import * as MathUtils from '../../../src/Utils/Math';
 
 // Mock the math utilities — spread the real module, then override the draws we
 // need to control. Randomness is controlled through these named functions, never
 // via Math.random (ADR-0010). rollChance defaults to "risk never triggers".
-vi.mock('../Utils/Math', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../Utils/Math')>();
+vi.mock('../../../src/Utils/Math', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../../../src/Utils/Math')>();
     return {
         ...actual,
         getRandomFromList: vi.fn((arr: string[]) => arr[0]),
@@ -18,12 +18,12 @@ vi.mock('../Utils/Math', async (importOriginal) => {
 });
 
 // Mock constants
-vi.mock('../Constants/Power', () => ({
+vi.mock('../../../src/Constants/Power', () => ({
     Power: ['military', 'business', 'people']
 }));
 
 // Mock i18n — applyBudgetEffects emits translated log messages; return the key
-vi.mock('../i18n', () => ({
+vi.mock('../../../src/i18n', () => ({
     default: { t: (key: string) => key }
 }));
 

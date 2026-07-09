@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useGameStore } from './GameState';
+import { useGameStore } from '../../../src/Stores/GameState';
 
 // i18n http backend → return keys verbatim in node.
-vi.mock('../i18n', () => ({ default: { t: (key: string) => key } }));
+vi.mock('../../../src/i18n', () => ({ default: { t: (key: string) => key } }));
 
 /**
  * Meeting log capture (ADR-0011): the meet event uses the result text as its

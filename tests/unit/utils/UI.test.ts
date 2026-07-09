@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getCharismaLeft } from './UI';
-import { GAMESTATE } from '../Constants/GameState';
+import { getCharismaLeft } from '../../../src/Utils/UI';
+import { GAMESTATE } from '../../../src/Constants/GameState';
 
 describe('getCharismaLeft', () => {
     // Based on GAMESTATE.CHARISMA: MIN: -10, MAX: 10

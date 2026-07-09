@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { checkCoup } from './CoupHandler';
-import type { Power } from '../types/Power';
+import { checkCoup } from '../../../src/Stores/CoupHandler';
+import type { Power } from '../../../src/types/Power';
 
 /**
  * Coup mechanic — deterministic threshold/grace/tiebreak logic

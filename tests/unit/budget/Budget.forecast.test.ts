@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calculateRoundFinancials, computeRoundsLeft } from '../../Stores/BudgetHandler';
-import type { GameState, Modifier, ResolvedStatMod } from '../../types/GameState';
+import { calculateRoundFinancials, computeRoundsLeft } from '../../../src/components/../../src/Stores/BudgetHandler';
+import type { GameState, Modifier, ResolvedStatMod } from '../../../src/components/../../src/types/GameState';
 
 /**
  * Budget forecast includes recurring effects (TR-lasting-006, formerly Story 2-6).

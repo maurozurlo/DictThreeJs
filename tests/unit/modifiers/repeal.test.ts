@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useGameStore } from './GameState';
-import { computeRepealTier } from '../Utils/Modifiers';
-import type { Modifier, ResolvedStatMod } from '../types/GameState';
+import { useGameStore } from '../../../src/Stores/GameState';
+import { computeRepealTier } from '../../../src/Utils/Modifiers';
+import type { Modifier, ResolvedStatMod } from '../../../src/types/GameState';
 
 /**
  * repeal() store action + computeRepealTier() pure helper (ADR-0008 P2).
@@ -12,7 +12,7 @@ import type { Modifier, ResolvedStatMod } from '../types/GameState';
  */
 
 // i18n uses an http backend — return keys verbatim in node
-vi.mock('../i18n', () => ({
+vi.mock('../../../src/i18n', () => ({
     default: { t: (key: string) => key }
 }));
 

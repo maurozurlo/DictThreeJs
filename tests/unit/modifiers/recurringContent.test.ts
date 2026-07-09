@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { LAWS } from './laws';
-import { DEALS } from './deals';
-import { RECURRING, GAINS } from '../Constants/Costs';
-import type { ModifierSpec } from '../types/GameState';
-import enLaws from '../../public/locales/en/laws.json';
-import esLaws from '../../public/locales/es/laws.json';
-import enDeals from '../../public/locales/en/deals.json';
-import esDeals from '../../public/locales/es/deals.json';
+import { LAWS } from '../../../src/assets/laws';
+import { DEALS } from '../../../src/assets/deals';
+import { RECURRING, GAINS } from '../../../src/Constants/Costs';
+import type { ModifierSpec } from '../../../src/types/GameState';
+import enLaws from '../../../src/../public/locales/en/laws.json';
+import esLaws from '../../../src/../public/locales/es/laws.json';
+import enDeals from '../../../src/../public/locales/en/deals.json';
+import esDeals from '../../../src/../public/locales/es/deals.json';
 
 /**
  * Story 2-4 (re-expressed for ADR-0008 Amendment 2026-06-18 / Story 7-7):

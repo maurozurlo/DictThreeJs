@@ -1,7 +1,7 @@
 # Story 10-6: Test Relocation — src/** Tests into tests/unit/
 
 > **Epic**: Simplification & Debt (Sprint 10)
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Testing
 > **Type**: Config/Data
 > **Estimate**: 0.25 days
@@ -13,6 +13,14 @@
 `src/CLAUDE.md` mandates "Tests live in `tests/` — not in `src/`"; 16 test files
 violate it. Moving (not amending the standard) — the split, not the location, is
 the problem.
+
+## Completion Notes
+
+All 16 files moved via `git mv` into per-system folders (meet, budget [new], coup,
+laws, modifiers, utils [new], street); only relative import paths rewritten, zero
+test logic changes. Vitest's default include glob covers `tests/**` already — no
+config change needed. Suite identical before/after: 738/738, 50 files. `src/` now
+contains zero `*.test.*` files, matching the `src/CLAUDE.md` standard.
 
 ## Acceptance Criteria
 
