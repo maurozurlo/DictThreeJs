@@ -289,6 +289,13 @@ export type GameState = {
         rngSeed: number;
         nextRound: () => void;
         expireTimer: () => void;
+        /**
+         * Dismisses the round-1 opening dwell (ADR-0012: the game starts on
+         * Street, showing the inherited city, before the first work day).
+         * Distinct from nextRound() — there is no round to resolve yet, this
+         * only starts the timer and unlocks decision tabs.
+         */
+        beginFirstWorkDay: () => void;
         pauseTimer: () => void;
         resumeTimer: () => void;
         advanceRoundRequested: boolean;

@@ -30,7 +30,7 @@ describe('DayEnded — store selector reactivity', () => {
         // dayEnded + phase 'start' make the modal render its full subtree, so the
         // relation selectors at the top of the component actually execute.
         useGameStore.setState((s) => ({
-            gameManagement: { ...s.gameManagement, dayEnded: true, phase: 'start' },
+            gameManagement: { ...s.gameManagement, dayEnded: true, dwelling: true, phase: 'start' },
         }))
 
         expect(() => renderWithProviders(<DayEnded />)).not.toThrow()
@@ -38,7 +38,7 @@ describe('DayEnded — store selector reactivity', () => {
 
     it('renders the modal content (a Continue button) once shown', () => {
         useGameStore.setState((s) => ({
-            gameManagement: { ...s.gameManagement, dayEnded: true, phase: 'start' },
+            gameManagement: { ...s.gameManagement, dayEnded: true, dwelling: true, phase: 'start' },
         }))
 
         const { container } = renderWithProviders(<DayEnded />)

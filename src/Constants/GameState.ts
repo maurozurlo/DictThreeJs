@@ -248,3 +248,23 @@ export const DIFFICULTY_TREASURY: Record<Difficulty, number> = {
     medium: 500,
     hard: 150,
 } as const;
+
+/**
+ * Street tab camera. Grabbed from the 3ds Max PhysCamera001 (middleground/MaxDump).
+ * Position + aim converted Max Z-up → engine Y-up; aimed via the target point (the
+ * raw Max camera quaternion doesn't map directly — pitch derived from the look
+ * vector). fov 50.3 = vertical FOV of the 25.571mm lens on a 35mm frame (Max reports
+ * 60° horizontal). It sits 142 u back, so it's a wide vista — the skybox/skyline
+ * GLBs fill the frame behind the street. Tune fov live with the debug free-cam
+ * mouse-wheel (press I to read the value back).
+ *
+ * Shared by setActiveTab (manual Street tab click), expireTimer/nextRound
+ * (ADR-0012 force-navigate into the after-work hinge), and buildStartState
+ * (ADR-0012 round-1 opening — new games start on Street, not locked into a tab).
+ */
+export const STREET_CAMERA = {
+    pos: [8.116, 60.961, 124.141] as [number, number, number],
+    fov: 50.3, // fallback vFOV; actual value derived from hFOV + canvas aspect at runtime
+    hFov: 60,  // Max PhysCamera001 "Specify FOV" — horizontal; CameraController derives vFOV
+    rotation: [-0.4364, 0] as [number, number],
+};

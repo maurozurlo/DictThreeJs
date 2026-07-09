@@ -54,11 +54,11 @@ stories:
     name: "Round 1 opening — inherited city state"
     file: "production/stories/9-4-round-one-opening-reveal.md"
     priority: should-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.5
     blocker: ""
-    completed: ""
+    completed: "2026-07-08"
 
   - id: "9-5"
     name: "Crisis docket consistency check"

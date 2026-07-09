@@ -50,6 +50,7 @@ const DayEnded = () => {
         people: peopleRelation,
     }
     const nextRound = useGameStore(s => s.gameManagement.nextRound)
+    const beginFirstWorkDay = useGameStore(s => s.gameManagement.beginFirstWorkDay)
 
     // Re-evaluate whether the threat is still live at round-end.
     // If the player eliminated the faction this round, the warning is no longer valid.
@@ -64,32 +65,53 @@ const DayEnded = () => {
 
     // Mandatory-reveal-then-optional-dwell hinge (ADR-0012). The minimum viewing
     // window is local UI timing, not store state — Handlers stay pure (ADR-0002).
+    // Gated on `dwelling` (not `dayEnded`) so the same two-stage flow covers both
+    // the round-1 opening ("inherited city", dayEnded still false) and every
+    // subsequent round-end hinge (dayEnded true).
     const [revealAcked, setRevealAcked] = useState(false)
     useEffect(() => {
-        if (!dayEnded) return
+        if (!dwelling) return
         setRevealAcked(false)
         const timer = setTimeout(() => setRevealAcked(true), GAMESTATE.ROUNDS.MANDATORY_REVEAL_MS)
         return () => clearTimeout(timer)
-    }, [dayEnded])
+    }, [dwelling])
 
-    if (!dayEnded || phase !== 'start') return null
+    if (!dwelling || phase !== 'start') return null
+
+    // Round-1 opening has no round to report on yet — distinct headline/label/action.
+    const isIntro = !dayEnded
 
     const net = lastRoundIncome + recurringIncome + extraIncome + lawTreasuryDelta + dealTreasuryDelta + expropriateGain
         - lastRoundExpenses - recurringExpenses - extraExpenses - bribeCost - shopCost
 
-    const headline = dumbifyText(buildRevealHeadline(round, t), dumbScore)
-    const advanceLabel = round + 1 <= GAMESTATE.ROUNDS.MAX
-        ? t('actionPanel.continue_month', { month: round + 1 })
-        : t('actionPanel.finish_month', { month: round })
+    const headline = isIntro
+        ? dumbifyText(t('hinge.intro_headline'), dumbScore)
+        : dumbifyText(buildRevealHeadline(round, t), dumbScore)
+    const advanceLabel = isIntro
+        ? t('actionPanel.begin_first_month')
+        : round + 1 <= GAMESTATE.ROUNDS.MAX
+            ? t('actionPanel.continue_month', { month: round + 1 })
+            : t('actionPanel.finish_month', { month: round })
+    const onAdvance = isIntro ? beginFirstWorkDay : nextRound
 
     // Dwell stage: non-blocking corner banner — no full-viewport scrim, so the
     // Street scene (camera, ped click-to-inspect) stays interactive underneath.
-    if (dwelling && revealAcked) {
+    if (revealAcked) {
         return (
             <div className={styles.dwellBanner}>
                 <Typography variant="h3" color="accent" className={styles.headline}>{headline}</Typography>
-                <Button onClick={nextRound}>{advanceLabel}</Button>
+                <Button onClick={onAdvance}>{advanceLabel}</Button>
             </div>
+        )
+    }
+
+    if (isIntro) {
+        return (
+            <Modal>
+                <ModalCard>
+                    <Typography variant="h2" color="accent" className={styles.headline}>{headline}</Typography>
+                </ModalCard>
+            </Modal>
         )
     }
 

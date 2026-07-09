@@ -34,7 +34,8 @@
     "net": "Net:",
     "coup_warning": "Coup imminent! A faction is moving against you.",
     "continue_month": "Continue to Month {{month}} →",
-    "finish_month": "Finish Month {{month}}"
+    "finish_month": "Finish Month {{month}}",
+    "begin_first_month": "Begin Month 1 →"
   },
   "log": {
     "today": "Today's paper:",
@@ -249,6 +250,7 @@
     "back": "Back"
   },
   "hinge": {
+    "intro_headline": "A NEW ERA BEGINS",
     "headline": {
       "0": "PROSPERITY SOARS",
       "1": "THE PEOPLE REJOICE",

@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { Vector3 } from "three";
 import { Tabs } from "../types/Tabs";
 import type { Expenditures, Taxes } from "../types/Budget";
-import { GAMESTATE } from "../Constants/GameState";
+import { GAMESTATE, STREET_CAMERA } from "../Constants/GameState";
 import type { Difficulty } from "../Constants/GameState";
 import { Clamp, getRandomFromList, getRandomUniqueItem, rollChance } from "../Utils/Math";
 import { DEALS } from "../assets/deals";
@@ -168,17 +168,10 @@ export const INITIAL_STATE = ({ set, get }: {
             } else if (tab === Tabs.Laws) {
                 newCameraPos = cameraPositions[1];
             } else if (tab === Tabs.Street) {
-                // Grabbed from the 3ds Max PhysCamera001 (middleground/MaxDump). Position +
-                // aim converted Max Z-up → engine Y-up; aimed via the target point (the raw
-                // Max camera quaternion doesn't map directly — pitch derived from the look
-                // vector). fov 50.3 = vertical FOV of the 25.571 mm lens on a 35 mm frame
-                // (Max reports 60° horizontal). It sits 142 u back, so it's a wide vista —
-                // the skybox/skyline GLBs fill the frame behind the street. Tune fov live
-                // with the debug free-cam mouse-wheel (press I to read the value back).
-                newCameraPos = new Vector3(8.116, 60.961, 124.141);
-                newCameraFov = 50.3; // fallback vFOV; actual value derived from hFOV + canvas aspect at runtime
-                newCameraHFov = 60; // Max PhysCamera001 "Specify FOV" — horizontal; CameraController derives vFOV
-                newCameraRotation = [-0.4364, 0];
+                newCameraPos = new Vector3(...STREET_CAMERA.pos);
+                newCameraFov = STREET_CAMERA.fov;
+                newCameraHFov = STREET_CAMERA.hFov;
+                newCameraRotation = STREET_CAMERA.rotation;
             } else if (tab === Tabs.Secret) {
                 const s = get();
                 // When a special ending is active, show the triggering faction's room;
@@ -688,6 +681,17 @@ export const INITIAL_STATE = ({ set, get }: {
                 })
             }
         },
+        // Round Loop Phase Split (ADR-0012): dismisses the round-1 opening
+        // dwell. No round to resolve yet — just starts the timer and unlocks
+        // decision tabs, mirroring nextRound()'s tail without resolveRound().
+        beginFirstWorkDay: () => set((s) => ({
+            tabs: { ...s.tabs, activeTab: Tabs.Log },
+            gameManagement: {
+                ...s.gameManagement,
+                dwelling: false,
+                timerStartedAt: Date.now(),
+            },
+        })),
         expireTimer: () => {
             const state = get();
             const financials = calculateRoundFinancials(state.budget, state.gameManagement.modifiers, state.gameManagement.round);
@@ -721,6 +725,16 @@ export const INITIAL_STATE = ({ set, get }: {
                 set((s) => ({
                     relations: { ...s.relations, current: newRelations },
                     tabs: { ...s.tabs, activeTab: Tabs.Street },
+                    scene: {
+                        ...s.scene,
+                        camera: {
+                            ...s.scene.camera,
+                            cameraFov: STREET_CAMERA.fov,
+                            cameraHFov: STREET_CAMERA.hFov,
+                            cameraRotation: STREET_CAMERA.rotation,
+                            cameraPos: STREET_CAMERA.pos,
+                        },
+                    },
                     gameManagement: {
                         ...s.gameManagement,
                         charisma: { ...s.gameManagement.charisma, current: newCharisma },
@@ -738,6 +752,16 @@ export const INITIAL_STATE = ({ set, get }: {
             } else {
                 set((s) => ({
                     tabs: { ...s.tabs, activeTab: Tabs.Street },
+                    scene: {
+                        ...s.scene,
+                        camera: {
+                            ...s.scene.camera,
+                            cameraFov: STREET_CAMERA.fov,
+                            cameraHFov: STREET_CAMERA.hFov,
+                            cameraRotation: STREET_CAMERA.rotation,
+                            cameraPos: STREET_CAMERA.pos,
+                        },
+                    },
                     gameManagement: {
                         ...s.gameManagement,
                         dayEnded: true,

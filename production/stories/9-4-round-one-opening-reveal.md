@@ -1,12 +1,39 @@
 # Story 9-4: Round 1 Opening — Inherited City State
 
 > **Epic**: Round Loop & Street Reveal
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: UI
 > **Estimate**: 0.5 days
 > **Manifest Version**: 2026-06-13
 > **Last Updated**: 2026-07-08
+
+## Completion Notes
+
+Implemented per user request during live playtesting (independently arrived at the same
+design this story already scoped). `beginFirstWorkDay()` added as a new store action
+(distinct from `nextRound()` — no round to resolve yet). `buildStartState` now opens on
+`Tabs.Street` with `dwelling: true`, `timerStartedAt: null` (timer paused), and the
+scene camera pre-set to `STREET_CAMERA` (see below). `DayEnded.tsx` branches on
+`isIntro = !dayEnded` to show the `hinge.intro_headline` key and the "Begin Month 1"
+label instead of the round-recap flow, reusing the exact same mandatory-reveal/dwell
+component from Story 9-3.
+
+**Bonus bug fix caught in the same pass**: the user reported the camera staying at
+the last tab's position (e.g. Meet) after a round ended, only fixing itself once they
+manually clicked the Street tab. Root cause: `expireTimer()` (Story 9-1) force-set
+`tabs.activeTab: Tabs.Street` directly via `set()`, bypassing the camera-positioning
+logic that normally only runs inside the `setActiveTab()` action. Fixed by extracting
+the Street camera position/fov/rotation into a shared `STREET_CAMERA` constant
+(`src/Constants/GameState.ts`) and applying it explicitly in both `expireTimer()`
+branches and in `buildStartState`, not just `setActiveTab`.
+
+Verified end-to-end via Puppeteer against the live dev server: new game opens
+directly on the Street view with "A NEW ERA BEGINS"; navigated to Meet, forced a
+round-end, and confirmed the camera correctly snapped back to Street (not stuck on
+Meet) in the resulting screenshot. Automated: `tests/unit/roundloop/intro_dwell.test.ts`
+(8 tests, includes a regression guard for the camera bug). Full suite 704/704, `tsc -b`
+clean.
 
 ## Context
 

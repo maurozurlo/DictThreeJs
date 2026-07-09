@@ -54,7 +54,9 @@ describe('setActiveTab — work day (dwelling=false) blocks Street', () => {
     beforeEach(resetStore);
 
     it('test_dwelling_false_blocks_street_tab_during_start_phase', () => {
-        useGameStore.setState((s) => ({ gameManagement: { ...s.gameManagement, dwelling: false, phase: 'start' } }));
+        // New games open on Street (ADR-0012 round-1 opening) — move away first
+        // so the assertion proves the block, not just an unchanged default.
+        useGameStore.setState((s) => ({ tabs: { ...s.tabs, activeTab: Tabs.Log }, gameManagement: { ...s.gameManagement, dwelling: false, phase: 'start' } }));
         useGameStore.getState().tabs.setActiveTab(Tabs.Street);
         expect(useGameStore.getState().tabs.activeTab).not.toBe(Tabs.Street);
     });

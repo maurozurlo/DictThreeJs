@@ -4,7 +4,7 @@
 // Partial<GameState> patch; the store action just wraps it in set().
 
 import { Tabs } from "../types/Tabs";
-import { GAMESTATE, DIFFICULTY_TREASURY } from "../Constants/GameState";
+import { GAMESTATE, DIFFICULTY_TREASURY, STREET_CAMERA } from "../Constants/GameState";
 import type { Difficulty } from "../Constants/GameState";
 import { getRandomUniqueItem, seedRng, setRngState } from "../Utils/Math";
 import { LAWS } from "../assets/laws";
@@ -43,7 +43,20 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
     if (randomDeal) freshDeals.add(randomDeal);
 
     return {
-        tabs: { ...state.tabs, activeTab: Tabs.Log, tabsLocked: false },
+        // ADR-0012: new games open on Street (the city you inherited) before the
+        // first work day — dwelling: true + timerStartedAt: null keep the round
+        // timer paused until beginFirstWorkDay() dismisses the intro.
+        tabs: { ...state.tabs, activeTab: Tabs.Street, tabsLocked: false },
+        scene: {
+            ...state.scene,
+            camera: {
+                ...state.scene.camera,
+                cameraFov: STREET_CAMERA.fov,
+                cameraHFov: STREET_CAMERA.hFov,
+                cameraRotation: STREET_CAMERA.rotation,
+                cameraPos: STREET_CAMERA.pos,
+            },
+        },
         stats: {
             lawsPassed: 0, lawsRejected: 0,
             dealsAccepted: 0, dealsRejected: 0,
@@ -63,7 +76,7 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             difficulty: chosenDifficulty,
             round: GAMESTATE.ROUNDS.START,
             dayEnded: false,
-            dwelling: false,
+            dwelling: true,
             endReason: null,
             endCause: null,
             currentRoundExtraIncome: 0,
@@ -74,7 +87,7 @@ export function buildStartState(state: GameState, difficulty?: Difficulty): Part
             repealTakenThisRound: false,
             coupArmedLastRound: false,
             coupWarningFaction: null,
-            timerStartedAt: Date.now(),
+            timerStartedAt: null,
             timerPausedAt: null,
             pendingLog: [],
             charisma: { ...state.gameManagement.charisma, current: GAMESTATE.CHARISMA.INITIAL },

@@ -34,7 +34,8 @@
         "net": "Neto:",
         "coup_warning": "¡Golpe de estado inminente! Una facción se mueve en tu contra.",
         "continue_month": "Continuar al mes {{month}} →",
-        "finish_month": "Finalizar Mes {{month}}"
+        "finish_month": "Finalizar Mes {{month}}",
+        "begin_first_month": "Comenzar el Mes 1 →"
     },
     "log": {
         "today": "El periódico del día:",
@@ -249,6 +250,7 @@
         "back": "Volver"
     },
     "hinge": {
+        "intro_headline": "COMIENZA UNA NUEVA ERA",
         "headline": {
             "0": "LA PROSPERIDAD SE DISPARA",
             "1": "EL PUEBLO CELEBRA",
