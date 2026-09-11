@@ -76,7 +76,7 @@
 - [ADR-0004](../../docs/architecture/adr-0004-rng-determinism.md) — RNG & Determinism Strategy (`src/Utils/Math.ts`) — **Superseded by ADR-0010**
 - [ADR-0005](../../docs/architecture/adr-0005-event-scheduling.md) — Event Scheduling System
 - [ADR-0006](../../docs/architecture/adr-0006-round-timer-game-loop.md) — Round Timer / Game Loop
-- [ADR-0007](../../docs/architecture/adr-0007-effect-timing.md) — End-of-Round Effect Timing (Proposed — narrowed to non-stat delayed consequences by ADR-0008)
+- [ADR-0007](../../docs/architecture/adr-0007-effect-timing.md) — End-of-Round Effect Timing — **Superseded by ADR-0008** (closed 2026-07-09; residual non-stat delayed consequences undesigned, unneeded by current content)
 - [ADR-0008](../../docs/architecture/adr-0008-timed-modifier-engine.md) — Timed Modifier Engine / Unified Effect System (Accepted 2026-06-15)
 - [ADR-0009](../../docs/architecture/adr-0009-coup-telegraphing-fairness.md) — Coup Telegraphing & Fairness (Accepted 2026-06-16)
 - [ADR-0010](../../docs/architecture/adr-0010-seeded-rng-commit-on-roll.md) — Seeded RNG & Commit-on-Roll / save-scum resistance (Accepted 2026-06-17, supersedes ADR-0004)

@@ -2,18 +2,23 @@
 
 ## Status
 
-Proposed — Intentionally deferred to Sprint 5 planning.
-The problem and requirements are fully documented. The decision (which approach among
-Options A/B/C) will be made before Sprint 6 begins, when Tier 2 weird deals are scoped.
-Stories referencing Tier 2 weird deals are blocked on this ADR reaching Accepted.
-No current sprint stories depend on this ADR.
+Superseded by [ADR-0008](adr-0008-timed-modifier-engine.md) (closed 2026-07-09, Story 10-7)
 
-> **Scope narrowed by [ADR-0008](adr-0008-timed-modifier-engine.md) (Accepted 2026-06-15).**
-> Delayed/windowed effects expressible as *stat contributions* (charisma, relations,
-> per-round income/expense) are now handled by the Timed Modifier Engine. This ADR is
-> therefore reduced to **non-stat one-shot delayed consequences only** — e.g. delayed
-> one-shot base relation/treasury hits and cosmetic triggers (education dumbify text,
-> infrastructure textures). Revisit and finalise its scope alongside ADR-0008 Phase 3.
+> **Superseded.** ADR-0008's Timed Modifier Engine absorbed everything this ADR
+> was written for that shipped: delayed/windowed effects expressible as *stat
+> contributions* (charisma, relations, per-round income/expense). The residual
+> scope this ADR had been narrowed to — **non-stat one-shot delayed consequences**
+> (e.g. a one-shot base relation/treasury hit landing N rounds later) — remains
+> undesigned, and no current game content needs it: the "Tier 2 weird deals" that
+> motivated it were never scoped, and the cosmetic triggers named here shipped
+> through other mechanisms (education dumbify via `dumbScore`, infrastructure
+> visuals via `conditionStage`, Story 8-7). If such content is ever authored,
+> open a fresh ADR against the then-current modifier engine rather than reviving
+> this ADR's Options A/B/C analysis, which predates ADR-0008 and no longer
+> reflects the architecture.
+> (Status was previously "Proposed — deferred to Sprint 5 planning", left stale
+> through Sprint 9; closed by the Sprint 10 code audit,
+> `docs/architecture/code-audit-2026-07-08.md` §B2.)
 
 ## Date
 
@@ -21,7 +26,7 @@ No current sprint stories depend on this ADR.
 
 ## Last Verified
 
-2026-06-13
+2026-07-09
 
 ## Decision Makers
 

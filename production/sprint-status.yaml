@@ -14,7 +14,7 @@ goal: "Simplification & Debt — execute code-audit-2026-07-08: de-duplicate Gam
 start: "2026-07-08"
 end: "2026-07-15"
 generated: "2026-07-08"
-updated: "2026-07-09"
+updated: "2026-09-11"
 goal_amendment: ""
 
 stories:
@@ -84,8 +84,8 @@ stories:
     name: "ADR hygiene — ADR-0007 supersede, ADR-0004 status"
     file: "production/stories/10-7-adr-hygiene.md"
     priority: should-have
-    status: ready-for-dev
+    status: done
     owner: ""
     estimate_days: 0.25
     blocker: ""
-    completed: ""
+    completed: "2026-07-09"

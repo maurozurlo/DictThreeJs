@@ -191,3 +191,24 @@ aren't documented false positives.
 **Not in scope** (explicitly deferred): advisor refactors (user preference),
 visualConsequences wiring (visual update milestone), pedestrian avoidance phase 2,
 `useHoverGlow` typing polish.
+
+---
+
+## Outcomes (Sprint 10, executed 2026-07-08/09)
+
+All seven stories shipped, one per commit, each gated on full suite + `tsc -b` +
+build + (10-1..10-4) Puppeteer walkthroughs against the live dev server.
+
+| Finding | Story | Outcome |
+|---|---|---|
+| A1 | 10-1 | `buildGameOverPatch`/`buildRoundStartPatch`/`prepareRoundStart` in RoundResolver; `nextRound()` ~275 → ~50 lines. **Bonus bug fix**: bribe/expropriate/shop recap counters now zero on normal rounds too (previously accumulated across rounds in DayEnded's recap) |
+| A2, A3 | 10-2 | `expireTimer()` single `set()`; `TAB_CAMERA` table in Constants; `Utils/Timer.ts` shared pause/resume |
+| A4, E1 | 10-3 | `handleWeirdLaw` + `applyEventEffect` (EffectHandler), `handlePurchase` (new ShopHandler); `handleDecision` returns patch → ONE `set()` per decision, asserted by subscription-count tests. **Bonus fix**: `Power` const lacked `as const` — the Power type was silently `string` codebase-wide |
+| B1, A5 | 10-4 | `swapLaw` → canonical `pickNextLaw(allowWeird: false)` (rep-status drift bug fixed); `pickNextDeal` replaces 3 draw sites |
+| C | 10-5 | LanguageSwitcher, `getRandomDailyEventForPower`, `debugLog`, `middleground/` deleted; ~40 exports/types un-exported; knip now reports only the documented false positives |
+| F | 10-6 | 16 test files moved to `tests/unit/` (git mv + import paths only); suite count identical |
+| B2, B3 | 10-7 | ADR-0007 → Superseded by ADR-0008 with residual note; ADR-0004 status verified already correct; ADR index updated |
+
+**End state**: `GameState.ts` 1,276 → ~600 lines; suite 704 → 738 tests (all green);
+one code path each for round-end, round-start, and the hinge; zero `*.test.*` files
+in `src/`; zero undocumented knip findings.
