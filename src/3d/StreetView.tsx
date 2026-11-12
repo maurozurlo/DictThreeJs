@@ -126,6 +126,10 @@ function PlacedObjects({ placements }: { placements: ResolvedPlacement[] }) {
             const tex = loaded[i];
             tex.colorSpace = THREE.SRGBColorSpace;
             tex.flipY = false; // glTF UV convention
+            // TextureLoader defaults to ClampToEdge; the GLBs' strip/tiled UVs (facade bands,
+            // statue ramps, env_roads' kerb concrete) run past 0..1 and smear without repeat.
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
             map.set(normalizeTexName(slot.texture), { tex, transparent: slot.transparent });
         });
         return map;

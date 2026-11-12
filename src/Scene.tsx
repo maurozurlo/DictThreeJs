@@ -8,7 +8,6 @@ import People from "./3d/People";
 import Elite from "./3d/Elite";
 import Military from "./3d/Military";
 import SecretRoom from "./3d/SecretRoom";
-import Statue from "./3d/Statue";
 import StreetView from "./3d/StreetView";
 import { useGameStore } from "./Stores/GameState";
 import { Tabs } from "./types/Tabs";
@@ -39,7 +38,6 @@ export function Scene() {
             {repStatuses.people === 'active' && <People />}
             {repStatuses.military === 'active' && <Military />}
             <SecretRoom />
-            <Statue />
             {tab === Tabs.Street ? <StreetView /> : null}
         </Canvas>
     );

@@ -37,6 +37,11 @@ interface IDEObject {
         security?: [number, number];
         /** Modifier ID (e.g. "laws.5") that must be currently active. */
         modifier?: string;
+        /**
+         * Purchased-statue count range [min, max] inclusive (0–3; debug mode counts as all bought).
+         * Lets a statue slot show its empty pedestal until the matching statue is bought.
+         */
+        statues?: [number, number];
         /** Minimum round number. */
         minRound?: number;
     };

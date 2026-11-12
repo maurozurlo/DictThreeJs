@@ -17,6 +17,7 @@ const { state } = vi.hoisted(() => {
     const state = {
         tabs: { activeTab: 'Street' },
         budget: { expenditures: { infrastructure: 5, security: 5 } },
+        debug: { enabled: false },
         gameManagement: { modifiers: [] as unknown[], round: 1 },
     };
     return { state };
@@ -56,6 +57,7 @@ vi.mock('../../../src/assets/data/street-placement.ipl', () => ({
 
 vi.mock('../../../src/Utils/Modifiers', () => ({
     getVisibleModifiers: () => [],
+    countModifiersByType: () => 0,
 }));
 
 import { useStreetLayout } from '../../../src/Hooks/useStreetLayout';

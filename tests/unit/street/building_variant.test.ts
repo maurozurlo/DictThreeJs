@@ -41,13 +41,14 @@ describe('buildingVariantForSlot — all 55 combinations', () => {
 });
 
 // ---------------------------------------------------------------------------
-// AC-12: hook falls back to normal variant when rich model is null
+// AC-12: hook falls back to normal variant when the rich model has no IDE entry
 // ---------------------------------------------------------------------------
 
 const { hookState } = vi.hoisted(() => {
     const hookState = {
         tabs: { activeTab: 'Street' },
         budget: { expenditures: { infrastructure: 5, security: 5 } },
+        debug: { enabled: false },
         gameManagement: { modifiers: [] as unknown[], round: 1, conditionStage: 5 },
     };
     return { hookState };
@@ -57,7 +58,7 @@ vi.mock('../../../src/Stores/GameState', () => ({
     useGameStore: (selector: (s: typeof hookState) => unknown) => selector(hookState),
 }));
 
-// Minimal IDE with only slot-0 entries (normal + poor, no rich)
+// Minimal IDE with only slot-0 entries (normal + poor, no rich entry for the slot's rich name)
 vi.mock('../../../src/assets/data/street-objects.ide', () => ({
     STREET_IDE: {
         version: 1,
@@ -81,15 +82,16 @@ vi.mock('../../../src/assets/data/street-placement.ipl', () => ({
 
 vi.mock('../../../src/Utils/Modifiers', () => ({
     getVisibleModifiers: () => [],
+    countModifiersByType: () => 0,
 }));
 
 import { renderHook } from '@testing-library/react';
 import { useStreetLayout } from '../../../src/Hooks/useStreetLayout';
 
 describe('useStreetLayout — rich variant fallback', () => {
-    it('AC-12: returns normal asset when conditionStage=5 but rich model is null for slot 0', () => {
+    it('AC-12: returns normal asset when conditionStage=5 but the rich model has no IDE entry', () => {
         // conditionStage=5 → buildingVariantForSlot(0, 5) = 'rich'
-        // slot 0 has rich=null → hook falls back to normal variant
+        // slot 0's rich name is absent from this IDE → hook falls back to the normal name and asset
         hookState.gameManagement.conditionStage = 5;
         const { result } = renderHook(() => useStreetLayout());
 

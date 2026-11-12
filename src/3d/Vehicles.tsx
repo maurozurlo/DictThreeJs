@@ -6,6 +6,9 @@ import { STREET_PATHS } from '../assets/data/street-paths';
 import type { WaypointPath, VehicleConfig } from '../types/StreetLayout';
 import { lightPhase } from '../Utils/TrafficLight';
 import { pathTotalLength, positionAtPathDistance } from '../Utils/PathUtils';
+import { useGameStore } from '../Stores/GameState';
+import { AMBULANCE_HEALTH_MIN, JEEP_SECURITY_MIN, type VehicleModelId } from '../Constants/Vehicles';
+import { vehicleModelForSpawn, vehicleTierFor } from '../Utils/VehiclePool';
 
 // ---------------------------------------------------------------------------
 // Asset catalogue
@@ -100,7 +103,35 @@ const CAR_PAUSE_TIMEOUT_S = 3.0;
  * of 1.4) so crossing peds clear the stopped nose instead of clipping through it.
  */
 const CAR_STOP_PED_BUFFER = 3 * 1.4;
-const CAR_STOP_SETBACK = CAR_HALF_LENGTH + CAR_STOP_PED_BUFFER;
+
+/**
+ * The procedural POC cars (tools/blender/vehicles.py) are modelled at game size under a root
+ * carrying the street GLBs' stray 0.001 scale (cf. StreetView's GLB_UNIT_FIX), with a +90° Y turn
+ * so the root's local X is the axle; nose +X in scene space like the junker, so the same
+ * Math.PI / 2 wrapper applies. Wheels are separate nodes pivoted on their hubs.
+ */
+const VEHICLE_GLB_UNIT_FIX = 1000;
+const POC_WHEEL_NODES = ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr'] as const;
+
+/**
+ * Per-model spec. Half extents are the footprint the OBB avoidance and the stop-line setback
+ * use (world units). `tinted` cars get a paint colour from CAR_BODY_TINTS on their `*_body`
+ * material (grayscale albedo); the others keep their fixed livery.
+ */
+interface CarModelSpec {
+    url: string;
+    halfLength: number;
+    halfWidth: number;
+    tinted: boolean;
+}
+
+const POC_CAR_MODELS: Record<Exclude<VehicleModelId, 'junker'>, CarModelSpec> = {
+    sedan:     { url: '/models/vehicles/car_sedan.glb',         halfLength: 5.35, halfWidth: 2.2, tinted: true },
+    limo:      { url: '/models/vehicles/car_limo.glb',          halfLength: 8.0,  halfWidth: 2.4, tinted: false },
+    jeep:      { url: '/models/vehicles/car_jeep_military.glb', halfLength: 5.2,  halfWidth: 2.5, tinted: false },
+    ambulance: { url: '/models/vehicles/car_ambulance.glb',     halfLength: 6.0,  halfWidth: 2.4, tinted: false },
+};
+const POC_CAR_IDS = Object.keys(POC_CAR_MODELS) as Exclude<VehicleModelId, 'junker'>[];
 
 /**
  * True if two oriented rectangles in the XZ plane overlap (separating axis
@@ -161,10 +192,64 @@ interface CarAssets {
     yOffset: number;
     /** Tyre radius in world units (already scaled) — drives wheel spin rate. */
     wheelRadius: number;
+    /** Footprint half extents (world units) for avoidance and the stop setback. */
+    halfLength: number;
+    halfWidth: number;
+    /** Names of the wheel nodes spun by rotation.x. */
+    wheelNodes: readonly string[];
+}
+
+/** Loads and prepares every street vehicle model. Suspends. */
+function useVehicleAssets(): Record<VehicleModelId, CarAssets> {
+    const junker = useJunkerAssets();
+    const gltfs = useLoader(GLTFLoader, POC_CAR_IDS.map((id) => POC_CAR_MODELS[id].url));
+    const poc = useMemo(
+        () => Object.fromEntries(POC_CAR_IDS.map((id, i) => [id, preparePocCar(gltfs[i].scene as THREE.Group, POC_CAR_MODELS[id])])),
+        [gltfs],
+    ) as Record<Exclude<VehicleModelId, 'junker'>, CarAssets>;
+    return useMemo(() => ({ junker, ...poc }), [junker, poc]);
+}
+
+/**
+ * Prepares a POC car (see VEHICLE_GLB_UNIT_FIX): keeps each material's embedded albedo, sampled
+ * nearest like the street, on a plain MeshStandardMaterial. Idempotent — useLoader caches the
+ * scene and StrictMode re-runs the memo on the same object.
+ */
+function preparePocCar(scene: THREE.Group, spec: CarModelSpec): CarAssets {
+    scene.traverse((child) => {
+        const mesh = child as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        const prep = (mat: THREE.Material): THREE.Material => {
+            const map = (mat as THREE.MeshStandardMaterial).map ?? null;
+            if (map) {
+                // Set before the first GPU upload, so no needsUpdate is required.
+                map.magFilter = THREE.NearestFilter;
+                map.minFilter = THREE.NearestFilter;
+            }
+            const out = new THREE.MeshStandardMaterial({ map, roughness: 0.9, metalness: 0 });
+            out.name = mat.name;
+            out.userData.kind = spec.tinted && mat.name.endsWith('_body') ? 'body' : 'fixed';
+            return out;
+        };
+        mesh.material = Array.isArray(mesh.material) ? mesh.material.map(prep) : prep(mesh.material);
+    });
+    scene.updateMatrixWorld(true);
+    const modelScale = VEHICLE_GLB_UNIT_FIX;
+    const carBox = new THREE.Box3().setFromObject(scene);
+    const yOffset = -carBox.min.y * modelScale;
+    const wheel = scene.getObjectByName(POC_WHEEL_NODES[0]);
+    const wheelBox = wheel ? new THREE.Box3().setFromObject(wheel) : carBox;
+    const wheelRadius = Math.max(((wheelBox.max.y - wheelBox.min.y) / 2) * modelScale, 1e-6);
+    return {
+        template: scene, modelScale, yOffset, wheelRadius,
+        halfLength: spec.halfLength, halfWidth: spec.halfWidth, wheelNodes: POC_WHEEL_NODES,
+    };
 }
 
 /** Loads and prepares the junker model + textures. Suspends. */
-function useCarAssets(): CarAssets {
+function useJunkerAssets(): CarAssets {
     const gltf = useLoader(GLTFLoader, CAR_MODEL_URL);
     const loaded = useLoader(THREE.TextureLoader, CAR_TEXTURE_KINDS.map((k) => CAR_TEXTURE_URLS[k]));
 
@@ -233,7 +318,10 @@ function useCarAssets(): CarAssets {
         const wheelBox = front ? new THREE.Box3().setFromObject(front) : carBox;
         const wheelRadius = Math.max(((wheelBox.max.y - wheelBox.min.y) / 2) * modelScale, 1e-6);
 
-        return { template: scene, modelScale, yOffset, wheelRadius };
+        return {
+            template: scene, modelScale, yOffset, wheelRadius,
+            halfLength: CAR_HALF_LENGTH, halfWidth: CAR_HALF_WIDTH, wheelNodes: ['wheels_front', 'wheels_back'],
+        };
     }, [gltf, loaded]);
 }
 
@@ -248,8 +336,8 @@ interface CarParts {
 }
 
 /** Clone the template and give the body panels a per-car paint material. */
-function buildCarModel(template: THREE.Group, tint: string): CarParts {
-    const model = template.clone(true);
+function buildCarModel(assets: CarAssets, tint: string): CarParts {
+    const model = assets.template.clone(true);
     model.traverse((child) => {
         const mesh = child as THREE.Mesh;
         if (!mesh.isMesh) return;
@@ -261,7 +349,7 @@ function buildCarModel(template: THREE.Group, tint: string): CarParts {
         };
         mesh.material = Array.isArray(mesh.material) ? mesh.material.map(applyTint) : applyTint(mesh.material);
     });
-    const wheels = ['wheels_front', 'wheels_back']
+    const wheels = assets.wheelNodes
         .map((name) => model.getObjectByName(name))
         .filter((w): w is THREE.Object3D => w !== undefined);
     return { model, wheels };
@@ -276,16 +364,20 @@ interface CarRegistryEntry {
     /** Unit heading (XZ) — the car's current segment direction, used to build its OBB. */
     fwdX: number;
     fwdZ: number;
+    /** This car's footprint half extents — models differ (a limo is 16 long). */
+    halfLen: number;
+    halfWidth: number;
 }
 const carPositions = new Map<string, CarRegistryEntry>();
 
 const CAR_PATHS_BY_ID = new Map(STREET_PATHS.carPaths.map((p) => [p.id, p]));
 
 // ---------------------------------------------------------------------------
-// JunkerCar — one vehicle following a car path
+// StreetCar — one vehicle following a car path
 // ---------------------------------------------------------------------------
 
-interface JunkerCarProps {
+interface StreetCarProps {
+    /** Prepared model for this car; swapping it (tier change) rebuilds the model in place. */
     assets: CarAssets;
     vehicle: VehicleConfig;
     path: WaypointPath;
@@ -294,7 +386,7 @@ interface JunkerCarProps {
     startNextIdx: number;
 }
 
-function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarProps) {
+function StreetCar({ assets, vehicle, path, startPos, startNextIdx }: StreetCarProps) {
     const groupRef = useRef<THREE.Group>(null);
     const pos = useRef(startPos.clone());
     const nextIdx = useRef(startNextIdx);
@@ -306,7 +398,7 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
     const pausedSince = useRef<number | null>(null);
 
     const { model, wheels } = useMemo(
-        () => buildCarModel(assets.template, randomFrom(CAR_BODY_TINTS)),
+        () => buildCarModel(assets, randomFrom(CAR_BODY_TINTS)),
         [assets],
     );
 
@@ -330,11 +422,14 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
 
         // Register current position + heading so other cars can build an OBB
         // check against us
+        const { halfLength, halfWidth } = assets;
         let entry = carPositions.get(vehicle.id);
-        if (!entry) { entry = { pos: new THREE.Vector3(), fwdX, fwdZ }; carPositions.set(vehicle.id, entry); }
+        if (!entry) { entry = { pos: new THREE.Vector3(), fwdX, fwdZ, halfLen: halfLength, halfWidth }; carPositions.set(vehicle.id, entry); }
         entry.pos.copy(pos.current);
         entry.fwdX = fwdX;
         entry.fwdZ = fwdZ;
+        entry.halfLen = halfLength;
+        entry.halfWidth = halfWidth;
 
         const targetPos = new THREE.Vector3(target.x, target.y, target.z);
         if (segLen > 1e-6) {
@@ -345,7 +440,7 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
             targetPos.z += (-segX / segLen) * CAR_LANE_OFFSET;
             if (target.stopFor) {
                 // Shift the halt point back along the incoming segment (see
-                // CAR_STOP_SETBACK) so the nose clears the crossing with room
+                // halfLength + CAR_STOP_PED_BUFFER) so the nose clears the crossing with room
                 // for crossing peds, instead of stopping with the pivot at
                 // the baked node. Clamped to the segment's own length — some
                 // intersections chain short segments (kerb inserts, tight
@@ -353,7 +448,7 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
                 // distance there would place the point behind the previous
                 // waypoint, i.e. behind the car's already-arrived position,
                 // which reads as the car reversing mid-crossing.
-                const setback = Math.min(CAR_STOP_SETBACK, segLen * 0.9);
+                const setback = Math.min(halfLength + CAR_STOP_PED_BUFFER, segLen * 0.9);
                 targetPos.x -= (segX / segLen) * setback;
                 targetPos.z -= (segZ / segLen) * setback;
             }
@@ -372,13 +467,13 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
         // as blocked when they do, however they're angled.
         const sensorCenterX = pos.current.x + fwdX * (CAR_BRAKE_LOOKAHEAD / 2);
         const sensorCenterZ = pos.current.z + fwdZ * (CAR_BRAKE_LOOKAHEAD / 2);
-        const sensorHalfLen = CAR_HALF_LENGTH + CAR_BRAKE_LOOKAHEAD / 2;
+        const sensorHalfLen = halfLength + CAR_BRAKE_LOOKAHEAD / 2;
         let blocked = false;
         for (const [otherId, other] of carPositions) {
             if (otherId === vehicle.id) continue;
             if (rectsOverlap(
-                sensorCenterX, sensorCenterZ, fwdX, fwdZ, sensorHalfLen, CAR_HALF_WIDTH,
-                other.pos.x, other.pos.z, other.fwdX, other.fwdZ, CAR_HALF_LENGTH, CAR_HALF_WIDTH,
+                sensorCenterX, sensorCenterZ, fwdX, fwdZ, sensorHalfLen, halfWidth,
+                other.pos.x, other.pos.z, other.fwdX, other.fwdZ, other.halfLen, other.halfWidth,
             )) {
                 blocked = true;
                 break;
@@ -399,15 +494,15 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
         // Test only the real footprints over this frame's actual travel
         // distance: if executing the move would overlap another car's real
         // body, refuse regardless of how long we've been blocked.
-        const stepHalfLen = CAR_HALF_LENGTH + step / 2;
+        const stepHalfLen = halfLength + step / 2;
         const stepCenterX = pos.current.x + fwdX * (step / 2);
         const stepCenterZ = pos.current.z + fwdZ * (step / 2);
         let bodyBlocked = false;
         for (const [otherId, other] of carPositions) {
             if (otherId === vehicle.id) continue;
             if (rectsOverlap(
-                stepCenterX, stepCenterZ, fwdX, fwdZ, stepHalfLen, CAR_HALF_WIDTH,
-                other.pos.x, other.pos.z, other.fwdX, other.fwdZ, CAR_HALF_LENGTH, CAR_HALF_WIDTH,
+                stepCenterX, stepCenterZ, fwdX, fwdZ, stepHalfLen, halfWidth,
+                other.pos.x, other.pos.z, other.fwdX, other.fwdZ, other.halfLen, other.halfWidth,
             )) {
                 bodyBlocked = true;
                 break;
@@ -469,7 +564,7 @@ function JunkerCar({ assets, vehicle, path, startPos, startNextIdx }: JunkerCarP
 }
 
 // ---------------------------------------------------------------------------
-// Vehicles — junkers spread along every exported car loop
+// Vehicles — the tier's traffic spread along every exported car loop
 // ---------------------------------------------------------------------------
 
 interface CarSpawn {
@@ -480,16 +575,28 @@ interface CarSpawn {
 }
 
 /**
- * Renders every street vehicle: junkers spawned along each exported car loop
- * (one per ~CAR_TARGET_SPACING units, evenly spaced), painted from the cosmetic
- * tint pool, wheels rolling with ground speed. Baked `stopFor` waypoints gate
- * cars a few metres before crossings during the ped light phase; an
- * oriented-bounding-box collision check (rectsOverlap) queues cars behind a
- * stopped leader and holds cross traffic at merges/intersections. Must render
- * inside a <Suspense> boundary (GLB + texture loads suspend).
+ * Renders every street vehicle, spawned along each exported car loop (one per
+ * ~CAR_TARGET_SPACING units, evenly spaced). The model per spawn follows the
+ * traffic mix (Constants/Vehicles.ts via vehicleModelForSpawn): junkers /
+ * sedans / sedans + limos by infrastructure tier, plus military jeeps while
+ * security is Militarised and ambulances while health is funded high. Tinted
+ * bodies take a colour from the cosmetic tint pool; wheels roll with ground
+ * speed. Baked `stopFor` waypoints gate cars a few metres before crossings
+ * during the ped light phase; an oriented-bounding-box collision check
+ * (rectsOverlap, per-car footprints) queues cars behind a stopped leader and
+ * holds cross traffic at merges/intersections. Must render inside a
+ * <Suspense> boundary (GLB + texture loads suspend).
  */
 function Vehicles() {
-    const assets = useCarAssets();
+    const assets = useVehicleAssets();
+    // Primitive selectors only (an object-returning selector re-renders forever),
+    // reduced to tier + booleans so the mix only changes when a gate flips.
+    const infrastructure = useGameStore((s) => s.budget.expenditures.infrastructure);
+    const security = useGameStore((s) => s.budget.expenditures.security);
+    const health = useGameStore((s) => s.budget.expenditures.health);
+    const tier = vehicleTierFor(infrastructure);
+    const jeepOn = security >= JEEP_SECURITY_MIN;
+    const ambulanceOn = health >= AMBULANCE_HEALTH_MIN;
 
     const spawns = useMemo((): CarSpawn[] =>
         STREET_PATHS.carPaths.flatMap((path) => {
@@ -501,12 +608,17 @@ function Vehicles() {
             });
         }), []);
 
+    const models = useMemo(
+        () => spawns.map((_, i) => vehicleModelForSpawn(i, tier, jeepOn, ambulanceOn)),
+        [spawns, tier, jeepOn, ambulanceOn],
+    );
+
     return (
         <>
-            {spawns.map((s) => (
-                <JunkerCar
+            {spawns.map((s, i) => (
+                <StreetCar
                     key={s.id}
-                    assets={assets}
+                    assets={assets[models[i]]}
                     vehicle={{ id: s.id, pathId: s.path.id, speed: CAR_SPEED_MPS * VEHICLE_WORLD_SCALE }}
                     path={s.path}
                     startPos={s.startPos}
