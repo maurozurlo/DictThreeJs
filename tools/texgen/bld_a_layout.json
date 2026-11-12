@@ -1,0 +1,73 @@
+{
+  "family": "bld_a",
+  "note": "Contract shared by tools/texgen/bld_a.py (paints) and tools/blender/bld_a.py (models). Rects are [x, y, w, h] from the image's top-left (Blender v = 1 - y / h). Strips span the full width and tile along U only; decals are unique. The game lights the street with one flat ambient light and ignores vertex colour, so every texture bakes its own form: recess and cornice shadows, darker roofs and undersides, and a darker '_shade' variant for the side faces (camera face = lit).",
+  "palette_hint": "Match public/textures/map/building1..4.png in value (mid, slightly warm, photo-ish, soft grime) but push the rich tier to dictator kitsch: cream and pink marble (RGB ~ 225,200,185 / 215,170,165), gilt (RGB ~ 205,160,60 with 250,215,120 highlights and 120,80,25 shadows), banner red (RGB ~ 170,25,25), gold-mirror glass (RGB ~ 175,140,70 with paler reflection streaks). Mid values: nothing above ~245 or below ~20.",
+  "textures": {
+    "bld_a_rich_trim": {
+      "file": "public/textures/map/bld_a_rich_trim.png", "size": [128, 128], "mode": "RGBA", "transparent": true,
+      "tiles": "atlas", "used_by": ["env_bld_apartment_rich", "env_bld_civic_rich"],
+      "look": "Shared rich-tier ornament sheet. Alpha is 255 everywhere except the balustrade strip's gaps. The IDE entry flags it transparent (alpha-tested at 0.5, double-sided).",
+      "regions": {
+        "column":  {"rect": [0, 0, 16, 96],   "tiles": "none", "look": "One column face, mapped once per face over the column height (7-13 units). Top 14 px gilt Corinthian capital (acanthus lumps, volutes at the corners, abacus 2 px), bottom 8 px gilt base with a torus. Shaft: pink-white marble with 3 vertical flutes (1 px darker lines), cylindrical shading baked (edges 25 % darker, centre lighter), faint grey veins."},
+        "banner":  {"rect": [16, 0, 32, 96],  "tiles": "none", "look": "Tall hanging banner, mapped once per banner quad (aspect 1:3). Deep red cloth with soft vertical folds, 2 px gold border and a 4 px gold fringe at the bottom; top 6 px gold rod band. In the upper middle a gold-ringed medallion (about 24 px) holding the leader's silhouette: a moustached head and shoulders in a peaked cap, three-quarter profile, near-black on cream. A small gold star below it."},
+        "door":    {"rect": [48, 0, 32, 48],  "tiles": "none", "look": "Grand entrance, mapped once: a round-arched marble surround (3 px) with a gold keystone, gilt double doors with raised panels and a bright gold vertical seam, a dark fanlight in the arch head, a 3 px red-carpet threshold at the bottom."},
+        "gilt":    {"rect": [80, 0, 48, 48],  "tiles": "none", "look": "Gilt dome / spire panel, mapped once per dome segment column (u across one segment, v rim (bottom) to apex (top)). 3 px raised rib at the left and right edges (bright highlight on the rib, dark line beside it), the panel between in warm gold with a broad soft highlight band at 40 % height and darker toward the rim (occlusion). Fish-scale relief rows faintly across the panel."},
+        "canopy":  {"rect": [48, 48, 32, 24], "tiles": "none", "look": "Red-carpet canopy: red cloth top with a 3 px gold border, the bottom 8 px a gold scalloped valance with fringe. Top part maps the canopy roof, the valance part its edges."},
+        "flag":    {"rect": [48, 72, 32, 24], "tiles": "none", "look": "Red flag with a gold five-point star in a laurel ring at the hoist side, soft folds."},
+        "marble":  {"rect": [80, 48, 48, 48], "tiles": "none", "look": "Pale pink-white marble paving with large square slabs (12 px), grey-pink veins, a 2 px darker border all round (parapet shadow). Stretched over roofs, terraces and slab tops."},
+        "cornice": {"rect": [0, 96, 128, 12], "tiles": "u", "metres": 16, "look": "Gilt cornice band: 2 px light gold lip on top, a row of dark dentils (2 px wide, 2 px gaps), egg-and-dart in gold below, the bottom 2 px dark (the shadow it casts). Tiles along U."},
+        "rail":    {"rect": [0, 108, 128, 12], "tiles": "u", "metres": 12, "look": "Gilt balustrade, alpha-cut: 2 px top rail, 1 px bottom rail, vase balusters every 8 px with transparent gaps between. Tiles along U."},
+        "carpet":  {"rect": [0, 120, 128, 8],  "tiles": "u", "metres": 8, "look": "Red carpet runner along U: crimson pile, 1 px gold line 1 px in from each edge."}
+      }
+    },
+    "env_bld_apartment_rich_facade": {
+      "file": "public/textures/map/env_bld_apartment_rich_facade.png", "size": [128, 128], "mode": "RGB",
+      "tiles": "strips (U)",
+      "look": "Luxury tower facade strips. Lit = the camera (-Y) face, shade = the road (+X) face, 18 % darker and a touch cooler.",
+      "regions": {
+        "tower_lit":    {"rect": [0, 0, 128, 32],  "tiles": "u", "metres": 20, "storey": 5, "look": "One tower storey (5 units), 4 bays of 32 px (5 units). Top 6 px: pink marble spandrel, darkened toward the top (the balcony slab above shades it). Rows 6-27: floor-to-ceiling gold-mirror glass, warm gold with pale diagonal reflection streaks, dark 1 px mullions every 8 px and a transom at row 12; 3 px gilt pilasters at the bay joins. Rows 27-32: marble sill band where the balcony slab sits."},
+        "tower_shade":  {"rect": [0, 32, 128, 32], "tiles": "u", "metres": 20, "storey": 5, "look": "tower_lit, 18 % darker and cooler."},
+        "podium_lit":   {"rect": [0, 64, 128, 32], "tiles": "u", "metres": 24, "storey": 7, "look": "Double-height marble lobby storey (7 units) behind the colonnade, 4 bays of 32 px (6 units). Pink-white rusticated marble (2 px grooves every 5 px), a tall round-arched window per bay (14 px wide, warm lit interior with a chandelier glint, gold frame), gold keystone. Top 4 px shaded (the entablature over the colonnade casts it), bottom 2 px darker plinth."},
+        "podium_shade": {"rect": [0, 96, 128, 32], "tiles": "u", "metres": 24, "storey": 7, "look": "podium_lit, 18 % darker and cooler."}
+      }
+    },
+    "env_bld_civic_rich_facade": {
+      "file": "public/textures/map/env_bld_civic_rich_facade.png", "size": [128, 128], "mode": "RGB",
+      "tiles": "strips (U)",
+      "look": "Palace wall, full height of the main block (17 units) in one strip. Lit = the -Y faces, shade = the +X / -X faces.",
+      "regions": {
+        "wall_lit":   {"rect": [0, 0, 128, 64],  "tiles": "u", "metres": 32, "height": 17, "look": "8 bays of 16 px (4 units). Bottom 18 px rusticated ground floor (pink-grey stone, deep grooves) with round-arched dark openings; then two storeys of tall gold-framed windows on cream-pink marble, the first-floor windows with alternating triangular and segmental pediments in gold; gold pilaster strips between bays; top 6 px a cornice with a dark shadow line under it."},
+        "wall_shade": {"rect": [0, 64, 128, 64], "tiles": "u", "metres": 32, "height": 17, "look": "wall_lit, 18 % darker and cooler."}
+      }
+    },
+    "env_bld_civic_rich_parts": {
+      "file": "public/textures/map/env_bld_civic_rich_parts.png", "size": [128, 128], "mode": "RGB",
+      "tiles": "atlas",
+      "look": "Palace parts: dome drum, stairs, attic band, pediment, roof.",
+      "regions": {
+        "drum":     {"rect": [0, 0, 128, 32],   "tiles": "u", "metres": "one turn of the 16-sided drum", "look": "Drum under the dome: cream marble, 8 tall arched windows (dark, gold frames) with paired gold pilasters between them, a gold cornice in the top 4 px, a dark plinth in the bottom 3 px."},
+        "stair":    {"rect": [0, 32, 128, 16],  "tiles": "u", "metres": 16, "look": "Rows 0-9: step tread, pale worn marble, lighter toward the front edge. Rows 10-15: riser, shaded marble (the step above shadows it)."},
+        "attic":    {"rect": [0, 48, 128, 32],  "tiles": "u", "metres": 16, "look": "Attic band above the cornice: cream marble with gilt relief panels (laurel wreaths with a star) between short pilasters, a gold coping line on top, darker at the bottom where it meets the cornice."},
+        "tympanum": {"rect": [0, 80, 64, 48],   "tiles": "none", "look": "Pediment triangle, mapped once (u across the base, v up to the apex): pink marble field, gold sunburst rays fanning up from the bottom centre, a gilt laurel-ringed medallion with the leader's silhouette in the middle, 3 px gold raking cornice along both slopes."},
+        "roof":     {"rect": [64, 80, 64, 48],  "tiles": "none", "look": "Palace roof, stretched over flat roofs: pale green-grey copper sheet with standing seams every 6 px, darker 3 px border (parapet shadow), faint verdigris streaks."}
+      }
+    }
+  },
+  "models": {
+    "env_bld_mixeduse_normal": {
+      "file": "public/models/map/env_bld_mixeduse_normal.glb", "tris_max": 150, "slot": "mixeduse", "ground_z": -8.58,
+      "materials": ["building4", "concrete_buildings_top", "concrete_buildings_base"],
+      "envelope": "The poor model's box x -8.06..9.46, y -11.35..11.35, z -8.58..8.58 with its damage removed: flat -Y front (u 0.502..1 of building4, v over the full height), -X road side (u 1..0 from the front corner to the back, v over the full height) with four recessed shop bays 1.1 deep (z -8.58..-3.69, the poor model's three plus the middle shopfront the texture paints), flat roof at 8.58 (concrete_buildings_top) with a 0.5 parapet capped in concrete_buildings_base. Back (+Y) and +X faces open, like the poor shell."
+    },
+    "env_bld_apartment_rich": {
+      "file": "public/models/map/env_bld_apartment_rich.glb", "tris_max": 600, "slot": "apartment", "ground_z": -12.17,
+      "materials": ["env_bld_apartment_rich_facade", "bld_a_rich_trim"],
+      "envelope": "Footprint x -16..16, y -26..26; street line at x = 15.46 (+X, road) and y = -25.71 (-Y, camera). Podium: marble lobby (wall x -15..11.8, y -22.6..25) 7 high behind a colonnade of 10 square columns, an entablature box out to x 14.6 / y -25.4 from 7 to 9, roof terrace at 9. Entrance on +X centred at y -3: red canopy out to x 15.9 on two gilt posts, red carpet, grand door decal. Tower x -13..9, y -20..14 with the +X/-Y corner chamfered 5, five 5-unit storeys from 9 to 34, a wrap-around balcony slab with gilt rail at each floor line on -Y and +X (not on the chamfer, which carries the leader banner). Penthouse 34..39 set back, gilt cornice, gilt pyramid crown to 44, gilded needle spire to 53 (allowed to poke out of frame). All heights above ground."
+    },
+    "env_bld_civic_rich": {
+      "file": "public/models/map/env_bld_civic_rich.glb", "tris_max": 800, "slot": "civic", "ground_z": -13.34,
+      "materials": ["env_bld_civic_rich_facade", "env_bld_civic_rich_parts", "bld_a_rich_trim"],
+      "envelope": "Footprint x -26..26, y -16..16; street line y = -15.25 (stairs), x = +-24.49 (pavilions). Main block x -17..17, y -9..15.25, 17 high. End pavilions x +-17..24.49, y -12.5..15.25, 20 high with gilt cupolas. Stylobate x -17..17, y -12.5..-9, 1.2 high, 8 giant-order columns (1.2..14) at y -11 with a wide central bay, entablature to 17, central attic x -7..7 to 21 with a pediment to 24.5. Speech balcony at 8 over the door. Grand stair x -9..9 from y -15.25 to -12.5 with a red runner. Drum (r 6, 17..22) and gilt dome (to 31), lantern to 33.5, spire tip at 37 (may poke out). Red leader banners on the pavilion fronts and over the balcony; flags on the pavilions. All heights above ground; top <= 36 except the spire tip and flagpoles."
+    }
+  }
+}

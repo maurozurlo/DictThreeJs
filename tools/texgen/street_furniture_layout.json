@@ -1,0 +1,82 @@
+{
+  "family": "street_furniture",
+  "about": "Poor and rich tiers of the street's streetlight and park bench. Each tier model reuses the NORMAL model's IPL placements, so it keeps the normal GLB's pivot: origin at the normal model's bbox centre, not the ground. Rects are [x, y, w, h] in pixels from the image's top-left (Blender v = 1 - y / h). Game lighting is one flat ambient light and no vertex colour: every face shows its albedo flat, so form (undersides, recesses, gilt highlights) is baked into the albedo.",
+  "palette_hint": "public/textures/map/streetlight.png (pale grey pole, pale-yellow lamp), public/textures/map/parkbench.png (dark brown slats, black iron). Mid values, photo-ish, NearestFilter so every pixel shows. Poor: rust, soot, decay. Rich: dictator kitsch, gold, white/pink marble, red velvet and banners.",
+  "textures": {
+    "env_streetlight_poor": {
+      "file": "public/textures/map/env_streetlight_poor.png", "size": [32, 32], "alpha": false, "transparent": false,
+      "regions": {
+        "pole_front": {"rect": [0, 0, 5, 32], "tiles": "none", "look": "Pole faces seen head-on (front and back). Top of rect = top of the pole (z 7.8), bottom = base collar (z -7.2), about 2 px a unit. Chipped grey-green paint (110,118,108) over rust (130,72,40); rust grows toward the bottom, two rust runs from bolt holes, soot black in the bottom 6 px, a 3x3 dark access-hatch hole at y 25-27."},
+        "pole_side": {"rect": [5, 0, 5, 32], "tiles": "none", "look": "Same pole paint for the side faces (+-X), 20 % darker so the square section reads under flat light."},
+        "arm_top": {"rect": [10, 0, 22, 3], "tiles": "none", "look": "Arm upper face, U from pole (left) to tip (right). Rusty, lighter (pigeon-dropping specks)."},
+        "arm_side": {"rect": [10, 3, 22, 3], "tiles": "none", "look": "Arm front/back faces: flaking grey paint, rust runs, sooty toward the tip."},
+        "arm_under": {"rect": [10, 6, 22, 2], "tiles": "none", "look": "Arm underside and end cap: dark, 0.55 of the side tone."},
+        "head_out": {"rect": [10, 8, 10, 10], "tiles": "none", "look": "Lamp hood outside, top of rect = hood top. Dented rusty grey steel, soot, a lighter rim at the bottom edge (2 px) where the glass sat."},
+        "head_in": {"rect": [20, 8, 12, 10], "tiles": "none", "look": "Smashed lamp underside: black-brown interior, a jagged ring of pale blue-grey glass shards around the rim, a broken bulb socket stub (dull brass) in the middle."},
+        "base_side": {"rect": [10, 18, 12, 8], "tiles": "none", "look": "Concrete plinth sides, top of rect = plinth top. Grey concrete (118,116,110), dark crack, chipped top edge, soot and grime rising from the bottom 2 px, a rust stain dribbling down from the top."},
+        "base_top": {"rect": [22, 18, 6, 6], "tiles": "none", "look": "Concrete plinth top: lighter concrete, rust ring stain round the pole footprint, a chipped corner."},
+        "wire": {"rect": [28, 18, 4, 14], "tiles": "none", "look": "Black rubber cable, U across, V along (top = fixed end); 1 px dull highlight column; bottom 3 px frayed copper (180,110,50)."},
+        "hatch": {"rect": [10, 26, 8, 6], "tiles": "none", "look": "Open access-hatch door: rusty steel plate, a darker riveted border."},
+        "shard": {"rect": [18, 26, 10, 6], "tiles": "none", "look": "Glass shards and soot on the pavement: pale blue-grey shard flecks on dark grey."}
+      }
+    },
+    "env_streetlight_rich": {
+      "file": "public/textures/map/env_streetlight_rich.png", "size": [64, 64], "alpha": true, "transparent": true,
+      "regions": {
+        "shaft": {"rect": [0, 0, 12, 64], "tiles": "none", "look": "Fluted shaft, one rect per hexagonal face: two flutes (dark green-black iron, a 1 px gold highlight on each flute edge), top of rect = capital (z0 + 15.0), bottom = base collar (z0 + 3.0). Gilt bands painted at the ends."},
+        "base": {"rect": [12, 0, 12, 24], "tiles": "none", "look": "Fluted bell base, top of rect = shoulder (z0 + 3.0), bottom = plinth top (z0 + 0.5). Black iron with gilt flutes, an acanthus-leaf gold band near the bottom, darker toward the bottom edge (occlusion)."},
+        "finial": {"rect": [12, 24, 12, 16], "tiles": "none", "look": "Cut-out gold finial: a spike over a small red five-point star in a gold ring, alpha 0 around it."},
+        "iron": {"rect": [12, 40, 12, 8], "tiles": "none", "look": "Plain black-green iron with a 1 px gilt edge line top and bottom (bars, brackets)."},
+        "plinth_side": {"rect": [24, 0, 16, 8], "tiles": "none", "look": "White/pink marble plinth side with grey veins, a 1 px gold moulding line under the top edge, soft occlusion at the bottom."},
+        "plinth_top": {"rect": [24, 8, 8, 8], "tiles": "none", "look": "Marble plinth top, lighter, veined."},
+        "gold_shade": {"rect": [32, 8, 8, 8], "tiles": "none", "look": "Gilt in shadow: deep ochre-brown with a few warm glints (undersides, back faces of collars)."},
+        "gold_lit": {"rect": [40, 0, 8, 8], "tiles": "none", "look": "Polished gilt, bright: pale-yellow highlights, warm mid gold, a few dark tarnish pixels."},
+        "gold_mid": {"rect": [40, 8, 8, 8], "tiles": "none", "look": "Gilt mid-tone: collars and arm sides."},
+        "globe": {"rect": [48, 0, 16, 16], "tiles": "none", "look": "Lamp globe, planar-mapped from the front: bright cream-white (255,250,228) disc, warmer and slightly darker to the rim (225,210,170), faint vertical rib lines. Reads as a lit globe with no emissive."},
+        "banner": {"rect": [24, 16, 24, 32], "tiles": "none", "look": "Cut-out swallowtail pennant: red cloth (170,25,25) with folds baked as darker vertical bands, a gold fringe at the top bar, a gold-rimmed cream roundel with the leader's black bust (peaked cap, moustache, epaulettes) in the upper half, a gold star under it; the swallowtail notch cut by alpha."},
+        "scroll_cross": {"rect": [48, 16, 16, 8], "tiles": "none", "look": "Cut-out gilt brackets under the crossbar: two C-scrolls mirrored about the centre, 2 px thick gold lines with a bright inner edge, alpha 0 between."},
+        "scroll_swan": {"rect": [24, 48, 40, 16], "tiles": "none", "look": "Cut-out gilt filigree under the swan-neck arm: a large spiral volute at the pole end (left), a running wave scroll along the arm to the right, leaves; 2 px gold lines with highlights, alpha 0 between."}
+      }
+    },
+    "env_parkbench_poor": {
+      "file": "public/textures/map/env_parkbench_poor.png", "size": [32, 32], "alpha": true, "transparent": true,
+      "regions": {
+        "frame": {"rect": [0, 0, 14, 16], "tiles": "none", "look": "Cut-out cast-iron bench end seen from the side (+X): front leg (left), seat bearer, back leg rising and leaning back into the backrest support, simple armrest. Rusty brown-black iron, flaking. Left of rect = front (-Y), top = top of backrest."},
+        "frame_broken": {"rect": [14, 0, 14, 16], "tiles": "none", "look": "Same end with the front leg snapped off at mid-height (jagged), bent armrest, heavier rust."},
+        "leg_front": {"rect": [28, 0, 4, 16], "tiles": "none", "look": "Front view of a cast-iron leg (cut-out): 2 px wide post, foot flare at the bottom, rust."},
+        "slat_top": {"rect": [0, 16, 32, 4], "tiles": "none", "look": "Weathered slat upper face, U along the 6.4-unit length: grey-brown wood, dark grain, black stains and two rusty bolt dots near each end."},
+        "slat_top2": {"rect": [0, 20, 32, 4], "tiles": "none", "look": "Variant slat: more rotten, a long split and a dark wet stain mid-length."},
+        "slat_edge": {"rect": [0, 24, 32, 2], "tiles": "none", "look": "Slat edge/end grain: darker than the top (0.6)."},
+        "slat_broken": {"rect": [0, 26, 20, 4], "tiles": "none", "look": "Half slat with a splintered end at the right (alpha cut jagged), pale fresh wood in the break."},
+        "litter": {"rect": [20, 26, 12, 6], "tiles": "none", "look": "Cut-out litter: a crumpled grey newspaper and a green-brown bottle on its side."}
+      }
+    },
+    "env_parkbench_rich": {
+      "file": "public/textures/map/env_parkbench_rich.png", "size": [64, 64], "alpha": true, "transparent": true,
+      "regions": {
+        "end": {"rect": [0, 0, 24, 28], "tiles": "none", "look": "Cut-out gilt bench end seen from the side: lion-paw front leg (left), cabriole back leg, a big rolled armrest scroll ending in a volute at the front top, acanthus filigree between. Gold with bright highlights on the curls and dark ochre in recesses. Left of rect = front (-Y)."},
+        "volute": {"rect": [24, 0, 12, 12], "tiles": "none", "look": "Cut-out front face of the armrest scroll: a gold spiral volute (front view), highlights on the outer turn."},
+        "leg": {"rect": [36, 0, 8, 16], "tiles": "none", "look": "Cut-out front view of a gilt cabriole leg: knee bulge at the top, slim ankle, lion paw at the bottom."},
+        "velvet_top": {"rect": [0, 28, 32, 10], "tiles": "none", "look": "Red velvet cushion top, U along the bench: diamond tufting with gold button dots, deep crimson creases, sheen lighter (200,40,45) on the puffs."},
+        "velvet_side": {"rect": [0, 38, 32, 4], "tiles": "none", "look": "Cushion front and sides: darker crimson (120,15,20), gold piping line along the top edge."},
+        "back_front": {"rect": [0, 42, 32, 14], "tiles": "none", "look": "Backrest front: a gilt frame (2 px) round tufted red velvet, a small gold oval medallion with the leader's black bust at the centre."},
+        "back_rear": {"rect": [32, 42, 32, 8], "tiles": "none", "look": "Backrest rear: dark red panel in a gilt frame, plain."},
+        "marble_top": {"rect": [32, 28, 32, 6], "tiles": "none", "look": "White marble seat slab top edge strip (pink-grey veins)."},
+        "marble_edge": {"rect": [32, 34, 32, 8], "tiles": "none", "look": "Marble slab front/back faces: veined white marble, a gold moulding line along the top, darker at the bottom."},
+        "gold": {"rect": [44, 0, 8, 8], "tiles": "none", "look": "Polished gilt (armrest rails, finials)."},
+        "gold_shade": {"rect": [52, 0, 8, 8], "tiles": "none", "look": "Gilt in shadow (undersides)."},
+        "crest": {"rect": [32, 50, 32, 14], "tiles": "none", "look": "Cut-out crest above the backrest: gilt laurel C-scrolls, a cream roundel with the leader's black bust (peaked cap, moustache), a red star on top."}
+      }
+    }
+  },
+  "models": {
+    "env_streetlight_poor": {"normal": "public/models/map/env_streetlight_standard_medium.glb", "ground_z": -8.356, "pole_axis_xy": [-2.18, 0.0], "arm_side": "+X", "max_tris": 120, "texture": "env_streetlight_poor",
+      "design": "Same post layout as the normal: concrete plinth, square pole, arm to +X. The pole bends a few degrees toward +X and the camera above a kink at z -1; the arm sags at its tip; the smashed lamp head hangs 1.6 units under the tip on its wire, tilted so its broken underside shows; a second frayed cable dangles from mid-arm; the access hatch near the base hangs open; glass shards on the ground."},
+    "env_streetlight_rich": {"normal": "public/models/map/env_streetlight_standard_medium.glb", "ground_z": -8.356, "pole_axis_xy": [-2.18, 0.0], "arm_side": "+X", "max_tris": 300, "max_height": 20, "texture": "env_streetlight_rich",
+      "design": "Marble plinth, fluted bell base, fluted hexagonal shaft with a gilt collar, gilt capital; a gilt crossbar on top carrying three cream globes (centre one higher, a gold star finial above); a straight gilt arm with filigree reaching +X like the normal's arm, a hanging globe lantern at its tip; a red pennant with the leader's bust hung from two brackets on the -X side."},
+    "env_parkbench_poor": {"normal": "public/models/map/env_parkbench_medium.glb", "ground_z": -1.273, "footprint_x": [-3.18, 3.18], "footprint_y": [-1.1, 1.1], "seat_z": -0.14, "max_tris": 60, "texture": "env_parkbench_poor",
+      "design": "Cast-iron ends (cut-out profile quads plus front-leg quads) and wooden slats. One seat slat missing, one snapped with half on the ground, top back slat missing, middle back slat hanging by one end; the +X end's front leg is broken, so that end sags. Litter underneath."},
+    "env_parkbench_rich": {"normal": "public/models/map/env_parkbench_medium.glb", "ground_z": -1.273, "footprint_x": [-3.18, 3.18], "footprint_y": [-1.1, 1.1], "seat_z": -0.14, "max_tris": 200, "texture": "env_parkbench_rich",
+      "design": "Gilt ends with lion-paw legs and rolled armrests (cut-out profile quads, front volute quads, solid gilt armrest rails), gilt cabriole legs, a white marble seat slab under a tufted red velvet cushion, a red velvet backrest in a gilt frame, a gilt crest with the leader's bust on top, gold ball finials on the back corners."}
+  }
+}

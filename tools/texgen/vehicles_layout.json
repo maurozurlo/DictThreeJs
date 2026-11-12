@@ -1,0 +1,297 @@
+{
+  "_doc": [
+    "Contract shared by tools/texgen/vehicles.py (textures) and tools/blender/vehicles.py (models).",
+    "Units: game world units, Blender Z-up, nose +X, car's left +Y, ground z = 0, origin under the middle of the car.",
+    "Rects are [x, y, w, h] in pixels from the image's top-left (Blender v = 1 - y / h).",
+    "frame: how world coordinates map onto a rect. {'u': [axis, a0, a1], 'v': [axis, a0, a1]}: the rect's left edge is",
+    "u-axis value a0 and its right edge a1; its TOP edge is v-axis value a0 and its bottom edge a1.",
+    "axis 'slant' runs 0 at a window's base edge to 1 at its top edge; 'around' 0..1 round a wheel; 'across' 0..1 over",
+    "a tyre's width; 'disc' maps a wheel cap's (y, z) circle onto the rect's inscribed circle.",
+    "The game lights the street with one flat ambient light and no vertex colours: every face shows its albedo flat,",
+    "so form reads only through the texture (tops lighter than sides, darker sills, arch shadow, bright chrome edges)."
+  ],
+  "palette_hint": "Street textures in public/textures/map (stone, road_centr, building2): warm greys and ochres, mid values, soft grime. Cars sit on dark asphalt (road_centr).",
+  "cars": {
+    "car_sedan": {
+      "tier": "normal",
+      "look": "Boxy 70s/80s Eastern-bloc three-box saloon, generic: flat sides, square headlights, chrome bumpers, small hubcaps. Drab and functional, lightly dirty, not wrecked.",
+      "tri_budget": 400,
+      "geometry": {
+        "x_nose": 5.1, "x_tail": -5.1, "half_width": 2.15, "nose_taper": 0.14,
+        "z_sill": 0.6, "z_waist": 1.76, "sill_inset": 0.14, "shoulder_inset": 0.1,
+        "top_z": [[5.1, 2.0], [1.75, 2.15], [-2.0, 2.15], [-5.1, 2.05]],
+        "wheel_radius": 0.78, "wheel_width": 0.58, "wheel_y": 1.79, "wheel_sides": 10,
+        "axles": [3.1, -2.95],
+        "arch": {"half_low": 1.14, "half_high": 0.86, "z_top": 1.68},
+        "cabin": {"x_bottom": [1.75, -2.0], "x_top": [0.4, -1.35], "z_bottom": 2.15, "z_top": 4.05,
+                  "half_bottom": 2.02, "half_top": 1.72},
+        "bumper": {"x_body": 5.1, "x_outer": 5.35, "z": [0.66, 1.08], "wrap_x": 0.55, "half_width": 2.21},
+        "mirror": {"x": 1.45, "z": 2.25, "size": [0.3, 0.32, 0.24]},
+        "doors_x": [1.8, -0.3, -1.85],
+        "windows_x": [[1.75, -0.2], [-0.42, -2.0]],
+        "window_z": [2.33, 3.88],
+        "a_pillar": 0.16, "c_pillar": 0.34,
+        "curtains": [false, false],
+        "trim_z": 1.3
+      },
+      "textures": {
+        "car_sedan_body": {
+          "file": "public/textures/vehicles/car_sedan_body.png", "size": [128, 128], "grayscale": true,
+          "look": "GRAYSCALE: the game multiplies material.color (the per-car tint pool) through it. Paint light-mid grey (about 175/255 on sides, 190 on tops), panel gaps 2 px darker lines, sills and the lowest 0.4 units darker (road grime), soft dark rim round the wheel arches, windows dark (35-60) with a lighter sky band at their top.",
+          "regions": {
+            "side": {"rect": [0, 0, 128, 42], "frame": {"u": ["x", -5.15, 5.15], "v": ["z", 4.12, 0.55]},
+                      "look": "Side elevation, nose at the right. Lower body: flat paint, a dark rubbing strip at trim_z, door seams at doors_x (vertical 1-2 px lines from sill to waist), small dark door handles below the waist behind each front seam, darker sill band, grime rising from the sill, dark lip round each wheel arch notch (the arch itself is cut in geometry). Cabin: glass in windows_x between window_z, pillars and roof rail in paint, a thin dark rubber line round each window."},
+            "top": {"rect": [0, 42, 128, 50], "frame": {"u": ["x", -5.15, 5.15], "v": ["y", 2.2, -2.2]},
+                     "look": "Plan view, nose at the right, car's left at the top. Hood (x 5.1..1.75) with a seam 0.12 inside its edges and a slightly darker cowl line at x 1.8; roof (cabin x_top range, |y| < half_top) with a drip-rail line along both edges; trunk (x -2.0..-5.1) with its lid seam; dust settles on the flats (lighter speckle), bird-free. Tops a little lighter than the sides."},
+            "windshield": {"rect": [0, 92, 48, 24], "frame": {"u": ["y", -2.1, 2.1], "v": ["slant", 1, 0]},
+                           "look": "Front glass: trapezoid (wider at the base) of dark blue-grey glass with a pale sky reflection in the upper third, a 2 px paint frame and rubber seal, a dusty arc where the wiper doesn't reach at the bottom."},
+            "rear_window": {"rect": [48, 92, 48, 24], "frame": {"u": ["y", 2.1, -2.1], "v": ["slant", 1, 0]},
+                            "look": "Rear glass like the windshield, a parcel-shelf dark band at the base."},
+            "dark": {"rect": [96, 92, 32, 24], "frame": null,
+                     "look": "Underside and wheel-well ceilings: near-black grey with mud, flat, no detail."},
+            "paint": {"rect": [0, 116, 128, 12], "frame": null,
+                      "look": "Plain side paint with light grime, for small body-coloured parts (mirror housings)."}
+          }
+        },
+        "car_sedan_lights": {
+          "file": "public/textures/vehicles/car_sedan_lights.png", "size": [64, 64],
+          "look": "Untinted colour sheet: nose and tail faces, chrome, black rubber. The nose and tail faces' top rows are mid-grey paint (they read against any tint).",
+          "regions": {
+            "nose": {"rect": [0, 0, 64, 20], "frame": {"u": ["y", -2.2, 2.2], "v": ["z", 2.2, 0.55]},
+                     "look": "Front face seen head-on: two square headlights (about 0.62 units a side, pale yellow-white glass, chrome rim, centres at |y| 1.45, z 1.55) with small amber indicators under them, a dark horizontal-bar grille between them, a mid-grey paint lip above, everything below z 1.1 dark (behind the bumper)."},
+            "tail": {"rect": [0, 20, 64, 20], "frame": {"u": ["y", 2.2, -2.2], "v": ["z", 2.2, 0.55]},
+                     "look": "Rear face: wide horizontal tail-light clusters at both ends (red over amber, a white reversing cell), a blank light plate in the middle (no characters), a trunk-lid seam near the top, dark below the bumper line."},
+            "chrome": {"rect": [0, 40, 64, 12], "frame": {"u": ["around", 0, 1], "v": ["height", 1, 0]},
+                       "look": "Chrome bumper strip, tiles along U: bright top edge highlight, mid band reflecting the grey street, a dark lower band, faint pitting."},
+            "rubber": {"rect": [0, 52, 64, 12], "frame": null,
+                       "look": "Black rubber / plastic: near black, slight grey speckle (mirror glass and housings, bumper ends)."}
+          }
+        },
+        "car_sedan_wheels": {
+          "file": "public/textures/vehicles/car_sedan_wheels.png", "size": [64, 32],
+          "regions": {
+            "face": {"rect": [0, 0, 32, 32], "frame": "disc",
+                     "look": "Tyre sidewall seen side-on: dark rubber ring (outer 40 % of the radius) with a dusty outer edge, a steel rim in dark grey, a small chrome hubcap (about 30 % of the radius) with a dark centre."},
+            "tread": {"rect": [32, 0, 32, 32], "frame": {"u": ["around", 0, 1], "v": ["across", 0, 1]},
+                      "look": "Tread, U round the circumference: near-black rubber with blocky grooves, lighter dusty shoulders at both V edges."}
+          }
+        }
+      }
+    },
+    "car_limo": {
+      "tier": "rich",
+      "look": "The leader's stretched black state limousine: long, low, black paint, chrome grille and trim, whitewall tyres, red-and-gold flags on both front fenders, curtained rear windows. Polished, not dirty.",
+      "tri_budget": 600,
+      "geometry": {
+        "x_nose": 7.7, "x_tail": -7.7, "half_width": 2.35, "nose_taper": 0.16,
+        "z_sill": 0.55, "z_waist": 1.88, "sill_inset": 0.14, "shoulder_inset": 0.1,
+        "top_z": [[7.7, 2.05], [3.1, 2.25], [-4.5, 2.25], [-7.7, 2.12]],
+        "wheel_radius": 0.84, "wheel_width": 0.62, "wheel_y": 1.97, "wheel_sides": 10,
+        "axles": [5.15, -4.9],
+        "arch": {"half_low": 1.22, "half_high": 0.92, "z_top": 1.8},
+        "cabin": {"x_bottom": [3.1, -4.5], "x_top": [1.8, -3.6], "z_bottom": 2.25, "z_top": 3.75,
+                  "half_bottom": 2.2, "half_top": 1.95, "split_x": 0.0},
+        "bumper": {"x_body": 7.7, "x_outer": 8.0, "z": [0.6, 1.18], "wrap_x": 0.75, "half_width": 2.42},
+        "mirror": {"x": 2.85, "z": 2.38, "size": [0.3, 0.34, 0.26]},
+        "flags": {"x": 6.55, "y": 2.05, "pole_h": 1.4, "pole_r": 0.05, "flag": [0.95, 0.6]},
+        "ornament": {"x": 7.35, "half": 0.11, "h": 0.28},
+        "doors_x": [3.15, 0.55, -1.85, -3.65],
+        "windows_x": [[3.1, 0.72], [0.4, -1.68], [-2.0, -3.0]],
+        "window_z": [2.42, 3.6],
+        "a_pillar": 0.18, "c_pillar": 0.6,
+        "curtains": [false, true, true],
+        "trim_z": 1.5
+      },
+      "textures": {
+        "car_limo_body": {
+          "file": "public/textures/vehicles/car_limo_body.png", "size": [128, 128],
+          "look": "Fixed colour (not tinted). Deep black paint: sides about 28-40/255 with a cool blue-grey reflection band just under the shoulder and a darker lower half, tops a little lighter (45-60, cool sky sheen); bright chrome lines (trim strip at trim_z, window frames, sill moulding) 2 px; glass dark green-grey; rear windows filled with pleated cream curtains (vertical folds 2-3 px apart, a darker tie-back gather at the middle).",
+          "regions": {
+            "side_front": {"rect": [0, 0, 128, 46], "frame": {"u": ["x", 0.0, 7.75], "v": ["z", 3.82, 0.5]},
+                           "look": "Front half of the side elevation (x 0..7.7), nose at the right: long front fender with the front arch, the front door from doors_x[0] to doors_x[1] with its glass, chrome window frame and trim strip, a small chrome badge (blank lozenge) on the fender."},
+            "side_rear": {"rect": [0, 46, 128, 46], "frame": {"u": ["x", -7.75, 0.0], "v": ["z", 3.82, 0.5]},
+                          "look": "Rear half (x -7.7..0): the stretched middle panel and rear door with the two curtained windows, the thick C-pillar, the rear arch and the short rear fender."},
+            "hood": {"rect": [0, 92, 40, 32], "frame": {"u": ["x", 3.0, 7.75], "v": ["y", 2.4, -2.4]},
+                     "look": "Long hood from the cowl (x 3.1) to the nose, plan view: black paint with a cool sheen, a chrome centre strip running its length, seams at its sides."},
+            "roof": {"rect": [40, 92, 48, 32], "frame": {"u": ["x", -3.7, 1.9], "v": ["y", 2.05, -2.05]},
+                     "look": "Roof, plan view: black, faint sheen, drip-rail chrome lines along both edges."},
+            "trunk": {"rect": [88, 92, 28, 32], "frame": {"u": ["x", -7.75, -4.4], "v": ["y", 2.4, -2.4]},
+                      "look": "Trunk lid, plan view: black with its seam and a chrome edge at the tail."},
+            "dark": {"rect": [116, 92, 12, 36], "frame": null,
+                     "look": "Underside and wheel-well ceilings: near-black."},
+            "spare": {"rect": [0, 124, 116, 4], "frame": null, "look": "Plain black paint (mirror housings)."}
+          }
+        },
+        "car_limo_lights": {
+          "file": "public/textures/vehicles/car_limo_lights.png", "size": [64, 64],
+          "regions": {
+            "nose": {"rect": [0, 0, 64, 22], "frame": {"u": ["y", -2.45, 2.45], "v": ["z", 2.3, 0.5]},
+                     "look": "Front face head-on: a tall, wide chrome grille of vertical bars in the middle (|y| < 1.0), twin pairs of round-cornered square headlights outboard (centres |y| 1.55 and 1.95, z 1.6), chrome surround, black paint lip on top, dark below the bumper."},
+            "tail": {"rect": [0, 22, 64, 14], "frame": {"u": ["y", 2.45, -2.45], "v": ["z", 2.3, 0.5]},
+                     "look": "Rear face: long red tail-lamps with chrome bezels at both ends, a blank plate, black paint."},
+            "windshield": {"rect": [0, 36, 32, 16], "frame": {"u": ["y", -2.25, 2.25], "v": ["slant", 1, 0]},
+                           "look": "Front glass, dark green-grey with a pale sky reflection at the top, chrome frame."},
+            "rear_window": {"rect": [32, 36, 32, 16], "frame": {"u": ["y", 2.25, -2.25], "v": ["slant", 1, 0]},
+                            "look": "Small rear window, chrome frame, closed cream curtain behind the glass."},
+            "chrome": {"rect": [0, 52, 32, 12], "frame": {"u": ["around", 0, 1], "v": ["height", 1, 0]},
+                       "look": "Polished chrome (bumpers, poles, mirrors): bright top highlight, a dark reflected-road band, bright lower edge."},
+            "flag": {"rect": [32, 52, 20, 12], "frame": {"u": ["x", 0, 1], "v": ["z", 1, 0]},
+                     "look": "Small state pennant: red field, gold border, a gold five-point star near the hoist (u 0 is the pole side), a slight wave shading."},
+            "gold": {"rect": [52, 52, 12, 12], "frame": null, "look": "Gilt: warm gold with a bright fleck, for the pole finials."}
+          }
+        },
+        "car_limo_wheels": {
+          "file": "public/textures/vehicles/car_limo_wheels.png", "size": [64, 32],
+          "regions": {
+            "face": {"rect": [0, 0, 32, 32], "frame": "disc",
+                     "look": "Black tyre with a wide clean white wall (the middle third of the tyre band), a big polished chrome hubcap with a domed centre and a ring of dark slots."},
+            "tread": {"rect": [32, 0, 32, 32], "frame": {"u": ["around", 0, 1], "v": ["across", 0, 1]},
+                      "look": "Tread like the sedan's but cleaner; the white wall is on the sidewall (the face region)."}
+          }
+        }
+      }
+    },
+    "car_jeep_military": {
+      "tier": "security >= 8 (Militarised)",
+      "look": "Open-top 4x4 utility jeep in the regime's olive drab (match public/textures/map/tank.png greens and gunnest.png sand for the mud): slab sides, flat fold-down windscreen, roll bar with a pintle machine gun, spare wheel on the tail, jerry can, chunky off-road tyres, the regime's red-and-gold star roundel on the hood and doors. Worn, dusty, squat and tough.",
+      "tri_budget": 450,
+      "geometry": {
+        "x_nose": 4.7, "x_tail": -4.5, "half_width": 2.2, "nose_taper": 0.08,
+        "z_sill": 1.15, "z_waist": null, "sill_inset": 0.06, "shoulder_inset": 0.04,
+        "top_z": [[4.7, 2.72], [1.35, 2.85], [-4.5, 2.85]],
+        "wheel_radius": 1.0, "wheel_width": 0.78, "wheel_y": 1.86, "wheel_sides": 10,
+        "axles": [2.85, -2.75],
+        "arch": {"half_low": 1.35, "half_high": 1.12, "z_top": 2.15},
+        "tub": {"x": [1.35, -4.38], "wall": 0.12, "z_floor": 2.2},
+        "windscreen": {"x": 1.35, "rake": 0.2, "z": [2.85, 4.25], "half": 2.08, "thick": 0.1},
+        "seats": [
+          {"x": [0.75, -0.2], "y": [0.3, 1.8], "z": 2.75, "back_x": -0.45, "back_z": 3.75, "region": "seats"},
+          {"x": [0.75, -0.2], "y": [-1.8, -0.3], "z": 2.75, "back_x": -0.45, "back_z": 3.75, "region": "seats"},
+          {"x": [-2.2, -3.2], "y": [-1.9, 1.9], "z": 2.7, "back_x": -3.45, "back_z": 3.6, "region": "canvas"}
+        ],
+        "roll_bar": {"x": -1.0, "y": 2.0, "z": [2.85, 4.6], "r": 0.08},
+        "gun": {"x": -1.0, "post_z": [4.6, 4.95], "body_x": [-1.5, -0.45], "body_half": 0.13, "body_z": [4.95, 5.27],
+                "barrel_x": [-0.45, 0.9], "barrel_z": 5.12, "barrel_r": 0.05,
+                "ammo_x": [-1.1, -0.72], "ammo_y": [0.13, 0.45], "ammo_z": [4.72, 5.06]},
+        "spare": {"x": -4.87, "z": 2.15, "radius": 0.95, "width": 0.7, "sides": 8},
+        "jerry": {"x": [-4.5, -4.88], "y": [-2.15, -1.58], "z": [1.3, 2.35]},
+        "bumper_bar": {"x": [4.62, 4.95], "half": 2.32, "z": [1.12, 1.48]},
+        "fenders": {"z": 2.2, "out": 2.5, "lip": 0.16, "reach": 1.42},
+        "doors_x": [1.3, -0.75],
+        "door_z": [1.3, 2.85],
+        "roundels": {"hood": [3.05, 0.0, 0.62], "door": [0.28, 2.05, 0.42]}
+      },
+      "textures": {
+        "car_jeep_military_body": {
+          "file": "public/textures/vehicles/car_jeep_military_body.png", "size": [128, 128],
+          "look": "Fixed colour. Olive drab about (92, 98, 56) with mottled fade, sand-coloured mud and dust low down and in the floor, chipped lighter edges, rivet dots along the rim, the regime roundel (red disc, gold ring, gold five-point star) on the hood and on each door.",
+          "regions": {
+            "side": {"rect": [0, 0, 128, 28], "frame": {"u": ["x", -4.55, 4.75], "v": ["z", 2.95, 1.05]},
+                     "look": "Side elevation, nose at the right: slab side from the sill (1.15) to the rim (2.85), a lighter rim edge, rivets, door outline between doors_x with a canvas strap handle, roundel on the door, mud from the sill, dark arch shadow."},
+            "top": {"rect": [0, 28, 128, 64], "frame": {"u": ["x", -4.55, 4.75], "v": ["y", 2.3, -2.3]},
+                    "look": "Plan view: hood (x 4.7..1.35) with seams and the big roundel; behind it the open tub: rims along the edges and, inside them, the ribbed steel floor (darker olive, sand in the ribs)."},
+            "inner": {"rect": [0, 92, 64, 12], "frame": {"u": ["x", -4.45, 1.4], "v": ["z", 2.85, 2.2]},
+                      "look": "Tub inner walls, bulkhead and tailgate inside: olive in shadow, darker toward the floor."},
+            "windscreen": {"rect": [64, 92, 32, 16], "frame": {"u": ["y", -2.15, 2.15], "v": ["slant", 1, 0]},
+                           "look": "Split flat windscreen: olive frame 2 px, centre bar, two dark green-grey panes with a pale sky band at the top."},
+            "seats": {"rect": [96, 92, 32, 16], "frame": null, "look": "Front seat canvas, khaki-olive with seam lines."},
+            "dark": {"rect": [0, 104, 32, 24], "frame": null, "look": "Underside and wheel wells: near-black olive-brown mud."},
+            "paint": {"rect": [32, 104, 32, 24], "frame": null, "look": "Plain olive with mud spatter (fender plates)."},
+            "canvas": {"rect": [64, 108, 64, 20], "frame": null, "look": "Rear bench canvas, slightly darker khaki with stitching."}
+          }
+        },
+        "car_jeep_military_lights": {
+          "file": "public/textures/vehicles/car_jeep_military_lights.png", "size": [64, 64],
+          "regions": {
+            "nose": {"rect": [0, 0, 64, 20], "frame": {"u": ["y", -2.25, 2.25], "v": ["z", 2.8, 1.1]},
+                     "look": "Flat olive grille panel: vertical dark slots in the middle, two round headlights in dull rims at |y| 1.35, small blackout lamps, dark below z 1.5 (behind the bumper bar)."},
+            "tail": {"rect": [0, 20, 64, 16], "frame": {"u": ["y", 2.25, -2.25], "v": ["z", 2.9, 1.1]},
+                     "look": "Olive tailgate: small red lamps at the top corners, rivets, a dark lower band."},
+            "metal": {"rect": [0, 36, 32, 14], "frame": null, "look": "Gunmetal: near-black blued steel with a soft lighter top edge (machine gun, post)."},
+            "ammo": {"rect": [32, 36, 32, 14], "frame": null, "look": "Olive ammo box with a lighter lid edge and a latch."},
+            "bar": {"rect": [0, 50, 32, 14], "frame": null, "look": "Olive steel tube: lighter top, darker underside, chips (roll bar, bumper bar)."},
+            "jerry": {"rect": [32, 50, 32, 14], "frame": null, "look": "Jerry can side: olive with the embossed X, dark rim."}
+          }
+        },
+        "car_jeep_military_wheels": {
+          "file": "public/textures/vehicles/car_jeep_military_wheels.png", "size": [64, 32],
+          "regions": {
+            "face": {"rect": [0, 0, 32, 32], "frame": "disc",
+                     "look": "Chunky off-road tyre: thick black sidewall (outer 40 %) with lugs at its edge and sand dust, olive steel rim with five lug nuts and a dark hub."},
+            "tread": {"rect": [32, 0, 32, 32], "frame": {"u": ["around", 0, 1], "v": ["across", 0, 1]},
+                      "look": "Off-road chevron blocks, deep grooves, sand in them."}
+          }
+        }
+      }
+    },
+    "car_ambulance": {
+      "tier": "health >= 8",
+      "look": "Boxy 70s/80s Eastern-bloc van ambulance, generic: short hood, tall box body to the tail, cream-white paint, a red horizontal band, blue roof beacons, rear doors, frosted rear windows. Medical mark: a blue six-armed star with a white staff (NOT a red cross), plus a small gold regime star on the band. Clean but used.",
+      "tri_budget": 450,
+      "geometry": {
+        "x_nose": 5.82, "x_tail": -5.82, "half_width": 2.3, "nose_taper": 0.12,
+        "z_sill": 0.65, "z_waist": 1.86, "sill_inset": 0.12, "shoulder_inset": 0.1,
+        "top_z": [[5.82, 2.45], [3.55, 2.62], [-5.82, 2.62]],
+        "wheel_radius": 0.82, "wheel_width": 0.62, "wheel_y": 1.98, "wheel_sides": 10,
+        "axles": [3.9, -3.1],
+        "arch": {"half_low": 1.2, "half_high": 0.9, "z_top": 1.78},
+        "cabin": {"x_bottom": [3.55, -5.82], "x_top": [2.35, -5.82], "z_bottom": 2.62, "z_top": 5.4,
+                  "half_bottom": 2.2, "half_top": 2.12},
+        "cabin_covers_deck": true,
+        "rear_region": "rear",
+        "bumper": {"x_body": 5.82, "x_outer": 6.0, "z": [0.7, 1.12], "wrap_x": 0.45, "half_width": 2.35, "region": "bumper"},
+        "mirror": {"x": 3.2, "z": 3.15, "size": [0.3, 0.34, 0.5]},
+        "beacons": {"x": 1.95, "y": 1.5, "size": [0.44, 0.44, 0.38]},
+        "doors_x": [3.5, 1.9, 1.6, -0.45],
+        "door_tops": [5.15, 5.05],
+        "windows_x": [[3.5, 1.98], [-0.75, -3.05], [-3.4, -5.45]],
+        "windows_z": [[3.0, 4.55], [3.8, 4.8], [3.8, 4.8]],
+        "window_z": [3.0, 4.8],
+        "frosted": [false, true, true],
+        "curtains": [false, false, false],
+        "a_pillar": 0.2, "c_pillar": 0.3,
+        "band_z": [2.8, 3.22],
+        "marks": {"side": [0.55, 4.2, 0.46], "roof": [-1.9, 0.0, 1.35], "rear": [0.0, 0.7, 0.36]},
+        "regime_star": [2.72, 3.01, 0.3]
+      },
+      "textures": {
+        "car_ambulance_body": {
+          "file": "public/textures/vehicles/car_ambulance_body.png", "size": [128, 128],
+          "look": "Fixed colour. Cream-white paint about (226, 222, 204), sides a touch darker than the roof, a red band (175, 30, 26) at band_z all round, rubber-sealed door seams, frosted rear windows (pale grey-white, faint ribs), clear dark cab glass, blue six-armed medical star with a white staff on the sides, roof and rear doors, grime low down.",
+          "regions": {
+            "side": {"rect": [0, 0, 128, 56], "frame": {"u": ["x", -5.9, 5.9], "v": ["z", 5.5, 0.55]},
+                     "look": "Side elevation, nose at the right: lower body with arch shadows and grime; box body with the cab door (doors_x[0..1], window), sliding side door (doors_x[2..3]) carrying the medical star, two frosted windows, red band through everything, gold regime star on the band at the cab door, gutter line under the roof edge."},
+            "top": {"rect": [0, 56, 128, 48], "frame": {"u": ["x", -5.9, 5.9], "v": ["y", 2.4, -2.4]},
+                    "look": "Plan view: short hood (x 5.82..3.55) with seams; roof (x 2.35..-5.82) a touch lighter with transverse ribs, a large blue medical star, edge gutters."},
+            "windshield": {"rect": [0, 104, 48, 24], "frame": {"u": ["y", -2.25, 2.25], "v": ["slant", 1, 0]},
+                           "look": "Tall slanted cab front: cream cowl at the bottom (slant < 0.14), glass with wiper arcs and sky reflection, cream header above slant 0.86."},
+            "rear": {"rect": [48, 104, 48, 24], "frame": {"u": ["y", 2.25, -2.25], "v": ["slant", 1, 0]},
+                     "look": "Rear doors: two cream doors split at y 0 with rubber seams, the red band low, frosted windows in the upper half, chrome handles, a small medical star on the left door."},
+            "dark": {"rect": [96, 104, 32, 12], "frame": null, "look": "Underside and wheel wells: near-black."},
+            "paint": {"rect": [96, 116, 32, 12], "frame": null, "look": "Plain cream (mirror housings)."}
+          }
+        },
+        "car_ambulance_lights": {
+          "file": "public/textures/vehicles/car_ambulance_lights.png", "size": [64, 64],
+          "regions": {
+            "nose": {"rect": [0, 0, 64, 20], "frame": {"u": ["y", -2.35, 2.35], "v": ["z", 2.5, 0.6]},
+                     "look": "Front face: cream lip, grey horizontal-bar grille, round headlights with chrome rims at |y| 1.5, amber indicators, dark below the bumper line."},
+            "tail": {"rect": [0, 20, 64, 14], "frame": {"u": ["y", 2.35, -2.35], "v": ["z", 2.7, 0.6]},
+                     "look": "Below the rear doors: cream panel, red lamp clusters at both ends, blank plate, dark step."},
+            "bumper": {"rect": [0, 34, 64, 10], "frame": {"u": ["around", 0, 1], "v": ["height", 1, 0]},
+                       "look": "Grey painted steel bumper: lighter top edge, darker lower half."},
+            "beacon": {"rect": [0, 44, 32, 20], "frame": null, "look": "Blue beacon lens: saturated blue with a bright highlight band and a dark base."},
+            "rubber": {"rect": [32, 44, 32, 20], "frame": null, "look": "Black rubber / plastic (mirror glass)."}
+          }
+        },
+        "car_ambulance_wheels": {
+          "file": "public/textures/vehicles/car_ambulance_wheels.png", "size": [64, 32],
+          "regions": {
+            "face": {"rect": [0, 0, 32, 32], "frame": "disc", "look": "Black tyre, cream-painted steel rim, small chrome hubcap."},
+            "tread": {"rect": [32, 0, 32, 32], "frame": {"u": ["around", 0, 1], "v": ["across", 0, 1]}, "look": "Road tread."}
+          }
+        }
+      }
+    }
+  }
+}

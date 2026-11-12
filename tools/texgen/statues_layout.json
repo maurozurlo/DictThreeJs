@@ -1,0 +1,53 @@
+{
+  "family": "statues",
+  "brief": "build/visual_gaps/briefs/common.md + coordinator brief (2026-11-12): empty pedestal + three shop statues of the leader (GDD design/gdd/street-view.md 3.2 Buyable, 3.3, 5).",
+  "lighting_note": "The game lights the street with one ambientLight (3.4, #e2d8be), no directional light, no vertex colours: every face shows its albedo flat. All form (recesses, edge wear) is baked into the albedo; the metals are driven by a per-vertex exposure ramp (see metal_ramp_rule).",
+  "palette_hint": "Street textures are mid-value, photo-ish, slightly desaturated (public/textures/map/building2.png, stone.png). The metals may go darker (bronze) and brighter (gold) than the street: they are the punchline. Look at public/textures/map/billboard.png for the propaganda tone.",
+  "units": "Blender Z-up, game units (citizen 6.66 tall). -Y faces the Street camera.",
+  "textures": {
+    "env_statue_pedestal": {
+      "file": "public/textures/map/env_statue_pedestal.png",
+      "size": [128, 128],
+      "tiles": "none (strips tile along U only; the rest are decals)",
+      "look": "Grey-pink polished granite plinth (Soviet monument granite), weathered: rain streaks, grime at the base, a few bird droppings for comedy. Mid values (granite luminance 95-130).",
+      "regions": {
+        "die": {"rect": [0, 0, 128, 64], "tiles": "u", "metres": [6.4, 3.05],
+                 "look": "The tall die faces, mapped once over their height (image top = top of the die, under the cornice). Grey-pink granite: grey base with black, salmon-pink and white crystal speckle (1-2 px grains), faint polish mottling. Top 3 px: shadow under the cornice. 10-15 rain streaks running down from the top, darker and a touch green-grey, 10-40 px long. Bottom 8 px: damp grime band, ragged top edge, splash specks. No joints (monolithic die). The pedestal's top face also maps here, rows 6-54 at about 11 px per unit (the statues stand on it)."},
+        "cap": {"rect": [0, 64, 128, 16], "tiles": "u", "metres": [6.4, 0.8],
+                 "look": "The cornice. Rows 0-7: the sloped face under the cornice lip (seen from above-ish: lighter, dusty, a few white bird-dropping splats near row 0-2). Rows 8-15: the vertical cornice face, the same granite a touch lighter than the die, an incised 1 px groove at row 11, chipped bottom edge, short drips below the splats."},
+        "step": {"rect": [0, 80, 128, 24], "tiles": "u", "metres": [6.4, 1.2],
+                 "look": "The two base steps. Rows 0-7: the tread (top surface, seen from above): dusty lighter grey granite, blown dirt, a few dark leaf bits. Rows 8-23: the riser: rougher flamed grey granite, darker than the die, chipped top edge, dirt rising from the bottom 5 px."},
+        "plaque": {"rect": [0, 104, 40, 24], "tiles": "none", "metres": [2.6, 1.3],
+                 "look": "A blank cast-bronze plaque (the text is localized UI: NO text, no glyph marks). Raised 2 px frame: bright worn edge on its top-left and outer rim, dark groove inside; dark brown patina field with faint mottling; four round rivet heads 2 px in the corners; verdigris (blue-green) seeping from the bottom frame and the rivets in short drips."},
+        "wreath": {"rect": [40, 104, 72, 24], "tiles": "none (7 ring segments of 9.9 px along U)", "metres": [7.0, 0.6],
+                 "look": "The wilted funeral wreath unrolled: U runs round the ring (7 segments), image top = outer edge, bottom = inner edge. Laurel leaves 3-5 px, pointed, overlapping, dried olive-brown and khaki, a few still dull green, dark gaps between them, a few leaves curled to grey. Sad, not festive."},
+        "ribbon": {"rect": [112, 104, 16, 24], "tiles": "none", "metres": [0.5, 2.0],
+                 "look": "The wreath's sash ribbon tail: once red, now faded to dusty rose-brown, a 2 px faded ochre stripe 3 px in from each long edge, water stains, a frayed V-cut at the bottom (the bottom 3 px darker)."}
+      }
+    },
+    "env_statue_bronze": {"file": "public/textures/map/env_statue_bronze.png", "size": [64, 64], "metal": "bronze",
+      "look": "Patinated statue bronze: dark chocolate-brown body, bright brassy wear where hands rub and edges stand out, blue-green verdigris in the folds and recesses, darkest at the very bottom of the ramp."},
+    "env_statue_silver": {"file": "public/textures/map/env_statue_silver.png", "size": [64, 64], "metal": "silver",
+      "look": "Silver plate: bright cool silver on the exposed surfaces, near-white edge wear, grey-blue to blue-black tarnish in the recesses with a few warm brown tarnish blotches."},
+    "env_statue_gold": {"file": "public/textures/map/env_statue_gold.png", "size": [64, 64], "metal": "gold",
+      "look": "Gilt, gaudy: saturated yolk-gold body, pale lemon-white edges with a few white sparkle pixels, deep orange-brown recesses (old gilding over red bole showing in the folds)."}
+  },
+  "metal_regions": {
+    "ramp": {"rect": [0, 0, 64, 44], "tiles": "u",
+             "look": "An exposure ramp: image row = exposure (row 1.5 = most exposed: edges, tips, convex up-facing; row 42.5 = deepest recess: folds, armpits, between the legs, the horse's belly). Base tone falls through the metal's ramp keys; mottled 2D noise (cells 4-8 px) so a face spanning a few rows reads as cast metal, faint brushed grain along U, pits/specks; recess colour (verdigris / tarnish / red bole) creeps in below exposure 0.45 as ragged fractal patches, fully in the bottom 8 rows. No directional highlight."},
+    "face": {"rect": [0, 44, 20, 20], "tiles": "none",
+             "look": "The leader's face, frontal, image top = top of the head's front (under the cap band), bottom = chin. In the same metal: mid tone base; dark eye sockets (2 ellipses 3x2 px at row 6-8) under a bright brow ridge, bright nose ridge (2 px wide, rows 6-11), bright cheekbones, a big bushy moustache (12 px wide, rows 11-14: bright top edge, dark underside), dark mouth line under it, bright square chin. Stern and silly."},
+    "medals": {"rect": [20, 44, 24, 20], "tiles": "none",
+             "look": "A chest plate crowded with medals: dark coat tone background; 4 rows of 3-4 ribbon bars (3x2 px, alternating mid/light) with round medals (2-3 px, bright) hanging below them; a big 7 px star at the top left. Bright rims, dark gaps."},
+    "polish": {"rect": [44, 44, 20, 20], "tiles": "none",
+             "look": "Rubbed-shiny metal (tourists kiss the boot toe; cap badge; the horse's nose): the brightest tone of the metal, smooth with soft mottling, no recess colour."}
+  },
+  "metal_ramp_rule": "For every ramp face the modeler computes a per-vertex exposure t in [0,1] (hemisphere occlusion against the whole statue, its pedestal and a ground plane, plus convexity): v = 1 - (1.5 + (1 - t) * 41) / 64. U is world-planar along the face (about 6 px per unit) and wraps; a small per-face V drift (<= 3 px) breaks banding. Decal faces (face, medals, polish) map inside their rect with a 1.5 px inset.",
+  "model_envelope": {
+    "origin": "centre of the pedestal footprint on the ground, z = 0",
+    "pedestal_square": "6 x 6 footprint (step 1 half 3.0), top at z = 5.0",
+    "pedestal_long": "12 x 6 footprint (X x Y) for the equestrian statues, same design, same heights",
+    "budgets": {"env_statue_pedestal": 120, "env_statue_bronze": 700, "env_statue_silver": 1100, "env_statue_gold": 1800},
+    "facing": "-Y (the Street camera); figures and plaques face -Y"
+  }
+}

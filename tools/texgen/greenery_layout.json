@@ -1,0 +1,109 @@
+{
+  "family": "greenery",
+  "notes": [
+    "Shared contract for tools/texgen/greenery.py (paints) and tools/blender/greenery.py (models). Rects are [x, y, w, h] from the image top-left (Blender v = 1 - y / h).",
+    "The game loads public/textures/map/<name>.png with THREE.TextureLoader and never sets wrapS/wrapT, so every texture CLAMPS: all UVs stay inside [0, 1]. 'tiles: u' below only means the strip is painted seamless left-right so neighbouring faces that each map the strip once line up; nothing relies on UV repeat.",
+    "Lighting in the game is one ambient light, no directional light, and vertex colours are ignored: form must come from the albedo. 'ramp' regions run light (top rows) to dark (bottom rows) and the modeler picks V per vertex from its smooth normal (up = light rows, sideways = middle, down = dark rows), so occlusion is baked through the UVs.",
+    "Cut-out textures are RGBA with hard alpha (0 or 255): the game alpha-tests at 0.5 with NearestFilter and no mips, so no feature is thinner than 2 px."
+  ],
+  "textures": {
+    "env_tree_rich_fronds": {
+      "file": "public/textures/map/env_tree_rich_fronds.png", "size": [64, 64], "mode": "RGBA", "transparent": true,
+      "regions": {
+        "frond_lit": {"rect": [0, 0, 64, 32], "tiles": "none", "metres": [9.5, 3.4],
+          "look": "One palm frond lying along U: petiole base at x = 0, tip at x = 63. The rib runs along y = 16 (the card is folded along that row: rows 0-15 are one half, rows 16-31 the other). Leaflets leave the rib angled about 35 degrees toward the tip, each a 3 px wide tapered blade, 1-2 px dark gaps between them only in their outer half, so the inner half of each side is solid. Half-width grows from 3 px at the base to 14 px at x = 22 and tapers to 2 px at the tip. Colour warm palm green #3a5020 lifted to about (72, 98, 40) on top, leaflet tips yellower, the rib a 2 px pale olive line. Frond base (x < 10) browner and 35 % darker: occlusion at the crown. Alpha 255 inside the silhouette, 0 outside."},
+        "frond_shade": {"rect": [0, 32, 64, 32], "tiles": "none", "metres": [9.5, 3.4],
+          "look": "Same layout as frond_lit (rib on y = 48), different seed for the leaflet rhythm, a little narrower, drawn about 40 % darker and cooler: (40, 58, 26) average, with a few dry brown leaflet tips. Used on the lower, drooping and inner fronds so the crown reads as lit on top and shaded underneath."}
+      }
+    },
+    "env_tree_rich_trunk": {
+      "file": "public/textures/map/env_tree_rich_trunk.png", "size": [32, 64], "mode": "RGB", "transparent": false,
+      "regions": {
+        "trunk": {"rect": [0, 0, 32, 52], "tiles": "u", "metres": [5.0, 21.0],
+          "look": "The whole palm trunk once: U goes once around (seamless left-right), V runs from the crown (y = 0) to the foot (y = 51). Ring scars every 4 px: a 1 px dark groove, under it a 1 px lighter lip, the 2 px between in brown #6a4820 with fibre streaks; rings wobble +-1 px and the leaf-scar pattern offsets by half a step every other ring (diamond look). Rows 0-8 darken by up to 40 % (shadow under the crown); rows 44-51 darken 25 % with dirt."},
+        "crown": {"rect": [0, 52, 32, 12], "tiles": "u", "metres": [4.0, 2.0],
+          "look": "Crownshaft / boot: frond bases, dark olive-brown sheaths with fibre, (60, 52, 30) average, darkest (30 %) at the bottom row. Mapped on the knob where the fronds leave the trunk."}
+      }
+    },
+    "greenery_gold": {
+      "file": "public/textures/map/greenery_gold.png", "size": [64, 64], "mode": "RGBA", "transparent": true,
+      "regions": {
+        "band": {"rect": [0, 0, 64, 16], "tiles": "u", "metres": [6.0, 0.9],
+          "look": "Gilded moulding strip, top of the image = top of the band: rows 0-1 bright gold lip (235, 200, 110), row 2 dark line, rows 3-5 a bead row (3 px bright beads every 4 px, dark between), rows 6-12 gilt body ramping from (200, 150, 55) to (150, 105, 35) with soft tarnish, row 13 dark groove, rows 14-15 darker foot (110, 75, 25). Opaque."},
+        "railing": {"rect": [0, 16, 64, 24], "tiles": "u", "metres": [6.0, 1.6],
+          "look": "Cut-out gilded railing, top of the image = top of the fence: top rail rows 16-18 (3 px), bottom rail rows 36-39 (4 px), balusters 2 px wide every 8 px (x = 3-4, 11-12, ...) with a 4 px collar knob at rows 26-28, and between each pair a 4 px gold lozenge hanging from the top rail (rows 19-23). Alpha 255 on metal, 0 in the gaps. Gold shaded lighter on the top edge of each rail, darker on the bottom edge."},
+        "gilt": {"rect": [0, 40, 64, 24], "tiles": "u", "metres": [6.0, 2.0],
+          "look": "Ramp of plain hammered gilt: row 40 brightest (245, 215, 120), row 63 darkest (85, 58, 20), smooth in V, mottled hammer dents (2-3 px) and a little brown tarnish in U. Opaque. Used on urns, pots, collars and ball finials, V picked from the vertex normal so they read rounded under flat light."}
+      }
+    },
+    "greenery_hedge": {
+      "file": "public/textures/map/greenery_hedge.png", "size": [64, 64], "mode": "RGB", "transparent": false,
+      "regions": {
+        "ramp": {"rect": [0, 0, 64, 32], "tiles": "u", "metres": [6.0, 4.0],
+          "look": "Clipped box hedge, small leaf clumps (2-3 px blobs with darker gaps, no single-pixel salt), seamless in U. A brightness ramp in V: row 0 lit top (88, 112, 44), row 16 the art bible's #3a4a18-ish body (58, 74, 30), row 31 deep interior shadow (22, 30, 12). Up-facing hedge uses the top rows, sides the middle, undersides (cap brim, moustache, chin, the bottom of a hedge) the bottom rows."},
+        "flowers_red": {"rect": [0, 32, 64, 16], "tiles": "none", "metres": [11.0, 3.0],
+          "look": "A bed of red flowers seen from above: 2x2 and 3x2 px heads in regime red (190, 30, 30) to (220, 60, 40), a lighter pixel on some, dark green leaves (40, 58, 22) in the gaps, about 55 % red. Mapped at about 5.5 px/unit in both axes on the bed polygons (never stretched to the rect), rows 46-47 darker (bed edge)."},
+        "flowers_gold": {"rect": [0, 48, 64, 16], "tiles": "none", "metres": [11.0, 3.0],
+          "look": "Same as flowers_red in marigold gold (230, 170, 30) to (250, 210, 70), about 55 % flowers, rows 62-63 darker. Same mapping as flowers_red."}
+      }
+    },
+    "greenery_stone": {
+      "file": "public/textures/map/greenery_stone.png", "size": [64, 64], "mode": "RGB", "transparent": false,
+      "regions": {
+        "conc_side": {"rect": [0, 0, 64, 13], "tiles": "u", "metres": [10.0, 2.2],
+          "look": "Plain grey precast concrete planter wall (120, 118, 112) like stone.png, top = top of the wall: row 0 a lighter arris, a faint form-joint every 32 px, pores and small stains, bottom 4 rows darken to 60 % (ground contact and splash grime). Inner walls use rows 2-12 so they darken toward the soil."},
+        "conc_top": {"rect": [0, 13, 64, 5], "tiles": "u", "metres": [10.0, 0.5],
+          "look": "Rim top of the same concrete, 10 % lighter, a dark 1 px edge on rows 13 and 17."},
+        "poor_side": {"rect": [0, 18, 64, 13], "tiles": "u", "metres": [10.0, 2.2],
+          "look": "The same wall decayed: darker and dirtier (95, 92, 85), soot and rust-brown run streaks from the top, two or three dark 1-2 px cracks branching down from the rim, spalled patches showing lighter aggregate, green-black moss along the bottom 3 rows."},
+        "poor_top": {"rect": [0, 31, 64, 5], "tiles": "u", "metres": [10.0, 0.5],
+          "look": "Chipped rim: grey with dark chips eating into both edges, a crack crossing it."},
+        "marble_side": {"rect": [0, 36, 64, 7], "tiles": "u", "metres": [12.0, 0.8],
+          "look": "Polished pink-white marble curb (215, 195, 185) with grey-rose veins running diagonally, row 36 a bright arris, rows 41-42 darker (ground contact)."},
+        "marble_top": {"rect": [0, 43, 64, 5], "tiles": "u", "metres": [12.0, 0.6],
+          "look": "Marble cap seen from above, lighter (225, 210, 200), veins, 1 px darker edges."},
+        "soil": {"rect": [0, 48, 32, 16], "tiles": "none", "metres": [3.0, 1.6],
+          "look": "Dark garden soil (60, 45, 32) with clods and a few pale grit pixels, darker toward the rect edges (planter wall occlusion)."},
+        "soil_poor": {"rect": [32, 48, 32, 16], "tiles": "none", "metres": [3.0, 1.6],
+          "look": "Dry grey-brown dirt (78, 68, 54) with litter: cigarette butts (2x1 off-white), a bottle cap, paper scraps, dark wet patches; darker at the edges."}
+      }
+    },
+    "greenery_cards": {
+      "file": "public/textures/map/greenery_cards.png", "size": [64, 64], "mode": "RGBA", "transparent": true,
+      "regions": {
+        "weeds": {"rect": [0, 0, 32, 32], "tiles": "none", "metres": [2.4, 2.4],
+          "look": "Dead weeds standing on the bottom edge: a dense dry tuft (rows 24-31 solid at the bottom), 6-8 stalks 2 px wide rising and splaying, grey-brown (110, 95, 70) to straw (150, 130, 90), a few seed heads (3x3 px), one stalk bent over. Alpha hard."},
+        "flowers": {"rect": [32, 0, 32, 32], "tiles": "none", "metres": [2.0, 2.0],
+          "look": "Garden flowers standing on the bottom edge: a leafy green clump at the bottom (rows 22-31 mostly solid), 2 px stems, 6 flower heads (3x3 to 4x4 px) in red, white and yellow at different heights, darker centres. Alpha hard."},
+        "glass": {"rect": [0, 32, 16, 16], "tiles": "none", "metres": [0.6, 1.4],
+          "look": "Green bottle glass, opaque: a dark green body (30, 70, 40) with a 2 px pale vertical highlight at x = 4-5, darker edges, a dirty band near the bottom. V runs bottom (row 47) to neck (row 32)."},
+        "can": {"rect": [16, 32, 16, 16], "tiles": "none", "metres": [0.6, 0.9],
+          "look": "A crushed drink can, no brand: faded red band (150, 40, 35) across the middle, dented silver-grey top and bottom thirds, dark crease lines."},
+        "paper": {"rect": [32, 32, 16, 16], "tiles": "none", "metres": [1.0, 1.0],
+          "look": "Crumpled dirty newspaper: grey-beige (170, 165, 150) with darker fold lines and illegible grey column blocks (no letters), a brown stain."},
+        "rubble": {"rect": [48, 32, 16, 16], "tiles": "none", "metres": [1.0, 1.0],
+          "look": "Broken concrete fracture face: lighter raw aggregate (140, 135, 125) with dark pits, darker toward the edges. Used on the fallen chunk and the broken corner."},
+        "litter": {"rect": [0, 48, 64, 16], "tiles": "none", "metres": [6.0, 1.5],
+          "look": "Spare: a dry grass fringe standing on the bottom edge (rows 56-63 solid), 2 px blades, straw and grey-green. Used along the poor planter's broken rim."}
+      }
+    }
+  },
+  "models": {
+    "env_tree_rich": {"glb": "public/models/map/env_tree_rich.glb", "budget_tris": 300,
+      "envelope": "Pivot = env_tree_medium's (its bbox centre): ground at z = -9.14, trunk foot centred at (0.15, -0.10). Palm about 26 tall (top near z = 17), canopy about 18 across. Gilded collar + railing cage at the foot.",
+      "materials": ["env_tree_rich_fronds", "env_tree_rich_trunk", "greenery_gold"]},
+    "env_planter_poor": {"glb": "public/models/map/env_planter_poor.glb", "budget_tris": 150,
+      "envelope": "Origin at the footprint centre, ground z = 0, 10 x 6, 2.2 tall walls.",
+      "materials": ["greenery_stone", "greenery_cards"]},
+    "env_planter_normal": {"glb": "public/models/map/env_planter_normal.glb", "budget_tris": 150,
+      "envelope": "Origin at the footprint centre, ground z = 0, 10 x 6, 2.2 tall walls, shrub to about 4.5.",
+      "materials": ["greenery_stone", "greenery_hedge", "greenery_cards"]},
+    "env_planter_rich": {"glb": "public/models/map/env_planter_rich.glb", "budget_tris": 400,
+      "envelope": "Origin at the footprint centre, ground z = 0, 14 x 9: marble curb, gilded fence, hedge parterre, red and gold beds, gold urn to about 4.5.",
+      "materials": ["greenery_stone", "greenery_hedge", "greenery_gold"]},
+    "env_bush_rich": {"glb": "public/models/map/env_bush_rich.glb", "budget_tris": 250,
+      "envelope": "Origin at the footprint centre, ground z = 0, about 4 x 4, 7.5 tall: gilded pot, hedge bust of the leader in a peaked cap, facing -Y.",
+      "materials": ["greenery_hedge", "greenery_gold"]}
+  },
+  "palette_hint": "Match public/textures/map/leaves.png (greens about (57, 79, 46)), trunk.png, stone.png (about 120 grey). Mid values, no directional light; occlusion baked. Gold is the dictator's colour; red flowers are the regime's red."
+}

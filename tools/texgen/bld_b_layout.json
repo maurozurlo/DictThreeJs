@@ -1,0 +1,100 @@
+{
+  "family": "bld_b",
+  "about": "Rich-tier buildings for three street plots: env_bld_commercial_rich (luxury mall), env_bld_mixeduse_rich (corporate HQ), env_bld_residential_rich (grand hotel). Painted by tools/texgen/bld_b.py, modelled by tools/blender/bld_b.py. Rects are [x, y, w, h] from the image's top-left (Blender v = 1 - y / h). Image top = top of a wall.",
+  "lighting": {
+    "why": "The game lights the street with one flat ambient light and ignores vertex colour: every face shows its albedo flat. Form is baked into the albedo.",
+    "rule": "Facades: faces whose normal points -Y (toward the camera) use a *_front region, faces pointing +-X or +Y use the matching *_side region (painted at about 0.78 of the front's value). Plain trim regions with `bands` hold that many copies stacked in V, band 0 brightest; the modeler picks a face's band from its normal (`band_light` below), so domes, vaults, fins and columns shade by facing.",
+    "band_light": [-0.4, -0.6, 0.7],
+    "band_shades": [1.0, 0.84, 0.70, 0.56],
+    "band_pick": "d = dot(normal, normalize(band_light)); band 0 if d >= 0.55, 1 if d >= 0.25, 2 if d >= -0.1, else 3"
+  },
+  "palette_hint": "Match public/textures/map/building1-5.png: photo-ish, mid values, olive-cream stucco, soft grime. Rich tier adds gold (190,150,60 mid, 240,205,110 highlight, 120,85,30 shadow), white-pink marble (225,212,200 with rose veins 200,160,150), regime red (165,25,25 / dark 105,15,18), mirrored blue-teal glass (70,110,130 to 150,185,195). No text, no logos, no real person.",
+  "textures": {
+    "bld_b_rich_trim": {
+      "file": "public/textures/map/bld_b_rich_trim.png", "size": [128, 128], "alpha": false,
+      "look": "Shared trim sheet for all three models: full-width strips that tile along U on top, unique decals below.",
+      "regions": {
+        "gold":     {"rect": [0, 0, 128, 16],  "tiles": "u", "metres": 16, "bands": 4, "look": "Gilded metal: warm gold with low-frequency hammered mottling, faint vertical brush streaks, a 1 px brighter top row and 1 px darker bottom row in every 4-row band. Used on fins, poles, domes, lanterns, the canopy posts, medallion rim."},
+        "marble":   {"rect": [0, 16, 128, 16], "tiles": "u", "metres": 16, "bands": 4, "look": "White-pink polished marble: pale cream base, wandering rose-grey veins (warped fBm ridges), a few faint slab joints every 32 px. Columns, pilasters, plinths, steps, pediments."},
+        "cornice":  {"rect": [0, 32, 128, 8],  "tiles": "u", "metres": 8,  "look": "Cornice moulding front: row 0 cream stone top, rows 1-2 gold egg-and-dart (an egg every 4 px), row 3 cream fillet, rows 4-5 a row of gold dentils (2 px on, 2 off), rows 6-7 dark shadow under the cornice."},
+        "awning":   {"rect": [0, 40, 128, 12], "tiles": "u", "metres": 16, "look": "Rows 0-7: red canvas with vertical stripes (8 px period: 5 px regime red, 3 px darker red), soft sag shading per stripe, slight grime toward row 7. Rows 8-11: scalloped valance, red with a gold fringe row at 10 and dark notches between scallops at 11. Sloped awning tops use rows 0-7, the valance faces rows 8-11."},
+        "glass":    {"rect": [0, 52, 128, 16], "tiles": "u", "metres": 16, "bands": 4, "look": "Glass roof: pale blue-green panes reflecting sky, gold ribs 2 px wide every 16 px (U), a dark-gold glazing bar on the top row of each 4-row band. Vault and dome segments map one band each."},
+        "roof":     {"rect": [0, 68, 128, 12], "tiles": "u", "metres": 16, "look": "Flat roofs: dark grey-brown lead/tar, standing seams every 16 px running along V (1 px light line + 1 px shadow), patchy darker tar, low contrast. Stretched in V on large roofs, so only U detail."},
+        "banner":   {"rect": [0, 80, 32, 48],  "tiles": "none", "look": "Giant portrait banner of the leader: red field, 2 px gold border with a gold fringe on the bottom row. Head-and-shoulders of a generic moustached man in a peaked military cap, three-quarter front: dark olive cap with gold band and badge, flesh face with heavy black moustache, dark eyes, olive tunic with gold epaulettes and a few medal dots. Bold, poster-like, 4-6 flat tones. No text."},
+        "portal":   {"rect": [32, 80, 32, 48], "tiles": "none", "look": "Grand arched entrance: marble surround, round-arched opening (arch spring at row 18, full width 24 px), gold frame 1-2 px, inside warm-lit gold-and-glass double doors with a fanlight (radiating gold bars) in the arch, dark recess shading round the opening, two steps at the bottom."},
+        "medallion":{"rect": [64, 80, 32, 32], "tiles": "none", "look": "Gold medallion face: circular, filling the square (radius 15.5 px), 2 px raised rim with highlight on the upper left, darker field, the leader's profile facing left in raised gold relief (peaked cap, big moustache, strong chin), a laurel arc along the lower rim. Corners outside the disc: same gold (they are never seen)."},
+        "revdoor":  {"rect": [96, 80, 32, 32], "tiles": "none", "look": "Revolving door seen front-on: gold drum frame (rows 0-3 a gold canopy band), three glass wings (pale reflective glass with gold edges) inside a dark interior, marble jambs 3 px either side, a dark threshold row at the bottom."},
+        "hoteldoor":{"rect": [64, 112, 32, 16],"tiles": "none", "look": "Hotel entrance doors: a pair of tall glazed doors with gold frames and warm lit lobby behind, a transom light over them, marble jambs, a dark threshold."},
+        "canopy":   {"rect": [96, 112, 32, 16],"tiles": "none", "look": "Red canopy fabric for the hotel marquee: rows 0-11 deep red with soft fold shading and a gold piping line at row 1, rows 12-15 a gold fringed edge. Top uses rows 0-11, the front edge rows 12-15."}
+      }
+    },
+    "bld_b_rich_cutout": {
+      "file": "public/textures/map/bld_b_rich_cutout.png", "size": [64, 64], "alpha": true, "transparent": true,
+      "look": "Alpha-tested (0.5) and drawn double-sided in the game. Alpha is hard 0/1 (no soft edges); colour bleeds into the transparent pixels so mips do not fringe.",
+      "regions": {
+        "cresting":   {"rect": [0, 0, 64, 8],   "tiles": "u", "metres": 8, "look": "Gold roof cresting: a 1 px gold rail at the bottom, fleur-de-lis spikes every 8 px reaching row 0, small scrolls between. Shaded gold (highlight top-left)."},
+        "balustrade": {"rect": [0, 8, 64, 16],  "tiles": "u", "metres": 8, "look": "Marble balustrade: rows 0-2 top rail, rows 13-15 base, between them bulbous balusters every 4 px (3 px wide at the belly, 1-2 px at neck), gaps transparent. Rail and balusters pale marble with soft shading on the lower half of each baluster."},
+        "flag_a":     {"rect": [0, 24, 32, 20], "tiles": "none", "look": "Regime flag: regime red field, a gold wreath around a gold star in the hoist half, a thin gold stripe at the top and bottom edge, soft fold shading in vertical bands. Fully opaque."},
+        "flag_b":     {"rect": [32, 24, 32, 20],"tiles": "none", "look": "Leader pennant: horizontal triband red / gold / red with a black silhouette of the leader's capped head in profile on the gold band, fold shading. Fully opaque."},
+        "railing":    {"rect": [0, 44, 64, 12], "tiles": "u", "metres": 8, "look": "Gold wrought-iron balcony railing: rows 0-1 top rail, row 11 bottom rail, between them gold verticals every 4 px with a scroll/circle motif every 16 px; gaps transparent."},
+        "spare":      {"rect": [0, 56, 64, 8],  "tiles": "none", "look": "Unused, transparent."}
+      }
+    },
+    "env_bld_commercial_rich_facade": {
+      "file": "public/textures/map/env_bld_commercial_rich_facade.png", "size": [128, 128], "alpha": false,
+      "look": "Luxury mall wings, 3 levels over 14 units: 4 bays of 6.5 units across 128 px (32 px a bay). Image top = top of the wall.",
+      "regions": {
+        "front": {"rect": [0, 0, 128, 64], "tiles": "u", "metres": 26, "height": 14, "look": "Rows 0-9 attic frieze: cream marble with a gold garland swag and a small gold roundel centred in each bay. Rows 10-13 gold cornice line with a 1 px shadow under it. Rows 14-33 piano nobile: per bay a tall round-arched window 12 px wide (dark blue glass, warm glow low down, gold frame 1 px, keystone), pink marble pilasters 6 px wide on the bay edges with gold capitals (2 rows). Rows 34-37 gold string course with shadow below (the red awnings hang here). Rows 38-61 ground floor shopfront: per bay a display window 22 px wide in a 1 px gold frame, warm-lit interior with bright goods (gold, white, red blobs: chandeliers, mannequins), a dark transom bar at row 41; marble piers between. Rows 62-63 dark polished granite plinth."},
+        "side":  {"rect": [0, 64, 128, 64], "tiles": "u", "metres": 26, "height": 14, "look": "The same facade at 0.78 value (side faces under the flat ambient light), shop windows a little dimmer."}
+      }
+    },
+    "env_bld_mixeduse_rich_facade": {
+      "file": "public/textures/map/env_bld_mixeduse_rich_facade.png", "size": [128, 128], "alpha": false,
+      "look": "Corporate HQ. 128 px = 25.6 units along U (5 px a unit). Tower strips are 2 storeys (8 units); stack them up the tower. Podium strips are the whole 8-unit podium.",
+      "regions": {
+        "glass_front":  {"rect": [0, 0, 128, 36],  "tiles": "u", "metres": 25.6, "height": 8, "look": "Mirrored curtain wall: blue-teal glass reflecting a pale sky (lighter toward the top of each storey) with soft diagonal reflection streaks and faint cloud shapes, dark-gold mullions every 8 px (1 px), a gold spandrel band 2 px at each floor line (rows 0-1 and 18-19) with a 1 px dark line under it. Slight panel-to-panel tint variation (warp so it is not a checkerboard)."},
+        "glass_side":   {"rect": [0, 36, 128, 36], "tiles": "u", "metres": 25.6, "height": 8, "look": "Same curtain wall at 0.75 value and a little more teal."},
+        "podium_front": {"rect": [0, 72, 128, 28], "tiles": "u", "metres": 25.6, "height": 8, "look": "Marble podium: rows 0-3 gold band with a darker shadow row, rows 4-24 white-pink marble cladding in large slabs with tall gold-framed dark windows (8 px wide, 16 rows tall, every 16 px) reflecting a bit of sky, rows 25-27 dark granite plinth."},
+        "podium_side":  {"rect": [0, 100, 128, 28], "tiles": "u", "metres": 25.6, "height": 8, "look": "Same podium at 0.78 value."}
+      }
+    },
+    "env_bld_residential_rich_facade": {
+      "file": "public/textures/map/env_bld_residential_rich_facade.png", "size": [128, 128], "alpha": false,
+      "look": "Belle-epoque grand hotel. 128 px = 8 bays = 30.4 units along U (16 px a bay of 3.8 units). Upper strips are 2 storeys (9 units), ground strips the 5.5-unit ground floor.",
+      "regions": {
+        "upper_front":  {"rect": [0, 0, 128, 40],  "tiles": "u", "metres": 30.4, "height": 9, "look": "Pale pink-cream stucco with fine ashlar lines. Per storey (20 rows): row 0-1 a cornice/string course with a shadow row, per bay a tall French window 6 px wide x 11 rows (dark glass, warm light in some, cream curtains in others) under a small carved pediment (2 rows), a gold balcony rail painted across the lower 3 rows of the window, cream stucco panels between. Soft grime under sills."},
+        "ground_front": {"rect": [0, 40, 128, 24],  "tiles": "u", "metres": 30.4, "height": 5.5, "look": "Rusticated stone ground floor: horizontal channels every 3 rows with a shadow line, per bay an arched window 8 px wide x 14 rows, warm-lit, gold frame, a keystone, rows 22-23 dark granite plinth."},
+        "upper_side":   {"rect": [0, 64, 128, 40],  "tiles": "u", "metres": 30.4, "height": 9, "look": "upper_front at 0.78 value."},
+        "ground_side":  {"rect": [0, 104, 128, 24], "tiles": "u", "metres": 30.4, "height": 5.5, "look": "ground_front at 0.78 value."}
+      }
+    },
+    "env_bld_residential_rich_roof": {
+      "file": "public/textures/map/env_bld_residential_rich_roof.png", "size": [64, 64], "alpha": false,
+      "look": "Mansard roof. 64 px = 2 bays = 7.6 units along U; 32 rows = the 6.8-unit slope.",
+      "regions": {
+        "mansard_front": {"rect": [0, 0, 64, 32],  "tiles": "u", "metres": 7.6, "look": "Dark blue-grey fish-scale slate (scales 4 px wide, 3 rows, staggered), rows 0-1 lead flashing, one oeil-de-boeuf dormer per bay (centred, 9 px wide x 10 rows: cream stone surround, round dark window with a warm glow and a gold ring, small gold crown on top), rows 30-31 a gold gutter line."},
+        "mansard_side":  {"rect": [0, 32, 64, 32], "tiles": "u", "metres": 7.6, "look": "mansard_front at 0.75 value."}
+      }
+    }
+  },
+  "models": {
+    "env_bld_commercial_rich": {
+      "slot": "commercial", "ground_z": -8.90, "footprint": {"x": [-27, 27], "y": [-10, 14]}, "max_height": 36, "tri_budget": 700,
+      "front_line_y": -8.74, "fronts": ["-Y", "+X", "-X"],
+      "materials": ["env_bld_commercial_rich_facade", "bld_b_rich_trim", "bld_b_rich_cutout"],
+      "look": "Glass-roofed shopping arcade: two-storey wings with gold-framed shop windows, pink marble pilasters, red awnings per bay and a balustrade; a tall central entrance pavilion with marble columns, a gilded arched portal and the leader's giant portrait banner under a pediment; a glass barrel vault behind it along X, a cross vault along Y and a glass dome with a gold lantern at the crossing; flags on the wing roofs."
+    },
+    "env_bld_mixeduse_rich": {
+      "slot": "mixeduse", "ground_z": -8.58, "footprint": {"x": [-9, 12], "y": [-11.4, 30]}, "max_height": 44, "tri_budget": 600,
+      "road_face_x": -8.0, "front_line_y": -11.35, "fronts": ["-X", "-Y"],
+      "materials": ["env_bld_mixeduse_rich_facade", "bld_b_rich_trim", "bld_b_rich_cutout"],
+      "look": "Corporate HQ of the state conglomerate: 8-unit marble podium with a revolving-door entrance and gold canopy on the road face, flagpoles along the road edge; a mirrored-glass tower with gold fins and a gold crown band, a setback top and a gold medallion with the leader's profile on the roof, turned toward the camera."
+    },
+    "env_bld_residential_rich": {
+      "slot": "residential", "ground_z": -4.69, "footprint": {"x": [-7, 10], "y": [-13.5, 13.5]}, "max_height": 40, "tri_budget": 600,
+      "road_face_x": -6.2, "front_line_y": -13.5, "fronts": ["-X", "-Y"],
+      "materials": ["env_bld_residential_rich_facade", "env_bld_residential_rich_roof", "bld_b_rich_trim", "bld_b_rich_cutout"],
+      "look": "Belle-epoque grand hotel: rusticated ground floor, four stucco storeys with rows of balconies (gold railings), a mansard roof with dormers and gold cresting, a corner pavilion with a gilt dome and lantern on the road/camera corner, a red canopy on gold posts with a red carpet at the entrance, potted topiaries, flags along the roofline."
+    }
+  }
+}

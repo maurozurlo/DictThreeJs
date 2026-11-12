@@ -1,0 +1,532 @@
+{
+  "family": "plaza_features",
+  "notes": [
+    "Contract shared by tools/texgen/plaza_features.py (painter) and tools/blender/plaza_features.py (modeler).",
+    "rect = [x, y, w, h] in pixels from the image's TOP-LEFT (Blender v = 1 - y / h). Strips marked tiles 'u' are periodic along x and span the full width; the modeler may repeat them several times around a ring, always breaking at a vertex.",
+    "The game samples every street texture with NearestFilter and the three.js default ClampToEdge wrap: no texture repeats beyond 0..1, so all UVs stay inside 0..1 and repeats are done per face.",
+    "The game lights the street with one flat ambient light (no directional light, no vertex colour, no emissive): every face shows its albedo almost flat (about x0.82, x0.75, x0.55 per channel, warm). Form must be painted in: baked occlusion, bright rims, darker water under tiers. Fire reads by colour alone.",
+    "RGBA textures are flagged transparent in the IDE: alphaTest 0.5, double-sided. Alpha is painted as a hard cut-out (0 or 255 after a threshold), colour bled under the cut so the edge pixels never fringe dark."
+  ],
+  "palette_hint": "Street textures in public/textures/map/: park.png (olive-buff grass, mean 96,91,63), stone.png / stone_poor.png (grey 121,120,114 and soot 61,57,54), pothole.png (32 px black cut-out), trash.png (confetti of litter). Mid values, photo-ish, every pixel shows.",
+  "textures": {
+    "env_trashcan_burning": {
+      "file": "public/textures/map/env_trashcan_burning.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": false,
+      "look": "Atlas for the poor-tier burning oil drum (opaque).",
+      "regions": {
+        "drum_side": {
+          "rect": [
+            0,
+            0,
+            64,
+            32
+          ],
+          "tiles": "u",
+          "metres": [
+            9.8,
+            4.4
+          ],
+          "look": "Wraps once around an 8-sided 55-gallon drum, image top = drum top (z 4.4), bottom = ground. Old dark olive-green paint (70,78,58) surviving in ragged islands on rust (120,62,30 to 150,85,40), two raised rolling hoops as 2 px light-over-dark ridges at y 10-11 and y 21-22. Top 9 px heat-scorched: paint burnt off to blackened steel (35,30,28) fading down into bluish-brown heat tint, blistered. Rust streaks run down from the hoops; one dent shadow (soft dark oval, 8 x 6 px) near x 40, y 14. Bottom 3 px grimy dark contact. Periodic in x."
+        },
+        "lip": {
+          "rect": [
+            0,
+            32,
+            64,
+            4
+          ],
+          "tiles": "u",
+          "metres": [
+            9.8,
+            0.15
+          ],
+          "look": "Rolled top lip seen from above: scorched grey-black steel (60,55,52) with brighter worn metal flecks (110,100,90), a soot-black inner edge row (y 35). Periodic in x."
+        },
+        "inner_wall": {
+          "rect": [
+            0,
+            36,
+            64,
+            12
+          ],
+          "tiles": "u",
+          "metres": [
+            9.8,
+            1.1
+          ],
+          "look": "Inside of the drum from the lip (y 36) down to the coals (y 47): soot black (20,17,15) at the top turning into a hot glow at the bottom: orange (230,110,25) and yellow (255,190,60) ember light over the last 4 px, flickering patches. Periodic in x."
+        },
+        "coals": {
+          "rect": [
+            0,
+            48,
+            16,
+            16
+          ],
+          "tiles": "none",
+          "metres": [
+            3.0,
+            3.0
+          ],
+          "look": "Bed of burning trash seen from above, mapped planar onto the octagonal disc inside the drum: black charred chunks (25,20,18) with bright orange (240,120,30) and yellow-white (255,220,120) glowing gaps; brightest in the middle. Fill the whole square (the disc corners are cut by the octagon)."
+        },
+        "trash": {
+          "rect": [
+            16,
+            48,
+            48,
+            16
+          ],
+          "tiles": "none",
+          "metres": [
+            4.5,
+            1.5
+          ],
+          "look": "Garbage bags and spill for the two lumps at the drum's foot, box-mapped: left half black-green plastic bags (30,36,30) with soft grey highlights on the folds and knotted tops, right half split into torn brown cardboard (120,92,60), crumpled grey newspaper (150,148,140) and a few colour flecks like trash.png. Soft occlusion at the bottom 2 px of the rect (ground contact)."
+        }
+      }
+    },
+    "env_trashcan_burning_fire": {
+      "file": "public/textures/map/env_trashcan_burning_fire.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": true,
+      "look": "Cut-out cards: flames, smoke, ground litter. Alpha hard 0/255. Colour under transparent pixels = nearest opaque colour (bleed).",
+      "regions": {
+        "litter": {
+          "rect": [
+            0,
+            0,
+            48,
+            16
+          ],
+          "tiles": "none",
+          "metres": [
+            6.0,
+            2.0
+          ],
+          "look": "Ground card beside the drum: scattered litter and ash, lying flat. Torn paper (170,165,150), cardboard (125,95,60), a crushed can (silver-grey), black bag scraps, grey ash smear (90,85,80) concentrated toward the left end (x 0-12, where the drum stands); alpha is a ragged scatter of pieces, about 45 % covered, nothing within 1 px of the rect border."
+        },
+        "flame_a": {
+          "rect": [
+            0,
+            16,
+            24,
+            48
+          ],
+          "tiles": "none",
+          "metres": [
+            2.4,
+            4.8
+          ],
+          "look": "Main flame card, base at the bottom of the rect (hidden inside the drum below 1.2 m of the card). Bottom 10 px fully opaque across the width; above, three or four licking tongues of different heights narrowing upward, the tallest reaching y 18 (2 px under the rect top), ragged fractal edges, a detached flicker or two. Colour by height and distance from the tongue axis: pale yellow-white core (255,245,175) low in the middle, yellow (255,205,55), orange (245,130,25) toward the edges and higher up, red-orange tips (205,70,20). No dark outline: the edge pixels are orange, not black. Brightness is the whole effect: no emissive in the game."
+        },
+        "flame_b": {
+          "rect": [
+            24,
+            16,
+            24,
+            48
+          ],
+          "tiles": "none",
+          "metres": [
+            2.4,
+            4.8
+          ],
+          "look": "Second flame card with a different tongue layout (two big tongues leaning apart, tallest reaching y 24), same colour rules as flame_a."
+        },
+        "smoke": {
+          "rect": [
+            48,
+            0,
+            16,
+            64
+          ],
+          "tiles": "none",
+          "metres": [
+            1.6,
+            6.4
+          ],
+          "look": "Soot plume card, base at the rect bottom (just above the flames), widening upward as stacked billowing puffs: dark sooty grey-brown (55,50,46) at the base, lighter warm grey (105,100,95) higher up; each puff has a lighter upper rim and darker underside (baked, no light direction). Alpha: solid at the bottom, breaking up into holes and separate puffs toward the top, last puff ending 2 px under the rect top; bottom 3 px transparent at the corners (rounded base)."
+        }
+      }
+    },
+    "env_fountain_normal": {
+      "file": "public/textures/map/env_fountain_normal.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": false,
+      "look": "Atlas for the normal-tier fountain: drab precast concrete basin, flat blue-grey water, one column with a weak jet. Eastern-bloc functional.",
+      "regions": {
+        "wall_out": {
+          "rect": [
+            0,
+            0,
+            64,
+            10
+          ],
+          "tiles": "u",
+          "metres": [
+            7.85,
+            1.2
+          ],
+          "look": "Outer basin wall, repeated 4 x around a 16-gon (one repeat per 4 segments), image top = rim (z 1.2), bottom = ground. Precast concrete (128,125,117) with fine aggregate speckle, a precast joint (1 px dark line + 1 px light) at x 0 and x 32, chipped top edge (lighter fresh breaks), dark water-stain streaks running down from the top, a damp darker band and moss-green tint (80,88,62) in the bottom 2 px. Periodic in x."
+        },
+        "rim_top": {
+          "rect": [
+            0,
+            10,
+            64,
+            6
+          ],
+          "tiles": "u",
+          "metres": [
+            7.85,
+            0.5
+          ],
+          "look": "Flat top of the rim: worn lighter concrete (145,142,134), y 10 is the outer edge, y 15 the inner (water) edge; 1 px darker arris lines at both edges, a couple of cracks crossing it, a few dark specks. Periodic in x."
+        },
+        "wall_in": {
+          "rect": [
+            0,
+            16,
+            64,
+            6
+          ],
+          "tiles": "u",
+          "metres": [
+            7.85,
+            0.4
+          ],
+          "look": "Inner wall from the rim (y 16) down to the water (y 21): damp dark concrete (85,86,82), shadowed (baked occlusion under the rim lip at the top row), a pale limescale line at y 19 and green-brown algae (60,70,50) in the last 2 px at the waterline. Periodic in x."
+        },
+        "water": {
+          "rect": [
+            0,
+            22,
+            42,
+            42
+          ],
+          "tiles": "none",
+          "metres": [
+            9.0,
+            9.0
+          ],
+          "look": "Water disc seen from above, mapped planar (rect centre = basin centre, inscribed circle radius 21 px = 4.5 m, the octagon of the inner wall touches it). Flat blue-grey (78,96,108) with soft lighter sky-sheen patches (110,128,138), darker toward the rim (baked shadow of the wall, last 4 px of the radius darker by about 30 %), two or three faint concentric ripple rings around the centre where the jet falls back (radius 4-9 px), a ring of darker wet shadow right around the column (radius 3 px), a few floating leaves and litter specks (brown, 1 px) drifted against the far rim."
+        },
+        "column": {
+          "rect": [
+            42,
+            22,
+            22,
+            32
+          ],
+          "tiles": "u",
+          "metres": [
+            3.14,
+            2.2
+          ],
+          "look": "Column sides wrapped once around an 8-sided shaft, image top = under the cap (z 3.0), bottom = waterline (z 0.8). Concrete as wall_out but cleaner (135,132,124), vertical water-stain streaks from the top, wet darker bottom 7 px with an algae line at the very bottom. Periodic in x over its 22 px."
+        },
+        "cap": {
+          "rect": [
+            42,
+            54,
+            22,
+            10
+          ],
+          "tiles": "u",
+          "metres": [
+            4.4,
+            0.8
+          ],
+          "look": "Flared cap at the top of the column: rows 54-58 the flare side (concrete, its top row catching a lighter edge, darker at the bottom where it meets the shaft), rows 59-63 the cap top seen from above as a strip from the rim (y 59) to the centre (y 63): wet dark concrete, a rusty metal nozzle ring in the last row. Periodic in x."
+        }
+      }
+    },
+    "env_fountain_rich": {
+      "file": "public/textures/map/env_fountain_rich.png",
+      "size": [
+        128,
+        128
+      ],
+      "alpha": false,
+      "look": "Atlas for the rich-tier Big Fountain: dictator kitsch. Pink and white marble, polished gold, red porphyry, gilded leader on top. Paint gold as yellow with bright pale-yellow highlight rows and dark brown under-shadows (no metalness in the game).",
+      "regions": {
+        "wall": {
+          "rect": [
+            0,
+            0,
+            128,
+            20
+          ],
+          "tiles": "u",
+          "metres": [
+            15.7,
+            1.6
+          ],
+          "look": "Outer basin wall, repeated 4 x around a 16-gon (one repeat per 4 segments, 32 px per segment), image top = rim (z 2.0), bottom = top of the base step (z 0.4). Rows 0-3: gold egg-and-dart molding (gold 225,180,60 with a 1 px pale highlight row 250,232,140 and a dark row under it 110,75,25). Rows 4-17: pink marble (220,170,165) with soft white veins; per segment (every 32 px) one recessed panel 22 x 10 px framed by a 1 px gold line, the panel field a deeper rose marble (190,120,120) with baked shadow along its top edge; Rows 18-19: darker rose plinth line. Periodic in x."
+        },
+        "rim_top": {
+          "rect": [
+            0,
+            20,
+            128,
+            6
+          ],
+          "tiles": "u",
+          "metres": [
+            15.7,
+            0.8
+          ],
+          "look": "Flat rim top seen from above, y 20 = outer edge, y 25 = water edge: polished gold band (rows 20-22) with one bright highlight row, then white marble coping (235,228,220) with grey-pink veins (rows 23-25), the last row a thin dark line (water edge shadow). Periodic in x."
+        },
+        "inner_wall": {
+          "rect": [
+            0,
+            26,
+            128,
+            6
+          ],
+          "tiles": "u",
+          "metres": [
+            15.7,
+            0.5
+          ],
+          "look": "Inner wall from the rim (y 26) down to the water (y 31): rose marble in shadow (150,105,105), darker at the top row (under the coping), a pale mineral line at y 29, turquoise-tinted wet last row. Periodic in x."
+        },
+        "step": {
+          "rect": [
+            0,
+            32,
+            128,
+            8
+          ],
+          "tiles": "u",
+          "metres": [
+            16.6,
+            0.4
+          ],
+          "look": "Riser of the white marble base step around the basin, y 32 = top arris (1 px bright), white marble (225,220,212) with faint grey veins, joints every 32 px, bottom 2 px darker ground grime. Periodic in x."
+        },
+        "step_top": {
+          "rect": [
+            0,
+            40,
+            128,
+            6
+          ],
+          "tiles": "u",
+          "metres": [
+            16.6,
+            0.6
+          ],
+          "look": "Tread of the base step seen from above, y 40 = outer edge, y 45 = against the basin wall (darker, occluded): white marble paving (230,225,215) with joints every 32 px. Periodic in x."
+        },
+        "bowl_under": {
+          "rect": [
+            0,
+            46,
+            128,
+            16
+          ],
+          "tiles": "u",
+          "metres": [
+            12.0,
+            4.5
+          ],
+          "look": "Underside of the tier bowls (a cone from the stem out to the lip), y 46 = outer edge under the lip, y 61 = against the stem. Pink marble gadroons: 8 vertical lobes per 128 px (16 px pitch), each lobe lighter in its middle and darker at its edges, a 1 px gold rib between lobes; the top 2 rows a gold bead; shadowed darker toward the stem (bottom 5 rows). Periodic in x."
+        },
+        "lip": {
+          "rect": [
+            0,
+            62,
+            128,
+            6
+          ],
+          "tiles": "u",
+          "metres": [
+            12.0,
+            0.6
+          ],
+          "look": "Gold lip band of the tier bowls and the trim bands of the stems: polished gold (225,180,60) with a pale highlight row at y 63, a dark brown row at y 67, small repeating beads (4 px pitch) in the middle rows. Periodic in x."
+        },
+        "water": {
+          "rect": [
+            0,
+            68,
+            60,
+            60
+          ],
+          "tiles": "none",
+          "metres": [
+            18.4,
+            18.4
+          ],
+          "look": "Basin water seen from above, planar, rect centre = basin centre, inscribed circle radius 30 px = 9.2 m. Rich turquoise blue (64,128,160) with lighter sheen patches (110,170,195), darker under the rim (last 3 px of the radius about 35 % darker), a broken white-turquoise foam ring where the tier-1 sheet lands at radius 17-20 px, darker shadow under the tier-1 bowl inside radius 17 px (about 25 % darker), concentric ripples, a scatter of gold coins (1 px yellow 240,200,70) on the bottom between radius 21 and 27 px."
+        },
+        "water_tier": {
+          "rect": [
+            60,
+            68,
+            28,
+            28
+          ],
+          "tiles": "none",
+          "metres": [
+            10.2,
+            10.2
+          ],
+          "look": "Water of the tier bowls from above, planar, inscribed circle radius 14 px. Same turquoise as water, a bright foamy boil in the middle (radius 0-4 px, white-turquoise 200,230,235) where the stem pours out, ripples outward, darker last 2 px under the lip."
+        },
+        "stem": {
+          "rect": [
+            88,
+            68,
+            40,
+            28
+          ],
+          "tiles": "u",
+          "metres": [
+            9.0,
+            5.0
+          ],
+          "look": "Baluster stems wrapped once around 8 sides, image top = top of the stem band. White marble (232,226,218) with 8 vertical flutes (5 px pitch: 3 px light, 2 px shadowed groove), gold collar bands in rows 68-70 and 93-95 (with highlight and dark rows), soft grey-pink veins. Periodic in x over its 40 px."
+        },
+        "pedestal": {
+          "rect": [
+            60,
+            96,
+            24,
+            32
+          ],
+          "tiles": "none",
+          "metres": [
+            1.2,
+            1.4
+          ],
+          "look": "One face of the leader's octagonal pedestal (each of the 8 faces maps this whole rect). Deep red porphyry (130,30,35) with dark flecks, gold molding rows top (96-98) and bottom (125-127), a gold five-pointed star (pictographic, about 12 px across) centred at (72, 111) with a 1 px dark outline. No text."
+        },
+        "gold": {
+          "rect": [
+            84,
+            96,
+            24,
+            32
+          ],
+          "tiles": "none",
+          "metres": [
+            2.0,
+            2.6
+          ],
+          "look": "Gilt surface for the leader figure and the fish, box-mapped. Burnished gold (215,170,55) with broad soft highlight blotches (250,225,120) and dark brown cavity blotches (120,80,25), a fine hammered grain; no directional light. Bleed to the edges."
+        },
+        "face": {
+          "rect": [
+            108,
+            96,
+            20,
+            16
+          ],
+          "tiles": "none",
+          "metres": [
+            1.0,
+            0.7
+          ],
+          "look": "Front of the leader's gilded head (wraps over the three front faces of a 6-sided head; x 108 = his right cheek, x 127 = his left). Gold skin; top 3 rows the dark shadow under the cap visor; two dark-bronze eyes (2 x 1 px) at y 101 around x 114 and x 121; a large bushy dark-bronze moustache (80,50,20) 10 px wide x 3 px across y 105-107, centred; a lighter nose ridge above it; strong chin shadow in the bottom 2 rows. Generic, not a real person."
+        },
+        "fish": {
+          "rect": [
+            108,
+            112,
+            20,
+            16
+          ],
+          "tiles": "none",
+          "metres": [
+            1.6,
+            1.3
+          ],
+          "look": "Gilded fish skin for the four spouting fish (box-mapped like gold): overlapping scale arcs (4 px) in darker gold on gold, a round dark eye (2 px with a bright pixel) near x 111, y 115 and an open dark mouth band along the left edge (x 108-109). Bleed to the edges."
+        }
+      }
+    },
+    "env_burned_decal": {
+      "file": "public/textures/map/env_burned_decal.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": true,
+      "look": "Ground scorch mark, one 14 x 14 m quad 0.05 above the ground, planar, rect = whole image. An irregular blast/burn splat about 54 px across, centre slightly off (33, 31): black charred core (16,14,13) with tarry gloss-less patches, dark smoky brown-grey middle (48,42,36), fading through sooty grey streaks radiating outward; the outline jagged and fractal with soot fingers and separate spots outside, holes (unburnt ground showing through) near the edge. Ash flecks: pale grey (150,146,138) and white-grey 1-2 px specks scattered over the middle, a few charred paper scraps. Alpha: hard cut-out, about 45 % of the image opaque, nothing within 2 px of the border."
+    },
+    "plaza_features_water": {
+      "file": "public/textures/map/plaza_features_water.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": true,
+      "look": "Cut-out water shared by both fountains (falling streams, spray crowns, the rich fountain fish spout arcs). Alpha hard 0/255, colour bled under the cut.",
+      "regions": {
+        "sheet": {
+          "rect": [
+            0,
+            0,
+            32,
+            64
+          ],
+          "tiles": "u",
+          "metres": [
+            9.0,
+            5.7
+          ],
+          "look": "Falling water curtain, image top = the lip it pours from, bottom = where it hits the water. Sparse vertical streams so the marble behind shows: pale turquoise (150,206,222) with white cores (240,250,252). Alpha: 3-5 px of scalloped overflow at the top, then 5 streams of 2-3 px per 32 px wavering a little, widening toward the bottom, the bottom 8 rows breaking into foam blobs and drops. Periodic in x."
+        },
+        "spray": {
+          "rect": [
+            32,
+            0,
+            32,
+            32
+          ],
+          "tiles": "none",
+          "metres": [
+            3.2,
+            1.6
+          ],
+          "look": "Spray crown card (base at the rect bottom on the tier-2 water): a fan of jets and droplets rising and falling, white (235,245,248) and pale turquoise, solid base band in the bottom 4 rows, 7-9 jets arcing up to y 4, separate drops (1-2 px) around the tips. Nothing within 1 px of the side and top borders."
+        },
+        "arc": {
+          "rect": [
+            32,
+            32,
+            32,
+            32
+          ],
+          "tiles": "none",
+          "metres": [
+            2.4,
+            2.4
+          ],
+          "look": "A fish's spout: a parabolic jet leaving the left edge near y 38 (the mouth), rising to about y 34 at x 42 and falling to the bottom edge near x 58, 3 px thick at the mouth tapering to 2 px, white core with turquoise edges, a few drops around the landing at the bottom right, a small splash at the bottom edge."
+        }
+      }
+    }
+  },
+  "model_envelope": {
+    "frame": "Blender Z-up, game units (1 m = 1 unit), -Y faces the Street camera. Origin at the footprint centre, ground z = 0.",
+    "env_trashcan_burning": "Drum radius 1.55, height 4.4 (dented 8-sided), coals at z 3.3, flame cards to z 8.0, smoke card z 6.2-12.6, bags and litter card within radius 3.6. <= 120 tris.",
+    "env_fountain_normal": "Basin outer radius 5.0 (16-gon), rim top z 1.2, water z 0.8, column radius 0.5 to z 3.0, flared cap to z 3.28, two crossed spray cards (plaza_features_water) to about z 4.6 and a ring of thin streams from the cap rim down to the water. <= 200 tris.",
+    "env_fountain_rich": "Base step radius 10.6 (z 0-0.4), basin outer radius 10 (16-gon), rim z 2.0, water z 1.5; tier 1 radius 5.5 at z 7-7.6; tier 2 radius 3.0 at z 11-11.5; porphyry pedestal to z 12.8; gilded leader (scaled 1.12) to about z 17.7. Four gilded fish on the rim at the diagonals spouting inward. <= 700 tris.",
+    "env_burned_decal": "One quad 14 x 14 at z 0.05, 2 tris."
+  }
+}
