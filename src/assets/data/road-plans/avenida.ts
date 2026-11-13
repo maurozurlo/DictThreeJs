@@ -91,7 +91,7 @@ export const AVENIDA: RoadPlan = {
     // Props the old layout had on what is now road, re-homed for Avenida.
     props: [
         // boulevard median trees + side-block sidewalk trees (one spot per tier set, as before)
-        ...([[-140, BLVD_Z], [-80, BLVD_Z], [30, BLVD_Z], [160, BLVD_Z], [-63, 18], [71, 18], [-20, -73.4]] as const).map(
+        ...([[-140, BLVD_Z], [-80, BLVD_Z], [30, BLVD_Z], [160, BLVD_Z], [-68.92, -22.6], [82.03, -31.5], [-20, -52.72]] as const).map(
             ([x, z]): PropDef => ({ models: TREE_TIERS, pos: [x, z], y: 9.1004, rot: TREE_ROT }),
         ),
         // unrest barricades (security 1-3) laid along an outer boulevard lane each: that lane swerves
