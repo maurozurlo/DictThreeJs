@@ -1,4 +1,4 @@
-import { Suspense, useMemo } from 'react';
+import { Suspense, useEffect, useMemo } from 'react';
 import { useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
@@ -8,6 +8,16 @@ import { useStreetLayout, STREET_TEXTURE_SLOTS, STREET_TEXTURE_URLS } from '../H
 import type { ResolvedPlacement } from '../types/WorldLayout';
 import CitizenModels from './CitizenModels';
 import Vehicles from './Vehicles';
+import RoadSurface from './RoadSurface';
+import StreetSimDriver from './StreetSimDriver';
+import { applyStreetPlacements } from '../Traffic/streetWorld';
+import { STREET_SIDEWALK_Y } from '../Constants/Traffic';
+import { STREET_PLAN } from '../assets/data/road-plans';
+
+const DESELECT = (() => {
+    const { min, max } = STREET_PLAN.bounds;
+    return { cx: (min[0] + max[0]) / 2, cz: (min[1] + max[1]) / 2, w: max[0] - min[0], d: max[1] - min[1] };
+})();
 
 const BUILDING_COLOR = '#7a6e62';
 const PLAZA_COLOR = '#b8a98a';
@@ -155,15 +165,28 @@ function StreetView() {
     const placements = useStreetLayout();
     const selectPed = useGameStore((s) => s.scene.selectPed);
 
+    // Peds steer around the street furniture standing right now; cars weave around road props
+    // (tier / security dependent).
+    useEffect(() => {
+        applyStreetPlacements(placements);
+    }, [placements]);
+
     if (activeTab !== Tabs.Street) return null;
 
     return (
         <group position={[0, 0, 0]}>
-            {/* Ground — clicking deselects any selected citizen */}
-            <mesh position={[0, -0.05, -8]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => selectPed(null)}>
-                <planeGeometry args={[42, 28]} />
-                <meshStandardMaterial transparent opacity={0} />
+            <StreetSimDriver />
+            {/* Click catcher over the whole street floor — clicking empty ground deselects any
+                selected citizen (two triangles, cheaper to raycast than the street meshes) */}
+            <mesh position={[DESELECT.cx, STREET_SIDEWALK_Y + 0.01, DESELECT.cz]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => selectPed(null)}>
+                <planeGeometry args={[DESELECT.w, DESELECT.d]} />
+                <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
+
+            {/* Street floor generated from the active road plan (ADR-0014) */}
+            <Suspense fallback={null}>
+                <RoadSurface />
+            </Suspense>
 
 
             {/* IDE/IPL placed objects — GLBs textured from public/textures by material name */}
@@ -177,7 +200,7 @@ function StreetView() {
                 <CitizenModels />
             </Suspense>
 
-            {/* Vehicles — one junker per exported car loop; stopFor nodes gate them at crossings */}
+            {/* Vehicles — the traffic simulation's cars (src/Traffic/StreetSim.ts) */}
             <Suspense fallback={null}>
                 <Vehicles />
             </Suspense>

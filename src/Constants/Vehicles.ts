@@ -42,3 +42,16 @@ export const JEEP_SPAWN_OFFSET = 1;
 /** While ambulances are on, every AMBULANCE_SPAWN_EVERY-th spawn (from the offset) is an ambulance. */
 export const AMBULANCE_SPAWN_EVERY = 5;
 export const AMBULANCE_SPAWN_OFFSET = 3;
+
+/**
+ * Footprint half extents per model (world units) — what the traffic simulation uses for
+ * following distances, conflict zones and collision checks. Junker: 2.9 × 1.1 m at the 3.7×
+ * world scale; POC cars measured from their GLBs (tools/blender/vehicles.py).
+ */
+export const VEHICLE_FOOTPRINT: Record<VehicleModelId, { halfLength: number; halfWidth: number }> = {
+    junker: { halfLength: (2.9 * 3.7) / 2, halfWidth: (1.1 * 3.7) / 2 },
+    sedan: { halfLength: 5.35, halfWidth: 2.2 },
+    limo: { halfLength: 8.0, halfWidth: 2.4 },
+    jeep: { halfLength: 5.2, halfWidth: 2.5 },
+    ambulance: { halfLength: 6.0, halfWidth: 2.4 },
+};

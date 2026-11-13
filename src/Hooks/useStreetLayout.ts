@@ -6,6 +6,30 @@ import type { ResolvedPlacement, TextureSlot } from '../types/WorldLayout';
 import { countModifiersByType, getVisibleModifiers } from '../Utils/Modifiers';
 import { STATUES } from '../assets/ShopItems';
 import { buildingVariantForSlot, groundVariantSuffix } from '../Utils/BuildingDegradation';
+import { STREET_PLAN } from '../assets/data/road-plans';
+
+/** IPL entries the active road plan supersedes (old roads, buildings, props it re-homed). */
+const REPLACED_IPL = new Set(STREET_PLAN.replacesIpl ?? []);
+
+/** Instance ids for plan-generated placements start here (clear of IPL ids). */
+const PLAN_INSTANCE_BASE = 100_000;
+
+/** Yaw-only quaternion. */
+const yawQuat = (y: number): [number, number, number, number] => [0, Math.sin(y / 2), 0, Math.cos(y / 2)];
+
+/**
+ * The plan's buildings and props as IPL-style instances, so they flow through the exact same
+ * slot-variant / visibleIf resolution as the hand-placed ones.
+ */
+const PLAN_INSTANCES: Array<{ id: number; modelName: string; pos: [number, number, number]; rot: [number, number, number, number]; scale?: [number, number, number] }> = [
+    ...(STREET_PLAN.buildings ?? []).map((b) => ({ modelName: b.model, pos: [b.pos[0], b.y ?? 0, b.pos[1]] as [number, number, number], rot: yawQuat(0) })),
+    ...(STREET_PLAN.props ?? []).flatMap((p) => p.models.map((m) => ({
+        modelName: m, pos: [p.pos[0], p.y, p.pos[1]] as [number, number, number], rot: p.rot ?? yawQuat(0),
+    }))),
+].map((inst, i) => ({ ...inst, id: PLAN_INSTANCE_BASE + i }));
+
+/** Every instance the street shows: IPL minus what the plan replaced, plus the plan's own. */
+const STREET_INSTANCES = [...STREET_IPL.inst.filter((i) => !REPLACED_IPL.has(i.id)), ...PLAN_INSTANCES];
 
 const ideMap = new Map(STREET_IDE.objs.map((o) => [o.modelName, o]));
 
@@ -17,6 +41,7 @@ const BUILDING_SLOTS: BuildingSlot[] = [
     { normal: 'env_bld_commercial_normal',  poor: 'env_bld_commercial_poor',  rich: 'env_bld_commercial_rich' },
     { normal: 'env_bld_civic_normal',       poor: 'env_bld_civic_poor',       rich: 'env_bld_civic_rich' },
     { normal: 'env_bld_residential_normal', poor: 'env_bld_residential_poor', rich: 'env_bld_residential_rich' },
+    { normal: 'env_bld_terrace_normal',     poor: 'env_bld_terrace_poor',     rich: null },
 ];
 
 /** All non-canonical building variant names — IPL instances with these names are skipped;
@@ -69,7 +94,7 @@ export function useStreetLayout(): ResolvedPlacement[] {
     const statueCount = debugEnabled ? STATUES.length : countModifiersByType(modifiers, 'statue');
 
     return useMemo((): ResolvedPlacement[] => {
-        return STREET_IPL.inst.flatMap((inst): ResolvedPlacement[] => {
+        return STREET_INSTANCES.flatMap((inst): ResolvedPlacement[] => {
             // Building slot path: canonical (normal) IPL entries drive variant selection.
             // Fallback: a variant with no IDE entry renders the slot's normal model (name and asset).
             const slotIndex = BUILDING_SLOTS.findIndex((s) => s.normal === inst.modelName);
@@ -81,7 +106,8 @@ export function useStreetLayout(): ResolvedPlacement[] {
                              : variant === 'rich' && slot.rich  ? slot.rich
                              : slot.normal;
                 const variantName = ideMap.has(wanted) ? wanted : slot.normal;
-                const def = ideMap.get(variantName)!;
+                const def = ideMap.get(variantName);
+                if (!def) return [];
                 return [{
                     instanceId: inst.id,
                     modelName:  variantName,

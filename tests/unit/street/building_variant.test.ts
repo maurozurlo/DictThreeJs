@@ -54,6 +54,10 @@ const { hookState } = vi.hoisted(() => {
     return { hookState };
 });
 
+vi.mock('../../../src/assets/data/road-plans', () => ({
+    // these tests exercise IPL resolution alone — no road-plan buildings / props / replacements
+    STREET_PLAN: { buildings: [], props: [], replacesIpl: [] },
+}));
 vi.mock('../../../src/Stores/GameState', () => ({
     useGameStore: (selector: (s: typeof hookState) => unknown) => selector(hookState),
 }));

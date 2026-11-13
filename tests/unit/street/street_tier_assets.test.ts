@@ -22,6 +22,10 @@ const { state, statues } = vi.hoisted(() => {
     return { state, statues };
 });
 
+vi.mock('../../../src/assets/data/road-plans', () => ({
+    // these tests exercise IPL resolution alone — no road-plan buildings / props / replacements
+    STREET_PLAN: { buildings: [], props: [], replacesIpl: [] },
+}));
 vi.mock('../../../src/Stores/GameState', () => ({
     useGameStore: (selector: (s: typeof state) => unknown) => selector(state),
 }));

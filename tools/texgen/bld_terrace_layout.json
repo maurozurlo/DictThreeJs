@@ -1,0 +1,210 @@
+{
+ "family": "bld_terrace",
+ "note": "Contract shared by tools/texgen/bld_terrace.py (paints) and tools/blender/bld_terrace.py (model). env_bld_terrace_{poor,normal}: a 100 x 20 attached-townhouse row, 15 u eaves (three 5 u storeys, like the existing facades), pitched roof ridge along X (+4 u). Facade faces Blender -Y (game +Z, the Street camera). The game has one ambient light and ignores vertex colour, so every texture paints its own form: sill and lintel shadows, recess darkening, a cornice shadow band, a darker plinth. Rects are [x, y, w, h] from the image's top-left (v = 1 - y / h). Poor = same layout, darker/greyer, grime streaks, boarded and broken windows, peeled plaster, missing shutters. No texture tiles in UV space (StreetView does not set wrap: >1 UVs clamp once a texture is IDE-listed), so the facade spans the full 100 u once, the roof is mapped once per slope, and the brick once per end wall.",
+ "model": {
+  "size": [
+   100.0,
+   20.0
+  ],
+  "wall_height": 15.0,
+  "roof_rise": 4.0,
+  "eave_overhang": 0.7,
+  "houses": 10,
+  "strip_houses": 10,
+  "strip_metres": 100.0,
+  "tris_max": 600
+ },
+ "textures": {
+  "bld_terrace_facade": {
+   "file": "public/textures/map/bld_terrace_facade.png",
+   "size": [
+    320,
+    64
+   ],
+   "tiles": "none: spans the full 100 u once (10 houses of 32 px / 10 u), V = full 15 u wall height incl. cornice",
+   "rows_px": {
+    "cornice": [
+     0,
+     3
+    ],
+    "storey3": [
+     3,
+     22
+    ],
+    "storey2": [
+     22,
+     43
+    ],
+    "ground": [
+     43,
+     64
+    ],
+    "plinth": [
+     60,
+     64
+    ]
+   },
+   "houses": [
+    {
+     "x": 0,
+     "plaster": [
+      214,
+      196,
+      150
+     ],
+     "door": "left",
+     "shop": false,
+     "balcony": false
+    },
+    {
+     "x": 32,
+     "plaster": [
+      190,
+      160,
+      142
+     ],
+     "door": "right",
+     "shop": false,
+     "balcony": true
+    },
+    {
+     "x": 64,
+     "plaster": [
+      168,
+      182,
+      148
+     ],
+     "door": "left",
+     "shop": true,
+     "balcony": false
+    },
+    {
+     "x": 96,
+     "plaster": [
+      206,
+      190,
+      166
+     ],
+     "door": "right",
+     "shop": false,
+     "balcony": false
+    },
+    {
+     "x": 128,
+     "plaster": [
+      184,
+      170,
+      128
+     ],
+     "door": "left",
+     "shop": false,
+     "balcony": true
+    },
+    {
+     "x": 160,
+     "plaster": [
+      192,
+      176,
+      150
+     ],
+     "door": "right",
+     "shop": false,
+     "balcony": true
+    },
+    {
+     "x": 192,
+     "plaster": [
+      208,
+      184,
+      150
+     ],
+     "door": "left",
+     "shop": false,
+     "balcony": false
+    },
+    {
+     "x": 224,
+     "plaster": [
+      180,
+      150,
+      134
+     ],
+     "door": "right",
+     "shop": false,
+     "balcony": false
+    },
+    {
+     "x": 256,
+     "plaster": [
+      160,
+      176,
+      150
+     ],
+     "door": "left",
+     "shop": true,
+     "balcony": false
+    },
+    {
+     "x": 288,
+     "plaster": [
+      212,
+      200,
+      172
+     ],
+     "door": "right",
+     "shop": false,
+     "balcony": true
+    }
+   ],
+   "door_px": {
+    "w": 9,
+    "h": 16,
+    "left_x": 3,
+    "right_x": 20
+   },
+   "tex_for_tiers": {
+    "normal": "bld_terrace_facade",
+    "poor": "bld_terrace_facade_poor"
+   }
+  },
+  "bld_terrace_brick": {
+   "file": "public/textures/map/bld_terrace_brick.png",
+   "size": [
+    32,
+    32
+   ],
+   "tiles": "none: mapped once per end wall (20 x 19 u) and over chimney faces",
+   "look": "End walls, gable triangles and chimneys: running-bond red-brown brick, light grime at the base of the tile, soot at the top.",
+   "tex_for_tiers": {
+    "normal": "bld_terrace_brick",
+    "poor": "bld_terrace_brick_poor"
+   }
+  },
+  "bld_terrace_roof": {
+   "file": "public/textures/map/bld_terrace_roof.png",
+   "size": [
+    128,
+    16
+   ],
+   "tiles": "none: mapped once per roof slope (100 x ~10.8 u)",
+   "look": "Terracotta/brown-red pantiles in staggered rows with shadow under each course; poor: faded, mossy and with missing tiles.",
+   "tex_for_tiers": {
+    "normal": "bld_terrace_roof",
+    "poor": "bld_terrace_roof_poor"
+   }
+  },
+  "bld_terrace_trim": {
+   "file": "public/textures/map/bld_terrace_trim.png",
+   "size": [
+    16,
+    16
+   ],
+   "tiles": "none: any UV (near-uniform)",
+   "look": "Cornice top and soffit, canopy tops, steps, chimney caps: pale weathered stone/concrete.",
+   "tex_for_tiers": {
+    "normal": "bld_terrace_trim",
+    "poor": "bld_terrace_trim_poor"
+   }
+  }
+ }
+}

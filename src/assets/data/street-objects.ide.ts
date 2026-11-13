@@ -19,6 +19,9 @@ export const STREET_IDE: IDEFile = {
         { id: 2008, modelName: 'env_bld_commercial_poor', asset: 'models/map/env_bld_commercial_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/building5_poor.png', transparent: false }] },
         { id: 2009, modelName: 'env_bld_civic_poor', asset: 'models/map/env_bld_civic_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/building2_poor.png', transparent: false }] },
         { id: 2010, modelName: 'env_bld_residential_poor', asset: 'models/map/env_bld_residential_poor.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/building3_poor.png', transparent: false }] },
+        // Long terrace row (road planning 2026-11-12, tools/blender/bld_terrace.py) — textures embedded, material names = texture basenames
+        { id: 2040, modelName: 'env_bld_terrace_normal', asset: 'models/map/env_bld_terrace_normal.glb', visibleIf: { tab: 'Street' } },
+        { id: 2041, modelName: 'env_bld_terrace_poor', asset: 'models/map/env_bld_terrace_poor.glb', visibleIf: { tab: 'Street' } },
         // Street Objects
         { id: 2011, modelName: 'env_flagpole_large', asset: 'models/map/env_flagpole_large.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/flagpole.png', transparent: false }] },
         { id: 2012, modelName: 'env_flag_small', asset: 'models/map/env_flag_small.glb', visibleIf: { tab: 'Street' } },
