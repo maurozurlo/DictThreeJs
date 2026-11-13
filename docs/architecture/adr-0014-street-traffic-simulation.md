@@ -83,6 +83,20 @@ traffic uses always match.
    - A uniform spatial hash grid supplies neighbours. Peds keep right, sidestep oncoming walkers,
      overtake on the left, steer around furniture bases and follow when boxed in. After 2.5 s
      stuck they turn around.
+   - Sidestepping uses **absolute lateral bounds**. Each ped or furniture base ahead narrows the
+     band of offsets the walker may use, measured from where the other one *is*. The walker eases
+     to its keep-right line, clamped into that band. A sidestep that has cleared stays cleared.
+     The first version shifted relative to the walker's own offset and flipped on and off every
+     few ticks (visible twitch).
+   - Oncoming pairs read the same lateral offset of each other, so they always pick opposite
+     sides. They keep right, unless they are already clearly offset the other way.
+   - A walker that can't clear a ped ahead in time slows to keep a gap (to a stop if needed) and
+     waits until the way is clear. It no longer pushes through at a minimum speed.
+   - Sidestep speed is eased and acceleration-limited. The body heading eases toward the walking
+     direction (rate-capped, at most 35° off the path).
+   - The path frame turns smoothly through polyline vertices (`sampleRtSmooth`). A ped off the
+     centre line no longer jumps at corners; on the inside of a turn it used to jump backwards.
+     Switching between loop and link keeps the world position.
    - A final pass pushes apart overlapping bodies, through the path frame only, so a push can
      never move a ped into the road.
 4. **Zebra yield.** Cars give way to peds on the crossing, and to peds waiting at the kerb while
@@ -109,6 +123,8 @@ traffic uses always match.
 - **Measured** (`tools/roadplan/soak.ts`, Avenida, 6 seeds × 10 simulated minutes):
   - 0 car-car and 0 ped-car body overlap.
   - Ped-ped overlap at most a shoulder brush (< 1 u of 2.2 u).
+  - Ped twitch (`SoakProbe` `pedWobblePerMin` / `pedStepBackPerMin`, 45 walkers): about 0.03
+    per ped-minute each. Before the steering rework (2026-11-13) it was 28 and 14.
   - No gridlock.
   - About 0.1 ms per tick for 16 cars and 25 peds.
 - **Remaining tail:** under full load (16 cars) a side-street car can wait 30–50 s at a busy

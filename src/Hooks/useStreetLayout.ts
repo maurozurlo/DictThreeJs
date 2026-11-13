@@ -33,16 +33,39 @@ const STREET_INSTANCES = [...STREET_IPL.inst.filter((i) => !REPLACED_IPL.has(i.i
 
 const ideMap = new Map(STREET_IDE.objs.map((o) => [o.modelName, o]));
 
-/** Ordered building slots: canonical (normal) IPL entries drive variant selection each round. */
-interface BuildingSlot { normal: string; poor: string; rich: string | null; }
+/**
+ * Building families: canonical (normal) IPL entries drive variant selection each round.
+ * `progression` is the GDD §3.1 slot (0-4) whose stage→variant row the family follows; the
+ * terrace shares slot 2 with commercial, so it flips mid-pack (poor at stage ≤ −3, rich at ≥ +3).
+ */
+interface BuildingSlot { normal: string; poor: string; rich: string | null; progression: number; }
 const BUILDING_SLOTS: BuildingSlot[] = [
-    { normal: 'env_bld_mixeduse_normal',    poor: 'env_bld_mixeduse_poor',    rich: 'env_bld_mixeduse_rich' },
-    { normal: 'env_bld_apartment_normal',   poor: 'env_bld_apartment_poor',   rich: 'env_bld_apartment_rich' },
-    { normal: 'env_bld_commercial_normal',  poor: 'env_bld_commercial_poor',  rich: 'env_bld_commercial_rich' },
-    { normal: 'env_bld_civic_normal',       poor: 'env_bld_civic_poor',       rich: 'env_bld_civic_rich' },
-    { normal: 'env_bld_residential_normal', poor: 'env_bld_residential_poor', rich: 'env_bld_residential_rich' },
-    { normal: 'env_bld_terrace_normal',     poor: 'env_bld_terrace_poor',     rich: null },
+    { normal: 'env_bld_mixeduse_normal',    poor: 'env_bld_mixeduse_poor',    rich: 'env_bld_mixeduse_rich',    progression: 0 },
+    { normal: 'env_bld_apartment_normal',   poor: 'env_bld_apartment_poor',   rich: 'env_bld_apartment_rich',   progression: 1 },
+    { normal: 'env_bld_commercial_normal',  poor: 'env_bld_commercial_poor',  rich: 'env_bld_commercial_rich',  progression: 2 },
+    { normal: 'env_bld_civic_normal',       poor: 'env_bld_civic_poor',       rich: 'env_bld_civic_rich',       progression: 3 },
+    { normal: 'env_bld_residential_normal', poor: 'env_bld_residential_poor', rich: 'env_bld_residential_rich', progression: 4 },
+    { normal: 'env_bld_terrace_normal',     poor: 'env_bld_terrace_poor',     rich: 'env_bld_terrace_rich',     progression: 2 },
 ];
+
+/**
+ * Model a building family shows at a condition stage. Falls back to the family's normal
+ * model when the wanted variant has no IDE entry (missing rich models).
+ *
+ * @param normalName     the family's canonical (normal) model name
+ * @param conditionStage current district condition stage
+ * @param hasModel       whether a model name has an IDE entry
+ * @returns the model name to render, or undefined when `normalName` is not a building family
+ */
+export function buildingModelFor(normalName: string, conditionStage: number, hasModel: (name: string) => boolean): string | undefined {
+    const slot = BUILDING_SLOTS.find((s) => s.normal === normalName);
+    if (!slot) return undefined;
+    const variant = buildingVariantForSlot(slot.progression, conditionStage);
+    const wanted = variant === 'poor'              ? slot.poor
+                 : variant === 'rich' && slot.rich ? slot.rich
+                 : slot.normal;
+    return hasModel(wanted) ? wanted : slot.normal;
+}
 
 /** All non-canonical building variant names — IPL instances with these names are skipped;
  *  the canonical (normal) entry for that slot emits the correct variant placement. */
@@ -97,15 +120,9 @@ export function useStreetLayout(): ResolvedPlacement[] {
         return STREET_INSTANCES.flatMap((inst): ResolvedPlacement[] => {
             // Building slot path: canonical (normal) IPL entries drive variant selection.
             // Fallback: a variant with no IDE entry renders the slot's normal model (name and asset).
-            const slotIndex = BUILDING_SLOTS.findIndex((s) => s.normal === inst.modelName);
-            if (slotIndex !== -1) {
+            const variantName = buildingModelFor(inst.modelName, conditionStage, (n) => ideMap.has(n));
+            if (variantName !== undefined) {
                 if (activeTab !== 'Street') return [];
-                const slot = BUILDING_SLOTS[slotIndex];
-                const variant = buildingVariantForSlot(slotIndex, conditionStage);
-                const wanted = variant === 'poor'               ? slot.poor
-                             : variant === 'rich' && slot.rich  ? slot.rich
-                             : slot.normal;
-                const variantName = ideMap.has(wanted) ? wanted : slot.normal;
                 const def = ideMap.get(variantName);
                 if (!def) return [];
                 return [{

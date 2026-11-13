@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
 import { groundVariantSuffix } from '../Utils/BuildingDegradation';
 import { streetNetwork } from '../Traffic/streetWorld';
 import { buildRoadSurface, type SurfaceKind } from './streetFloorGeometry';
+import { roadPaintOpacity } from '../Utils/RoadPaint';
 
 /** Texture per textured surface kind (public/textures/map/<name>.png, `_poor` variants exist). */
 const SURFACE_TEXTURE: Partial<Record<SurfaceKind, string>> = {
@@ -26,12 +27,16 @@ const MARKING_COLOR: Partial<Record<SurfaceKind, string>> = { markWhite: '#ecebe
 /**
  * The street floor — asphalt, kerbs, sidewalks, lots, medians and road markings — generated from
  * the active road plan (ADR-0014; replaces the env_roads GLB). Ground textures swap to their
- * `_poor` paint when the city degrades, like env_roads did (art-bible §7.2.3).
+ * `_poor` paint when the city degrades, like env_roads did (art-bible §7.2.3). Road paint
+ * (lines, stop lines, zebras) wears off with the infrastructure budget: invisible at the
+ * minimum, fresh at the maximum (src/Utils/RoadPaint.ts).
  * Suspends while textures load.
  */
 function RoadSurface() {
     const conditionStage = useGameStore((s) => s.gameManagement.conditionStage);
+    const infrastructure = useGameStore((s) => s.budget.expenditures.infrastructure);
     const suffix = groundVariantSuffix(conditionStage);
+    const paintOpacity = roadPaintOpacity(infrastructure);
     const loaded = useLoader(THREE.TextureLoader, TEXTURE_URLS);
     const geometries = useMemo(() => buildRoadSurface(streetNetwork()), []);
 
@@ -60,19 +65,35 @@ function RoadSurface() {
                     map: tex, roughness: 0.9, metalness: 0, color: kind === 'ground' ? GROUND_TINT : '#ffffff',
                 });
             } else {
+                // Road paint: transparent so it can wear off; no depth write (flat decal on the asphalt).
                 out[kind] = new THREE.MeshStandardMaterial({
                     color: MARKING_COLOR[kind] ?? '#ffffff', roughness: 0.9, metalness: 0,
                     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+                    transparent: true, depthWrite: false,
                 });
             }
         }
         return out;
     }, [geometries, textures, suffix]);
 
+    // Wear follows the budget live without rebuilding materials.
+    useEffect(() => {
+        for (const kind of Object.keys(MARKING_COLOR) as SurfaceKind[]) {
+            const mat = materials[kind];
+            if (mat) mat.opacity = paintOpacity;
+        }
+    }, [materials, paintOpacity]);
+
     return (
         <group>
             {(Object.keys(geometries) as SurfaceKind[]).map((kind) => (
-                <mesh key={kind} geometry={geometries[kind]} material={materials[kind]} receiveShadow />
+                <mesh
+                    key={kind}
+                    geometry={geometries[kind]}
+                    material={materials[kind]}
+                    visible={!(kind in MARKING_COLOR) || paintOpacity > 0}
+                    receiveShadow
+                />
             ))}
         </group>
     );

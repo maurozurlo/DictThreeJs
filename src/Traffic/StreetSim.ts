@@ -25,14 +25,14 @@
 import {
     CAR_ACCEL, CAR_AGING_PER_S, CAR_AXLE_FRACTION, CAR_CLAIM_MARGIN, CAR_COMFORT_DECEL, CAR_GAP_ACCEPT_S,
     CAR_HEADWAY_S, CAR_IDLE_RELEASE_S, CAR_JAM_GAP, CAR_LATERAL_ACCEL, CAR_MAX, CAR_MAX_DECEL, CAR_PED_SENSOR, CAR_RANK_WEIGHT,
-    CAR_SPAWN_MEAN_S, CAR_TURN_WEIGHT, CAR_ZEBRA_PATIENCE_S, PED_ACCEL, PED_CROSS_CHANCE, PED_KERB_WAIT_BACK,
-    PED_LATERAL_SPEED, PED_LOOKAHEAD, PED_ONCOMING_MIN_SPEED, PED_PERSONAL, PED_RADIUS, PED_STUCK_TURN_S, PED_SPEED_MAX, PED_SPEED_MIN, PED_TURN_RATE,
-    PED_WALKWAY_CHANCE, SIM_DT,
+    CAR_SPAWN_MEAN_S, CAR_TURN_WEIGHT, CAR_ZEBRA_PATIENCE_S, PED_ACCEL, PED_CROSS_CHANCE, PED_HEADING_DEV_MAX, PED_HEADING_EASE_S,
+    PED_KERB_WAIT_BACK, PED_LATERAL_ACCEL, PED_LATERAL_GAIN, PED_LATERAL_SPEED, PED_LOOKAHEAD, PED_ONCOMING_SIDE_TIE, PED_PERSONAL,
+    PED_RADIUS, PED_STUCK_TURN_S, PED_SPEED_MAX, PED_SPEED_MIN, PED_TURN_RATE, PED_WALKWAY_CHANCE, PED_YIELD_GAP, SIM_DT,
 } from '../Constants/Traffic.ts';
 import { buildConflicts, REF_HALF_LEN, type Conflicts, type PathZoneRef } from './Conflicts.ts';
 import type { RoadNetwork } from './RoadBuilder.ts';
 import { mulberry32, type Rng } from './Rng.ts';
-import { newSample, sampleRt, speedEnvelope, toRtPath, vertexAt, type PathSample, type RtPath } from './RtPath.ts';
+import { newSample, sampleRt, sampleRtSmooth, speedEnvelope, toRtPath, vertexAt, type PathSample, type RtPath } from './RtPath.ts';
 import { SpatialGrid } from './SpatialGrid.ts';
 
 // ---------------------------------------------------------------------------
@@ -90,6 +90,10 @@ export interface Ped {
     dir: 1 | -1;
     /** Lateral offset from the loop/link line, along rightOf(path tangent). */
     u: number;
+    /** Sidestep velocity: rate of change of u (u/s) — eased, so it never flips sign in one tick. */
+    latV: number;
+    /** Where along the kerb (u) a waiting ped shuffles to while the zebra is busy. */
+    uWait: number;
     v: number;
     /** Link index: crossings first, then walkways. */
     link: number;
@@ -737,7 +741,7 @@ export class StreetSim {
         const rt = this.loops[L];
         const p: Ped = {
             id, speed0: PED_SPEED_MIN + this.rng() * (PED_SPEED_MAX - PED_SPEED_MIN), mode: 'loop', loop: L,
-            s: this.rng() * rt.length, dir: this.rng() < 0.5 ? 1 : -1, u: (this.rng() - 0.5) * this.loopHalf[L],
+            s: this.rng() * rt.length, dir: this.rng() < 0.5 ? 1 : -1, u: (this.rng() - 0.5) * this.loopHalf[L], latV: 0, uWait: 0,
             v: 0, link: -1, t: 0, dirL: 1, onRoad: false, cooldownUntil: 0, stuckFor: 0, x: 0, z: 0, yaw: 0, y: this.opts.sidewalkY,
         };
         p.v = p.speed0;
@@ -786,30 +790,54 @@ export class StreetSim {
         this.pedGrid.rebuild(n, this.pedX, this.pedZ);
     }
 
-    /** Path frame of a ped: the sample of its current loop/link and the corridor half-width. */
+    /**
+     * Path frame of a ped: the sample of its current loop/link and the corridor half-width. The
+     * frame turns smoothly through polyline vertices (sampleRtSmooth), so a ped walking off the
+     * centre line never jumps at a corner.
+     */
     private pedFrame(p: Ped, out: PathSample): number {
         if (p.mode === 'loop') {
-            sampleRt(this.loops[p.loop], p.s, out);
+            sampleRtSmooth(this.loops[p.loop], p.s, out);
             return this.loopHalf[p.loop];
         }
         const l = this.links[p.link];
-        sampleRt(l.rt, p.t, out);
+        sampleRtSmooth(l.rt, p.t, out);
         return l.halfWidth;
     }
 
+    /**
+     * Ped steering, one tick. Each ped ahead (and each furniture base) narrows a band [lo, hi] of
+     * lateral offsets the walker may use; the walker eases toward its keep-right line clamped into
+     * that band. The bounds sit at absolute offsets (where the other ped IS), not relative to where
+     * the walker is now, so once it has stepped aside the constraint is simply satisfied and it
+     * stays put — no stepping back into the other ped's way and out again every few ticks.
+     * Whoever can't clear a ped ahead in time slows to keep a gap and waits until the way is clear.
+     */
     private stepPeds(dt: number): void {
         const { peds } = this;
         const fr = this.sampleA;
+        const body = 2 * PED_RADIUS;
         for (let i = 0; i < peds.length; i++) {
             const p = peds[i];
-            if (p.mode === 'wait') { this.tryStartCrossing(p); if (p.mode === 'wait') { p.v = 0; continue; } }
+            if (p.mode === 'wait') {
+                this.tryStartCrossing(p);
+                if (p.mode === 'wait') {
+                    // standing at the kerb: shuffle to its spot along it, then wait
+                    p.v = 0;
+                    this.stepLateral(p, p.uWait, this.pedFrame(p, fr), dt);
+                    this.pedPose(p, dt);
+                    continue;
+                }
+            }
             const hw = this.pedFrame(p, fr);
             const dir = p.mode === 'loop' ? p.dir : p.dirL;
             // travel frame
             const tx = fr.tx * dir, tz = fr.tz * dir;
             const rx = -tz, rz = tx;
             const lt = p.u * dir; // lateral in travel frame (+ = travel right)
-            let rightShift = 0, leftShift = 0, vCap = p.speed0;
+            let lo = -hw, hi = hw, vCap = p.speed0;
+            /** Lateral reach: anything farther to the side than this can't bound the corridor. */
+            const reach = 2 * hw + PED_PERSONAL;
 
             const n = this.pedGrid.query(p.x, p.z, PED_LOOKAHEAD + PED_PERSONAL, this.nbuf);
             for (let k = 0; k < n; k++) {
@@ -819,23 +847,29 @@ export class StreetSim {
                 const dx = q.x - p.x, dz = q.z - p.z;
                 const a = dx * tx + dz * tz;
                 const l = dx * rx + dz * rz;
-                if (a < 0 || a > PED_LOOKAHEAD || Math.abs(l) > PED_PERSONAL + 0.5) continue;
-                const qHeadX = Math.sin(q.yaw), qHeadZ = Math.cos(q.yaw);
-                const facing = qHeadX * tx + qHeadZ * tz;
+                // keep the constraint until it is fully behind (shoulder to shoulder still counts)
+                if (a < -PED_RADIUS || a > PED_LOOKAHEAD || Math.abs(l) > reach) continue;
+                const qAbs = lt + l; // its lateral offset in my travel frame
+                const facing = Math.sin(q.yaw) * tx + Math.cos(q.yaw) * tz;
                 if (q.v > 0.3 && facing < -0.3) {
-                    // oncoming: both keep right — I take half the needed clearance, and keep
-                    // walking (slowly) so the pair slides past instead of freezing face to face
-                    if (l > -PED_PERSONAL) rightShift = Math.max(rightShift, (l + PED_PERSONAL) * 0.5);
-                    if (Math.abs(l) < 2 * PED_RADIUS + 0.3) vCap = Math.min(vCap, Math.max(PED_ONCOMING_MIN_SPEED * p.speed0, (a - 2 * PED_RADIUS) * 1.2));
-                    continue;
-                } else if (q.v < p.speed0 - 0.4) {
-                    // slower or standing: overtake on the left, or pass on the freer side if stopped
-                    const passLeft = q.v > 0.3 || l >= 0;
-                    if (passLeft) leftShift = Math.max(leftShift, PED_PERSONAL - l);
-                    else rightShift = Math.max(rightShift, PED_PERSONAL + l);
+                    // Oncoming. `l` reads the same for both of us (each measures the other on its own
+                    // right), so we always choose opposite sides: keep right, unless we are already
+                    // clearly offset the other way round — then both pass on the left.
+                    if (l < PED_ONCOMING_SIDE_TIE) lo = Math.max(lo, Math.min(hw, qAbs + PED_PERSONAL));
+                    else hi = Math.min(hi, Math.max(-hw, qAbs - PED_PERSONAL));
+                } else if (q.v < p.speed0 - 0.4 && a > 0) {
+                    // Slower or standing: overtake on the left; pass a standing ped on the side it
+                    // leaves free. A side "fits" if a body gets by, even short of comfortable room.
+                    const leftFits = qAbs + hw >= body + 0.3, rightFits = hw - qAbs >= body + 0.3;
+                    const passLeft = leftFits && (q.v > 0.3 || l >= 0 || !rightFits);
+                    if (passLeft) hi = Math.min(hi, Math.max(-hw, qAbs - PED_PERSONAL));
+                    else if (rightFits) lo = Math.max(lo, Math.min(hw, qAbs + PED_PERSONAL));
                 }
-                // follow if still overlapping laterally (can't get past yet)
-                if (Math.abs(l) < 2 * PED_RADIUS + 0.3) vCap = Math.min(vCap, Math.max(0, q.v * Math.max(0, facing)) + Math.max(0, a - 2 * PED_RADIUS - 0.6) * 1.2);
+                // Yield: still in its way → slow to hold a gap (to a stop if need be) until I've
+                // stepped clear or it has moved on.
+                if (a > 0 && Math.abs(l) < body + 0.3) {
+                    vCap = Math.min(vCap, Math.max(0, q.v * facing) + Math.max(0, a - body - PED_YIELD_GAP) * 1.2);
+                }
             }
             const no = this.obstacles.length ? this.obstacleGrid.query(p.x, p.z, PED_LOOKAHEAD + 3, this.nbuf) : 0;
             for (let k = 0; k < no; k++) {
@@ -844,31 +878,42 @@ export class StreetSim {
                 const a = dx * tx + dz * tz;
                 const l = dx * rx + dz * rz;
                 const need = o.r + PED_RADIUS + 0.4;
-                if (a < -o.r || a > PED_LOOKAHEAD || Math.abs(l) > need) continue;
-                if (l >= 0) leftShift = Math.max(leftShift, need - l);
-                else rightShift = Math.max(rightShift, need + l);
-                if (Math.abs(l) < need - 0.2) vCap = Math.min(vCap, p.speed0 * 0.7);
+                if (a < -o.r || a > PED_LOOKAHEAD || Math.abs(l) > reach + o.r) continue;
+                const oAbs = lt + l;
+                if (l >= 0) hi = Math.min(hi, Math.max(-hw, oAbs - need));
+                else lo = Math.max(lo, Math.min(hw, oAbs + need));
+                if (a > -o.r && Math.abs(l) < need - 0.2) vCap = Math.min(vCap, p.speed0 * 0.7);
             }
 
             const keepRight = hw * 0.35;
-            let target = rightShift > 0 || leftShift > 0 ? lt + rightShift - leftShift : keepRight;
-            target = Math.max(-hw, Math.min(hw, target));
-            const dl = Math.max(-PED_LATERAL_SPEED * dt, Math.min(PED_LATERAL_SPEED * dt, target - lt));
-            const ltNew = lt + dl;
-            p.u = ltNew * dir;
+            const goal = lo <= hi ? Math.max(lo, Math.min(hi, keepRight)) : (lo + hi) / 2;
+            this.stepLateral(p, goal * dir, hw, dt);
             const vt = Math.max(0, Math.min(p.speed0, vCap));
             p.v += Math.max(-PED_ACCEL * 2 * dt, Math.min(PED_ACCEL * dt, vt - p.v));
             // boxed in on a sidewalk for too long: turn around rather than stand there forever
             if (p.mode === 'loop' && p.v < 0.2) {
                 p.stuckFor += dt;
-                if (p.stuckFor > PED_STUCK_TURN_S) { p.dir = (-p.dir) as 1 | -1; p.u = -p.u; p.stuckFor = 0; }
+                if (p.stuckFor > PED_STUCK_TURN_S) { p.dir = (-p.dir) as 1 | -1; p.stuckFor = 0; }
             } else p.stuckFor = 0;
             const ds = p.v * dt;
             if (p.mode === 'loop') this.moveOnLoop(p, ds);
             else this.moveOnLink(p, ds);
-            this.pedPose(p, dt, dl / dt);
+            this.pedPose(p, dt);
         }
         this.separatePeds();
+    }
+
+    /**
+     * Eases the lateral offset toward `goal` (path frame): sidestep speed proportional to the
+     * distance left, capped, and itself acceleration-limited — so a change of plan bends the
+     * sidestep instead of reversing it in one tick.
+     */
+    private stepLateral(p: Ped, goal: number, hw: number, dt: number): void {
+        const want = Math.max(-PED_LATERAL_SPEED, Math.min(PED_LATERAL_SPEED, (goal - p.u) * PED_LATERAL_GAIN));
+        p.latV += Math.max(-PED_LATERAL_ACCEL * dt, Math.min(PED_LATERAL_ACCEL * dt, want - p.latV));
+        const u = p.u + p.latV * dt;
+        p.u = Math.max(-hw, Math.min(hw, u));
+        if (p.u !== u) p.latV = 0;
     }
 
     private moveOnLoop(p: Ped, ds: number): void {
@@ -883,13 +928,31 @@ export class StreetSim {
             const link = this.links[lp.link];
             const chance = link.kind === 'crossing' ? PED_CROSS_CHANCE : PED_WALKWAY_CHANCE;
             if (this.rng() >= chance) continue;
+            const [ox, oz] = this.pedWorld(p);
             p.mode = 'link';
             p.link = lp.link;
             p.dirL = lp.end === 0 ? 1 : -1;
             p.t = lp.end === 0 ? 0 : link.rt.length;
-            p.u = Math.max(-link.halfWidth, Math.min(link.halfWidth, p.u * 0.3));
+            p.u = 0;
+            this.carryOver(p, ox, oz);
             return;
         }
+    }
+
+    /** Where the ped stands right now on its current path (sets p.x/p.z). */
+    private pedWorld(p: Ped): [number, number] {
+        this.pedPlace(p, this.sampleB);
+        return [p.x, p.z];
+    }
+
+    /**
+     * After switching path (loop ↔ link), re-expresses the ped's old world spot in the new path's
+     * frame, so the switch moves nobody — only the frame changes.
+     */
+    private carryOver(p: Ped, ox: number, oz: number): void {
+        this.pedPlace(p, this.sampleB);
+        this.nudge(p, ox - p.x, oz - p.z);
+        p.latV = 0; // a sidestep on the old path is not one on the new
     }
 
     private moveOnLink(p: Ped, ds: number): void {
@@ -914,6 +977,8 @@ export class StreetSim {
         if (p.t <= 0 || p.t >= l.rt.length) {
             const end = l.ends[p.t <= 0 ? 0 : 1];
             if (!end) { p.dirL = (p.dirL * -1) as 1 | -1; p.t = Math.max(0, Math.min(l.rt.length, p.t)); return; }
+            p.t = Math.max(0, Math.min(l.rt.length, p.t));
+            const [ox, oz] = this.pedWorld(p);
             p.mode = 'loop';
             p.loop = end.loop;
             p.s = end.s;
@@ -921,6 +986,7 @@ export class StreetSim {
             p.u = 0;
             p.link = -1;
             p.cooldownUntil = this.time + 4;
+            this.carryOver(p, ox, oz);
         }
     }
 
@@ -938,7 +1004,7 @@ export class StreetSim {
             p.mode = 'wait';
             this.pedWait[cr]++;
             const hw = this.links[p.link].halfWidth;
-            p.u = (this.rng() * 2 - 1) * hw; // spread out along the kerb
+            p.uWait = (this.rng() * 2 - 1) * hw; // spread out along the kerb (walked to, not teleported)
         }
         p.v = 0;
         return false;
@@ -1024,20 +1090,28 @@ export class StreetSim {
         p.y = p.onRoad ? this.opts.asphaltY : this.opts.sidewalkY;
     }
 
-    private pedPose(p: Ped, dt: number, latVel = 0): void {
+    /**
+     * Places the ped and eases its body heading toward where it walks: along the path, leaning
+     * into a sidestep by at most PED_HEADING_DEV_MAX. Waiting peds face across the road. The turn
+     * is exponentially eased and rate-capped, so heading never snaps.
+     */
+    private pedPose(p: Ped, dt: number): void {
         const fr = this.sampleB;
         this.pedPlace(p, fr);
-        const rx = -fr.tz, rz = fr.tx;
         const dir = p.mode === 'loop' ? p.dir : p.dirL;
-        if (p.mode === 'wait') {
-            // face across the road
-            const target = Math.atan2(fr.tx * dir, fr.tz * dir);
-            p.yaw = dt > 0 ? p.yaw + Math.max(-PED_TURN_RATE * dt, Math.min(PED_TURN_RATE * dt, wrapAngle(target - p.yaw))) : target;
-            return;
+        const base = Math.atan2(fr.tx * dir, fr.tz * dir);
+        let target = base;
+        if (p.mode !== 'wait') {
+            // forward floor: a standing ped shuffling sideways turns a little, not side-on
+            const fwd = Math.max(p.v, 0.5 * p.speed0);
+            const vx = fr.tx * dir * fwd - fr.tz * p.latV;
+            const vz = fr.tz * dir * fwd + fr.tx * p.latV;
+            const dev = wrapAngle(Math.atan2(vx, vz) - base);
+            target = base + Math.max(-PED_HEADING_DEV_MAX, Math.min(PED_HEADING_DEV_MAX, dev));
         }
-        const vx = fr.tx * dir * Math.max(p.v, 0.5) + rx * dir * latVel;
-        const vz = fr.tz * dir * Math.max(p.v, 0.5) + rz * dir * latVel;
-        const target = Math.atan2(vx, vz);
-        p.yaw = dt > 0 ? p.yaw + Math.max(-PED_TURN_RATE * dt, Math.min(PED_TURN_RATE * dt, wrapAngle(target - p.yaw))) : target;
+        if (dt <= 0) { p.yaw = wrapAngle(target); return; }
+        const step = wrapAngle(target - p.yaw) * (1 - Math.exp(-dt / PED_HEADING_EASE_S));
+        const max = PED_TURN_RATE * dt;
+        p.yaw = wrapAngle(p.yaw + Math.max(-max, Math.min(max, step)));
     }
 }

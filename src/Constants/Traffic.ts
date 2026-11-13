@@ -57,6 +57,12 @@ export const PED_PERSONAL = 2.6;
 export const PED_LOOKAHEAD = 7;
 /** Max sidestep speed (u/s). */
 export const PED_LATERAL_SPEED = 2.2;
+/** Sidestep speed per unit of distance still to cover (1/s) — eases into the target offset. */
+export const PED_LATERAL_GAIN = 2.5;
+/** How fast sidestep speed itself may change (u/s²) — no instant left/right flips. */
+export const PED_LATERAL_ACCEL = 7;
+/** Oncoming peds keep right unless already this far on the "wrong" side of each other (u). */
+export const PED_ONCOMING_SIDE_TIE = 0.4;
 /** Walking acceleration (u/s²). */
 export const PED_ACCEL = 4;
 /** Preferred walking speed range (u/s): 0.9–1.4 m/s. */
@@ -67,12 +73,16 @@ export const PED_CROSS_CHANCE = 0.35;
 export const PED_WALKWAY_CHANCE = 0.5;
 /** Where a ped stops before the kerb while waiting for the zebra (u back from the kerb). */
 export const PED_KERB_WAIT_BACK = 1.4;
-/** Oncoming peds never slow below this fraction of their walk speed while sidestepping. */
-export const PED_ONCOMING_MIN_SPEED = 0.35;
+/** Gap (u) kept to a ped ahead that blocks the way, on top of both body radii. */
+export const PED_YIELD_GAP = 0.6;
 /** A ped boxed in on a sidewalk this long turns around. */
 export const PED_STUCK_TURN_S = 2.5;
-/** Max heading turn rate (rad/s) — keeps turns smooth. */
-export const PED_TURN_RATE = 7;
+/** Max heading turn rate (rad/s). */
+export const PED_TURN_RATE = 4.5;
+/** Heading ease time constant (s): the body turns toward its walking direction over ~3× this. */
+export const PED_HEADING_EASE_S = 0.12;
+/** The body faces at most this far (rad) off the path while sidestepping (~35°). */
+export const PED_HEADING_DEV_MAX = 0.6;
 
 // ---- street surface ------------------------------------------------------------------------
 
@@ -100,7 +110,6 @@ export const ROAD_OBSTACLE_FOOTPRINT: ReadonlyArray<{ prefix: string; hx: number
  */
 export const PED_OBSTACLE_FOOTPRINT: ReadonlyArray<{ prefix: string; dx: number; dz: number; r: number }> = [
     { prefix: 'env_streetlight', dx: -2.18, dz: 0, r: 0.7 },
-    { prefix: 'env_electricpole', dx: -10.02, dz: 0, r: 0.6 },
     { prefix: 'env_camera_pole', dx: 0, dz: 0, r: 0.8 },
     { prefix: 'env_tree', dx: 0.3, dz: 0.3, r: 1.7 },
     { prefix: 'env_bush', dx: 0, dz: 0, r: 1.5 },

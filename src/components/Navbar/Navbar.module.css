@@ -126,6 +126,14 @@
     animation: hintPulse 1.8s ease-in-out infinite;
 }
 
+/* Long hints (dwell advance label) anchor to the button's right edge so they
+   never run off the viewport — the slot sits at the far right of the Navbar. */
+.advanceHintRight {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
 @keyframes hintPulse {
     0%, 100% {
         opacity: 0.6;

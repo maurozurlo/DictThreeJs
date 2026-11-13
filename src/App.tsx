@@ -13,6 +13,7 @@ import FadeOverlay from "./components/FadeOverlay/FadeOverlay";
 import { useFadeTransition } from "./Hooks/useFadeTransition";
 import { useDelayedFlag } from "./Hooks/useDelayedFlag";
 import { specialEndingRevealDelayMs } from "./Constants/SecretRooms";
+import { GAMESTATE } from "./Constants/GameState";
 import RoundAdvanceController from "./components/RoundAdvanceController/RoundAdvanceController";
 import DayEnded from "./components/DayEnded/DayEnded";
 import TutorialOverlay from "./components/Tutorial/TutorialOverlay";
@@ -31,8 +32,14 @@ export default function App() {
   const tab = useGameStore(s => s.tabs.activeTab)
   const phase = useGameStore(s => s.gameManagement.phase)
   const specialFaction = useGameStore(s => s.specialEnding.faction)
+  const dwelling = useGameStore(s => s.gameManagement.dwelling)
 
   const { fading, transitionTo } = useFadeTransition();
+
+  // ADR-0012 hinge: mandatory reveal window, then the optional dwell. Local UI
+  // timing (not store state). One flag shared by DayEnded (reveal modal) and the
+  // Navbar advance slot (dwell advance), so the hand-off is the same frame.
+  const revealAcked = useDelayedFlag(dwelling, GAMESTATE.ROUNDS.MANDATORY_REVEAL_MS);
 
   // A special ending's room take (the bunker's button press) plays before the end screen covers it.
   const showEndScreen = useDelayedFlag(
@@ -69,12 +76,12 @@ export default function App() {
         </div>
         {debugEnabled && <DebugRecurringOverlay />}
         {debugEnabled && <DebugSelectorOverlay />}
-        <Navbar transitionTo={transitionTo} />
+        <Navbar transitionTo={transitionTo} revealAcked={revealAcked} />
         <FadeOverlay visible={fading} />
         <TabManager />
         <ActionPanel />
         <RoundAdvanceController />
-        <DayEnded />
+        <DayEnded revealAcked={revealAcked} />
         <TutorialOverlay />
         {tab === Tabs.Laws ? <DictatorHands /> : null}
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />

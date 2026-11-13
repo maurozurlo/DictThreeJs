@@ -123,8 +123,8 @@ const INITIAL_STATE = ({ set, get }: {
                 }));
             },
         },
-        selectedPedId: null,
-        selectPed: (id) => set((s) => ({ scene: { ...s.scene, selectedPedId: id } })),
+        selection: null,
+        select: (selection) => set((s) => ({ scene: { ...s.scene, selection } })),
     },
     tabs: {
         activeTab: GAMESTATE.TABS.START_TAB,

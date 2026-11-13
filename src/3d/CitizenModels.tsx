@@ -407,8 +407,12 @@ interface WalkerProps {
 /** Walk-cycle playback rate limits as the sim speed varies (sidesteps, kerb waits, follows). */
 const WALK_TIMESCALE_MIN = 0.35;
 const WALK_TIMESCALE_MAX = 1.8;
-/** Below this ground speed (u/s) the walker switches to the idle clip. */
-const WALK_IDLE_BELOW = 0.35;
+/**
+ * Walk/idle switch with hysteresis (ground speed, u/s): idle below WALK_IDLE_BELOW, walk again
+ * only above WALK_RESUME_ABOVE — a ped creeping at a yield gap doesn't flicker between clips.
+ */
+const WALK_IDLE_BELOW = 0.3;
+const WALK_RESUME_ABOVE = 0.8;
 /** Bounding radius (u) for the per-walker frustum test. */
 const WALKER_CULL_RADIUS = 6;
 
@@ -488,7 +492,7 @@ function CitizenModelWalker({ assets, bodyType, appearance, happiness, citizenId
         cullSphere.center.set(p.x, p.y + WALKER_CULL_RADIUS / 2, p.z);
         const visible = streetFrustum.intersectsSphere(cullSphere);
         group.visible = visible;
-        setMoving(p.v > WALK_IDLE_BELOW);
+        setMoving(p.v > (actions.current.moving ? WALK_IDLE_BELOW : WALK_RESUME_ABOVE));
         const walk = actions.current.walk;
         if (walk) {
             const natural = WALK_CLIP_NATURAL_SPEED * PED_WORLD_SCALE;
@@ -582,7 +586,7 @@ function CitizenModels() {
     const citizens = useGameStore((s) => s.citizens);
     const citizenStates = useGameStore((s) => s.citizenStates);
     const health = useGameStore((s) => s.budget.expenditures.health);
-    const selectPed = useGameStore((s) => s.scene.selectPed);
+    const select = useGameStore((s) => s.scene.select);
 
     const assets = useCitizenAssets();
 
@@ -622,7 +626,7 @@ function CitizenModels() {
 
                 const handleClick = (e: ThreeEvent<MouseEvent>) => {
                     e.stopPropagation();
-                    selectPed(citizen.id);
+                    select({ kind: 'ped', id: citizen.id });
                 };
 
                 if (cs.role === 'protestor') {

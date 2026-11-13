@@ -1,0 +1,750 @@
+{
+    "inspector": {
+        "idle": "Click a citizen, building or street object to inspect it",
+        "legend": "Plaque"
+    },
+    "real": {
+        "infrastructure": {
+            "poor": "Infrastructure {{value}}/10. Repairs start at {{up}}.",
+            "normal": "Infrastructure {{value}}/10. Upgrades at {{up}}, falls apart below {{down}}.",
+            "rich": "Infrastructure {{value}}/10. Stays this fancy while it is {{down}} or more."
+        },
+        "security": {
+            "low": "Security {{value}}/10. Barricades go up while it is {{low}} or less.",
+            "medium": "Security {{value}}/10. Posted while security is {{mid}} to {{midTop}}.",
+            "high": "Security {{value}}/10. Deployed while security is {{high}} or more."
+        },
+        "condition": {
+            "decay": "District condition {{stage}} ({{min}} to {{max}}). Crumbling every month: infrastructure {{infra}} is {{poor}} or less.",
+            "upgrade": "District condition {{stage}} ({{min}} to {{max}}). Improving every month: infrastructure {{infra}} is {{rich}} or more.",
+            "peak": "District condition {{stage}} ({{min}} to {{max}}). Peak luxury. Keep infrastructure at {{rich}} or more.",
+            "repair": "District condition {{stage}} ({{min}} to {{max}}). Slowly being repaired.",
+            "fade": "District condition {{stage}} ({{min}} to {{max}}). Luxury fading. Infrastructure {{rich}} or more keeps it.",
+            "stable": "District condition {{stage}} ({{min}} to {{max}}). Holding steady."
+        },
+        "statue": {
+            "dated": "+{{charisma}} Charisma, forever. Unveiled in month {{round}}.",
+            "undated": "+{{charisma}} Charisma, forever."
+        },
+        "pedestal": {
+            "next": "Empty. The next statue costs ${{price}}M in the Shop.",
+            "later": "Empty. The pedestals before it come first."
+        }
+    },
+    "props": {
+        "bench": {
+            "kind": "Park bench",
+            "labels": [
+                "Cleanliness",
+                "Craftsmanship",
+                "Comfort"
+            ],
+            "poor": {
+                "titles": [
+                    "Splintered Plank",
+                    "Regrettable Bench",
+                    "Tetanus Seat"
+                ],
+                "values": [
+                    "Biological",
+                    "Gave Up",
+                    "Seatbelt Advised"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Municipal Bench",
+                    "Standard Bench",
+                    "Approved Seating"
+                ],
+                "values": [
+                    "Acceptable",
+                    "Adequate",
+                    "Upright"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Gold Plated Bench",
+                    "Velvet Throne Bench",
+                    "Marble Lounger"
+                ],
+                "values": [
+                    "Sparkling",
+                    "High End",
+                    "Cloud Grade"
+                ]
+            }
+        },
+        "streetlight": {
+            "kind": "Street lamp",
+            "labels": [
+                "Brightness",
+                "Reliability",
+                "Moths"
+            ],
+            "poor": {
+                "titles": [
+                    "Flickering Pole",
+                    "Optimistic Lamp",
+                    "Dark Suggestion"
+                ],
+                "values": [
+                    "Rumored",
+                    "Weekends Only",
+                    "Hosting Colony"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Street Lamp",
+                    "Public Light",
+                    "Regulation Lamp"
+                ],
+                "values": [
+                    "Sufficient",
+                    "Mostly",
+                    "Tolerable"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Chandelier Lamp",
+                    "Golden Beacon",
+                    "Crystal Lamppost"
+                ],
+                "values": [
+                    "Blinding",
+                    "Eternal",
+                    "Pampered"
+                ]
+            }
+        },
+        "tree": {
+            "kind": "Street tree",
+            "labels": [
+                "Shade",
+                "Foliage",
+                "Loyalty"
+            ],
+            "poor": {
+                "titles": [
+                    "Sad Stick",
+                    "Twig With Hopes",
+                    "Retired Tree"
+                ],
+                "values": [
+                    "Theoretical",
+                    "Four Leaves",
+                    "Wants Out"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Civic Tree",
+                    "Roadside Tree",
+                    "Approved Oak"
+                ],
+                "values": [
+                    "Adequate",
+                    "Regulation",
+                    "Neutral"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Imperial Tree",
+                    "Glorious Canopy",
+                    "Patriotic Oak"
+                ],
+                "values": [
+                    "Ceremonial",
+                    "Lush and Obedient",
+                    "Unquestioning"
+                ]
+            }
+        },
+        "planter": {
+            "kind": "Flower planter",
+            "labels": [
+                "Soil",
+                "Blooms",
+                "Pride"
+            ],
+            "poor": {
+                "titles": [
+                    "Dirt Box",
+                    "Cracked Planter",
+                    "Weed Garden"
+                ],
+                "values": [
+                    "Gravel, Mostly",
+                    "Allegedly",
+                    "Wounded"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Flower Box",
+                    "Civic Planter",
+                    "Tidy Planter"
+                ],
+                "values": [
+                    "Damp",
+                    "Seasonal",
+                    "Moderate"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Orchid Palace",
+                    "Gilded Planter",
+                    "Royal Flowerbed"
+                ],
+                "values": [
+                    "Imported",
+                    "Over-Watered",
+                    "Insufferable"
+                ]
+            }
+        },
+        "bush": {
+            "kind": "Topiary",
+            "labels": [
+                "Trim",
+                "Gilding",
+                "Ego"
+            ],
+            "rich": {
+                "titles": [
+                    "Gilded Topiary",
+                    "Golden Hedge Sculpture",
+                    "Leader-Shaped Bush"
+                ],
+                "values": [
+                    "Laser Precise",
+                    "Leaf by Leaf",
+                    "Towering"
+                ]
+            }
+        },
+        "fountain": {
+            "kind": "Public fountain",
+            "labels": [
+                "Water",
+                "Splash",
+                "Wishes"
+            ],
+            "normal": {
+                "titles": [
+                    "Town Fountain",
+                    "Plaza Fountain",
+                    "Municipal Spout"
+                ],
+                "values": [
+                    "Wet Enough",
+                    "Polite",
+                    "Mostly Coins"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Champagne Fountain",
+                    "Grand Cascade",
+                    "Golden Geyser"
+                ],
+                "values": [
+                    "Sparkling",
+                    "Theatrical",
+                    "Granted Instantly"
+                ]
+            }
+        },
+        "trashcan": {
+            "kind": "Trash can",
+            "labels": [
+                "Temperature",
+                "Contents",
+                "Fire Code"
+            ],
+            "poor": {
+                "titles": [
+                    "Barrel of Warmth",
+                    "Bin on Fire",
+                    "Eternal Flame Bin"
+                ],
+                "values": [
+                    "Cozy",
+                    "Classified",
+                    "Not Applicable"
+                ]
+            }
+        },
+        "bld_mixeduse": {
+            "kind": "Mixed-use building",
+            "labels": [
+                "Facade",
+                "Plumbing",
+                "Rent"
+            ],
+            "poor": {
+                "titles": [
+                    "Boarded-Up Block",
+                    "Crumbling Annex",
+                    "Leaning Landmark"
+                ],
+                "values": [
+                    "Falling Off",
+                    "Audible",
+                    "Paid in Chickens"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Shop and Flats",
+                    "Mixed Use Block",
+                    "Corner Complex"
+                ],
+                "values": [
+                    "Painted",
+                    "Functional",
+                    "Fair, Allegedly"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Renovated Tower",
+                    "Gilded Arcade",
+                    "Prestige Block"
+                ],
+                "values": [
+                    "Polished",
+                    "Silent",
+                    "Inquire Discreetly"
+                ]
+            }
+        },
+        "bld_apartment": {
+            "kind": "Apartment block",
+            "labels": [
+                "Walls",
+                "Neighbors",
+                "Elevator"
+            ],
+            "poor": {
+                "titles": [
+                    "Crumbling Flats",
+                    "Concrete Regret",
+                    "Condemned Block"
+                ],
+                "values": [
+                    "Optional",
+                    "Heard Everything",
+                    "Out Since 1998"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Apartment Block",
+                    "Housing Unit",
+                    "Standard Flats"
+                ],
+                "values": [
+                    "Thin",
+                    "Nosy",
+                    "Occasionally"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Luxury Residence",
+                    "Penthouse Palace",
+                    "Grand Apartments"
+                ],
+                "values": [
+                    "Soundproof",
+                    "Vetted",
+                    "Has a Butler"
+                ]
+            }
+        },
+        "bld_commercial": {
+            "kind": "Commercial building",
+            "labels": [
+                "Signage",
+                "Stock",
+                "Customers"
+            ],
+            "poor": {
+                "titles": [
+                    "Closed Forever Shop",
+                    "Shuttered Store",
+                    "Looted Emporium"
+                ],
+                "values": [
+                    "Two Letters Left",
+                    "One Sock",
+                    "Pigeons"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Local Shop",
+                    "Corner Store",
+                    "Trade House"
+                ],
+                "values": [
+                    "Legible",
+                    "Adequate",
+                    "Regulars"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Grand Emporium",
+                    "Golden Mall",
+                    "Elite Boutique"
+                ],
+                "values": [
+                    "Neon Gold",
+                    "Overflowing",
+                    "By Invitation"
+                ]
+            }
+        },
+        "bld_civic": {
+            "kind": "Government office",
+            "labels": [
+                "Paperwork",
+                "Queues",
+                "Portraits"
+            ],
+            "poor": {
+                "titles": [
+                    "Leaking Ministry",
+                    "Forgotten Office",
+                    "Moldy Bureau"
+                ],
+                "values": [
+                    "Soggy",
+                    "Open Since Tuesday",
+                    "Faded Leader"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Civic Office",
+                    "State Bureau",
+                    "Ministry Annex"
+                ],
+                "values": [
+                    "In Triplicate",
+                    "Eternal",
+                    "One per Room"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Marble Ministry",
+                    "Palace of Forms",
+                    "Temple of Stamps"
+                ],
+                "values": [
+                    "Embossed",
+                    "Valet Service",
+                    "Every Wall"
+                ]
+            }
+        },
+        "bld_residential": {
+            "kind": "Residential house",
+            "labels": [
+                "Roof",
+                "Garden",
+                "Neighborhood"
+            ],
+            "poor": {
+                "titles": [
+                    "Sagging Shack",
+                    "Boarded-Up House",
+                    "Cardboard Villa"
+                ],
+                "values": [
+                    "Conceptual",
+                    "Tires",
+                    "Feared"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Family House",
+                    "Cozy Home",
+                    "Standard House"
+                ],
+                "values": [
+                    "Watertight",
+                    "A Lawn",
+                    "Gossipy"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Gilded Villa",
+                    "Luxury Manor",
+                    "Leader's Favorite"
+                ],
+                "values": [
+                    "Solid Gold Tiles",
+                    "Peacock Staffed",
+                    "Gated Twice"
+                ]
+            }
+        },
+        "bld_terrace": {
+            "kind": "Terraced houses",
+            "labels": [
+                "Uniformity",
+                "Chimneys",
+                "Gossip"
+            ],
+            "poor": {
+                "titles": [
+                    "Leaning Row",
+                    "Dominoes Waiting",
+                    "Shared Collapse"
+                ],
+                "values": [
+                    "Shared Cracks",
+                    "Smoking Weakly",
+                    "Through Walls"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Terraced Row",
+                    "Tidy Terraces",
+                    "Row Houses"
+                ],
+                "values": [
+                    "Identical",
+                    "Working",
+                    "Over the Fence"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Gentrified Row",
+                    "Heritage Townhouses",
+                    "Boutique Terraces"
+                ],
+                "values": [
+                    "Curated",
+                    "Decorative Only",
+                    "Over Champagne"
+                ]
+            }
+        },
+        "statue": {
+            "kind": "Monument",
+            "labels": [
+                "Height",
+                "Material",
+                "Resemblance"
+            ],
+            "bronze": {
+                "titles": [
+                    "Bronze Leader"
+                ],
+                "values": [
+                    "Tall Enough",
+                    "Bronze",
+                    "Flattering"
+                ],
+                "legend": "Erected by a grateful people. Gratitude was not optional."
+            },
+            "silver": {
+                "titles": [
+                    "Silver Leader"
+                ],
+                "values": [
+                    "Taller Still",
+                    "Silver",
+                    "Improved"
+                ],
+                "legend": "Taller than the last. Looks down on the sky itself, which has been notified."
+            },
+            "gold": {
+                "titles": [
+                    "Golden Leader"
+                ],
+                "values": [
+                    "Visible from Space",
+                    "Solid Gold",
+                    "Better Than Real"
+                ],
+                "legend": "Gaze upon the Leader and be cured. Side effects include tears, devotion and sunburn."
+            }
+        },
+        "pedestal": {
+            "kind": "Empty pedestal",
+            "labels": [
+                "Occupant",
+                "Capacity",
+                "Ambition"
+            ],
+            "empty": {
+                "titles": [
+                    "Empty Pedestal",
+                    "Reserved Plinth",
+                    "Pedestal of Promise"
+                ],
+                "values": [
+                    "Pending",
+                    "One Leader",
+                    "Unlimited"
+                ],
+                "legend": "Reserved for future glory. Please admire the vacancy in the meantime."
+            }
+        },
+        "barricade": {
+            "kind": "Street barricade",
+            "labels": [
+                "Sturdiness",
+                "Contents",
+                "Mood"
+            ],
+            "low": {
+                "titles": [
+                    "Angry Barricade",
+                    "Furniture Wall",
+                    "Uprising Pile"
+                ],
+                "values": [
+                    "Couch Level",
+                    "Mostly Sofas",
+                    "Fired Up"
+                ]
+            }
+        },
+        "guard_post": {
+            "kind": "Guard booth",
+            "labels": [
+                "Alertness",
+                "Coffee",
+                "Paperwork"
+            ],
+            "medium": {
+                "titles": [
+                    "Guard Booth",
+                    "Checkpoint Hut",
+                    "Watchful Cabin"
+                ],
+                "values": [
+                    "Pretending",
+                    "Third Cup",
+                    "Stamped Twice"
+                ]
+            }
+        },
+        "camera_pole": {
+            "kind": "CCTV pole",
+            "labels": [
+                "Resolution",
+                "Privacy",
+                "Blinking"
+            ],
+            "medium": {
+                "titles": [
+                    "Watching Pole",
+                    "Camera Mast",
+                    "Friendly Eye"
+                ],
+                "values": [
+                    "Alarming",
+                    "Abolished",
+                    "Constant"
+                ]
+            }
+        },
+        "tank": {
+            "kind": "Battle tank",
+            "labels": [
+                "Firepower",
+                "Parking Manners",
+                "Subtlety"
+            ],
+            "high": {
+                "titles": [
+                    "Street Tank",
+                    "Persuasion Tank",
+                    "Polite Tank"
+                ],
+                "values": [
+                    "Excessive",
+                    "On Sidewalks",
+                    "Absent"
+                ]
+            }
+        },
+        "cannon": {
+            "kind": "Artillery piece",
+            "labels": [
+                "Range",
+                "Warnings",
+                "Calibre"
+            ],
+            "high": {
+                "titles": [
+                    "Plaza Cannon",
+                    "Loud Opinion",
+                    "Neighbor Cannon"
+                ],
+                "values": [
+                    "Next Province",
+                    "Zero Given",
+                    "Oversized"
+                ]
+            }
+        },
+        "gun_nest": {
+            "kind": "Machine gun nest",
+            "labels": [
+                "Sandbags",
+                "Morale",
+                "Hospitality"
+            ],
+            "high": {
+                "titles": [
+                    "Gun Nest",
+                    "Sandbag Fortress",
+                    "Welcome Nest"
+                ],
+                "values": [
+                    "Fluffy",
+                    "Eager",
+                    "Frosty"
+                ]
+            }
+        },
+        "searchlight": {
+            "kind": "Searchlight",
+            "labels": [
+                "Beam",
+                "Privacy",
+                "Guilt"
+            ],
+            "high": {
+                "titles": [
+                    "Searchlight",
+                    "Interrogation Beam",
+                    "Eye of Order"
+                ],
+                "values": [
+                    "Retina Grade",
+                    "Not Found",
+                    "Induced"
+                ]
+            }
+        }
+    }
+}

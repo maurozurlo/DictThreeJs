@@ -206,5 +206,300 @@
     "poor": "bld_terrace_trim_poor"
    }
   }
+ },
+ "poor": {
+  "note": "Dilapidated variant of the same 10-house row (env_bld_terrace_poor). Texture sizes are 2x the normal ones except the atlas. Window states: ok | broken | dark (empty frame) | boarded (planks are geometry, see tools/blender/bld_terrace.py) | gone (collapsed). gf (ground window, or shopfront for shop houses) adds shop_boarded | shop_roller. door: ok | open | boarded. canopy: ok | tilt | half | missing | none. steps: ok | cracked | none. balcony: null | ok | droop | stub. gutter: ok | sag | hang | missing. Roof pits, tarps, chimney damage, props and the house-9 collapse live in the Blender script. Normal textures are untouched.",
+  "tris_max": 1200,
+  "textures": {
+   "bld_terrace_facade_poor": {
+    "size": [
+     640,
+     128
+    ],
+    "scale": 2
+   },
+   "bld_terrace_brick_poor": {
+    "size": [
+     64,
+     64
+    ],
+    "scale": 2
+   },
+   "bld_terrace_roof_poor": {
+    "size": [
+     256,
+     32
+    ],
+    "scale": 2
+   },
+   "bld_terrace_trim_poor": {
+    "size": [
+     64,
+     64
+    ],
+    "scale": 1,
+    "note": "ATLAS (not just trim): every non-facade/brick/roof surface of the poor model samples a 16x16 cell of it, so the poor model still has 4 materials like the normal one"
+   }
+  },
+  "atlas": {
+   "stone": [
+    0,
+    0,
+    16,
+    16
+   ],
+   "planks": [
+    16,
+    0,
+    32,
+    16
+   ],
+   "tarp": [
+    32,
+    0,
+    48,
+    16
+   ],
+   "tin": [
+    48,
+    0,
+    64,
+    16
+   ],
+   "dark": [
+    0,
+    16,
+    16,
+    32
+   ],
+   "shutter": [
+    16,
+    16,
+    32,
+    32
+   ],
+   "rust": [
+    32,
+    16,
+    48,
+    32
+   ],
+   "cloth": [
+    48,
+    16,
+    64,
+    32
+   ],
+   "wallpaper": [
+    0,
+    32,
+    16,
+    48
+   ],
+   "timber": [
+    16,
+    32,
+    32,
+    48
+   ],
+   "dish": [
+    32,
+    32,
+    48,
+    48
+   ]
+  },
+  "houses": [
+   {
+    "w3": [
+     "boarded",
+     "ok"
+    ],
+    "w2": [
+     "broken",
+     "broken"
+    ],
+    "gf": "boarded",
+    "door": "boarded",
+    "canopy": "tilt",
+    "steps": "ok",
+    "balcony": null,
+    "shutter_paint": [
+     "w2L"
+    ],
+    "shutter_hang": [],
+    "gutter": "ok"
+   },
+   {
+    "w3": [
+     "ok",
+     "dark"
+    ],
+    "w2": [
+     "boarded",
+     "boarded"
+    ],
+    "gf": "broken",
+    "door": "ok",
+    "canopy": "missing",
+    "steps": "cracked",
+    "balcony": "droop",
+    "shutter_paint": [],
+    "shutter_hang": [
+     "w3L"
+    ],
+    "gutter": "sag"
+   },
+   {
+    "w3": [
+     "broken",
+     "boarded"
+    ],
+    "w2": [
+     "ok",
+     "broken"
+    ],
+    "gf": "shop_boarded",
+    "door": "ok",
+    "canopy": "none",
+    "steps": "none",
+    "balcony": null,
+    "shutter_paint": [],
+    "shutter_hang": [],
+    "gutter": "missing"
+   },
+   {
+    "w3": [
+     "dark",
+     "dark"
+    ],
+    "w2": [
+     "boarded",
+     "ok"
+    ],
+    "gf": "boarded",
+    "door": "open",
+    "canopy": "ok",
+    "steps": "ok",
+    "balcony": null,
+    "shutter_paint": [],
+    "shutter_hang": [],
+    "gutter": "hang"
+   },
+   {
+    "w3": [
+     "ok",
+     "boarded"
+    ],
+    "w2": [
+     "dark",
+     "broken"
+    ],
+    "gf": "ok",
+    "door": "boarded",
+    "canopy": "half",
+    "steps": "none",
+    "balcony": "stub",
+    "shutter_paint": [],
+    "shutter_hang": [
+     "w3R"
+    ],
+    "gutter": "ok"
+   },
+   {
+    "w3": [
+     "boarded",
+     "ok"
+    ],
+    "w2": [
+     "ok",
+     "boarded"
+    ],
+    "gf": "broken",
+    "door": "ok",
+    "canopy": "ok",
+    "steps": "ok",
+    "balcony": "ok",
+    "shutter_paint": [
+     "w3R"
+    ],
+    "shutter_hang": [],
+    "gutter": "missing"
+   },
+   {
+    "w3": [
+     "ok",
+     "ok"
+    ],
+    "w2": [
+     "boarded",
+     "dark"
+    ],
+    "gf": "boarded",
+    "door": "boarded",
+    "canopy": "tilt",
+    "steps": "cracked",
+    "balcony": null,
+    "shutter_paint": [],
+    "shutter_hang": [
+     "w2R"
+    ],
+    "gutter": "sag"
+   },
+   {
+    "w3": [
+     "broken",
+     "boarded"
+    ],
+    "w2": [
+     "ok",
+     "ok"
+    ],
+    "gf": "broken",
+    "door": "open",
+    "canopy": "missing",
+    "steps": "ok",
+    "balcony": null,
+    "shutter_paint": [],
+    "shutter_hang": [],
+    "gutter": "ok"
+   },
+   {
+    "w3": [
+     "boarded",
+     "dark"
+    ],
+    "w2": [
+     "broken",
+     "ok"
+    ],
+    "gf": "shop_roller",
+    "door": "ok",
+    "canopy": "none",
+    "steps": "none",
+    "balcony": null,
+    "shutter_paint": [],
+    "shutter_hang": [],
+    "gutter": "hang"
+   },
+   {
+    "w3": [
+     "ok",
+     "gone"
+    ],
+    "w2": [
+     "boarded",
+     "dark"
+    ],
+    "gf": "boarded",
+    "door": "boarded",
+    "canopy": "ok",
+    "steps": "ok",
+    "balcony": "ok",
+    "shutter_paint": [],
+    "shutter_hang": [],
+    "gutter": "ok"
+   }
+  ]
  }
 }

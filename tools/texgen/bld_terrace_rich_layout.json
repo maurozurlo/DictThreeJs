@@ -1,0 +1,69 @@
+{
+ "family": "bld_terrace_rich",
+ "note": "Contract shared by tools/texgen/bld_terrace_rich.py (paints) and tools/blender/bld_terrace_rich.py (model). env_bld_terrace_rich: the gentrified env_bld_terrace_normal -- same 100 x 20 footprint, same 10-house / 10 u rhythm, same door sides and shop houses, same 15 u eaves + 4 u rise; cream and pastel stucco, white pilasters and window surrounds, gold accents, balustrade over a stepped cornice, slate roof with dormers, wrought-iron balconies with flower boxes, polished brass doors. Facade faces Blender -Y (game +Z). One ambient light and no vertex colour in the game: every texture paints its own shading. UVs stay inside 0..1 (nothing tiles). Atlas rects are [x, y, w, h] from the image's top-left (v = 1 - y / h).",
+ "model": {
+  "size": [100.0, 20.0],
+  "wall_height": 15.0,
+  "roof_rise": 4.0,
+  "eave_overhang_back": 0.7,
+  "pivot_shift": [0.0, 0.3, -10.5],
+  "pivot_note": "The normal terrace GLB spans x -50..50, y -11..11, z -10.5..10.5 (centred on its own bbox incl. canopies and chimney caps). The rich model is built with the facade plane at y = -10, ground at z = 0 and then shifted by pivot_shift so ground, facade plane and house positions coincide with the normal at the same placement.",
+  "tris_max": 1200,
+  "max_front_protrusion": 0.8
+ },
+ "textures": {
+  "bld_terrace_rich_facade": {
+   "size": [320, 64],
+   "tiles": "none: the whole row once (10 houses of 32 px / 10 u), V = full 15 u wall height incl. cornice",
+   "rows_px": {"cornice": [0, 3], "frieze": [3, 6.5], "storey3": [3, 22], "storey2": [22, 43], "ground": [43, 64], "plinth": [60, 64]},
+   "houses": [
+    {"x": 0,   "plaster": [244, 234, 208], "door": "left",  "shop": false, "door_col": [28, 44, 84]},
+    {"x": 32,  "plaster": [240, 212, 204], "door": "right", "shop": false, "door_col": [24, 76, 58]},
+    {"x": 64,  "plaster": [214, 230, 214], "door": "left",  "shop": true,  "door_col": [110, 26, 40]},
+    {"x": 96,  "plaster": [246, 228, 176], "door": "right", "shop": false, "door_col": [30, 30, 36]},
+    {"x": 128, "plaster": [212, 224, 238], "door": "left",  "shop": false, "door_col": [110, 26, 40]},
+    {"x": 160, "plaster": [244, 220, 196], "door": "right", "shop": false, "door_col": [28, 44, 84]},
+    {"x": 192, "plaster": [246, 238, 220], "door": "left",  "shop": false, "door_col": [24, 76, 58]},
+    {"x": 224, "plaster": [236, 206, 208], "door": "right", "shop": false, "door_col": [30, 30, 36]},
+    {"x": 256, "plaster": [218, 232, 222], "door": "left",  "shop": true,  "door_col": [28, 44, 84]},
+    {"x": 288, "plaster": [244, 228, 200], "door": "right", "shop": false, "door_col": [110, 26, 40]}
+   ],
+   "door_px": {"w": 9, "h": 16, "left_x": 3, "right_x": 20}
+  },
+  "bld_terrace_rich_wall": {
+   "size": [32, 32],
+   "tiles": "none: mapped once per end wall (20 x 19 u), back wall and chimney shafts",
+   "look": "cream ashlar stucco: pale blocks in running bond with fine joints"
+  },
+  "bld_terrace_rich_roof": {
+   "size": [256, 32],
+   "tiles": "none: mapped once per roof slope (100 x ~11 u); dormer roofs sample a small patch",
+   "look": "slate: blue-grey tiles with two lighter decorative bands, shadow under each course"
+  },
+  "bld_terrace_rich_trim": {
+   "size": [64, 64],
+   "tiles": "none: 16 x 16 cells, every face maps into one cell (half-texel inset)",
+   "regions": {
+    "white":         [0, 0, 16, 16],
+    "white_dark":    [16, 0, 16, 16],
+    "white_mid":     [32, 0, 16, 16],
+    "gold":          [48, 0, 16, 16],
+    "planter":       [0, 16, 16, 16],
+    "dormer":        [16, 16, 16, 16],
+    "awning":        [32, 16, 16, 16],
+    "copper":        [48, 16, 16, 16],
+    "marble":        [0, 32, 16, 16],
+    "balcony_front": [16, 32, 16, 16]
+   }
+  },
+  "bld_terrace_rich_cutout": {
+   "size": [128, 32],
+   "tiles": "none: RGBA, alpha clip 0.5; double-sided material",
+   "regions": {
+    "balustrade":   [0, 0, 80, 10],
+    "railing":      [0, 12, 64, 12],
+    "railing_side": [2, 12, 8, 12]
+   }
+  }
+ }
+}

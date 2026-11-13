@@ -1,5 +1,5 @@
-import { Suspense, useEffect, useMemo } from 'react';
-import { useLoader } from '@react-three/fiber';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useLoader, type ThreeEvent } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
@@ -13,6 +13,8 @@ import StreetSimDriver from './StreetSimDriver';
 import { applyStreetPlacements } from '../Traffic/streetWorld';
 import { STREET_SIDEWALK_Y } from '../Constants/Traffic';
 import { STREET_PLAN } from '../assets/data/road-plans';
+import { isInspectable } from '../Utils/StreetInspect';
+import { INSPECT_HOVER_EMISSIVE, INSPECT_SELECTED_EMISSIVE } from '../Constants/StreetInspect';
 
 const DESELECT = (() => {
     const { min, max } = STREET_PLAN.bounds;
@@ -83,9 +85,20 @@ type TextureMap = Map<string, TextureEntry>;
  * never change (env_roads, env_plaza) swap textures by game state: the suffixed key is tried
  * first, falling back to the bare name if no such variant texture was preloaded.
  */
-function PlacedObject({ placement, textures }: { placement: ResolvedPlacement; textures: TextureMap }) {
+interface PlacedObjectProps {
+    placement: ResolvedPlacement;
+    textures: TextureMap;
+    /** True while this instance is the street inspector's selection (highlight). */
+    selected: boolean;
+    /** Click handler — given only for inspectable models; others take no pointer events. */
+    onSelect?: (placement: ResolvedPlacement) => void;
+}
+
+function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectProps) {
     const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
     const variantSuffix = placement.textureVariantSuffix;
+    const [hovered, setHovered] = useState(false);
+    const hoveredRef = useRef(false);
 
     const object = useMemo(() => {
         const fallback = paletteFor(placement.modelName);
@@ -102,7 +115,8 @@ function PlacedObject({ placement, textures }: { placement: ResolvedPlacement; t
                     : {};
                 return new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0, ...alphaProps });
             }
-            if ((mat as THREE.MeshStandardMaterial).map) return mat; // keep embedded texture
+            // Keep the embedded texture; clone so the inspector highlight lights this instance only.
+            if ((mat as THREE.MeshStandardMaterial).map) return mat.clone();
             return new THREE.MeshStandardMaterial({ color: fallback, roughness: 0.9, metalness: 0 });
         };
         const g = (gltf.scene as THREE.Group).clone(true);
@@ -118,16 +132,58 @@ function PlacedObject({ placement, textures }: { placement: ResolvedPlacement; t
         return g;
     }, [gltf, textures, placement.modelName, variantSuffix]);
 
+    // Inspector highlight: emissive tint while selected (stronger) or hovered.
+    useEffect(() => {
+        const tint = selected ? INSPECT_SELECTED_EMISSIVE : hovered ? INSPECT_HOVER_EMISSIVE : null;
+        object.traverse((child) => {
+            const mesh = child as THREE.Mesh;
+            if (!mesh.isMesh) return;
+            const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            for (const m of mats) {
+                const std = m as THREE.MeshStandardMaterial;
+                if (std.emissive) std.emissive.set(tint ?? 0x000000);
+            }
+        });
+    }, [object, selected, hovered]);
+
+    // Never leave the pointer cursor behind when a hovered object leaves the scene.
+    useEffect(() => () => {
+        if (hoveredRef.current) document.body.style.cursor = '';
+    }, []);
+
     const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
     const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);
-    return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
+
+    if (!onSelect) {
+        return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
+    }
+    const setHover = (on: boolean) => {
+        hoveredRef.current = on;
+        setHovered(on);
+        document.body.style.cursor = on ? 'pointer' : '';
+    };
+    return (
+        <primitive
+            object={object}
+            position={placement.pos}
+            quaternion={quaternion}
+            scale={scale}
+            onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect(placement); }}
+            onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHover(true); }}
+            onPointerOut={() => setHover(false)}
+        />
+    );
 }
 
 /**
  * Preloads every external street texture once, then renders all placements. Lives inside
  * the StreetView <Suspense> so the texture and GLB loads suspend together.
  */
-function PlacedObjects({ placements }: { placements: ResolvedPlacement[] }) {
+function PlacedObjects({ placements, selectedInstanceId, onSelect }: {
+    placements: ResolvedPlacement[];
+    selectedInstanceId: number | null;
+    onSelect: (placement: ResolvedPlacement) => void;
+}) {
     const loaded = useLoader(THREE.TextureLoader, STREET_TEXTURE_URLS.map((u) => `/${u}`));
 
     const textures = useMemo((): TextureMap => {
@@ -149,7 +205,13 @@ function PlacedObjects({ placements }: { placements: ResolvedPlacement[] }) {
         <>
             {placements.map((p) =>
                 p.asset !== null
-                    ? <PlacedObject key={p.instanceId} placement={p} textures={textures} />
+                    ? <PlacedObject
+                        key={p.instanceId}
+                        placement={p}
+                        textures={textures}
+                        selected={p.instanceId === selectedInstanceId}
+                        onSelect={isInspectable(p.modelName) ? onSelect : undefined}
+                    />
                     : null,
             )}
         </>
@@ -163,7 +225,9 @@ function PlacedObjects({ placements }: { placements: ResolvedPlacement[] }) {
 function StreetView() {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
     const placements = useStreetLayout();
-    const selectPed = useGameStore((s) => s.scene.selectPed);
+    const select = useGameStore((s) => s.scene.select);
+    const selection = useGameStore((s) => s.scene.selection);
+    const selectedInstanceId = selection?.kind === 'prop' ? selection.instanceId : null;
 
     // Peds steer around the street furniture standing right now; cars weave around road props
     // (tier / security dependent).
@@ -171,14 +235,26 @@ function StreetView() {
         applyStreetPlacements(placements);
     }, [placements]);
 
+    // A selected object that swapped tier or vanished (budget change, new round) drops the card.
+    useEffect(() => {
+        if (activeTab !== Tabs.Street || selection?.kind !== 'prop') return;
+        const still = placements.some((p) => p.instanceId === selection.instanceId && p.modelName === selection.modelName);
+        if (!still) select(null);
+    }, [activeTab, placements, selection, select]);
+
+    const selectProp = useMemo(
+        () => (p: ResolvedPlacement) => select({ kind: 'prop', instanceId: p.instanceId, modelName: p.modelName }),
+        [select],
+    );
+
     if (activeTab !== Tabs.Street) return null;
 
     return (
         <group position={[0, 0, 0]}>
             <StreetSimDriver />
-            {/* Click catcher over the whole street floor — clicking empty ground deselects any
-                selected citizen (two triangles, cheaper to raycast than the street meshes) */}
-            <mesh position={[DESELECT.cx, STREET_SIDEWALK_Y + 0.01, DESELECT.cz]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => selectPed(null)}>
+            {/* Click catcher over the whole street floor — clicking empty ground clears the
+                inspector selection (two triangles, cheaper to raycast than the street meshes) */}
+            <mesh position={[DESELECT.cx, STREET_SIDEWALK_Y + 0.01, DESELECT.cz]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => select(null)}>
                 <planeGeometry args={[DESELECT.w, DESELECT.d]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
@@ -191,7 +267,7 @@ function StreetView() {
 
             {/* IDE/IPL placed objects — GLBs textured from public/textures by material name */}
             <Suspense fallback={null}>
-                <PlacedObjects placements={placements} />
+                <PlacedObjects placements={placements} selectedInstanceId={selectedInstanceId} onSelect={selectProp} />
             </Suspense>
 
             {/* Citizens — simulation entities rendered as animated models (roles,

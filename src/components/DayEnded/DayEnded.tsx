@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react'
 import { useGameStore } from '../../Stores/GameState'
 import { MoneyNumberFormatter } from '../../Constants/Budget'
 import { GAMESTATE } from '../../Constants/GameState'
 import Typography from '../Typography/Typography'
-import Button from '../Button/Button'
 import { useTranslation } from 'react-i18next'
 import { Modal, ModalCard } from '../Modal/Modal'
 import styles from './DayEnded.module.css'
@@ -14,7 +12,12 @@ import { Icon } from '../Icon/Icon'
 import { dumbifyText } from '../../Utils/String'
 import { buildRevealHeadline } from '../../Utils/RevealHeadline'
 
-const DayEnded = () => {
+interface DayEndedProps {
+    /** True once the mandatory reveal window has elapsed (ADR-0012); the modal then hides. */
+    revealAcked: boolean;
+}
+
+const DayEnded = ({ revealAcked }: DayEndedProps) => {
     const { t } = useTranslation()
     const phase = useGameStore(s => s.gameManagement.phase)
     const dayEnded = useGameStore(s => s.gameManagement.dayEnded)
@@ -49,9 +52,6 @@ const DayEnded = () => {
         business: businessRelation,
         people: peopleRelation,
     }
-    const nextRound = useGameStore(s => s.gameManagement.nextRound)
-    const beginFirstWorkDay = useGameStore(s => s.gameManagement.beginFirstWorkDay)
-
     // Re-evaluate whether the threat is still live at round-end.
     // If the player eliminated the faction this round, the warning is no longer valid.
     const coupStillActive = coupArmed
@@ -63,22 +63,14 @@ const DayEnded = () => {
     const advisorVerdict = computeDayendedVerdict(coupStillActive, treasury)
     const advisorTrigger = computeDayendedTrigger(coupStillActive, treasury)
 
-    // Mandatory-reveal-then-optional-dwell hinge (ADR-0012). The minimum viewing
-    // window is local UI timing, not store state — Handlers stay pure (ADR-0002).
-    // Gated on `dwelling` (not `dayEnded`) so the same two-stage flow covers both
-    // the round-1 opening ("inherited city", dayEnded still false) and every
-    // subsequent round-end hinge (dayEnded true).
-    const [revealAcked, setRevealAcked] = useState(false)
-    useEffect(() => {
-        if (!dwelling) return
-        setRevealAcked(false)
-        const timer = setTimeout(() => setRevealAcked(true), GAMESTATE.ROUNDS.MANDATORY_REVEAL_MS)
-        return () => clearTimeout(timer)
-    }, [dwelling])
+    // Mandatory-reveal-then-optional-dwell hinge (ADR-0012). This component is
+    // only the blocking reveal stage; once `revealAcked` (App-owned timer) flips,
+    // the dwell-stage advance lives in the Navbar advance slot so nothing covers
+    // the Street view. Gated on `dwelling` (not `dayEnded`) so the same flow
+    // covers the round-1 opening and every round-end hinge.
+    if (!dwelling || phase !== 'start' || revealAcked) return null
 
-    if (!dwelling || phase !== 'start') return null
-
-    // Round-1 opening has no round to report on yet — distinct headline/label/action.
+    // Round-1 opening has no round to report on yet — distinct headline.
     const isIntro = !dayEnded
 
     const net = lastRoundIncome + recurringIncome + extraIncome + lawTreasuryDelta + dealTreasuryDelta + expropriateGain
@@ -87,23 +79,6 @@ const DayEnded = () => {
     const headline = isIntro
         ? dumbifyText(t('hinge.intro_headline'), dumbScore)
         : dumbifyText(buildRevealHeadline(round, t), dumbScore)
-    const advanceLabel = isIntro
-        ? t('actionPanel.begin_first_month')
-        : round + 1 <= GAMESTATE.ROUNDS.MAX
-            ? t('actionPanel.continue_month', { month: round + 1 })
-            : t('actionPanel.finish_month', { month: round })
-    const onAdvance = isIntro ? beginFirstWorkDay : nextRound
-
-    // Dwell stage: non-blocking corner banner — no full-viewport scrim, so the
-    // Street scene (camera, ped click-to-inspect) stays interactive underneath.
-    if (revealAcked) {
-        return (
-            <div className={styles.dwellBanner}>
-                <Typography variant="h3" color="accent" className={styles.headline}>{headline}</Typography>
-                <Button onClick={onAdvance}>{advanceLabel}</Button>
-            </div>
-        )
-    }
 
     if (isIntro) {
         return (

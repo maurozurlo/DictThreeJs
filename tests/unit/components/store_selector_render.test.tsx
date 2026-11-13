@@ -33,7 +33,7 @@ describe('DayEnded — store selector reactivity', () => {
             gameManagement: { ...s.gameManagement, dayEnded: true, dwelling: true, phase: 'start' },
         }))
 
-        expect(() => renderWithProviders(<DayEnded />)).not.toThrow()
+        expect(() => renderWithProviders(<DayEnded revealAcked={false} />)).not.toThrow()
     })
 
     it('renders the modal content (a Continue button) once shown', () => {
@@ -41,8 +41,9 @@ describe('DayEnded — store selector reactivity', () => {
             gameManagement: { ...s.gameManagement, dayEnded: true, dwelling: true, phase: 'start' },
         }))
 
-        const { container } = renderWithProviders(<DayEnded />)
-        // The Continue/Finish button is the modal's primary control.
+        const { container } = renderWithProviders(<DayEnded revealAcked={false} />)
+        // Reveal stage: the recap modal (advisor button) — the advance itself is
+        // in the Navbar slot once the reveal elapses (ADR-0012).
         expect(container.querySelectorAll('button').length).toBeGreaterThan(0)
     })
 })

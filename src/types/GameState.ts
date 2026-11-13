@@ -170,6 +170,14 @@ export type GameStats = {
     repealCount: number;
 };
 
+/**
+ * Street-view selection: a citizen by id, or a placed street object by its placement
+ * instance id (plus model name, so the inspector can find its card without the layout).
+ */
+export type StreetSelection =
+    | { kind: 'ped'; id: number }
+    | { kind: 'prop'; instanceId: number; modelName: string };
+
 type CameraState = {
     cameraPos: [number, number, number];
     /** Vertical FOV in degrees, applied in CameraController when cameraHFov is unset. */
@@ -207,8 +215,10 @@ export type GameState = {
     },
     scene: {
         camera: CameraState;
-        selectedPedId: number | null;
-        selectPed: (id: number | null) => void;
+        /** What the street inspector shows: a clicked citizen or street object, or nothing. */
+        selection: StreetSelection | null;
+        /** Replace the street selection (one atomic set — selecting a prop drops the citizen and vice versa). */
+        select: (selection: StreetSelection | null) => void;
     };
     tabs: {
         activeTab: Tabs;

@@ -114,7 +114,6 @@ export const AVENIDA: RoadPlan = {
         8, // env_roads — the road surface is generated from this plan
         1, 2, 5, 6, 11, 32, 59, 60, 61, 62, 63, // buildings (now `buildings` above)
         12, 13, 14, 15, 16, 17, 18, 64, 65, 66, 67, 68, 69, 70, 99, 100, 101, 102, 103, 104, 105, // trees
-        22, 27, // electric poles that would stand in the side streets
         31, 39, 40, 41, 42, 43, 44, 53, // billboard, searchlight, graffiti, potholes, barricades
     ],
 };

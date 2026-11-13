@@ -190,7 +190,6 @@
   },
   "citizen": {
     "inspector": {
-      "idle": "Click a citizen to inspect",
       "faction": "Faction",
       "status": "Status",
       "role": "Role",

@@ -22,7 +22,21 @@ export interface SoakReport {
     /** Longest any single ped stood still (s), waits at kerbs included. */
     longestPedStop: number;
     crossingsStarted: number;
+    /**
+     * Heading twitches per ped-minute: ticks where a ped's turn rate reverses (left↔right, both
+     * faster than PED_WOBBLE_RATE). Smooth walking sits near 0; jittery steering in the tens.
+     */
+    pedWobblePerMin: number;
+    /** Back-steps per ped-minute: ticks where a ped's displacement reverses against the last tick's. */
+    pedStepBackPerMin: number;
 }
+
+/** Turn rate (rad/s) above which a reversal counts as a visible twitch. */
+const PED_WOBBLE_RATE = 0.8;
+const wrapAngle = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
+
+/** Per-ped motion history for the twitch metrics. */
+interface PedTrace { yaw: number; w: number; x: number; z: number; dx: number; dz: number }
 
 /** SAT penetration depth of two cars' footprints (0 when separated). */
 export function carPenetration(a: Car, b: Car): number {
@@ -57,12 +71,14 @@ export function soak(sim: StreetSim, seconds: number): SoakReport {
     const r: SoakReport = {
         seconds, spawned: 0, despawned: 0, maxCars: 0, meanCars: 0, meanCarSpeed: 0, carCarWorst: 0, carCarFrames: 0,
         pedPedWorst: 0, pedCarWorst: 0, longestCarStop: 0, longestPedStop: 0, crossingsStarted: 0,
+        pedWobblePerMin: 0, pedStepBackPerMin: 0,
     };
     const carStop = new Map<number, number>();
     const pedStop = new Map<number, number>();
     const wasOnRoad = new Map<number, boolean>();
+    const trace = new Map<number, PedTrace>();
     const seen = new Set<number>();
-    let ticks = 0, speedSum = 0, speedN = 0;
+    let ticks = 0, speedSum = 0, speedN = 0, pedTicks = 0, wobbles = 0, stepBacks = 0;
     const steps = Math.round(seconds / SIM_DT);
     for (let k = 0; k < steps; k++) {
         const before = new Set(sim.cars.map((c) => c.serial));
@@ -94,6 +110,16 @@ export function soak(sim: StreetSim, seconds: number): SoakReport {
             r.longestPedStop = Math.max(r.longestPedStop, st);
             if (p.onRoad && !wasOnRoad.get(p.id)) r.crossingsStarted++;
             wasOnRoad.set(p.id, p.onRoad);
+            const tr = trace.get(p.id);
+            if (tr) {
+                pedTicks++;
+                const w = wrapAngle(p.yaw - tr.yaw) / SIM_DT;
+                if (Math.abs(w) > PED_WOBBLE_RATE && Math.abs(tr.w) > PED_WOBBLE_RATE && Math.sign(w) !== Math.sign(tr.w)) wobbles++;
+                const dx = p.x - tr.x, dz = p.z - tr.z;
+                const m = Math.hypot(dx, dz), mPrev = Math.hypot(tr.dx, tr.dz);
+                if (m > 0.01 && mPrev > 0.01 && dx * tr.dx + dz * tr.dz < -0.3 * m * mPrev) stepBacks++;
+                tr.yaw = p.yaw; tr.w = w; tr.x = p.x; tr.z = p.z; tr.dx = dx; tr.dz = dz;
+            } else trace.set(p.id, { yaw: p.yaw, w: 0, x: p.x, z: p.z, dx: 0, dz: 0 });
             for (let j = i + 1; j < sim.peds.length; j++) {
                 const q = sim.peds[j];
                 r.pedPedWorst = Math.max(r.pedPedWorst, 2 * PED_RADIUS - Math.hypot(q.x - p.x, q.z - p.z));
@@ -104,5 +130,8 @@ export function soak(sim: StreetSim, seconds: number): SoakReport {
     r.meanCars /= ticks;
     r.meanCarSpeed = speedN ? speedSum / speedN : 0;
     r.pedPedWorst = Math.max(0, r.pedPedWorst);
+    const pedMinutes = (pedTicks * SIM_DT) / 60;
+    r.pedWobblePerMin = pedMinutes > 0 ? wobbles / pedMinutes : 0;
+    r.pedStepBackPerMin = pedMinutes > 0 ? stepBacks / pedMinutes : 0;
     return r;
 }

@@ -1,0 +1,750 @@
+{
+    "inspector": {
+        "idle": "Haz clic en un ciudadano, edificio u objeto de la calle para inspeccionarlo",
+        "legend": "Placa"
+    },
+    "real": {
+        "infrastructure": {
+            "poor": "Infraestructura {{value}}/10. Las reparaciones empiezan en {{up}}.",
+            "normal": "Infraestructura {{value}}/10. Mejora en {{up}}, se viene abajo por debajo de {{down}}.",
+            "rich": "Infraestructura {{value}}/10. Sigue así de lujoso mientras esté en {{down}} o más."
+        },
+        "security": {
+            "low": "Seguridad {{value}}/10. Las barricadas aparecen mientras esté en {{low}} o menos.",
+            "medium": "Seguridad {{value}}/10. Apostado mientras la seguridad esté entre {{mid}} y {{midTop}}.",
+            "high": "Seguridad {{value}}/10. Desplegado mientras la seguridad esté en {{high}} o más."
+        },
+        "condition": {
+            "decay": "Estado del barrio {{stage}} (de {{min}} a {{max}}). Se derrumba cada mes: la infraestructura {{infra}} está en {{poor}} o menos.",
+            "upgrade": "Estado del barrio {{stage}} (de {{min}} a {{max}}). Mejora cada mes: la infraestructura {{infra}} está en {{rich}} o más.",
+            "peak": "Estado del barrio {{stage}} (de {{min}} a {{max}}). Lujo máximo. Mantén la infraestructura en {{rich}} o más.",
+            "repair": "Estado del barrio {{stage}} (de {{min}} a {{max}}). Se repara de a poco.",
+            "fade": "Estado del barrio {{stage}} (de {{min}} a {{max}}). El lujo se apaga. Con infraestructura en {{rich}} o más se mantiene.",
+            "stable": "Estado del barrio {{stage}} (de {{min}} a {{max}}). Estable."
+        },
+        "statue": {
+            "dated": "+{{charisma}} de Carisma, para siempre. Inaugurada en el mes {{round}}.",
+            "undated": "+{{charisma}} de Carisma, para siempre."
+        },
+        "pedestal": {
+            "next": "Vacío. La próxima estatua cuesta ${{price}}M en la Tienda.",
+            "later": "Vacío. Primero van los pedestales anteriores."
+        }
+    },
+    "props": {
+        "bench": {
+            "kind": "Banco de plaza",
+            "labels": [
+                "Limpieza",
+                "Confección",
+                "Comodidad"
+            ],
+            "poor": {
+                "titles": [
+                    "Tablón Astillado",
+                    "Banco Lamentable",
+                    "Asiento Antitetánica"
+                ],
+                "values": [
+                    "Biológica",
+                    "Se Rindió",
+                    "Con Cinturón"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Banco Municipal",
+                    "Banco Estándar",
+                    "Asiento Aprobado"
+                ],
+                "values": [
+                    "Aceptable",
+                    "Suficiente",
+                    "Derechita"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Banco Enchapado en Oro",
+                    "Banco Trono de Terciopelo",
+                    "Diván de Mármol"
+                ],
+                "values": [
+                    "Reluciente",
+                    "Alta Gama",
+                    "Nivel Nube"
+                ]
+            }
+        },
+        "streetlight": {
+            "kind": "Farola",
+            "labels": [
+                "Luminosidad",
+                "Fiabilidad",
+                "Polillas"
+            ],
+            "poor": {
+                "titles": [
+                    "Poste Parpadeante",
+                    "Farola Optimista",
+                    "Sugerencia Oscura"
+                ],
+                "values": [
+                    "Según Rumores",
+                    "Solo Fines de Semana",
+                    "Colonia Residente"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Farola Pública",
+                    "Luz Municipal",
+                    "Farola Reglamentaria"
+                ],
+                "values": [
+                    "Suficiente",
+                    "Casi Siempre",
+                    "Tolerable"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Farola Araña",
+                    "Faro Dorado",
+                    "Poste de Cristal"
+                ],
+                "values": [
+                    "Enceguecedora",
+                    "Eterna",
+                    "Mimada"
+                ]
+            }
+        },
+        "tree": {
+            "kind": "Árbol de calle",
+            "labels": [
+                "Sombra",
+                "Follaje",
+                "Lealtad"
+            ],
+            "poor": {
+                "titles": [
+                    "Palito Triste",
+                    "Ramita con Sueños",
+                    "Árbol Jubilado"
+                ],
+                "values": [
+                    "Teórica",
+                    "Cuatro Hojas",
+                    "Quiere Irse"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Árbol Cívico",
+                    "Árbol de Vereda",
+                    "Roble Aprobado"
+                ],
+                "values": [
+                    "Suficiente",
+                    "Reglamentario",
+                    "Neutral"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Árbol Imperial",
+                    "Copa Gloriosa",
+                    "Roble Patriota"
+                ],
+                "values": [
+                    "Ceremonial",
+                    "Frondoso y Obediente",
+                    "Sin Preguntas"
+                ]
+            }
+        },
+        "planter": {
+            "kind": "Macetero",
+            "labels": [
+                "Tierra",
+                "Flores",
+                "Orgullo"
+            ],
+            "poor": {
+                "titles": [
+                    "Cajón de Tierra",
+                    "Macetero Rajado",
+                    "Jardín de Yuyos"
+                ],
+                "values": [
+                    "Más Bien Grava",
+                    "Supuestas",
+                    "Herido"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Cajón de Flores",
+                    "Macetero Cívico",
+                    "Macetero Prolijo"
+                ],
+                "values": [
+                    "Húmeda",
+                    "De Temporada",
+                    "Moderado"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Palacio de Orquídeas",
+                    "Macetero Dorado",
+                    "Cantero Real"
+                ],
+                "values": [
+                    "Importada",
+                    "Sobrerregada",
+                    "Insoportable"
+                ]
+            }
+        },
+        "bush": {
+            "kind": "Arbusto escultural",
+            "labels": [
+                "Poda",
+                "Dorado",
+                "Ego"
+            ],
+            "rich": {
+                "titles": [
+                    "Topiaria Dorada",
+                    "Seto Escultura de Oro",
+                    "Arbusto con Forma de Líder"
+                ],
+                "values": [
+                    "Precisión Láser",
+                    "Hoja por Hoja",
+                    "Imponente"
+                ]
+            }
+        },
+        "fountain": {
+            "kind": "Fuente pública",
+            "labels": [
+                "Agua",
+                "Chorro",
+                "Deseos"
+            ],
+            "normal": {
+                "titles": [
+                    "Fuente del Pueblo",
+                    "Fuente de Plaza",
+                    "Surtidor Municipal"
+                ],
+                "values": [
+                    "Mojada Justa",
+                    "Educado",
+                    "Más Que Nada Monedas"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Fuente de Champagne",
+                    "Gran Cascada",
+                    "Géiser Dorado"
+                ],
+                "values": [
+                    "Burbujeante",
+                    "Teatral",
+                    "Concedidos Al Instante"
+                ]
+            }
+        },
+        "trashcan": {
+            "kind": "Tacho de basura",
+            "labels": [
+                "Temperatura",
+                "Contenido",
+                "Normativa"
+            ],
+            "poor": {
+                "titles": [
+                    "Tacho Calefactor",
+                    "Basurero en Llamas",
+                    "Llama Eterna"
+                ],
+                "values": [
+                    "Acogedora",
+                    "Confidencial",
+                    "No Aplica"
+                ]
+            }
+        },
+        "bld_mixeduse": {
+            "kind": "Edificio mixto",
+            "labels": [
+                "Fachada",
+                "Cañerías",
+                "Alquiler"
+            ],
+            "poor": {
+                "titles": [
+                    "Bloque Tapiado",
+                    "Anexo Desmoronado",
+                    "Monumento Inclinado"
+                ],
+                "values": [
+                    "Se Desprende",
+                    "Audibles",
+                    "Pagado en Gallinas"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Locales y Departamentos",
+                    "Bloque Mixto",
+                    "Complejo de Esquina"
+                ],
+                "values": [
+                    "Pintada",
+                    "Funcionales",
+                    "Justo, Dicen"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Torre Renovada",
+                    "Galería Dorada",
+                    "Bloque de Prestigio"
+                ],
+                "values": [
+                    "Pulida",
+                    "Silenciosas",
+                    "Consulte con Discreción"
+                ]
+            }
+        },
+        "bld_apartment": {
+            "kind": "Edificio de departamentos",
+            "labels": [
+                "Paredes",
+                "Vecinos",
+                "Ascensor"
+            ],
+            "poor": {
+                "titles": [
+                    "Departamentos en Ruinas",
+                    "Arrepentimiento de Cemento",
+                    "Bloque Clausurado"
+                ],
+                "values": [
+                    "Opcionales",
+                    "Oyen Todo",
+                    "Roto Desde 1998"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Edificio de Departamentos",
+                    "Unidad Habitacional",
+                    "Departamentos Estándar"
+                ],
+                "values": [
+                    "Finas",
+                    "Curiosos",
+                    "A Veces"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Residencia de Lujo",
+                    "Palacio Penthouse",
+                    "Grandes Departamentos"
+                ],
+                "values": [
+                    "Insonorizadas",
+                    "Verificados",
+                    "Con Mayordomo"
+                ]
+            }
+        },
+        "bld_commercial": {
+            "kind": "Edificio comercial",
+            "labels": [
+                "Cartelería",
+                "Mercadería",
+                "Clientes"
+            ],
+            "poor": {
+                "titles": [
+                    "Local Cerrado Por Siempre",
+                    "Comercio Clausurado",
+                    "Emporio Saqueado"
+                ],
+                "values": [
+                    "Quedan Dos Letras",
+                    "Una Media",
+                    "Palomas"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Comercio Local",
+                    "Almacén de Esquina",
+                    "Casa de Comercio"
+                ],
+                "values": [
+                    "Legible",
+                    "Suficiente",
+                    "Habitués"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Gran Emporio",
+                    "Centro Comercial Dorado",
+                    "Boutique de Élite"
+                ],
+                "values": [
+                    "Neón Dorado",
+                    "Desbordante",
+                    "Solo con Invitación"
+                ]
+            }
+        },
+        "bld_civic": {
+            "kind": "Oficina de gobierno",
+            "labels": [
+                "Papelería",
+                "Colas",
+                "Retratos"
+            ],
+            "poor": {
+                "titles": [
+                    "Ministerio con Goteras",
+                    "Oficina Olvidada",
+                    "Oficina Mohosa"
+                ],
+                "values": [
+                    "Empapada",
+                    "Abierta Desde el Martes",
+                    "Líder Desteñido"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Oficina Cívica",
+                    "Dependencia Estatal",
+                    "Anexo Ministerial"
+                ],
+                "values": [
+                    "Por Triplicado",
+                    "Eternas",
+                    "Uno por Sala"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Ministerio de Mármol",
+                    "Palacio de Formularios",
+                    "Templo del Sello"
+                ],
+                "values": [
+                    "En Relieve",
+                    "Con Valet",
+                    "En Cada Pared"
+                ]
+            }
+        },
+        "bld_residential": {
+            "kind": "Casa residencial",
+            "labels": [
+                "Techo",
+                "Jardín",
+                "Vecindario"
+            ],
+            "poor": {
+                "titles": [
+                    "Rancho Hundido",
+                    "Casa Tapiada",
+                    "Villa de Cartón"
+                ],
+                "values": [
+                    "Conceptual",
+                    "Neumáticos",
+                    "Temido"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Casa Familiar",
+                    "Hogar Acogedor",
+                    "Casa Estándar"
+                ],
+                "values": [
+                    "Impermeable",
+                    "Un Césped",
+                    "Chismoso"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Villa Dorada",
+                    "Mansión de Lujo",
+                    "La Favorita del Líder"
+                ],
+                "values": [
+                    "Tejas de Oro Macizo",
+                    "Con Pavos Reales",
+                    "Doble Reja"
+                ]
+            }
+        },
+        "bld_terrace": {
+            "kind": "Casas en hilera",
+            "labels": [
+                "Uniformidad",
+                "Chimeneas",
+                "Chismes"
+            ],
+            "poor": {
+                "titles": [
+                    "Hilera Inclinada",
+                    "Fichas de Dominó",
+                    "Derrumbe Compartido"
+                ],
+                "values": [
+                    "Grietas Compartidas",
+                    "Humean Débilmente",
+                    "A Través de Paredes"
+                ]
+            },
+            "normal": {
+                "titles": [
+                    "Hilera de Casas",
+                    "Casas Prolijas",
+                    "Casas Apareadas"
+                ],
+                "values": [
+                    "Idénticas",
+                    "Funcionan",
+                    "Por Sobre el Cerco"
+                ]
+            },
+            "rich": {
+                "titles": [
+                    "Hilera Gentrificada",
+                    "Casonas Patrimoniales",
+                    "Terrazas Boutique"
+                ],
+                "values": [
+                    "Curada",
+                    "Solo Decorativas",
+                    "Con Champán"
+                ]
+            }
+        },
+        "statue": {
+            "kind": "Monumento",
+            "labels": [
+                "Altura",
+                "Material",
+                "Parecido"
+            ],
+            "bronze": {
+                "titles": [
+                    "Líder de Bronce"
+                ],
+                "values": [
+                    "Suficiente",
+                    "Bronce",
+                    "Favorecedor"
+                ],
+                "legend": "Erigida por un pueblo agradecido. La gratitud no era opcional."
+            },
+            "silver": {
+                "titles": [
+                    "Líder de Plata"
+                ],
+                "values": [
+                    "Todavía Más",
+                    "Plata",
+                    "Mejorado"
+                ],
+                "legend": "Más alta que la anterior. Mira de arriba al propio cielo, que ya fue notificado."
+            },
+            "gold": {
+                "titles": [
+                    "Líder de Oro"
+                ],
+                "values": [
+                    "Visible Desde el Espacio",
+                    "Oro Macizo",
+                    "Mejor Que el Original"
+                ],
+                "legend": "Contempla al Líder y sana. Efectos secundarios: lágrimas, devoción e insolación."
+            }
+        },
+        "pedestal": {
+            "kind": "Pedestal vacío",
+            "labels": [
+                "Ocupante",
+                "Capacidad",
+                "Ambición"
+            ],
+            "empty": {
+                "titles": [
+                    "Pedestal Vacío",
+                    "Plinto Reservado",
+                    "Pedestal Prometedor"
+                ],
+                "values": [
+                    "Pendiente",
+                    "Un Líder",
+                    "Ilimitada"
+                ],
+                "legend": "Reservado para la gloria futura. Mientras tanto, admire la vacante."
+            }
+        },
+        "barricade": {
+            "kind": "Barricada",
+            "labels": [
+                "Solidez",
+                "Materiales",
+                "Ánimo"
+            ],
+            "low": {
+                "titles": [
+                    "Barricada Furiosa",
+                    "Muro de Muebles",
+                    "Pila de Levantamiento"
+                ],
+                "values": [
+                    "Nivel Sillón",
+                    "Más Que Nada Sofás",
+                    "Caliente"
+                ]
+            }
+        },
+        "guard_post": {
+            "kind": "Garita",
+            "labels": [
+                "Alerta",
+                "Café",
+                "Trámites"
+            ],
+            "medium": {
+                "titles": [
+                    "Garita de Guardia",
+                    "Cabina de Control",
+                    "Casilla Vigilante"
+                ],
+                "values": [
+                    "Haciendo Que Sí",
+                    "Tercera Taza",
+                    "Sellado Dos Veces"
+                ]
+            }
+        },
+        "camera_pole": {
+            "kind": "Poste con cámara",
+            "labels": [
+                "Resolución",
+                "Privacidad",
+                "Parpadeo"
+            ],
+            "medium": {
+                "titles": [
+                    "Poste Observador",
+                    "Mástil de Cámara",
+                    "Ojo Amigo"
+                ],
+                "values": [
+                    "Alarmante",
+                    "Abolida",
+                    "Constante"
+                ]
+            }
+        },
+        "tank": {
+            "kind": "Tanque de guerra",
+            "labels": [
+                "Potencia",
+                "Modales",
+                "Sutileza"
+            ],
+            "high": {
+                "titles": [
+                    "Tanque Callejero",
+                    "Tanque Persuasivo",
+                    "Tanque Educado"
+                ],
+                "values": [
+                    "Excesiva",
+                    "Estaciona en Veredas",
+                    "Ausente"
+                ]
+            }
+        },
+        "cannon": {
+            "kind": "Pieza de artillería",
+            "labels": [
+                "Alcance",
+                "Avisos",
+                "Calibre"
+            ],
+            "high": {
+                "titles": [
+                    "Cañón de Plaza",
+                    "Opinión Fuerte",
+                    "Cañón Vecino"
+                ],
+                "values": [
+                    "Próxima Provincia",
+                    "Ni Uno",
+                    "Sobredimensionado"
+                ]
+            }
+        },
+        "gun_nest": {
+            "kind": "Nido de ametralladora",
+            "labels": [
+                "Sacos",
+                "Moral",
+                "Hospitalidad"
+            ],
+            "high": {
+                "titles": [
+                    "Nido Artillado",
+                    "Fortaleza de Arena",
+                    "Nido de Bienvenida"
+                ],
+                "values": [
+                    "Mullidos",
+                    "Ansiosa",
+                    "Glacial"
+                ]
+            }
+        },
+        "searchlight": {
+            "kind": "Reflector",
+            "labels": [
+                "Haz",
+                "Privacidad",
+                "Culpa"
+            ],
+            "high": {
+                "titles": [
+                    "Reflector",
+                    "Haz de Interrogatorio",
+                    "Ojo del Orden"
+                ],
+                "values": [
+                    "Grado Retina",
+                    "No Encontrada",
+                    "Inducida"
+                ]
+            }
+        }
+    }
+}

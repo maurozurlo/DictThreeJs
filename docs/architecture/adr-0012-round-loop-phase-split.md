@@ -159,7 +159,7 @@ if (!get().gameManagement.dwelling && tab === Tabs.Street && get().gameManagemen
 
 ### Negative
 
-- `DayEnded` component takes on two responsibilities (blocking reveal + non-blocking dwell banner) — acceptable for the MVP validation pass per the design doc's own "build the dumb version" instruction (§8); may warrant a split into two components after playtesting confirms the direction.
+- ~~`DayEnded` component takes on two responsibilities (blocking reveal + non-blocking dwell banner)~~ — split 2026-11-13: the centred dwell banner blocked the Street view, so `DayEnded` now owns only the blocking reveal, and the dwell-stage advance moved into the Navbar advance slot (`>>>` + "Continue to Month N" hint). The reveal timer is a single App-level `useDelayedFlag(dwelling, MANDATORY_REVEAL_MS)` passed to both as `revealAcked`.
 
 ### Neutral
 

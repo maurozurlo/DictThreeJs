@@ -6,13 +6,16 @@ import { useGameStore } from '../../Stores/GameState'
 import { Tabs } from '../../types/Tabs'
 import { useTranslation } from 'react-i18next'
 import CoupRiskReadout from '../CoupRiskReadout/CoupRiskReadout';
+import { GAMESTATE } from '../../Constants/GameState';
 
 interface NavbarProps {
     /** Triggers a fade-to-black transition before switching to the given tab. */
     transitionTo: (tab: Tabs) => void;
+    /** True once the hinge's mandatory reveal has elapsed (ADR-0012) — the advance slot then ends the dwell. */
+    revealAcked: boolean;
 }
 
-const Navbar = ({ transitionTo }: NavbarProps) => {
+const Navbar = ({ transitionTo, revealAcked }: NavbarProps) => {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
     const displayTabs = activeTab !== Tabs.Menu;
     const tabsLocked = useGameStore(s => s.tabs.tabsLocked)
@@ -25,6 +28,9 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
     const dealDecided = useGameStore(s => s.deals.dealDecided)
     const meetTaken = useGameStore(s => s.meet.actionTaken.taken)
     const requestAdvanceRound = useGameStore(s => s.gameManagement.requestAdvanceRound)
+    const round = useGameStore(s => s.gameManagement.round)
+    const nextRound = useGameStore(s => s.gameManagement.nextRound)
+    const beginFirstWorkDay = useGameStore(s => s.gameManagement.beginFirstWorkDay)
     const miniChallengePending = useGameStore(s => s.miniChallenge.current !== null && !s.miniChallenge.decided)
     const { t } = useTranslation();
 
@@ -54,6 +60,20 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
 
     const allActionsDone = meetTaken && lawDecided && dealDecided
     const canGoHome = phase !== 'idle' && activeTab !== Tabs.Menu;
+
+    // Advance slot has two modes: during the work day it requests the round end;
+    // in the dwell stage of the hinge (ADR-0012) it starts the next work day. The
+    // dwell advance lives here, not over the scene, so the Street stays unobstructed.
+    const showWorkDayAdvance = displayTabs && phase === 'start' && !dayEnded && !dwelling
+    const showDwellAdvance = displayTabs && phase === 'start' && dwelling && revealAcked
+    // Round-1 opening (dayEnded still false) begins month 1 instead of resolving a round.
+    const isIntro = !dayEnded
+    const dwellAdvanceLabel = isIntro
+        ? t('actionPanel.begin_first_month')
+        : round + 1 <= GAMESTATE.ROUNDS.MAX
+            ? t('actionPanel.continue_month', { month: round + 1 })
+            : t('actionPanel.finish_month', { month: round })
+    const onDwellAdvance = isIntro ? beginFirstWorkDay : nextRound
 
     return (
         <header className={styles.navbar}>
@@ -86,7 +106,16 @@ const Navbar = ({ transitionTo }: NavbarProps) => {
 
             <div className={styles.navRight}>
                 {displayTabs && <CoupRiskReadout />}
-                {displayTabs && phase === 'start' && !dayEnded && (
+                {showDwellAdvance && (
+                    <div className={clsx(styles.advanceWrapper, styles.glowing)}>
+                        <div className={styles.advanceRing} />
+                        <Button variant="primary" className={styles.advanceButton} onClick={onDwellAdvance} title={dwellAdvanceLabel}>
+                            {'>>>'}
+                        </Button>
+                        <span className={clsx(styles.advanceHint, styles.advanceHintRight)}>{dwellAdvanceLabel}</span>
+                    </div>
+                )}
+                {showWorkDayAdvance && (
                     <div className={clsx(styles.advanceWrapper, { [styles.glowing]: allActionsDone })}>
                         <div className={styles.advanceRing} />
                         <Button variant="primary" className={styles.advanceButton} onClick={requestAdvanceRound} data-tutorial="advance-btn">

@@ -54,6 +54,62 @@ export function sampleRt(p: RtPath, s: number, out: PathSample): PathSample {
     return out;
 }
 
+/** Unit direction of segment k → k+1 (wrapping on closed paths) into out[0..1]; false if degenerate. */
+function segDir(p: RtPath, k: number, out: Float64Array, o: number): boolean {
+    const j = (k + 1) % p.n;
+    const dx = p.xs[j] - p.xs[k], dz = p.zs[j] - p.zs[k];
+    const l = Math.hypot(dx, dz);
+    if (l < 1e-9) return false;
+    out[o] = dx / l;
+    out[o + 1] = dz / l;
+    return true;
+}
+
+const tanScratch = new Float64Array(8);
+
+/** Vertex tangent: bisector of the incoming and outgoing segments (one of them at open ends). */
+function vertexTangent(p: RtPath, k: number, out: Float64Array, o: number): void {
+    const hasIn = (p.closed || k > 0) && segDir(p, (k - 1 + p.n) % p.n, tanScratch, 4);
+    const hasOut = (p.closed || k < p.n - 1) && segDir(p, k, tanScratch, 6);
+    let x = (hasIn ? tanScratch[4] : 0) + (hasOut ? tanScratch[6] : 0);
+    let z = (hasIn ? tanScratch[5] : 0) + (hasOut ? tanScratch[7] : 0);
+    let l = Math.hypot(x, z);
+    if (l < 1e-9) { x = hasOut ? tanScratch[6] : 0; z = hasOut ? tanScratch[7] : 1; l = 1; } // hairpin: take the outgoing side
+    out[o] = x / l;
+    out[o + 1] = z / l;
+}
+
+/**
+ * Like sampleRt, but the tangent blends across each segment from one vertex tangent (the bisector
+ * of its two segments) to the next. Position is still on the polyline; only the frame turns
+ * continuously. A point offset sideways along rightOf(tangent) — a ped walking off the centre
+ * line — then moves smoothly through vertices instead of jumping at each one (on the inside of
+ * a turn the old per-segment frame even threw it backwards).
+ */
+export function sampleRtSmooth(p: RtPath, s: number, out: PathSample): PathSample {
+    const L = p.length;
+    let d = p.closed ? ((s % L) + L) % L : s < 0 ? 0 : s > L ? L : s;
+    const cum = p.cum;
+    let lo = 0, hi = cum.length - 2;
+    while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (cum[mid] <= d) lo = mid; else hi = mid - 1;
+    }
+    const i = lo, j = (i + 1) % p.n;
+    const seg = cum[i + 1] - cum[i];
+    d -= cum[i];
+    const t = seg > 1e-9 ? d / seg : 0;
+    out.x = p.xs[i] + (p.xs[j] - p.xs[i]) * t;
+    out.z = p.zs[i] + (p.zs[j] - p.zs[i]) * t;
+    vertexTangent(p, i, tanScratch, 0);
+    vertexTangent(p, j, tanScratch, 2);
+    const tx = tanScratch[0] + (tanScratch[2] - tanScratch[0]) * t;
+    const tz = tanScratch[1] + (tanScratch[3] - tanScratch[1]) * t;
+    const l = Math.hypot(tx, tz);
+    if (l > 1e-9) { out.tx = tx / l; out.tz = tz / l; }
+    return out;
+}
+
 /** Vertex index whose arc length is at or before s (for envelope lookups). */
 export function vertexAt(p: RtPath, s: number): number {
     const cum = p.cum;

@@ -32,6 +32,9 @@ describe('StreetSim soak (Avenida)', () => {
             expect(rep.despawned).toBeGreaterThan(40); // traffic actually flows through
             expect(rep.crossingsStarted).toBeGreaterThan(10);
             expect(rep.meanCarSpeed).toBeGreaterThan(6);
+            // no visible twitch (was ~7 heading wobbles and ~15 back-steps per ped-minute)
+            expect(rep.pedWobblePerMin).toBeLessThan(0.5);
+            expect(rep.pedStepBackPerMin).toBeLessThan(0.5);
         }, 60_000);
     }
 

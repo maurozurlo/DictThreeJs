@@ -113,3 +113,36 @@ describe('useStreetLayout — rich variant fallback', () => {
         expect(result.current[0].instanceId).toBe(1);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Terrace joins the progression mid-pack (shares GDD slot 2 with commercial)
+// ---------------------------------------------------------------------------
+
+import { buildingModelFor } from '../../../src/Hooks/useStreetLayout';
+
+describe('buildingModelFor — terrace family', () => {
+    const all = () => true;
+
+    it('test_terrace_follows_the_commercial_row_at_every_stage', () => {
+        for (const stage of Object.keys(TABLE).map(Number)) {
+            const expected = TABLE[stage][2];
+            expect(buildingModelFor('env_bld_terrace_normal', stage, all), `stage ${stage}`).toBe(`env_bld_terrace_${expected}`);
+        }
+    });
+
+    it('test_terrace_flips_at_plus_minus_three', () => {
+        expect(buildingModelFor('env_bld_terrace_normal', -2, all)).toBe('env_bld_terrace_normal');
+        expect(buildingModelFor('env_bld_terrace_normal', -3, all)).toBe('env_bld_terrace_poor');
+        expect(buildingModelFor('env_bld_terrace_normal', 2, all)).toBe('env_bld_terrace_normal');
+        expect(buildingModelFor('env_bld_terrace_normal', 3, all)).toBe('env_bld_terrace_rich');
+    });
+
+    it('test_terrace_rich_without_ide_entry_falls_back_to_normal', () => {
+        const noRich = (n: string) => n !== 'env_bld_terrace_rich';
+        expect(buildingModelFor('env_bld_terrace_normal', 5, noRich)).toBe('env_bld_terrace_normal');
+    });
+
+    it('test_non_building_model_returns_undefined', () => {
+        expect(buildingModelFor('env_parkbench_medium', 0, all)).toBeUndefined();
+    });
+});

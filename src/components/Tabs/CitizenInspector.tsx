@@ -3,26 +3,17 @@ import { useTranslation } from 'react-i18next';
 import styles from './CitizenInspector.module.css';
 
 /**
- * Sidebar panel shown in ActionPanel when the Street tab is active.
- * Displays the selected citizen's identity, faction, employment, role, and happiness.
+ * Street inspector card for a clicked citizen (rendered by StreetInspector).
+ * Displays the citizen's identity, faction, employment, role, and happiness.
  * No Three.js imports — reads only from Zustand (ADR-0003).
  */
-const CitizenInspector = () => {
+const CitizenInspector = ({ citizenId }: { citizenId: number }) => {
     const { t } = useTranslation();
-    const selectedPedId = useGameStore((s) => s.scene.selectedPedId);
     const citizens      = useGameStore((s) => s.citizens);
     const citizenStates = useGameStore((s) => s.citizenStates);
 
-    if (selectedPedId === null) {
-        return (
-            <div className={styles.idle}>
-                <p>{t('citizen.inspector.idle')}</p>
-            </div>
-        );
-    }
-
-    const citizen = citizens[selectedPedId];
-    const cs      = citizenStates[selectedPedId];
+    const citizen = citizens[citizenId];
+    const cs      = citizenStates[citizenId];
 
     if (!citizen || !cs) return null;
 

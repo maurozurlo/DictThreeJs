@@ -22,6 +22,8 @@ export const STREET_IDE: IDEFile = {
         // Long terrace row (road planning 2026-11-12, tools/blender/bld_terrace.py) — textures embedded, material names = texture basenames
         { id: 2040, modelName: 'env_bld_terrace_normal', asset: 'models/map/env_bld_terrace_normal.glb', visibleIf: { tab: 'Street' } },
         { id: 2041, modelName: 'env_bld_terrace_poor', asset: 'models/map/env_bld_terrace_poor.glb', visibleIf: { tab: 'Street' } },
+        // Rich terrace (tools/{texgen,blender}/bld_terrace_rich.py) — same pivot as normal; bld_terrace_rich_cutout is the alpha-clip (MASK) railing material
+        { id: 2056, modelName: 'env_bld_terrace_rich', asset: 'models/map/env_bld_terrace_rich.glb', visibleIf: { tab: 'Street' } },
         // Street Objects
         { id: 2011, modelName: 'env_flagpole_large', asset: 'models/map/env_flagpole_large.glb', visibleIf: { tab: 'Street' }, textures: [{ texture: 'textures/map/flagpole.png', transparent: false }] },
         { id: 2012, modelName: 'env_flag_small', asset: 'models/map/env_flag_small.glb', visibleIf: { tab: 'Street' } },
@@ -56,7 +58,6 @@ export const STREET_IDE: IDEFile = {
         { id: 2018, modelName: 'env_parkbench_medium', asset: 'models/map/env_parkbench_medium.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/map/parkbench.png', transparent: false }] },
         { id: 2019, modelName: 'env_guard_post_small', asset: 'models/map/env_guard_post_small.glb', visibleIf: { tab: 'Street', security: [4, 7] }, textures: [{ texture: 'textures/map/guardpost.png', transparent: false }] },
         { id: 2020, modelName: 'env_tank_large', asset: 'models/map/env_tank_large.glb', visibleIf: { tab: 'Street', security: [8, 10] }, textures: [{ texture: 'textures/map/tank.png', transparent: false }] },
-        { id: 2021, modelName: 'env_electricpole_medium', asset: 'models/map/env_electricpole_medium.glb', visibleIf: { tab: 'Street', infrastructure: [4, 10] }, textures: [{ texture: 'textures/map/electricpole.png', transparent: true }] },
         { id: 2022, modelName: 'env_billboard', asset: 'models/map/env_billboard.glb', visibleIf: { tab: 'Street' } },
         { id: 2023, modelName: 'env_scaffolding_large', asset: 'models/map/env_scaffolding_large.glb', visibleIf: { tab: 'Street', infrastructure: [4, 7] }, textures: [{ texture: 'textures/map/scaffolding.png', transparent: false }] },
         { id: 2024, modelName: 'env_gunnest_small', asset: 'models/map/env_gunnest_small.glb', visibleIf: { tab: 'Street', security: [8, 10] }, textures: [{ texture: 'textures/map/gunnest.png', transparent: false }] },

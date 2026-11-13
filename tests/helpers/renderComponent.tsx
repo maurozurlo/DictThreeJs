@@ -14,7 +14,7 @@ const testI18n = i18n.createInstance()
 testI18n.use(initReactI18next).init({
     lng: 'en',
     fallbackLng: 'en',
-    ns: ['menu', 'laws', 'deals', 'meet', 'daily_events', 'shop', 'endscreen', 'periodic_events', 'mini_challenges', 'secret', 'help', 'tutorial', 'advisor'],
+    ns: ['menu', 'laws', 'deals', 'meet', 'daily_events', 'shop', 'endscreen', 'periodic_events', 'mini_challenges', 'secret', 'help', 'tutorial', 'advisor', 'street'],
     defaultNS: 'menu',
     resources: {},
     interpolation: { escapeValue: false },
