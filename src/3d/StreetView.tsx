@@ -1,10 +1,16 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useLoader, type ThreeEvent } from '@react-three/fiber';
+import { TransformControls } from '@react-three/drei';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
+import { useDebugEditStore, gizmoBusy } from '../Stores/DebugEditStore';
 import { Tabs } from '../types/Tabs';
-import { useStreetLayout, STREET_TEXTURE_SLOTS, STREET_TEXTURE_URLS } from '../Hooks/useStreetLayout';
+import { useStreetLayout, placementSourceOf, STREET_TEXTURE_SLOTS, STREET_TEXTURE_URLS } from '../Hooks/useStreetLayout';
+import { applyPlacementEdits, type PlacementEdit } from '../Utils/PlacementEdit';
+import {
+    DEBUG_EDIT_EXCLUDED_PREFIXES, DEBUG_EDIT_MOVED_EMISSIVE, DEBUG_EDIT_ROTATION_SNAP, DEBUG_EDIT_SELECTED_EMISSIVE,
+} from '../Constants/DebugEdit';
 import type { ResolvedPlacement } from '../types/WorldLayout';
 import CitizenModels from './CitizenModels';
 import Vehicles from './Vehicles';
@@ -92,9 +98,55 @@ interface PlacedObjectProps {
     selected: boolean;
     /** Click handler — given only for inspectable models; others take no pointer events. */
     onSelect?: (placement: ResolvedPlacement) => void;
+    /** Debug placement editor: this instance's source key when it can be picked (debug mode only). */
+    editKey?: string;
+    /** Debug placement editor: this instance carries the move / rotate gizmo. */
+    gizmo?: boolean;
+    /** Debug placement editor tint: its spot is under the gizmo, or was edited this session. */
+    editTint?: 'selected' | 'moved' | null;
 }
 
-function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectProps) {
+const snapshotTransform = (o: THREE.Object3D): PlacementEdit => ({
+    pos: [o.position.x, o.position.y, o.position.z],
+    rot: [o.quaternion.x, o.quaternion.y, o.quaternion.z, o.quaternion.w],
+});
+
+const sameTransform = (a: PlacementEdit, b: PlacementEdit): boolean =>
+    a.pos.every((v, i) => Math.abs(v - b.pos[i]) < 1e-6) && a.rot.every((v, i) => Math.abs(v - b.rot[i]) < 1e-7);
+
+/**
+ * Debug placement editor gizmo on one placed object. Translate = all three axes (world);
+ * rotate = yaw only, 5° steps. The drag mutates the object directly; its release commits the
+ * end transform to the debug edit store, which feeds back in as the placement's pos / rot.
+ */
+function EditGizmo({ object, editKey }: { object: THREE.Object3D; editKey: string }) {
+    const mode = useDebugEditStore((s) => s.mode);
+    const setDragging = useDebugEditStore((s) => s.setDragging);
+    const commitEdit = useDebugEditStore((s) => s.commitEdit);
+    const start = useRef<PlacementEdit | null>(null);
+    const translate = mode === 'translate';
+    return (
+        <TransformControls
+            object={object}
+            mode={mode}
+            space="world"
+            showX={translate}
+            showZ={translate}
+            showY
+            rotationSnap={translate ? null : DEBUG_EDIT_ROTATION_SNAP}
+            onMouseDown={() => { start.current = snapshotTransform(object); setDragging(true); }}
+            onMouseUp={() => {
+                const end = snapshotTransform(object);
+                setDragging(false);
+                if (start.current && !sameTransform(start.current, end)) commitEdit(editKey, end);
+                start.current = null;
+            }}
+        />
+    );
+}
+
+function PlacedObject({ placement, textures, selected, onSelect, editKey, gizmo = false, editTint = null }: PlacedObjectProps) {
+    const selectForEdit = useDebugEditStore((s) => s.selectForEdit);
     const gltf = useLoader(GLTFLoader, `/${placement.asset}`);
     const variantSuffix = placement.textureVariantSuffix;
     const [hovered, setHovered] = useState(false);
@@ -132,9 +184,14 @@ function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectP
         return g;
     }, [gltf, textures, placement.modelName, variantSuffix]);
 
-    // Inspector highlight: emissive tint while selected (stronger) or hovered.
+    // Inspector highlight: emissive tint while selected (stronger) or hovered. The debug
+    // editor's tints sit between them (gizmo spot) and below hover (edited this session).
     useEffect(() => {
-        const tint = selected ? INSPECT_SELECTED_EMISSIVE : hovered ? INSPECT_HOVER_EMISSIVE : null;
+        const tint = selected ? INSPECT_SELECTED_EMISSIVE
+            : editTint === 'selected' ? DEBUG_EDIT_SELECTED_EMISSIVE
+            : hovered ? INSPECT_HOVER_EMISSIVE
+            : editTint === 'moved' ? DEBUG_EDIT_MOVED_EMISSIVE
+            : null;
         object.traverse((child) => {
             const mesh = child as THREE.Mesh;
             if (!mesh.isMesh) return;
@@ -144,7 +201,7 @@ function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectP
                 if (std.emissive) std.emissive.set(tint ?? 0x000000);
             }
         });
-    }, [object, selected, hovered]);
+    }, [object, selected, hovered, editTint]);
 
     // Never leave the pointer cursor behind when a hovered object leaves the scene.
     useEffect(() => () => {
@@ -154,7 +211,9 @@ function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectP
     const quaternion = useMemo(() => placementQuaternion(placement.rot), [placement.rot]);
     const scale = useMemo(() => fixedScale(placement.scale), [placement.scale]);
 
-    if (!onSelect) {
+    const gizmoEl = gizmo && editKey !== undefined ? <EditGizmo object={object} editKey={editKey} /> : null;
+
+    if (!onSelect && editKey === undefined) {
         return <primitive object={object} position={placement.pos} quaternion={quaternion} scale={scale} />;
     }
     const setHover = (on: boolean) => {
@@ -163,15 +222,23 @@ function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectP
         document.body.style.cursor = on ? 'pointer' : '';
     };
     return (
-        <primitive
-            object={object}
-            position={placement.pos}
-            quaternion={quaternion}
-            scale={scale}
-            onClick={(e: ThreeEvent<MouseEvent>) => { e.stopPropagation(); onSelect(placement); }}
-            onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHover(true); }}
-            onPointerOut={() => setHover(false)}
-        />
+        <>
+            <primitive
+                object={object}
+                position={placement.pos}
+                quaternion={quaternion}
+                scale={scale}
+                onClick={(e: ThreeEvent<MouseEvent>) => {
+                    e.stopPropagation();
+                    if (gizmoBusy()) return; // the release of a gizmo drag, not a pick
+                    if (editKey !== undefined) selectForEdit(editKey);
+                    onSelect?.(placement);
+                }}
+                onPointerOver={(e: ThreeEvent<PointerEvent>) => { e.stopPropagation(); setHover(true); }}
+                onPointerOut={() => setHover(false)}
+            />
+            {gizmoEl}
+        </>
     );
 }
 
@@ -179,11 +246,35 @@ function PlacedObject({ placement, textures, selected, onSelect }: PlacedObjectP
  * Preloads every external street texture once, then renders all placements. Lives inside
  * the StreetView <Suspense> so the texture and GLB loads suspend together.
  */
-function PlacedObjects({ placements, selectedInstanceId, onSelect }: {
+function PlacedObjects({ placements, selectedInstanceId, onSelect, editing }: {
     placements: ResolvedPlacement[];
     selectedInstanceId: number | null;
     onSelect: (placement: ResolvedPlacement) => void;
+    /** Debug mode: every placed object (bar backdrop / ground slabs) can be picked and moved. */
+    editing: boolean;
 }) {
+    const selectedEditKey = useDebugEditStore((s) => s.selectedKey);
+    const edits = useDebugEditStore((s) => s.edits);
+
+    /** Debug editor: instance id -> source key, for the pickable placements only. */
+    const editKeys = useMemo(() => {
+        const m = new Map<number, string>();
+        if (!editing) return m;
+        for (const p of placements) {
+            if (p.asset === null || DEBUG_EDIT_EXCLUDED_PREFIXES.some((pre) => p.modelName.startsWith(pre))) continue;
+            const src = placementSourceOf(p.instanceId);
+            if (src) m.set(p.instanceId, src.key);
+        }
+        return m;
+    }, [placements, editing]);
+
+    // One gizmo per spot: tier variants standing together share a source key.
+    const gizmoInstanceId = useMemo(() => {
+        if (selectedEditKey === null) return null;
+        for (const [id, key] of editKeys) if (key === selectedEditKey) return id;
+        return null;
+    }, [editKeys, selectedEditKey]);
+
     const loaded = useLoader(THREE.TextureLoader, STREET_TEXTURE_URLS.map((u) => `/${u}`));
 
     const textures = useMemo((): TextureMap => {
@@ -203,17 +294,26 @@ function PlacedObjects({ placements, selectedInstanceId, onSelect }: {
 
     return (
         <>
-            {placements.map((p) =>
-                p.asset !== null
-                    ? <PlacedObject
+            {placements.map((p) => {
+                if (p.asset === null) return null;
+                const editKey = editKeys.get(p.instanceId);
+                const editTint = editKey === undefined ? null
+                    : editKey === selectedEditKey ? 'selected'
+                    : editKey in edits ? 'moved'
+                    : null;
+                return (
+                    <PlacedObject
                         key={p.instanceId}
                         placement={p}
                         textures={textures}
                         selected={p.instanceId === selectedInstanceId}
                         onSelect={isInspectable(p.modelName) ? onSelect : undefined}
+                        editKey={editKey}
+                        gizmo={p.instanceId === gizmoInstanceId}
+                        editTint={editTint}
                     />
-                    : null,
-            )}
+                );
+            })}
         </>
     );
 }
@@ -224,7 +324,12 @@ function PlacedObjects({ placements, selectedInstanceId, onSelect }: {
 
 function StreetView() {
     const activeTab = useGameStore((s) => s.tabs.activeTab);
-    const placements = useStreetLayout();
+    const debugEnabled = useGameStore((s) => s.debug.enabled);
+    const layout = useStreetLayout();
+    // Debug placement editor: moved / turned objects render (and steer the sim) at their edit.
+    const edits = useDebugEditStore((s) => s.edits);
+    const placements = useMemo(() => applyPlacementEdits(layout, edits, placementSourceOf), [layout, edits]);
+    const selectForEdit = useDebugEditStore((s) => s.selectForEdit);
     const select = useGameStore((s) => s.scene.select);
     const selection = useGameStore((s) => s.scene.selection);
     const selectedInstanceId = selection?.kind === 'prop' ? selection.instanceId : null;
@@ -254,7 +359,15 @@ function StreetView() {
             <StreetSimDriver />
             {/* Click catcher over the whole street floor — clicking empty ground clears the
                 inspector selection (two triangles, cheaper to raycast than the street meshes) */}
-            <mesh position={[DESELECT.cx, STREET_SIDEWALK_Y + 0.01, DESELECT.cz]} rotation={[-Math.PI / 2, 0, 0]} onClick={() => select(null)}>
+            <mesh
+                position={[DESELECT.cx, STREET_SIDEWALK_Y + 0.01, DESELECT.cz]}
+                rotation={[-Math.PI / 2, 0, 0]}
+                onClick={() => {
+                    if (gizmoBusy()) return; // releasing a gizmo drag over open ground
+                    select(null);
+                    selectForEdit(null);
+                }}
+            >
                 <planeGeometry args={[DESELECT.w, DESELECT.d]} />
                 <meshBasicMaterial transparent opacity={0} depthWrite={false} />
             </mesh>
@@ -267,7 +380,7 @@ function StreetView() {
 
             {/* IDE/IPL placed objects — GLBs textured from public/textures by material name */}
             <Suspense fallback={null}>
-                <PlacedObjects placements={placements} selectedInstanceId={selectedInstanceId} onSelect={selectProp} />
+                <PlacedObjects placements={placements} selectedInstanceId={selectedInstanceId} onSelect={selectProp} editing={debugEnabled} />
             </Suspense>
 
             {/* Citizens — simulation entities rendered as animated models (roles,

@@ -7,6 +7,7 @@ import { countModifiersByType, getVisibleModifiers } from '../Utils/Modifiers';
 import { STATUES } from '../assets/ShopItems';
 import { buildingVariantForSlot, groundVariantSuffix } from '../Utils/BuildingDegradation';
 import { STREET_PLAN } from '../assets/data/road-plans';
+import { buildingKey, iplKey, propKey, type PlacementSource, type Vec3 } from '../Utils/PlacementEdit';
 
 /** IPL entries the active road plan supersedes (old roads, buildings, props it re-homed). */
 const REPLACED_IPL = new Set(STREET_PLAN.replacesIpl ?? []);
@@ -21,15 +22,60 @@ const yawQuat = (y: number): [number, number, number, number] => [0, Math.sin(y 
  * The plan's buildings and props as IPL-style instances, so they flow through the exact same
  * slot-variant / visibleIf resolution as the hand-placed ones.
  */
-const PLAN_INSTANCES: Array<{ id: number; modelName: string; pos: [number, number, number]; rot: [number, number, number, number]; scale?: [number, number, number] }> = [
-    ...(STREET_PLAN.buildings ?? []).map((b) => ({ modelName: b.model, pos: [b.pos[0], b.y ?? 0, b.pos[1]] as [number, number, number], rot: yawQuat(0) })),
-    ...(STREET_PLAN.props ?? []).flatMap((p) => p.models.map((m) => ({
-        modelName: m, pos: [p.pos[0], p.y, p.pos[1]] as [number, number, number], rot: p.rot ?? yawQuat(0),
-    }))),
+const PLAN_INSTANCES: Array<{ id: number; modelName: string; pos: [number, number, number]; rot: [number, number, number, number]; scale?: [number, number, number]; source: PlacementSource }> = [
+    ...(STREET_PLAN.buildings ?? []).map((b, index) => {
+        const pos: Vec3 = [b.pos[0], b.y ?? 0, b.pos[1]];
+        const rot = yawQuat(0);
+        return { modelName: b.model, pos, rot, source: { kind: 'plan.building', key: buildingKey(index), index, models: [b.model], pos, rot } as PlacementSource };
+    }),
+    ...(STREET_PLAN.props ?? []).flatMap((p, index) => {
+        const pos: Vec3 = [p.pos[0], p.y, p.pos[1]];
+        const rot = p.rot ?? yawQuat(0);
+        const source: PlacementSource = { kind: 'plan.prop', key: propKey(index), index, models: [...p.models], pos, rot };
+        return p.models.map((m) => ({ modelName: m, pos, rot, source }));
+    }),
 ].map((inst, i) => ({ ...inst, id: PLAN_INSTANCE_BASE + i }));
 
 /** Every instance the street shows: IPL minus what the plan replaced, plus the plan's own. */
 const STREET_INSTANCES = [...STREET_IPL.inst.filter((i) => !REPLACED_IPL.has(i.id)), ...PLAN_INSTANCES];
+
+/**
+ * Debug placement editor: kept IPL lines grouped into spots — lines with the identical pos + rot
+ * (a spot's poor / normal / rich tier models, a decal under its prop) share one source.
+ */
+const IPL_SPOTS: Array<Extract<PlacementSource, { kind: 'ipl' }>> = (() => {
+    const spots = new Map<string, Extract<PlacementSource, { kind: 'ipl' }>>();
+    for (const i of STREET_IPL.inst) {
+        if (REPLACED_IPL.has(i.id)) continue;
+        const at = `${i.pos.join(',')}|${i.rot.join(',')}`;
+        const spot = spots.get(at);
+        if (spot) {
+            spot.ids.push(i.id);
+            if (!spot.models.includes(i.modelName)) spot.models.push(i.modelName);
+        } else {
+            spots.set(at, { kind: 'ipl', key: '', id: i.id, ids: [i.id], models: [i.modelName], pos: i.pos, rot: i.rot });
+        }
+    }
+    for (const s of spots.values()) {
+        s.ids.sort((a, b) => a - b);
+        s.id = s.ids[0];
+        s.key = iplKey(s.id);
+    }
+    return [...spots.values()];
+})();
+
+/** Debug placement editor: instance id -> the source entry it was built from. */
+const SOURCE_BY_INSTANCE = new Map<number, PlacementSource>([
+    ...IPL_SPOTS.flatMap((s) => s.ids.map((id): [number, PlacementSource] => [id, s])),
+    ...PLAN_INSTANCES.map((i): [number, PlacementSource] => [i.id, i.source]),
+]);
+const SOURCE_BY_KEY = new Map([...SOURCE_BY_INSTANCE.values()].map((s) => [s.key, s]));
+
+/** Source entry (IPL line / plan building / plan prop spot) a street instance comes from. */
+export const placementSourceOf = (instanceId: number): PlacementSource | undefined => SOURCE_BY_INSTANCE.get(instanceId);
+
+/** Source entry for a debug-editor edit key (`ipl:12`, `building:3`, `prop:7`). */
+export const placementSourceByKey = (key: string): PlacementSource | undefined => SOURCE_BY_KEY.get(key);
 
 const ideMap = new Map(STREET_IDE.objs.map((o) => [o.modelName, o]));
 

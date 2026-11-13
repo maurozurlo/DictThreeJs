@@ -19,6 +19,7 @@ import DayEnded from "./components/DayEnded/DayEnded";
 import TutorialOverlay from "./components/Tutorial/TutorialOverlay";
 import DebugRecurringOverlay from "./components/Debug/DebugRecurringOverlay";
 import DebugSelectorOverlay from "./components/Debug/DebugSelectorOverlay";
+import DebugPlacementOverlay from "./components/Debug/DebugPlacementOverlay";
 
 export default function App() {
   const setDebugMode = useGameStore((s) => s.debug.setDebugMode);
@@ -55,7 +56,7 @@ export default function App() {
           &nbsp;|&nbsp;
           <label>
             <input type="checkbox" checked={freeCam} onChange={(e) => setFreeCam(e.target.checked)} />
-            free cam{freeCam ? ` (FOV ${debugFov}, scroll to adjust · I to save pos)` : ''}
+            free cam{freeCam ? ` (FOV ${debugFov}, right-click to look, scroll to adjust · I to save pos)` : ''}
           </label>
           &nbsp;|&nbsp; cam FOV:&nbsp;
           {cameraHFov != null
@@ -76,6 +77,7 @@ export default function App() {
         </div>
         {debugEnabled && <DebugRecurringOverlay />}
         {debugEnabled && <DebugSelectorOverlay />}
+        {debugEnabled && tab === Tabs.Street && <DebugPlacementOverlay />}
         <Navbar transitionTo={transitionTo} revealAcked={revealAcked} />
         <FadeOverlay visible={fading} />
         <TabManager />

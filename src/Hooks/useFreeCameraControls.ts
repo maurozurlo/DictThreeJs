@@ -77,7 +77,12 @@ export function useFreeCameraControls(speed: number = 1, lookSpeed: number = 0.0
             }
         };
 
-        const onClick = () => gl.domElement.requestPointerLock();
+        // Right-click locks the pointer for mouse-look; left-click stays free for picking /
+        // dragging street objects with the debug placement editor. Esc releases the lock.
+        const onMouseDown = (e: MouseEvent) => {
+            if (e.button === 2) gl.domElement.requestPointerLock();
+        };
+        const onContextMenu = (e: MouseEvent) => e.preventDefault();
 
         const onWheel = (e: WheelEvent) => {
             const perspCam = camera as THREE.PerspectiveCamera;
@@ -91,14 +96,16 @@ export function useFreeCameraControls(speed: number = 1, lookSpeed: number = 0.0
         document.addEventListener("keyup", onKeyUp);
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("wheel", onWheel, { passive: true });
-        gl.domElement.addEventListener("click", onClick);
+        gl.domElement.addEventListener("mousedown", onMouseDown);
+        gl.domElement.addEventListener("contextmenu", onContextMenu);
 
         return () => {
             document.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("keyup", onKeyUp);
             document.removeEventListener("mousemove", onMouseMove);
             document.removeEventListener("wheel", onWheel);
-            gl.domElement.removeEventListener("click", onClick);
+            gl.domElement.removeEventListener("mousedown", onMouseDown);
+            gl.domElement.removeEventListener("contextmenu", onContextMenu);
         };
     }, [camera, gl, lookSpeed, setFov]);
 

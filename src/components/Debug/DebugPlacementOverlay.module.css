@@ -1,0 +1,31 @@
+.overlay {
+    position: fixed;
+    top: 92px; /* under the navbar, clear of the action panel / inspector card */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 120;
+    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+
+.header {
+    color: #5dade2;
+}
+
+.selected {
+    color: #f1c40f;
+}
+
+.keys {
+    color: #888;
+}
+
+.flash {
+    color: #27ae60;
+}
