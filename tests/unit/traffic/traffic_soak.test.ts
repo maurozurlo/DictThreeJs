@@ -9,7 +9,7 @@ import { roadObstaclesFrom } from '../../../src/Traffic/streetWorld';
 // Footprints of the real street models (sedan, junker, limo) — the limo is the long one.
 const SPECS: CarSpec[] = [
     { model: 'sedan', halfLen: 5.35, halfWidth: 2.2 },
-    { model: 'junker', halfLen: 5.37, halfWidth: 2.04 },
+    { model: 'junker', halfLen: 4.26, halfWidth: 2.6 },
     { model: 'limo', halfLen: 8.0, halfWidth: 2.4 },
 ];
 const NET = buildRoadNetwork(AVENIDA);

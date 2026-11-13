@@ -121,13 +121,11 @@ const CIVILIAN_PANTS_TINTS = ['#4a5a7a', '#6a5a4a', '#5a5a5a', '#7a7a6a', '#3a4a
 const SKIN_TONES = ['#ffdfc4', '#f0c8a0', '#dda577', '#b97a50', '#8d5a3b'] as const;
 
 /**
- * Flat prop colours. The current GLB exports have no UVs (and the hat's
- * embedded texture is unusable without them), so textures — including
- * protester_bits.png — can't be applied until the props are re-exported
- * with UV maps. Until then: olive cap, red megaphone, cardboard sign.
+ * Flat prop colours for the props whose GLB exports have no UVs (megaphone, sign) — textures,
+ * including protester_bits.png, can't be applied until they are re-exported with UV maps.
+ * Red megaphone, cardboard sign.
  */
-const PROP_COLORS: Record<PropKind, string> = {
-    armyHat: '#4f5d3a',
+const PROP_COLORS: Record<Exclude<PropKind, 'armyHat'>, string> = {
     megaphone: '#b03a30',
     sign: '#d6c9a8',
 };
@@ -143,9 +141,19 @@ interface PropFit {
     position: [number, number, number];
     rotation: [number, number, number];
     scale: number;
+    /** Per-body overrides — the bodies' heads differ in size and sit differently on the head bone. */
+    byBody?: Partial<Record<BodyType, Pick<PropFit, 'position' | 'scale'>>>;
 }
 const PROP_FIT: Record<PropKind, PropFit> = {
-    armyHat: { bone: 'mixamorigHead', position: [0, 0.55, 0.08], rotation: [0, 0, 0], scale: 1400 },
+    // Hat ≈ head width with the brim just above the eyes (measured in bind pose, 2026-11-13).
+    // The fat body's head is relatively larger and sits higher/forward of its head bone.
+    armyHat: {
+        bone: 'mixamorigHead', position: [0, 0.62, 0.05], rotation: [0, 0, 0], scale: 1050,
+        byBody: {
+            fat: { position: [0, 0.82, 0.14], scale: 1150 },
+            slim: { position: [0, 0.62, 0.05], scale: 1100 },
+        },
+    },
     megaphone: { bone: 'mixamorigRightHand', position: [0, 0.35, 0.1], rotation: [Math.PI / 2, 0, 0], scale: 700 },
     sign: { bone: 'mixamorigRightHand', position: [0, 0.45, 0], rotation: [0, Math.PI / 2, Math.PI], scale: 550 },
 };
@@ -220,6 +228,7 @@ function rollAppearance(variant: PedVariant, skin: Citizen['skin']): Appearance 
 // ---------------------------------------------------------------------------
 
 interface BodyModelAsset {
+    type: BodyType;
     source: THREE.Group;
     walkClip: THREE.AnimationClip | null;
     /** Uniform scale bringing the raw FBX to TARGET_HEIGHTS metres. */
@@ -271,10 +280,11 @@ function useCitizenAssets(): CitizenAssets {
             const bounds = new THREE.Box3().setFromObject(source);
             const rawHeight = Math.max(bounds.max.y - bounds.min.y, 1e-3);
             const modelScale = (TARGET_HEIGHTS[bt] * PED_WORLD_SCALE) / rawHeight;
-            bodies[bt] = { source, walkClip, modelScale, yOffset: -bounds.min.y * modelScale };
+            bodies[bt] = { type: bt, source, walkClip, modelScale, yOffset: -bounds.min.y * modelScale };
         });
 
-        // Prop templates — flat colours only until the GLBs get UV maps.
+        // Prop templates. The hat ships UVs, normals and an embedded camo texture; the
+        // megaphone and sign have no UVs, so they keep flat colours.
         const props = {} as Record<PropKind, THREE.Object3D>;
         PROP_KINDS.forEach((kind, i) => {
             const template = gltfs[i].scene.clone(true);
@@ -282,10 +292,21 @@ function useCitizenAssets(): CitizenAssets {
                 const mesh = child as THREE.Mesh;
                 if (!mesh.isMesh) return;
                 mesh.castShadow = true;
-                // Fresh unlit material: the exports lack UVs and normals, so a
-                // lit material renders black. Basic keeps the flat colour visible.
-                const prep = (): THREE.Material => new THREE.MeshBasicMaterial({ color: PROP_COLORS[kind] });
-                mesh.material = Array.isArray(mesh.material) ? mesh.material.map(prep) : prep();
+                const prep = (mat: THREE.Material): THREE.Material => {
+                    if (kind === 'armyHat') {
+                        // Embedded albedo, sampled nearest like the ped textures' pixel look. The
+                        // export's 0.5 base-colour factor would darken the camo, so leave it white.
+                        const map = (mat as THREE.MeshStandardMaterial).map ?? null;
+                        if (map) {
+                            map.magFilter = THREE.NearestFilter;
+                            map.minFilter = THREE.NearestFilter;
+                        }
+                        return new THREE.MeshStandardMaterial({ map, roughness: 0.9, metalness: 0 });
+                    }
+                    // Unlit: these exports lack UVs, so a flat colour is all they can show.
+                    return new THREE.MeshBasicMaterial({ color: PROP_COLORS[kind] });
+                };
+                mesh.material = Array.isArray(mesh.material) ? mesh.material.map(prep) : prep(mesh.material);
             });
             props[kind] = template;
         });
@@ -337,14 +358,15 @@ function buildCitizenModel(
 
     if (prop) {
         const fit = PROP_FIT[prop];
+        const placed = { ...fit, ...fit.byBody?.[body.type] };
         const bone = model.getObjectByName(fit.bone);
         if (bone) {
             const instance = assets.props[prop].clone(true);
-            instance.position.set(...fit.position);
+            instance.position.set(...placed.position);
             instance.rotation.set(...fit.rotation);
             // Bone-local scale: children of the bone inherit the body's model
             // scale, so a constant here keeps the prop proportional to its body.
-            instance.scale.setScalar(fit.scale);
+            instance.scale.setScalar(placed.scale);
             bone.add(instance);
         }
     }

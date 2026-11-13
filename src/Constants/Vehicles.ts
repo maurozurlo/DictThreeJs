@@ -44,12 +44,31 @@ export const AMBULANCE_SPAWN_EVERY = 5;
 export const AMBULANCE_SPAWN_OFFSET = 3;
 
 /**
+ * World units per metre for vehicles — the same 3.7× factor as the citizens' PED_WORLD_SCALE:
+ * the env GLBs are drawn oversized, so cars are scaled to match.
+ */
+export const VEHICLE_WORLD_SCALE = 3.7;
+
+/**
+ * Junker length in metres (× VEHICLE_WORLD_SCALE at render). The junker GLB is boxier than the
+ * POC cars (wider and taller per metre of length), so at sedan length (2.9 m) it read far bigger
+ * than the rest of the traffic; 65% (1.9 m) read too small. 2.3 m puts its roof at sedan height.
+ */
+export const JUNKER_LENGTH_M = 2.3;
+
+/** Junker GLB width ÷ length (raw bounds 0.0068573 / 0.0112278) — keeps the footprint honest. */
+export const JUNKER_WIDTH_PER_LENGTH = 0.6107;
+
+/**
  * Footprint half extents per model (world units) — what the traffic simulation uses for
- * following distances, conflict zones and collision checks. Junker: 2.9 × 1.1 m at the 3.7×
- * world scale; POC cars measured from their GLBs (tools/blender/vehicles.py).
+ * following distances, conflict zones and collision checks. Junker derived from its render
+ * length and GLB proportions; POC cars measured from their GLBs (tools/blender/vehicles.py).
  */
 export const VEHICLE_FOOTPRINT: Record<VehicleModelId, { halfLength: number; halfWidth: number }> = {
-    junker: { halfLength: (2.9 * 3.7) / 2, halfWidth: (1.1 * 3.7) / 2 },
+    junker: {
+        halfLength: (JUNKER_LENGTH_M * VEHICLE_WORLD_SCALE) / 2,
+        halfWidth: (JUNKER_LENGTH_M * JUNKER_WIDTH_PER_LENGTH * VEHICLE_WORLD_SCALE) / 2,
+    },
     sedan: { halfLength: 5.35, halfWidth: 2.2 },
     limo: { halfLength: 8.0, halfWidth: 2.4 },
     jeep: { halfLength: 5.2, halfWidth: 2.5 },

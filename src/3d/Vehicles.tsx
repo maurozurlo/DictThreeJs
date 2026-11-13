@@ -3,7 +3,14 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 import { useGameStore } from '../Stores/GameState';
-import { AMBULANCE_HEALTH_MIN, JEEP_SECURITY_MIN, VEHICLE_FOOTPRINT, type VehicleModelId } from '../Constants/Vehicles';
+import {
+    AMBULANCE_HEALTH_MIN,
+    JEEP_SECURITY_MIN,
+    JUNKER_LENGTH_M,
+    VEHICLE_FOOTPRINT,
+    VEHICLE_WORLD_SCALE,
+    type VehicleModelId,
+} from '../Constants/Vehicles';
 import { CAR_MAX, STREET_ASPHALT_Y } from '../Constants/Traffic';
 import { vehicleModelForSpawn, vehicleTierFor } from '../Utils/VehiclePool';
 import { setCarPicker, streetSim } from '../Traffic/streetWorld';
@@ -37,18 +44,6 @@ const CAR_MATERIAL_TEXTURE: Record<string, CarTexKind> = {
     'Material__1630': 'wheels',
     'fallback Material': 'wheels',
 };
-
-/**
- * World units per metre for vehicles — the same 3.7× factor as the citizens'
- * PED_WORLD_SCALE: the env GLBs are drawn oversized, so cars are scaled to match.
- */
-const VEHICLE_WORLD_SCALE = 3.7;
-
-/**
- * Junker length in metres (× VEHICLE_WORLD_SCALE at render). Tuned to ~65% of
- * the real 4.5 m — full metric size read too big against the street.
- */
-const CAR_LENGTH_M = 2.9;
 
 /**
  * The procedural POC cars (tools/blender/vehicles.py) are modelled at game size under a root
@@ -204,7 +199,7 @@ function useJunkerAssets(): CarAssets {
         const carBox = new THREE.Box3().setFromObject(scene);
         // The GLB nose points +X, so the car length is the X span
         const rawLength = Math.max(carBox.max.x - carBox.min.x, 1e-6);
-        const modelScale = (CAR_LENGTH_M * VEHICLE_WORLD_SCALE) / rawLength;
+        const modelScale = (JUNKER_LENGTH_M * VEHICLE_WORLD_SCALE) / rawLength;
         const yOffset = -carBox.min.y * modelScale;
 
         const wheelBox = front ? new THREE.Box3().setFromObject(front) : carBox;
