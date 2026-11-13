@@ -14,6 +14,7 @@ import { Tabs } from "./types/Tabs";
 import { Power as POWERS } from "./Constants/Power";
 import type { Power } from "./types/Power";
 import { useRepExecutions } from "./Hooks/useRepExecutions";
+import { ScreenGrade } from "./3d/ScreenGrade";
 
 function CameraControllerFree() {
     console.log("Free camera mode enabled");
@@ -42,6 +43,7 @@ export function Scene() {
 
     return (
         <Canvas shadows dpr={[1, 2]} >
+            <ScreenGrade />
             <ambientLight intensity={3.4} color={"#e2d8be"} />
 
             <pointLight position={[-1.335, 0.642, -0.09]} intensity={.2} />

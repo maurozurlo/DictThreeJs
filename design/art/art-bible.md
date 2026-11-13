@@ -370,6 +370,22 @@ The searchlight PointLight is the only animated light in the game. Its cold blue
 
 ---
 
+#### 5.4.5 Infrastructure screen grade (all 3D scenes)
+
+A full-screen colour grade sits on top of **every** 3D scene (office, meeting room, street, secret rooms) and follows the same infrastructure tier as §5.4.1–5.4.3 (1–3 poor, 4–7 normal, 8–10 rich — the traffic thresholds). HTML UI (panels, modals, the law paper, the dictator's hands overlay) is never graded.
+
+| Tier | Feel | Grade |
+|------|------|-------|
+| Poor | Desaturated, ashen, greyish | saturation 0.25, contrast 0.85, brightness 0.9, cool-grey tint `#c7c7cc` @ 0.5 |
+| Normal | Slight overcast; grey but still colourful, light-blue cast | saturation 0.75, contrast 0.93, brightness 1.03, light-blue tint `#9ec7f2` @ 0.55 |
+| Rich | Sunny, tropical; saturated, yellow cast, golden sun | saturation 1.3, contrast 1.05, brightness 1.08, yellow tint `#fff29e` @ 0.45, golden highlight tint `#ffd666` @ 0.35 |
+
+A tier change fades between grades over 2.5 s (smoothstep); a change mid-fade starts from what is on screen, so dragging the slider across a threshold never pops. Tints are luminance-normalised (hue shift, no darkening); the highlight tint is weighted by pixel brightness so only sunlit surfaces turn gold.
+
+Source of truth for the values: `src/Constants/ScreenGrade.ts`. Implementation: `src/3d/ScreenGrade.tsx` (EffectComposer: scene → OutputPass tone map/sRGB → grade shader). Tuning tool: `build/grade/shot_grade.mjs` (raw vs graded grid; `build/grade/params.json` overrides values live without editing source).
+
+---
+
 ### 5.5 Active Pressure State
 *Timer ≤ 30 seconds remaining*
 
