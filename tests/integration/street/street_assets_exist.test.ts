@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { STREET_IDE } from '../../../src/assets/data/street-objects.ide';
 import { STREET_IPL } from '../../../src/assets/data/street-placement.ipl';
@@ -20,6 +20,21 @@ describe('street assets exist', () => {
             .flatMap((o) => [o.asset, ...(o.textures ?? []).map((t) => t.texture)])
             .filter((p): p is string => p !== null && !existsSync(join(PUBLIC, p)));
         expect(missing).toEqual([]);
+    });
+
+    // StreetView only swaps in external textures the IDE lists; an unlisted material keeps the
+    // copy embedded in the GLB, so edits to public/textures/map silently never show.
+    it('test_street_ide_lists_every_external_texture_its_materials_name', () => {
+        const unlisted = STREET_IDE.objs.flatMap((o) => {
+            const glb = readFileSync(join(PUBLIC, o.asset));
+            const json = JSON.parse(glb.subarray(20, 20 + glb.readUInt32LE(12)).toString('utf8')) as { materials?: { name?: string }[] };
+            const listed = new Set((o.textures ?? []).map((t) => t.texture.split('/').pop()!.replace(/\.[^.]+$/, '').toLowerCase()));
+            return (json.materials ?? [])
+                .map((m) => m.name ?? '')
+                .filter((n) => n !== '' && existsSync(join(PUBLIC, 'textures', 'map', `${n}.png`)) && !listed.has(n.toLowerCase()))
+                .map((n) => `${o.modelName}: ${n}`);
+        });
+        expect(unlisted).toEqual([]);
     });
 
     it('test_street_ipl_every_placement_names_an_ide_model', () => {
