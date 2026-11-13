@@ -11,6 +11,8 @@ import { Tabs } from "./types/Tabs";
 import EndScreen from "./components/EndScreen/EndScreen";
 import FadeOverlay from "./components/FadeOverlay/FadeOverlay";
 import { useFadeTransition } from "./Hooks/useFadeTransition";
+import { useDelayedFlag } from "./Hooks/useDelayedFlag";
+import { specialEndingRevealDelayMs } from "./Constants/SecretRooms";
 import RoundAdvanceController from "./components/RoundAdvanceController/RoundAdvanceController";
 import DayEnded from "./components/DayEnded/DayEnded";
 import TutorialOverlay from "./components/Tutorial/TutorialOverlay";
@@ -28,8 +30,15 @@ export default function App() {
   const setFreeCam = useGameStore((s) => s.debug.setFreeCam);
   const tab = useGameStore(s => s.tabs.activeTab)
   const phase = useGameStore(s => s.gameManagement.phase)
+  const specialFaction = useGameStore(s => s.specialEnding.faction)
 
   const { fading, transitionTo } = useFadeTransition();
+
+  // A special ending's room take (the bunker's button press) plays before the end screen covers it.
+  const showEndScreen = useDelayedFlag(
+    phase === 'lose' || phase === 'victory' || phase === 'special_ending',
+    phase === 'special_ending' ? specialEndingRevealDelayMs(specialFaction) : 0,
+  );
 
   return (
     <>
@@ -70,9 +79,7 @@ export default function App() {
         {tab === Tabs.Laws ? <DictatorHands /> : null}
         <input type="checkbox" id="debug-toggle" className="debug-toggle" onChange={(e) => setDebugMode(e.target.checked)} value={debugEnabled ? 'checked' : 'unchecked'} />
 
-        {(phase === 'lose' || phase === 'victory' || phase === 'special_ending') && (
-          <EndScreen />
-        )}
+        {showEndScreen && <EndScreen />}
       </Suspense>
       <div data-tutorial="scene" style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <Scene />

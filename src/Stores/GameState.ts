@@ -175,6 +175,7 @@ const INITIAL_STATE = ({ set, get }: {
                 const room = SECRET_ROOMS[newSecretRoomIndex];
                 newCameraPos = room.pos;
                 newCameraFov = room.fov;
+                newCameraHFov = room.hFov;
                 newCameraRotation = room.rotation;
             }
 
