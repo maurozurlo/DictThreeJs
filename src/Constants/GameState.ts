@@ -274,8 +274,8 @@ export const DEFAULT_TAB_FOV = 34;
 
 /**
  * Per-tab camera routing consumed by `setActiveTab` (Story 10-2).
- * - `scan`: index into the palace camera positions scanned from the FBX at load
- *   (see MainModel → setCameraPositions).
+ * - `scan`: index into the palace camera stops (OFFICE_CAMERA_POSITIONS, Constants/Office.ts,
+ *   pushed into the store by MainModel → setCameraPositions).
  * - `fixed`: full static camera (Street vista).
  * - `secret`: SECRET_ROOMS cycling — room choice needs live state, resolved in the store.
  * - `default`: reset fov/rotation, keep the current position.

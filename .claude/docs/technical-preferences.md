@@ -82,6 +82,7 @@
 - [ADR-0010](../../docs/architecture/adr-0010-seeded-rng-commit-on-roll.md) — Seeded RNG & Commit-on-Roll / save-scum resistance (Accepted 2026-06-17, supersedes ADR-0004)
 - [ADR-0011](../../docs/architecture/adr-0011-structured-round-log.md) — Structured Round Log (capture-on-action, translate-on-render) (Accepted 2026-06-21)
 - [ADR-0012](../../docs/architecture/adr-0012-round-loop-phase-split.md) — Round Loop Phase Split — Work Day vs. Street Hinge (Accepted 2026-07-08)
+- [ADR-0013](../../docs/architecture/adr-0013-rep-execution-animations.md) — Representative Execution Animations — baked Max take scrubbed per slice (Accepted 2026-11-12)
 
 ## Engine Specialists
 
